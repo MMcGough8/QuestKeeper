@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuestKeeper - UML Class Diagram with Connections</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1a2e;
+            color: #e6edf3;
+            font-family: 'IBM Plex Sans', sans-serif;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #58a6ff;
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #8b949e;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .legend {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: #242b3d;
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        svg {
+            width: 100%;
+            height: auto;
+            background: #0f1419;
+            border: 2px solid #30363d;
+            border-radius: 8px;
+        }
+
+        /* Class Box Styles */
+        .class-box {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .class-box:hover rect {
+            stroke: #58a6ff;
+            stroke-width: 3;
+        }
+
+        .class-header {
+            fill: #242b3d;
+        }
+
+        .class-body {
+            fill: #1a1f2e;
+        }
+
+        .class-border {
+            stroke: #30363d;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .class-name {
+            fill: #58a6ff;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .stereotype {
+            fill: #8b949e;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+        }
+
+        .attribute, .method {
+            fill: #e6edf3;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+        }
+
+        .type {
+            fill: #bc8cff;
+        }
+
+        /* Relationship Lines */
+        .composition {
+            stroke: #58a6ff;
+            stroke-width: 2;
+            fill: #58a6ff;
+        }
+
+        .aggregation {
+            stroke: #56d364;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .dependency {
+            stroke: #bc8cff;
+            stroke-width: 2;
+            stroke-dasharray: 5,5;
+            fill: none;
+        }
+
+        .implements {
+            stroke: #ffd700;
+            stroke-width: 2;
+            stroke-dasharray: 5,5;
+            fill: none;
+        }
+
+        .label {
+            fill: #8b949e;
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 10px;
+        }
+
+        .multiplicity {
+            fill: #e6edf3;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚔️ QuestKeeper - UML Class Diagram</h1>
+        <div class="subtitle">Showing Class Relationships and Dependencies</div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <svg width="50" height="20"><line x1="0" y1="10" x2="40" y2="10" stroke="#58a6ff" stroke-width="2"/><polygon points="40,10 35,8 35,12" fill="#58a6ff"/></svg>
+                <span>Composition (owns)</span>
+            </div>
+            <div class="legend-item">
+                <svg width="50" height="20"><line x1="0" y1="10" x2="40" y2="10" stroke="#56d364" stroke-width="2"/><polygon points="40,10 35,8 35,12 30,10" fill="none" stroke="#56d364" stroke-width="2"/></svg>
+                <span>Aggregation (has)</span>
+            </div>
+            <div class="legend-item">
+                <svg width="50" height="20"><line x1="0" y1="10" x2="40" y2="10" stroke="#bc8cff" stroke-width="2" stroke-dasharray="5,5"/><polyline points="35,8 40,10 35,12" fill="none" stroke="#bc8cff" stroke-width="2"/></svg>
+                <span>Dependency (uses)</span>
+            </div>
+            <div class="legend-item">
+                <svg width="50" height="20"><line x1="0" y1="10" x2="40" y2="10" stroke="#ffd700" stroke-width="2" stroke-dasharray="5,5"/><polygon points="40,10 35,8 35,12" fill="none" stroke="#ffd700" stroke-width="2"/></svg>
+                <span>Implements</span>
+            </div>
+        </div>
+
+        <svg viewBox="0 0 1400 1800" xmlns="http://www.w3.org/2000/svg">
+            <!-- GAME (Top Center) -->
+            <g class="class-box">
+                <rect x="600" y="20" width="200" height="180" class="class-border"/>
+                <rect x="600" y="20" width="200" height="40" class="class-header"/>
+                <text x="700" y="35" text-anchor="middle" class="stereotype">«controller»</text>
+                <text x="700" y="52" text-anchor="middle" class="class-name">Game</text>
+                <line x1="600" y1="60" x2="800" y2="60" stroke="#30363d" stroke-width="1"/>
+                <text x="610" y="75" class="attribute">- campaign</text>
+                <text x="610" y="90" class="attribute">- character</text>
+                <text x="610" y="105" class="attribute">- gameState</text>
+                <text x="610" y="120" class="attribute">- parser</text>
+                <text x="610" y="135" class="attribute">- display</text>
+                <line x1="600" y1="140" x2="800" y2="140" stroke="#30363d" stroke-width="1"/>
+                <text x="610" y="155" class="method">+ run()</text>
+                <text x="610" y="170" class="method">+ processTurn()</text>
+                <text x="610" y="185" class="method">+ loadCampaign()</text>
+            </g>
+
+            <!-- CAMPAIGN (Left, Level 2) -->
+            <g class="class-box">
+                <rect x="50" y="280" width="200" height="140" class="class-border"/>
+                <rect x="50" y="280" width="200" height="35" class="class-header"/>
+                <text x="150" y="295" text-anchor="middle" class="stereotype">«aggregate»</text>
+                <text x="150" y="310" text-anchor="middle" class="class-name">Campaign</text>
+                <line x1="50" y1="315" x2="250" y2="315" stroke="#30363d" stroke-width="1"/>
+                <text x="60" y="330" class="attribute">- locations: Map</text>
+                <text x="60" y="345" class="attribute">- npcs: Map</text>
+                <text x="60" y="360" class="attribute">- trials: Map</text>
+                <text x="60" y="375" class="attribute">- items: Map</text>
+                <line x1="50" y1="380" x2="250" y2="380" stroke="#30363d" stroke-width="1"/>
+                <text x="60" y="395" class="method">+ getLocation()</text>
+                <text x="60" y="410" class="method">+ getNPC()</text>
+            </g>
+
+            <!-- CHARACTER (Center-Left, Level 2) -->
+            <g class="class-box">
+                <rect x="300" y="280" width="200" height="160" class="class-border"/>
+                <rect x="300" y="280" width="200" height="35" class="class-header"/>
+                <text x="400" y="295" text-anchor="middle" class="stereotype">«entity»</text>
+                <text x="400" y="310" text-anchor="middle" class="class-name">Character</text>
+                <line x1="300" y1="315" x2="500" y2="315" stroke="#30363d" stroke-width="1"/>
+                <text x="310" y="330" class="attribute">- name: String</text>
+                <text x="310" y="345" class="attribute">- level: int</text>
+                <text x="310" y="360" class="attribute">- maxHp: int</text>
+                <text x="310" y="375" class="attribute">- inventory</text>
+                <line x1="300" y1="380" x2="500" y2="380" stroke="#30363d" stroke-width="1"/>
+                <text x="310" y="395" class="method">+ makeCheck()</text>
+                <text x="310" y="410" class="method">+ takeDamage()</text>
+                <text x="310" y="425" class="method">+ addItem()</text>
+            </g>
+
+            <!-- GAMESTATE (Center-Right, Level 2) -->
+            <g class="class-box">
+                <rect x="550" y="280" width="200" height="140" class="class-border"/>
+                <rect x="550" y="280" width="200" height="35" class="class-header"/>
+                <text x="650" y="295" text-anchor="middle" class="stereotype">«entity»</text>
+                <text x="650" y="310" text-anchor="middle" class="class-name">GameState</text>
+                <line x1="550" y1="315" x2="750" y2="315" stroke="#30363d" stroke-width="1"/>
+                <text x="560" y="330" class="attribute">- flags: Set</text>
+                <text x="560" y="345" class="attribute">- completedTrials</text>
+                <text x="560" y="360" class="attribute">- activeQuests</text>
+                <line x1="550" y1="365" x2="750" y2="365" stroke="#30363d" stroke-width="1"/>
+                <text x="560" y="380" class="method">+ setFlag()</text>
+                <text x="560" y="395" class="method">+ checkFlag()</text>
+                <text x="560" y="410" class="method">+ saveToFile()</text>
+            </g>
+
+            <!-- PARSER (Right, Level 2) -->
+            <g class="class-box">
+                <rect x="800" y="280" width="180" height="120" class="class-border"/>
+                <rect x="800" y="280" width="180" height="35" class="class-header"/>
+                <text x="890" y="295" text-anchor="middle" class="stereotype">«parser»</text>
+                <text x="890" y="310" text-anchor="middle" class="class-name">CommandParser</text>
+                <line x1="800" y1="315" x2="980" y2="315" stroke="#30363d" stroke-width="1"/>
+                <text x="810" y="330" class="attribute">- synonymMap</text>
+                <line x1="800" y1="335" x2="980" y2="335" stroke="#30363d" stroke-width="1"/>
+                <text x="810" y="350" class="method">+ parse()</text>
+                <text x="810" y="365" class="method">+ extractVerb()</text>
+                <text x="810" y="380" class="method">+ extractNoun()</text>
+            </g>
+
+            <!-- DISPLAY (Far Right, Level 2) -->
+            <g class="class-box">
+                <rect x="1030" y="280" width="180" height="120" class="class-border"/>
+                <rect x="1030" y="280" width="180" height="35" class="class-header"/>
+                <text x="1120" y="295" text-anchor="middle" class="stereotype">«view»</text>
+                <text x="1120" y="310" text-anchor="middle" class="class-name">Display</text>
+                <line x1="1030" y1="315" x2="1210" y2="315" stroke="#30363d" stroke-width="1"/>
+                <text x="1040" y="330" class="method">+ showLocation()</text>
+                <text x="1040" y="345" class="method">+ showCharacter()</text>
+                <text x="1040" y="360" class="method">+ showCombat()</text>
+                <text x="1040" y="375" class="method">+ showDialogue()</text>
+            </g>
+
+            <!-- LOCATION (Far Left, Level 3) -->
+            <g class="class-box">
+                <rect x="50" y="500" width="180" height="120" class="class-border"/>
+                <rect x="50" y="500" width="180" height="35" class="class-header"/>
+                <text x="140" y="515" text-anchor="middle" class="stereotype">«entity»</text>
+                <text x="140" y="530" text-anchor="middle" class="class-name">Location</text>
+                <line x1="50" y1="535" x2="230" y2="535" stroke="#30363d" stroke-width="1"/>
+                <text x="60" y="550" class="attribute">- name: String</text>
+                <text x="60" y="565" class="attribute">- exits: Map</text>
+                <text x="60" y="580" class="attribute">- items: List</text>
+                <line x1="50" y1="585" x2="230" y2="585" stroke="#30363d" stroke-width="1"/>
+                <text x="60" y="600" class="method">+ getExits()</text>
+            </g>
+
+            <!-- NPC (Left-Center, Level 3) -->
+            <g class="class-box">
+                <rect x="280" y="500" width="180" height="120" class="class-border"/>
+                <rect x="280" y="500" width="180" height="35" class="class-header"/>
+                <text x="370" y="515" text-anchor="middle" class="stereotype">«entity»</text>
+                <text x="370" y="530" text-anchor="middle" class="class-name">NPC</text>
+                <line x1="280" y1="535" x2="460" y2="535" stroke="#30363d" stroke-width="1"/>
+                <text x="290" y="550" class="attribute">- name: String</text>
+                <text x="290" y="565" class="attribute">- dialogues: List</text>
+                <line x1="280" y1="570" x2="460" y2="570" stroke="#30363d" stroke-width="1"/>
+                <text x="290" y="585" class="method">+ greet()</text>
+                <text x="290" y="600" class="method">+ getDialogue()</text>
+            </g>
+
+            <!-- INVENTORY (Center, Level 3) -->
+            <g class="class-box">
+                <rect x="300" y="510" width="180" height="100" class="class-border"/>
+                <rect x="300" y="510" width="180" height="35" class="class-header"/>
+                <text x="390" y="525" text-anchor="middle" class="stereotype">«entity»</text>
+                <text x="390" y="540" text-anchor="middle" class="class-name">Inventory</text>
+                <line x1="300" y1="545" x2="480" y2="545" stroke="#30363d" stroke-width="1"/>
+                <text x="310" y="560" class="attribute">- items: List</text>
+                <line x1="300" y1="565" x2="480" y2="565" stroke="#30363d" stroke-width="1"/>
+                <text x="310" y="580" class="method">+ addItem()</text>
+                <text x="310" y="595" class="method">+ hasItem()</text>
+            </g>
+
+            <!-- TRIAL (Center-Right, Level 3) -->
+            <g class="class-box">
+                <rect x="510" y="500" width="180" height="120" class="class-border"/>
+                <rect x="510" y="500" width="180" height="35" class="class-header"/>
+                <text x="600" y="515" text-anchor="middle" class="stereotype">«entity»</text>
+                <text x="600" y="530" text-anchor="middle" class="class-name">Trial</text>
+                <line x1="510" y1="535" x2="690" y2="535" stroke="#30363d" stroke-width="1"/>
+                <text x="520" y="550" class="attribute">- miniGames: List</text>
+                <text x="520" y="565" class="attribute">- difficulty: int</text>
+                <line x1="510" y1="570" x2="690" y2="570" stroke="#30363d" stroke-width="1"/>
+                <text x="520" y="585" class="method">+ start()</text>
+                <text x="520" y="600" class="method">+ checkComplete()</text>
+            </g>
+
+            <!-- ITEM (Right-Center, Level 3) -->
+            <g class="class-box">
+                <rect x="740" y="500" width="180" height="120" class="class-border"/>
+                <rect x="740" y="500" width="180" height="35" class="class-header"/>
+                <text x="830" y="515" text-anchor="middle" class="stereotype">«entity»</text>
+                <text x="830" y="530" text-anchor="middle" class="class-name">Item</text>
+                <line x1="740" y1="535" x2="920" y2="535" stroke="#30363d" stroke-width="1"/>
+                <text x="750" y="550" class="attribute">- name: String</text>
+                <text x="750" y="565" class="attribute">- rarity: String</text>
+                <text x="750" y="580" class="attribute">- effects: List</text>
+                <line x1="740" y1="585" x2="920" y2="585" stroke="#30363d" stroke-width="1"/>
+                <text x="750" y="600" class="method">+ use()</text>
+            </g>
+
+            <!-- MINIGAME (Bottom-Left, Level 4) -->
+            <g class="class-box">
+                <rect x="510" y="700" width="180" height="120" class="class-border"/>
+                <rect x="510" y="700" width="180" height="35" class="class-header"/>
+                <text x="600" y="715" text-anchor="middle" class="stereotype">«entity»</text>
+                <text x="600" y="730" text-anchor="middle" class="class-name">MiniGame</text>
+                <line x1="510" y1="735" x2="690" y2="735" stroke="#30363d" stroke-width="1"/>
+                <text x="520" y="750" class="attribute">- requiredSkill</text>
+                <text x="520" y="765" class="attribute">- dc: int</text>
+                <text x="520" y="780" class="attribute">- reward: Item</text>
+                <line x1="510" y1="785" x2="690" y2="785" stroke="#30363d" stroke-width="1"/>
+                <text x="520" y="800" class="method">+ evaluate()</text>
+            </g>
+
+            <!-- COMBAT (Bottom-Center, Level 4) -->
+            <g class="class-box">
+                <rect x="740" y="700" width="180" height="120" class="class-border"/>
+                <rect x="740" y="700" width="180" height="35" class="class-header"/>
+                <text x="830" y="715" text-anchor="middle" class="stereotype">«controller»</text>
+                <text x="830" y="730" text-anchor="middle" class="class-name">Combat</text>
+                <line x1="740" y1="735" x2="920" y2="735" stroke="#30363d" stroke-width="1"/>
+                <text x="750" y="750" class="attribute">- participants</text>
+                <text x="750" y="765" class="attribute">- initiative: List</text>
+                <line x1="740" y1="770" x2="920" y2="770" stroke="#30363d" stroke-width="1"/>
+                <text x="750" y="785" class="method">+ rollInitiative()</text>
+                <text x="750" y="800" class="method">+ executeTurn()</text>
+            </g>
+
+            <!-- COMBATANT INTERFACE (Bottom-Right, Level 4) -->
+            <g class="class-box">
+                <rect x="970" y="700" width="180" height="100" class="class-border"/>
+                <rect x="970" y="700" width="180" height="35" class="class-header"/>
+                <text x="1060" y="715" text-anchor="middle" class="stereotype">«interface»</text>
+                <text x="1060" y="730" text-anchor="middle" class="class-name">Combatant</text>
+                <line x1="970" y1="735" x2="1150" y2="735" stroke="#30363d" stroke-width="1"/>
+                <text x="980" y="750" class="method">+ getHp()</text>
+                <text x="980" y="765" class="method">+ takeDamage()</text>
+                <text x="980" y="780" class="method">+ isAlive()</text>
+            </g>
+
+            <!-- MONSTER (Bottom-Right-2, Level 4) -->
+            <g class="class-box">
+                <rect x="1200" y="700" width="180" height="100" class="class-border"/>
+                <rect x="1200" y="700" width="180" height="35" class="class-header"/>
+                <text x="1290" y="715" text-anchor="middle" class="stereotype">«entity»</text>
+                <text x="1290" y="730" text-anchor="middle" class="class-name">Monster</text>
+                <line x1="1200" y1="735" x2="1380" y2="735" stroke="#30363d" stroke-width="1"/>
+                <text x="1210" y="750" class="attribute">- name: String</text>
+                <text x="1210" y="765" class="attribute">- maxHp: int</text>
+                <line x1="1200" y1="770" x2="1380" y2="770" stroke="#30363d" stroke-width="1"/>
+                <text x="1210" y="785" class="method">+ attack()</text>
+            </g>
+
+            <!-- DICE (Bottom-Far-Right, Level 4) -->
+            <g class="class-box">
+                <rect x="970" y="900" width="180" height="90" class="class-border"/>
+                <rect x="970" y="900" width="180" height="35" class="class-header"/>
+                <text x="1060" y="915" text-anchor="middle" class="stereotype">«utility»</text>
+                <text x="1060" y="930" text-anchor="middle" class="class-name">Dice</text>
+                <line x1="970" y1="935" x2="1150" y2="935" stroke="#30363d" stroke-width="1"/>
+                <text x="980" y="950" class="method">+ roll(sides)</text>
+                <text x="980" y="965" class="method">+ rollD20()</text>
+                <text x="980" y="980" class="method">+ rollMultiple()</text>
+            </g>
+
+            <!-- RELATIONSHIPS / CONNECTIONS -->
+            
+            <!-- Game to Campaign (Composition) -->
+            <line x1="650" y1="200" x2="200" y2="280" class="composition" marker-end="url(#diamond-blue)"/>
+            <text x="400" y="230" class="label">owns</text>
+            <text x="220" y="275" class="multiplicity">1</text>
+
+            <!-- Game to Character (Composition) -->
+            <line x1="670" y1="200" x2="400" y2="280" class="composition" marker-end="url(#diamond-blue)"/>
+            <text x="500" y="230" class="label">owns</text>
+            <text x="410" y="275" class="multiplicity">1</text>
+
+            <!-- Game to GameState (Composition) -->
+            <line x1="700" y1="200" x2="650" y2="280" class="composition" marker-end="url(#diamond-blue)"/>
+            <text x="680" y="230" class="label">owns</text>
+            <text x="660" y="275" class="multiplicity">1</text>
+
+            <!-- Game to Parser (Composition) -->
+            <line x1="750" y1="200" x2="860" y2="280" class="composition" marker-end="url(#diamond-blue)"/>
+            <text x="800" y="230" class="label">owns</text>
+            <text x="870" y="275" class="multiplicity">1</text>
+
+            <!-- Game to Display (Composition) -->
+            <line x1="780" y1="200" x2="1080" y2="280" class="composition" marker-end="url(#diamond-blue)"/>
+            <text x="900" y="230" class="label">owns</text>
+            <text x="1090" y="275" class="multiplicity">1</text>
+
+            <!-- Campaign to Location (Composition) -->
+            <line x1="150" y1="420" x2="140" y2="500" class="composition" marker-end="url(#diamond-blue)"/>
+            <text x="155" y="460" class="label">contains</text>
+            <text x="125" y="495" class="multiplicity">*</text>
+
+            <!-- Campaign to NPC (Composition) -->
+            <line x1="200" y1="420" x2="340" y2="500" class="composition" marker-end="url(#diamond-blue)"/>
+            <text x="260" y="460" class="label">contains</text>
+            <text x="350" y="495" class="multiplicity">*</text>
+
+            <!-- Campaign to Trial (Composition) -->
+            <line x1="250" y1="380" x2="560" y2="500" class="composition" marker-end="url(#diamond-blue)"/>
+            <text x="380" y="440" class="label">contains</text>
+            <text x="570" y="495" class="multiplicity">*</text>
+
+            <!-- Character to Inventory (Composition) -->
+            <line x1="400" y1="440" x2="390" y2="510" class="composition" marker-end="url(#diamond-blue)"/>
+            <text x="405" y="475" class="label">owns</text>
+            <text x="375" y="505" class="multiplicity">1</text>
+
+            <!-- Inventory to Item (Aggregation) -->
+            <line x1="480" y1="560" x2="740" y2="560" class="aggregation" marker-end="url(#diamond-green)"/>
+            <text x="580" y="555" class="label">contains</text>
+            <text x="725" y="555" class="multiplicity">*</text>
+
+            <!-- Trial to MiniGame (Composition) -->
+            <line x1="600" y1="620" x2="600" y2="700" class="composition" marker-end="url(#diamond-blue)"/>
+            <text x="610" y="660" class="label">contains</text>
+            <text x="585" y="695" class="multiplicity">*</text>
+
+            <!-- MiniGame to Item (Dependency - reward) -->
+            <line x1="690" y1="760" x2="740" y2="600" class="dependency" marker-end="url(#arrow-purple)"/>
+            <text x="700" y="680" class="label">rewards</text>
+
+            <!-- Character implements Combatant -->
+            <line x1="500" y1="360" x2="970" y2="750" class="implements" marker-end="url(#arrow-yellow)"/>
+            <text x="700" y="550" class="label">implements</text>
+
+            <!-- Monster implements Combatant -->
+            <line x1="1200" y1="750" x2="1150" y2="750" class="implements" marker-end="url(#arrow-yellow)"/>
+            <text x="1155" y="745" class="label">implements</text>
+
+            <!-- Combat uses Dice (Dependency) -->
+            <line x1="890" y1="820" x2="1000" y2="900" class="dependency" marker-end="url(#arrow-purple)"/>
+            <text x="920" y="860" class="label">uses</text>
+
+            <!-- MiniGame uses Dice (Dependency) -->
+            <line x1="690" y1="780" x2="970" y2="940" class="dependency" marker-end="url(#arrow-purple)"/>
+            <text x="800" y="860" class="label">uses</text>
+
+            <!-- Marker Definitions -->
+            <defs>
+                <!-- Composition Diamond (filled) -->
+                <marker id="diamond-blue" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+                    <polygon points="5,1 9,5 5,9 1,5" fill="#58a6ff"/>
+                </marker>
+
+                <!-- Aggregation Diamond (hollow) -->
+                <marker id="diamond-green" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+                    <polygon points="5,1 9,5 5,9 1,5" fill="none" stroke="#56d364" stroke-width="2"/>
+                </marker>
+
+                <!-- Dependency Arrow -->
+                <marker id="arrow-purple" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                    <polyline points="1,1 9,5 1,9" fill="none" stroke="#bc8cff" stroke-width="2"/>
+                </marker>
+
+                <!-- Interface Arrow -->
+                <marker id="arrow-yellow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                    <polygon points="1,1 9,5 1,9" fill="none" stroke="#ffd700" stroke-width="2"/>
+                </marker>
+            </defs>
+        </svg>
+
+        <div style="margin-top: 2rem; padding: 1.5rem; background: #242b3d; border-radius: 8px;">
+            <h3 style="color: #58a6ff; margin-bottom: 1rem;">How to Read This Diagram:</h3>
+            <ul style="line-height: 1.8; color: #e6edf3;">
+                <li><strong style="color: #58a6ff;">Solid lines with filled diamonds</strong> = Composition (Game <em>owns</em> Campaign)</li>
+                <li><strong style="color: #56d364;">Solid lines with hollow diamonds</strong> = Aggregation (Inventory <em>has</em> Items)</li>
+                <li><strong style="color: #bc8cff;">Dashed lines with open arrows</strong> = Dependency (Combat <em>uses</em> Dice)</li>
+                <li><strong style="color: #ffd700;">Dashed lines with triangles</strong> = Implements interface (Character/Monster implement Combatant)</li>
+                <li><strong>Numbers near lines</strong> = Multiplicity (1 = one, * = many)</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
