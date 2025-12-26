@@ -1,16 +1,40 @@
-# Compiled class file
+# ========================
+# Compiled Output
+# ========================
 *.class
+target/
 
-# Log file
-*.log
+# ========================
+# IDE Files
+# ========================
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
 
-# BlueJ files
+# VS Code
+.vscode/
+*.code-workspace
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# NetBeans
+nbproject/
+build/
+nbbuild/
+dist/
+nbdist/
+
+# BlueJ
 *.ctxt
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
+# ========================
+# Build & Package Files
+# ========================
 *.jar
 *.war
 *.nar
@@ -19,6 +43,35 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# ========================
+# Log Files
+# ========================
+*.log
+logs/
+
+# ========================
+# OS Files
+# ========================
+.DS_Store
+Thumbs.db
+
+# ========================
+# Java Specific
+# ========================
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Virtual machine crash logs
 hs_err_pid*
 replay_pid*
+
+# ========================
+# QuestKeeper Specific
+# ========================
+# Player save files (don't commit personal saves)
+saves/*.yaml
+saves/*.yml
+!saves/.gitkeep
+
+# Local config overrides
+config.local.yaml
