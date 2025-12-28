@@ -180,5 +180,86 @@ public class Display {
         }
     }
 
-    public static void showSkillCheck
+    public static void showSkillCheck (String skillName, int roll, int modifier, int dc, boolean success) {
+        int total = roll + modifier;
+        String modStr = modifier >= 0 ? "+" + modifier : String.valueOf(modifier);
+
+        print(colorize("[" + skillName.toUpperCase() + " CHECK] ", CYAN));
+        print(colorize("d20: " + roll + " " + modStr + " = ", WHITE));
+        print(colorize(String.valueOf(total), YELLOW));
+        print(colorize(" vs DC " + dc + " - ", WHITE));
+
+        if (success) {
+            println(colorize("SUCCESS!", GREEN));
+        } else {
+            println(colorize("FAILURE", RED));
+        }
+
+        if (roll == 20) {
+            print(colorize(" NATURAL 20! ", YELLOW));
+        } else if (roll == 1) {
+            println(colorize(" X Natural 1...", RED));
+        }
     }
+
+    public static void showDamage (String notation, int total, String damageType) {
+        print(colorize("[DAMAGE] ", RED));
+        print(colorize(notation + " = ", WHITE));
+        print(colorize(String.valueOf(total), YELLOW));
+        if (damageType != null && !damageType.isEmpty()) {
+            print(colorize(" " + damageType, MAGENTA));
+        }
+        println();
+    }
+
+    public static void showError(String message) {
+        println();
+        print(colorize("[ERROR] ", RED));
+        println(colorize(message, WHITE));
+        println();
+    }
+
+    public static void showWarning(String message) {
+        print(colorize("[WARNING] ", YELLOW));
+        println(colorize(message, WHITE));
+    }
+
+    public static void showInfo(String message) {
+        print(colorize("[INFO] ", CYAN));
+        println(colorize(message, WHITE));
+    }
+
+    public static void showSuccess(String message) {
+        println(colorize("✦ " + message, GREEN));
+    }
+
+    public static void showHelp() {
+        println();
+        printBox("AVAILABLE COMMANDS", DEFAULT_WIDTH, YELLOW);
+        println();
+        
+        showHelpCommand("look / examine", "Examine your surroundings or an object");
+        showHelpCommand("go <direction>", "Move in a direction (north, south, east, west)");
+        showHelpCommand("talk <npc>", "Talk to a character");
+        showHelpCommand("take <item>", "Pick up an item");
+        showHelpCommand("use <item>", "Use an item from your inventory");
+        showHelpCommand("inventory / i", "View your inventory");
+        showHelpCommand("stats / character", "View your character stats");
+        showHelpCommand("attack <target>", "Attack a target in combat");
+        showHelpCommand("cast <spell>", "Cast a spell");
+        showHelpCommand("rest", "Take a short or long rest");
+        showHelpCommand("save", "Save your game");
+        showHelpCommand("load", "Load a saved game");
+        showHelpCommand("quit / exit", "Exit the game");
+        showHelpCommand("help", "Show this help menu");
+        
+        println();
+    }
+
+    private static void showHelpCommand(String command, String description) {
+        print("  ");
+        print(colorize(String.format("%-20s", command), CYAN));
+        println(colorize(description, WHITE));
+    }
+
+    
