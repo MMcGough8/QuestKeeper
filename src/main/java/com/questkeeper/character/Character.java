@@ -256,4 +256,58 @@ public class Character {
         this.maxHitPoints = calculateMaxHitPoints();
         this.currentHitPoints = maxHitPoints;
     }
+
+    public int getBaseAbilityScore(Ability ability) {
+        return baseAbilityScores.get(ability);
+    }
+
+    public int getBaseAbilityScore(Ability ability) {
+        int base = baseAbilityScores.get(ability);
+        int racialBonus = race.getAbilityBonus(ability);
+
+        if (race == Race.HUMAN) {
+            racialBonus = 1;
+        }
+
+        return Math.min(base + racialBonus, MAX_ABILITY_SCORE);
+    }
+
+    public int getAbilityModifier(Ability ability) {
+        return (getAbilityScore(ability) - 10) / 2;
+    }
+    
+    public void setAbilityScore(Ability ability, int score) {
+        int clampedScore = Math.max(MIN_ABILITY_SCORE, Math.min(MAX_ABILITY_SCORE, score));
+        baseAbilityScores.put(ability, clampedScore);
+       
+        if (ability == Ability.CONSTITUTION) {
+            int oldMax = maxHitPoints;
+            maxHitPoints = calculateMaxHitPoints();
+            if (oldMax > 0) {
+                currentHitPoints = (int) ((double) currentHitPoints / oldMax * maxHitPoints);
+            }
+        }
+    }
+
+    public void setAbilityScores(int str, int dex, int con, int intel, int wis, int cha) {
+        baseAbilityScores.put(Ability.STRENGTH, clampAbilityScore(str));
+        baseAbilityScores.put(Ability.DEXTERITY, clampAbilityScore(dex));
+        baseAbilityScores.put(Ability.CONSTITUTION, clampAbilityScore(con));
+        baseAbilityScores.put(Ability.INTELLIGENCE, clampAbilityScore(intel));
+        baseAbilityScores.put(Ability.WISDOM, clampAbilityScore(wis));
+        baseAbilityScores.put(Ability.CHARISMA, clampAbilityScore(cha));
+
+        maxHitPoints = calculateMaxHitPoints();
+        if (currentHitPoints > maxHitPoints) {
+            currentHitPoints = maxHitPoints;
+        }
+    }
+
+    private int clampAbilityScore(int score) {
+        return Math.max(MIN_ABILITY_SCORE, Math.min(MAX_ABILITY_SCORE, score));
+    }
+
+    public int getProficiencyBonus() {
+        return (level - 1) / 4 + 2;
+    }
 }
