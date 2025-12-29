@@ -431,4 +431,53 @@ public class Character {
     public void fullHeal() {
         currentHitPoints = maxHitPoints;
     }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public int getExperiencePoints() {
+        return experiencePoints;
+    }
+
+    public int getXpForNextLevel() {
+        if (level >= XP_THRESHOLDS.length) {
+            return -1; // Max level
+        }
+        return XP_THRESHOLDS[level];
+    }
+
+    public int addExperience(int xp) {
+        if (xp <= 0) return 0;
+        
+        experiencePoints += xp;
+        int levelsGained = 0;
+        
+        // Check for level ups
+        while (level < XP_THRESHOLDS.length && experiencePoints >= XP_THRESHOLDS[level]) {
+            levelUp();
+            levelsGained++;
+        }
+        
+        return levelsGained;
+    }
+
+    private void levelUp() {
+        level++;
+
+        int oldMax = maxHitPoints;
+        maxHitPoints = calculateMaxHitPoints();
+
+        currentHitPoints += (maxHitPoints - oldMax);
+    }
+
+    public void setLevel(int newLevel) {
+        if (newLevel < 1) newLevel = 1;
+        if (newLevel > 20) newLevel = 20;
+        
+        this.level = newLevel;
+        this.maxHitPoints = calculateMaxHitPoints();
+        this.currentHitPoints = Math.min(currentHitPoints, maxHitPoints);
+    }
+
 }
