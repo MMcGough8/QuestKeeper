@@ -382,6 +382,133 @@ class CharacterTest {
     }
     
     // ========================================================================
+    // DICE CHECK TESTS
+    // ========================================================================
+    
+    @Nested
+    @DisplayName("Dice Check Tests")
+    class DiceCheckTests {
+        
+        @Test
+        @DisplayName("makeAbilityCheck returns valid range")
+        void abilityCheckReturnsValidRange() {
+            // Fighter STR mod is +3, so range is 4-23 (1+3 to 20+3)
+            for (int i = 0; i < 50; i++) {
+                int result = fighter.makeAbilityCheck(Ability.STRENGTH);
+                assertTrue(result >= 4 && result <= 23,
+                    "STR check should be 4-23, got: " + result);
+            }
+        }
+        
+        @Test
+        @DisplayName("makeSkillCheck returns valid range")
+        void skillCheckReturnsValidRange() {
+            fighter.addSkillProficiency(Skill.ATHLETICS);
+            // STR mod +3, proficiency +2 = +5, range is 6-25
+            for (int i = 0; i < 50; i++) {
+                int result = fighter.makeSkillCheck(Skill.ATHLETICS);
+                assertTrue(result >= 6 && result <= 25,
+                    "Athletics check should be 6-25, got: " + result);
+            }
+        }
+        
+        @Test
+        @DisplayName("makeSavingThrow returns valid range")
+        void savingThrowReturnsValidRange() {
+            // Fighter has STR save proficiency: +3 mod + 2 prof = +5
+            for (int i = 0; i < 50; i++) {
+                int result = fighter.makeSavingThrow(Ability.STRENGTH);
+                assertTrue(result >= 6 && result <= 25,
+                    "STR save should be 6-25, got: " + result);
+            }
+        }
+        
+        @Test
+        @DisplayName("makeAbilityCheckAgainstDC can succeed and fail")
+        void abilityCheckAgainstDCWorks() {
+            boolean foundSuccess = false;
+            boolean foundFailure = false;
+            
+            for (int i = 0; i < 100 && !(foundSuccess && foundFailure); i++) {
+                // DC 15 with +3 mod means roll needs 12+ to succeed
+                if (fighter.makeAbilityCheckAgainstDC(Ability.STRENGTH, 15)) {
+                    foundSuccess = true;
+                } else {
+                    foundFailure = true;
+                }
+            }
+            
+            assertTrue(foundSuccess, "Should have at least one success");
+            assertTrue(foundFailure, "Should have at least one failure");
+        }
+        
+        @Test
+        @DisplayName("makeSkillCheckAgainstDC can succeed and fail")
+        void skillCheckAgainstDCWorks() {
+            boolean foundSuccess = false;
+            boolean foundFailure = false;
+            
+            for (int i = 0; i < 100 && !(foundSuccess && foundFailure); i++) {
+                if (fighter.makeSkillCheckAgainstDC(Skill.ATHLETICS, 15)) {
+                    foundSuccess = true;
+                } else {
+                    foundFailure = true;
+                }
+            }
+            
+            assertTrue(foundSuccess, "Should have at least one success");
+            assertTrue(foundFailure, "Should have at least one failure");
+        }
+        
+        @Test
+        @DisplayName("makeSavingThrowAgainstDC can succeed and fail")
+        void savingThrowAgainstDCWorks() {
+            boolean foundSuccess = false;
+            boolean foundFailure = false;
+            
+            for (int i = 0; i < 100 && !(foundSuccess && foundFailure); i++) {
+                if (fighter.makeSavingThrowAgainstDC(Ability.STRENGTH, 15)) {
+                    foundSuccess = true;
+                } else {
+                    foundFailure = true;
+                }
+            }
+            
+            assertTrue(foundSuccess, "Should have at least one success");
+            assertTrue(foundFailure, "Should have at least one failure");
+        }
+        
+        @Test
+        @DisplayName("rollInitiative returns valid range")
+        void rollInitiativeWorks() {
+            // Rogue has DEX 18 (+4 mod), range is 5-24
+            for (int i = 0; i < 50; i++) {
+                int result = rogue.rollInitiative();
+                assertTrue(result >= 5 && result <= 24,
+                    "Initiative should be 5-24, got: " + result);
+            }
+        }
+        
+        @Test
+        @DisplayName("High modifier always succeeds low DC")
+        void highModifierSucceedsLowDC() {
+            // Fighter STR +3, DC 4 means minimum roll (1+3=4) always succeeds
+            for (int i = 0; i < 50; i++) {
+                assertTrue(fighter.makeAbilityCheckAgainstDC(Ability.STRENGTH, 4));
+            }
+        }
+        
+        @Test
+        @DisplayName("Low modifier always fails high DC")
+        void lowModifierFailsHighDC() {
+            // Fighter CHA is 8 (-1 mod), DC 25 means max roll (20-1=19) always fails
+            for (int i = 0; i < 50; i++) {
+                assertFalse(fighter.makeAbilityCheckAgainstDC(Ability.CHARISMA, 25));
+            }
+        }
+    }
+    
+    // ========================================================================
     // SKILL TESTS
     // ========================================================================
     
