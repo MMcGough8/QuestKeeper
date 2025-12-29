@@ -388,5 +388,47 @@ public class Character {
         return temporaryHitPoints;
     }
 
-    
+    public int heal(int amount) {
+        if (amount <= 0) return 0;
+        
+        int oldHp = currentHitPoints;
+        currentHitPoints = Math.min(currentHitPoints + amount, maxHitPoints);
+        return currentHitPoints - oldHp;
+    }
+
+    public int takeDamage(int amount) {
+        if (amount <= 0) return 0;
+
+        int remainingDamage = amount;
+
+        if (temporaryHitPoints > 0) {
+            if (temporaryHitPoints >= remainingDamage) {
+                temporaryHitPoints -= remainingDamage;
+                return 0;
+            } else {
+                remainingDamage -= temporaryHitPoints;
+                temporaryHitPoints = 0;
+            }
+        }
+
+        int actualDamage = Math.min(remainingDamage, currentHitPoints);
+        currentHitPoints -= actualDamage;
+        return actualDamage;
+    }
+
+    public void setTemporaryHitPoints(int amount) {
+        temporaryHitPoints = Math.max(temporaryHitPoints, amount);
+    }
+
+    public boolean isUnconscious() {
+        return currentHitPoints <= 0;
+    }
+
+    public boolean isBloodied() {
+        return currentHitPoints <= maxHitPoints / 2;
+    }
+
+    public void fullHeal() {
+        currentHitPoints = maxHitPoints;
+    }
 }
