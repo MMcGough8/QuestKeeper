@@ -310,4 +310,33 @@ public class Character {
     public int getProficiencyBonus() {
         return (level - 1) / 4 + 2;
     }
+
+    private int calculateMaxHitPoints() {
+        int conMod = getAbilityModifier(Ability.CONSTITUTION);
+        int hitDie = characterClass.getHitDie();
+
+        int hp = hitDie + conMod;
+
+        for (int i = 2; i <= level; i++) {
+            hp += (hitDie / 2) + 1 + conMod;
+        }
+
+        return Math.max(1, hp);
+    }
+
+    public int getArmorClass() {
+        return BASE_AC + getAbilityModifier(Ability.DEXTERITY) + armorBonus + shieldBonus;
+    }
+
+    public int getInitiativeModifier() {
+        return getAbilityModifier(Ability.DEXTERITY);
+    }
+
+    public int getSpeed() {
+        return race.getSpeed();
+    }
+
+    public int getPassivePerception() {
+        return 10 + getSkillModifier(Skill.PERCEPTION);
+    }
 }
