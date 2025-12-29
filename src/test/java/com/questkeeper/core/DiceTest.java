@@ -637,10 +637,14 @@ class DiceTest {
         @Test
         @DisplayName("parse is case insensitive")
         void parseCaseInsensitive() {
-            Dice.parse("2D6");
-            Dice.parse("2d6");
-            Dice.parse("2D6+3");
-        }
+            int upper = Dice.parse("2D6");
+            int lower = Dice.parse("2d6");
+            int mixed = Dice.parse("2D6+3");
+    
+            assertTrue(upper >= 2 && upper <= 12, "2D6 should return 2-12");
+            assertTrue(lower >= 2 && lower <= 12, "2d6 should return 2-12");
+            assertTrue(mixed >= 5 && mixed <= 15, "2D6+3 should return 5-15");
+}   
         
         @Test
         @DisplayName("parse throws on invalid notation")
