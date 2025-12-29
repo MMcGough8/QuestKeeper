@@ -480,4 +480,20 @@ public class Character {
         this.currentHitPoints = Math.min(currentHitPoints, maxHitPoints);
     }
 
+    public void setArmorBonus(int bonus) {
+        this.armorBonus = Math.max(0, bonus);
+    }
+
+    public void setShieldBonus(int bonus) {
+        this.shieldBonus = Math.max(0, bonus);
+    }
+
+    public int getArmorBonus() {
+        return armorBonus;
+    }
+
+    public int getShieldBonus() {
+        return shieldBonus;
+    }
+
 }
