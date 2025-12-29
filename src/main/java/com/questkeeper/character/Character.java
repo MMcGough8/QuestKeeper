@@ -339,4 +339,28 @@ public class Character {
     public int getPassivePerception() {
         return 10 + getSkillModifier(Skill.PERCEPTION);
     }
+
+    public void addSkillProficiency(Skill skill) {
+        proficientSkills.add(skill);
+    }
+
+    public void removeSkillProficiency(Skill skill) {
+        proficientSkills.remove(skill);
+    }
+
+    public boolean isProficientIn(Skill skill) {
+        return proficientSkills.contains(skill);
+    }
+
+    public int getSkillModifier(Skill skill) {
+        int modifier = getAbilityModifier(skill.getAbility());
+        if (proficientSkills.contains(skill)) {
+            modifier += getProficiencyBonus();
+        }
+        return modifier;
+    }
+
+    public Set<Skill> getProficientSkills() {
+        return EnumSet.copyOf(proficientSkills);
+    }
 }
