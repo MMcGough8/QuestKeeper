@@ -191,4 +191,69 @@ public class Character {
         public Ability getSecondarySave() { return secondarySave; }
     }
     
+    private static final int MIN_ABILITY_SCORE = 1;
+   
+    private static final int MAX_ABILITY_SCORE = 20;
+
+    private static final int BASE_AC = 10;
+
+    private static final int STARTING_LEVEL = 1;
+
+    private static final int[] XP_THRESHOLDS = {
+        0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000,
+        85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000
+    };
+
+    private String name;
+    private Race race;
+    private CharacterClass characterClass;
+    private int level;
+    private int experiencePoints;
+    
+    private final Map<Ability, Integer> baseAbilityScores;
+    private final Set<Skill> proficientSkills;
+    private final Set<Ability> savingThrowProficiencies;
+    
+    private int currentHitPoints;
+    private int maxHitPoints;
+    private int temporaryHitPoints;
+    
+    private int armorBonus;
+    private int shieldBonus;
+
+    public Character(String name, Race race, CharacterClass characterClass) {
+        this.name = name;
+        this.race = race;
+        this.characterClass = characterClass;
+        this.level = STARTING_LEVEL;
+        this.experiencePoints = 0;
+        
+        this.baseAbilityScores = new EnumMap<>(Ability.class);
+        this.proficientSkills = EnumSet.noneOf(Skill.class);
+        this.savingThrowProficiencies = EnumSet.noneOf(Ability.class);
+        
+        for (Ability ability : Ability.values()) {
+            baseAbilityScores.put(ability, 10);
+        }
+
+        savingThrowProficiencies.add(characterClass.getPrimarySave());
+        savingThrowProficiencies.add(characterClass.getSecondarySave());
+        
+        this.maxHitPoints = calculateMaxHitPoints();
+        this.currentHitPoints = maxHitPoints;
+        this.temporaryHitPoints = 0;
+        
+        this.armorBonus = 0;
+        this.shieldBonus = 0;
+    }
+
+    public Character(String name, Race race, CharacterClass characterClass,
+                     int str, int dex, int con, int intel, int wis, int cha) {
+        this(name, race, characterClass);
+        setAbilityScores(str, dex, con, intel, wis, cha);
+        
+        // Recalculate HP with new CON
+        this.maxHitPoints = calculateMaxHitPoints();
+        this.currentHitPoints = maxHitPoints;
+    }
 }
