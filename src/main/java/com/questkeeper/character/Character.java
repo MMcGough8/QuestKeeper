@@ -261,7 +261,7 @@ public class Character {
         return baseAbilityScores.get(ability);
     }
 
-    public int getBaseAbilityScore(Ability ability) {
+    public int getAbilityScore(Ability ability) {
         int base = baseAbilityScores.get(ability);
         int racialBonus = race.getAbilityBonus(ability);
 
@@ -494,6 +494,40 @@ public class Character {
 
     public int getShieldBonus() {
         return shieldBonus;
+    }
+
+    public String getName() {
+        return name;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public Race getRace() {
+        return race;
+    }
+    
+    public CharacterClass getCharacterClass() {
+        return characterClass;
+    }
+
+    public String getAbilityScoresString() {
+        StringBuilder sb = new StringBuilder();
+        for (Ability ability : Ability.values()) {
+            int score = getAbilityScore(ability);
+            int mod = getAbilityModifier(ability);
+            String modStr = mod >= 0 ? "+" + mod : String.valueOf(mod);
+            sb.append(String.format("%s: %d (%s)  ", ability.getAbbreviation(), score, modStr));
+        }
+        return sb.toString().trim();
+    }
+    
+    @Override
+    public String toString() {
+        return String.format("%s - Level %d %s %s (HP: %d/%d, AC: %d)",
+                name, level, race.getDisplayName(), characterClass.getDisplayName(),
+                currentHitPoints, maxHitPoints, getArmorClass());
     }
 
 }
