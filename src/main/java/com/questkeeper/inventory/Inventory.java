@@ -166,4 +166,44 @@ public class Inventory {
         return null;
     }
 
-    
+    public boolean hasItem(Item item) {
+        return getItemCount(item) > 0;
+    }
+
+    public boolean hasItemById(String itemId) {
+        return items.stream()
+                .anyMatch(stack -> stack.getItem().getId().equals(itemId));
+    }
+
+    public int getItemCount(Item item) {
+        return items.stream()
+                .filter(stack -> stack.getItem().getId().equals(item.getId()))
+                .mapToInt(ItemStack::getQuantity)
+                .sum();
+    }
+
+    public Optional<Item> findItemById(String itemId) {
+        return items.stream()
+                .filter(stack -> stack.getItem().getId().equals(itemId))
+                .map(ItemStack::getItem)
+                .findFirst();
+    }
+
+    public List<Item> findItemsByName(String name) {
+        String lowerName = name.toLowerCase();
+        return items.stream()
+                .filter(stack -> stack.getItem().getName().toLowerCase().contains(lowerName))
+                .map(ItemStack::getItem)
+                .collect(Collectors.toList());
+    }
+
+    public List<Item> getItemsByType(ItemType type) {
+        return items.stream()
+                .filter(stack -> stack.getItem().getType() == type)
+                .map(ItemStack::getItem)
+                .collect(Collectors.toList());
+    }
+
+    public List<ItemStack> getAllItems() {
+        return Collections.unmodifiableList(items);
+    }
