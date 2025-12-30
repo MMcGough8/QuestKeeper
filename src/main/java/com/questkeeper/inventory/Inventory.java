@@ -64,3 +64,51 @@ public class Inventory {
         this.maxWeight = 0; // 0 = no limit
         this.gold = 0;
     }
+
+    public Inventory(int strengthScore) {
+        this();
+        setCarryingCapacityFromStrength(strengthScore);
+    }
+
+    public boolean addItem(Item item) {
+        return addItem(item, 1);
+    }
+
+    public boolean addItem(Item item, int quantity) {
+        if (item == null || quantity <= 0) {
+            return false;
+        }
+        
+        // Check weight limit
+        double addedWeight = item.getWeight() * quantity;
+        if (maxWeight > 0 && getCurrentWeight() + addedWeight > maxWeight) {
+            return false;
+        }
+        
+        // Try to stack with existing items
+        if (item.isStackable()) {
+            for (ItemStack stack : items) {
+                if (stack.canStackWith(item)) {
+                    int added = stack.add(quantity);
+                    if (added == quantity) {
+                        return true;
+                    }
+                    quantity -= added;
+                }
+            }
+        }
+        // Add remaining as new stacks
+        while (quantity > 0) {
+            // Check slot limit
+            if (maxSlots > 0 && items.size() >= maxSlots) {
+                return false;
+            }
+            
+            int stackSize = item.isStackable() ? 
+                    Math.min(quantity, item.getMaxStackSize()) : 1;
+            items.add(new ItemStack(item.copy(), stackSize));
+            quantity -= stackSize;
+        }
+        
+        return true;
+    }
