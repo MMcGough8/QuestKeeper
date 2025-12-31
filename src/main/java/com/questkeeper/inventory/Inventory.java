@@ -207,3 +207,78 @@ public class Inventory {
     public List<ItemStack> getAllItems() {
         return Collections.unmodifiableList(items);
     }
+
+    /**
+     * Equips an item to the appropriate slot.
+     */
+    
+    public Item equip(Item item) {
+        if (item == null || !item.isEquippable()) {
+            return null;
+        }
+        
+        // Must have item in inventory
+        if (!hasItem(item)) {
+            return null;
+        }
+        
+        EquipmentSlot slot = getSlotForItem(item);
+        if (slot == null) {
+            return null;
+        }
+        
+        return equipToSlot(item, slot);
+    }
+
+    public Item equipToSlot(Item item, EquipmentSlot slot) {
+        if (item == null || slot == null) {
+            return null;
+        }
+        
+        if (!hasItem(item)) {
+            return null;
+        }
+        
+        // Handle two-handed weapons
+        if (item instanceof Weapon weapon && weapon.isTwoHanded()) {
+            Item offHand = unequip(EquipmentSlot.OFF_HAND);             // Unequip off-hand if equipping two-handed weapon
+            if (offHand != null) {
+                addItem(offHand);
+            }
+        }
+        Item previous = equipped.get(slot);                             // Unequip current item in slot
+        if (previous != null) {
+            addItem(previous);
+        }
+        removeItem(item);                                               // Remove from inventory and equip
+        equipped.put(slot, item);
+        
+        return previous;
+    }
+
+    public Item unequip(EquipmentSlot slot) {
+        Item item = equipped.remove(slot);
+        if (item != null) {
+            addItem(item);
+        }
+        return item;
+    }
+
+    public Item getEquipped(EquipmentSlot slot) {
+        return equipped.get(slot);
+    }
+
+    public Weapon getEquippedWeapon() {
+        Item item = equipped.get(EquipmentSlot.MAIN_HAND);
+        return item instanceof Weapon weapon ? weapon : null;
+    }
+
+    public Armor getEquippedArmor() {
+        Item item = equipped.get(EquipmentSlot.ARMOR);
+        return item instanceof Armor armor ? armor : null;
+    }
+
+    public Armor getEquippedShield() {
+        Item item = equipped.get(EquipmentSlot.OFF_HAND);
+        return item instanceof Armor armor && armor.isShield() ? armor : null;
+    }
