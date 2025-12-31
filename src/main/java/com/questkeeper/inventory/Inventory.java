@@ -282,3 +282,83 @@ public class Inventory {
         Item item = equipped.get(EquipmentSlot.OFF_HAND);
         return item instanceof Armor armor && armor.isShield() ? armor : null;
     }
+
+    public boolean isSlotEmpty(EquipmentSlot slot) {
+        return !equipped.containsKey(slot);
+    }
+
+    public Map<EquipmentSlot, Item> getEquippedItems() {
+        return Collections.unmodifiableMap(equipped);
+    }
+
+    private EquipmentSlot getSlotForItem(Item item) {
+        if (item instanceof Weapon) {
+            return EquipmentSlot.MAIN_HAND;
+        } else if (item instanceof Armor armor) {
+            if (armor.isShield()) {
+                return EquipmentSlot.OFF_HAND;
+            }
+            return EquipmentSlot.ARMOR;
+        }
+        return null;
+    }
+
+    public double getCurrentWeight() {
+        double inventoryWeight = items.stream()
+                .mapToDouble(stack -> stack.getItem().getWeight() * stack.getQuantity())
+                .sum();
+        
+        double equippedWeight = equipped.values().stream()
+                .mapToDouble(Item::getWeight)
+                .sum();
+        
+        return inventoryWeight + equippedWeight;
+    }
+
+    public double getMaxWeight() {
+        return maxWeight;
+    }
+
+    public void setMaxWeight(double maxWeight) {
+        this.maxWeight = Math.max(0, maxWeight);
+    }
+
+    public void setCarryingCapacityFromStrength(int strengthScore) {
+        this.maxWeight = strengthScore * CARRY_CAPACITY_MULTIPLIER;
+    }
+
+    public boolean isOverEncumbered() {
+        return maxWeight > 0 && getCurrentWeight() > maxWeight;
+    }
+
+    public double getRemainingCapacity() {
+        if (maxWeight <= 0) {
+            return -1;
+        }
+        return maxWeight - getCurrentWeight();
+    }
+
+    public int getGold() {
+        return gold;
+    }
+
+    public void addGold(int amount) {
+        if (amount > 0) {
+            gold += amount;
+        }
+    }
+
+    public boolean removeGold(int amount) {
+        if (amount <= 0) {
+            return true;
+        }
+        if (gold >= amount) {
+            gold -= amount;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean hasGold(int amount) {
+        return gold >= amount;
+    }
