@@ -15,12 +15,11 @@ import java.util.stream.Collectors;
  * Tracks carrying capacity based on character strength.
  * 
  * @author Marc McGough
- * @version 1.0
+ * @version 1.1
  */
-
 public class Inventory {
 
-     /** Default carrying capacity multiplier (STR × this = capacity in lbs) */
+    /** Default carrying capacity multiplier (STR × this = capacity in lbs) */
     private static final double CARRY_CAPACITY_MULTIPLIER = 15.0;
     
     /** Default maximum inventory slots (0 = unlimited) */
@@ -97,6 +96,7 @@ public class Inventory {
                 }
             }
         }
+        
         // Add remaining as new stacks
         while (quantity > 0) {
             // Check slot limit
@@ -113,7 +113,7 @@ public class Inventory {
         return true;
     }
 
-     public boolean removeItem(Item item) {
+    public boolean removeItem(Item item) {
         return removeItem(item, 1);
     }
 
@@ -197,7 +197,7 @@ public class Inventory {
                 .collect(Collectors.toList());
     }
 
-    public List<Item> getItemsByType(ItemType type) {
+    public List<Item> getItemsByType(Item.ItemType type) {
         return items.stream()
                 .filter(stack -> stack.getItem().getType() == type)
                 .map(ItemStack::getItem)
@@ -211,7 +211,6 @@ public class Inventory {
     /**
      * Equips an item to the appropriate slot.
      */
-    
     public Item equip(Item item) {
         if (item == null || !item.isEquippable()) {
             return null;
@@ -241,16 +240,18 @@ public class Inventory {
         
         // Handle two-handed weapons
         if (item instanceof Weapon weapon && weapon.isTwoHanded()) {
-            Item offHand = unequip(EquipmentSlot.OFF_HAND);             // Unequip off-hand if equipping two-handed weapon
+            Item offHand = unequip(EquipmentSlot.OFF_HAND);
             if (offHand != null) {
                 addItem(offHand);
             }
         }
-        Item previous = equipped.get(slot);                             // Unequip current item in slot
+        
+        Item previous = equipped.get(slot);
         if (previous != null) {
             addItem(previous);
         }
-        removeItem(item);                                               // Remove from inventory and equip
+        
+        removeItem(item);
         equipped.put(slot, item);
         
         return previous;
@@ -270,17 +271,17 @@ public class Inventory {
 
     public Weapon getEquippedWeapon() {
         Item item = equipped.get(EquipmentSlot.MAIN_HAND);
-        return item instanceof Weapon weapon ? weapon : null;
+        return item instanceof Weapon ? (Weapon) item : null;
     }
 
     public Armor getEquippedArmor() {
         Item item = equipped.get(EquipmentSlot.ARMOR);
-        return item instanceof Armor armor ? armor : null;
+        return item instanceof Armor ? (Armor) item : null;
     }
 
     public Armor getEquippedShield() {
         Item item = equipped.get(EquipmentSlot.OFF_HAND);
-        return item instanceof Armor armor && armor.isShield() ? armor : null;
+        return (item instanceof Armor armor && armor.isShield()) ? armor : null;
     }
 
     public boolean isSlotEmpty(EquipmentSlot slot) {
@@ -371,7 +372,7 @@ public class Inventory {
         return maxSlots;
     }
 
-     public void setMaxSlots(int maxSlots) {
+    public void setMaxSlots(int maxSlots) {
         this.maxSlots = Math.max(0, maxSlots);
     }
 
@@ -387,7 +388,7 @@ public class Inventory {
         items.clear();
     }
 
-     public int getTotalItemCount() {
+    public int getTotalItemCount() {
         return items.stream()
                 .mapToInt(ItemStack::getQuantity)
                 .sum();
@@ -411,7 +412,7 @@ public class Inventory {
                 getTotalItemCount(), getCurrentWeight(), maxWeight, gold);
     }
 
-     public static class ItemStack {
+    public static class ItemStack {
         private final Item item;
         private int quantity;
         
