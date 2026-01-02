@@ -165,4 +165,38 @@ public class Monster implements Combatant {
     public int rollInitiative() {
         return Dice.rollWithModifier(20, getInitiativeModifier());
     }
+
+    public int rollAttack() {
+        return Dice.rollWithModifier(20, attackBonus);
+    }
+
+    public int rollDamage() {
+        return Dice.parse(damageDice);
+    }
+
+    public boolean attackHits(int targetAC) {
+        int roll = rollAttack();
+        return roll >= targetAC;
+    }
+
+    public void resetHitPoints() {
+        this.currentHitPoints = this.maxHitPoints;
+    }
+
+    public Monster copy(String newId) {
+        Monster copy = new Monster(newId, name, size, type, 
+                armorClass, maxHitPoints, speed, challengeRating,experienceValue);
+        copy.alignment = this.alignment;
+        copy.strengthMod = this.strengthMod;
+        copy.dexterityMod = this.dexterityMod;
+        copy.constitutionMod = this.constitutionMod;
+        copy.intelligenceMod = this.intelligenceMod;
+        copy.wisdomMod = this.wisdomMod;
+        copy.charismaMod = this.charismaMod;
+        copy.attackBonus = this.attackBonus;
+        copy.damageDice = this.damageDice;
+        copy.description = this.description;
+        return copy;
+    }
+    
 }
