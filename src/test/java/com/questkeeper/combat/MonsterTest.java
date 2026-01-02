@@ -335,15 +335,15 @@ class MonsterTest {
         @DisplayName("getStatBlock returns formatted string")
         void getStatBlock() {
             String statBlock = clockworkCritter.getStatBlock();
-            
+    
             assertTrue(statBlock.contains("Clockwork Critter"));
             assertTrue(statBlock.contains("Small"));
             assertTrue(statBlock.contains("Construct"));
             assertTrue(statBlock.contains("AC: 13"));
             assertTrue(statBlock.contains("HP: 11/11"));
-            assertTrue(statBlock.contains("CR: 0.3"));
+            assertTrue(statBlock.contains("CR: 1/4"));
         }
-        
+
         @Test
         @DisplayName("toString returns summary string")
         void toStringTest() {
@@ -352,7 +352,7 @@ class MonsterTest {
             assertTrue(str.contains("Clockwork Critter"));
             assertTrue(str.contains("Small"));
             assertTrue(str.contains("Construct"));
-            assertTrue(str.contains("CR 0.3"));
+            assertTrue(str.contains("CR 1/4"));
         }
     }
     

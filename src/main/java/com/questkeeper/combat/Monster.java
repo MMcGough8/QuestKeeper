@@ -355,7 +355,13 @@ public class Monster implements Combatant {
     public void setCharismaMod(int mod) { 
         this.charismaMod = mod; 
     }
-
+private String formatCR() {
+    if (challengeRating == 0) return "0";
+    if (challengeRating == 0.125) return "1/8";
+    if (challengeRating == 0.25) return "1/4";
+    if (challengeRating == 0.5) return "1/2";
+    return String.format("%.0f", challengeRating);  // Whole numbers for CR 1+
+}
     public String getStatBlock() {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("%s%n", name));
@@ -368,7 +374,7 @@ public class Monster implements Combatant {
         sb.append(String.format("INT %+d | WIS %+d | CHA %+d%n", intelligenceMod, wisdomMod, charismaMod));
         sb.append(String.format("───────────────────────────%n"));
         sb.append(String.format("Attack: +%d to hit, %s damage%n", attackBonus, damageDice));
-        sb.append(String.format("CR: %.1f (%d XP)", challengeRating, experienceValue));
+        sb.append(String.format("CR: %s (%d XP)", formatCR(), experienceValue));
         
         if (!description.isEmpty()) {
             sb.append(String.format("%n%n%s", description));
@@ -379,9 +385,9 @@ public class Monster implements Combatant {
 
     @Override
     public String toString() {
-        return String.format("%s [%s %s, CR %.1f] (HP: %d/%d, AC: %d)",
-                name, size.getDisplayName(), type.getDisplayName(),
-                challengeRating, currentHitPoints, maxHitPoints, armorClass);
+        return String.format("%s [%s %s, CR %s] (HP: %d/%d, AC: %d)",
+        name, size.getDisplayName(), type.getDisplayName(),
+        formatCR(), currentHitPoints, maxHitPoints, armorClass);
     }
 
     public static Monster createClockworkCritter(String id) {
