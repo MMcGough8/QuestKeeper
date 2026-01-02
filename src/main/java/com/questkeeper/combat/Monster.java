@@ -199,4 +199,151 @@ public class Monster implements Combatant {
         return copy;
     }
     
+    public String getID() {
+        return id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Size getSize() {
+        return size;
+    }
+
+    public void setSize(Size size) {
+        this.size = size;
+    }
+
+    public MonsterType getType() {
+        return type;
+    }
+
+    public void setType(MonsterType type) {
+        this.type = type;
+    }
+
+    public String getAlignment() {
+        return alignment;
+    }
+
+    public void setAlignment(String alignment) {
+        this.alignment = alignment;
+    }
+
+    public int getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(int speed) {
+        this.speed = speed;
+    }
+
+    public void setArmorClass(int armorClass) {
+        this.armorClass = armorClass;
+    }
+
+    public void setMaxHitPoints(int maxHitPoints) {
+        this.maxHitPoints = maxHitPoints;
+        if (currentHitPoints > maxHitPoints) {
+            currentHitPoints = maxHitPoints;
+        }
+    }
+
+    public double getChallengeRating() {
+        return challengeRating;
+    }
+    
+    public void setChallengeRating(double challengeRating) {
+        this.challengeRating = challengeRating;
+    }
+    
+    public int getExperienceValue() {
+        return experienceValue;
+    }
+    
+    public void setExperienceValue(int experienceValue) {
+        this.experienceValue = experienceValue;
+    }
+    
+    public int getAttackBonus() {
+        return attackBonus;
+    }
+    
+    public void setAttackBonus(int attackBonus) {
+        this.attackBonus = attackBonus;
+    }
+    
+    public String getDamageDice() {
+        return damageDice;
+    }
+
+    public void setDamageDice(String damageDice) {
+        this.damageDice = damageDice;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setAbilityModifiers(int str, int dex, int con, int intel, int wis, int cha) {
+        this.strengthMod = str;
+        this.dexterityMod = dex;
+        this.constitutionMod = con;
+        this.intelligenceMod = intel;
+        this.wisdomMod = wis;
+        this.charismaMod = cha;
+    }
+
+    public int getStrengthMod() { 
+        return strengthMod; 
+    }
+
+    public int getDexterityMod() { 
+        return dexterityMod; 
+    }
+
+    public int getConstitutionMod() { 
+        return constitutionMod; 
+    }
+
+    public int getIntelligenceMod() { 
+        return intelligenceMod; 
+    }
+
+    public int getWisdomMod() { 
+        return wisdomMod; 
+    }
+
+    public int getCharismaMod() { 
+        return charismaMod; 
+    }
+    
+    public void setStrengthMod(int mod) { 
+        this.strengthMod = mod; 
+    }
+
+    public void setDexterityMod(int mod) { 
+        this.dexterityMod = mod; 
+    }
+
+    public void setConstitutionMod(int mod) { 
+        this.constitutionMod = mod;
+    }
+
+    public void setIntelligenceMod(int mod) { 
+        this.intelligenceMod = mod; 
+    }
+
+    public void setWisdomMod(int mod) { 
+        this.wisdomMod = mod; 
+    }
+
+    public void setCharismaMod(int mod) { 
+        this.charismaMod = mod; 
+    }
 }
