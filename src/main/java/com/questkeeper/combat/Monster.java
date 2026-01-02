@@ -127,6 +127,42 @@ public class Monster implements Combatant {
         this. experienceValue = experienceValue;
     }
 
+    @Override
+    public String getName() {
+        return name;
+    }
     
+    @Override
+    public int getCurrentHitPoints() {
+        return currentHitPoints;
+    }
     
+    @Override
+    public int getMaxHitPoints() {
+        return maxHitPoints;
+    }
+
+    @Override
+    public int getArmorClass() {
+        return armorClass;
+    }
+
+    @Override
+    public int takeDamage(int amount) {
+        if (amount <= 0) return 0;
+
+        int actualDamage = Math.min(amount, currentHitPoints);
+        currentHitPoints -= actualDamage;
+        return actualDamage;
+    }
+
+    @Override
+    public int getInitiativeModifier() {
+        return dexterityMod;
+    }
+    
+    @Override
+    public int rollInitiative() {
+        return Dice.rollWithModifier(20, getInitiativeModifier());
+    }
 }
