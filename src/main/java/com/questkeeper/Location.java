@@ -148,5 +148,25 @@ public class Location {
         return npcs.size();
     }
 
+    public List<String> getItems() {
+        return Collections.unmodifiableList(items);
+    }
 
+    public boolean hasItem(String itemId) {
+        return itemId != null && items.contains(itemId);
+    }
+
+    public void addItem(String itemId) {
+        if (itemId != null && !itemId.trim().isEmpty()) {
+            items.add(itemId);  // Allow duplicates (multiple of same item)
+        }
+    }
+
+    public boolean removeItem(String itemId) {
+        return itemId != null && items.remove(itemId);
+    }
+
+    public int getItemCount() {
+        return items.size();
+    }
 }
