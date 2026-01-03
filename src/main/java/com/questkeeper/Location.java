@@ -19,7 +19,7 @@ import java.util.Set;
  */
 public class Location {
 
-    private static final String FLAG_Visited = "visited";
+    private static final String FLAG_VISITED = "visited";
     private static final String FLAG_UNLOCKED = "unlocked";
 
     private final String id;
@@ -168,5 +168,45 @@ public class Location {
 
     public int getItemCount() {
         return items.size();
+    }
+
+    public boolean hasBeenVisited() {
+        return flags.contains(FLAG_VISITED);
+    }
+
+    public void markVisited() {
+        flags.add(FLAG_VISITED);
+    }
+
+    public boolean isUnlocked() {
+        return flags.contains(FLAG_UNLOCKED);
+    }
+
+    public void unlock() {
+        flags.add(FLAG_UNLOCKED);
+    }
+
+    public void lock() {
+        flags.remove(FLAG_UNLOCKED);
+    }
+
+    public boolean hasFlag(String flag) {
+        return flag != null && flags.contains(flag.toLowerCase());
+    }
+
+    public void setFlag(String flag) {
+        if (flag != null && !flag.trim().isEmpty()) {
+            flags.add(flag.toLowerCase());
+        }
+    }
+
+    public void removeFlag(String flag) {
+        if (flag != null) {
+            flags.remove(flag.toLowerCase());
+        }
+    }
+
+    public Set<String> getFlags() {
+        return Collections.unmodifiableSet(flags);
     }
 }
