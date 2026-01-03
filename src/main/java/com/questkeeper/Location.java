@@ -57,5 +57,40 @@ public class Location {
         this.flags.add(FLAG_UNLOCKED);
     }
 
-    
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        if (name != null && !name.trim().isEmpty()) {
+            this.name = name;
+        }
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description != null ? description : "";
+    }
+
+    public String getReadAloudText() {
+        return readAloudText;
+    }
+
+    public void setReadAloudText(String readAloudText) {
+        this.readAloudText = readAloudText != null ? readAloudText : "";
+    }
+
+    public String getDisplayDescription() {
+        if (!hasBeenVisited() && !readAloudText.isEmpty()) {
+            return readAloudText;
+        }
+        return description;
+    }
     }
