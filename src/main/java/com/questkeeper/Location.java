@@ -40,4 +40,22 @@ public class Location {
         if (id == null || id.trim().isEmpty()) {
             throw new IllegalArgumentException("Location ID cannot be null or empty");
         }
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Location name cannot be null or empty");
+        }
+
+        this.id = id;
+        this.name = name;
+        this.description = description != null ? description : "";
+        this.readAloudText = readAloudText != null ? readAloudText : "";
+
+        this.exits = new HashMap<>();
+        this.npcs = new ArrayList<>();
+        this.items = new ArrayList<>();
+        this.flags = new HashSet<>();
+
+        this.flags.add(FLAG_UNLOCKED);
+    }
+
+    
     }
