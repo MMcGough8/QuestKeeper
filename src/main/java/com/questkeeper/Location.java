@@ -93,4 +93,28 @@ public class Location {
         }
         return description;
     }
+
+    public Set<String> getExits() {
+        return Collections.unmodifiableSet(exits.keySet());
     }
+
+    public String getExit (String direction){
+        if (direction == null) {
+            return null;
+        }
+        return exits.get(direction.toLowerCase());
+    }
+    
+    public boolean hasExit(String direction) {
+        return direction != null && exits.containsKey(direction.toLowerCase());
+    }
+
+    public void addExit(String direction, String locationId) {
+        if (direction != null && !direction.trim().isEmpty() &&
+            locationId != null && !locationId.trim().isEmpty()) {
+            exits.put(direction.toLowerCase(), locationId);
+        }
+    }
+
+    
+}
