@@ -133,4 +133,34 @@ public class NPC {
         this.shopkeeper = shopkeeper;
     }
 
-    
+    public String getGreeting() {
+        return greeting;
+    }
+
+    public void setGreeting(String greeting) {
+        this.greeting = greeting != null ? greeting : "";
+    }
+
+    public String getReturnGreeting() {
+        return returnGreeting;
+    }
+
+    public void setReturnGreeting(String returnGreeting) {
+        this.returnGreeting = returnGreeting != null ? returnGreeting : "";
+    }
+
+    public String greet() {
+        if (hasMetPlayer()) {
+            return returnGreeting.isEmpty() ? greeting : returnGreeting;
+        } else {
+            markAsMet();
+            return greeting;
+        }
+    }
+
+    public String peekGreeting() {
+        if (hasMetPlayer()) {
+            return returnGreeting.isEmpty() ? greeting : returnGreeting;
+        }
+        return greeting;
+    }
