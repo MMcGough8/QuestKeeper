@@ -1,7 +1,7 @@
-package com.questkeeper.items.effects;
+package com.questkeeper.inventory.items.effects;
 
 import com.questkeeper.character.Character;
-import com.questkeeper.items.ItemEffect;
+import com.questkeeper.inventory.items.ItemEffect;
 
 /**
  * Abstract base class for item effects providing common functionality.

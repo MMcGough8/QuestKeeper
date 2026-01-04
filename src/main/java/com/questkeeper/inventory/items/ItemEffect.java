@@ -1,7 +1,7 @@
-package com.questkeeper.items;
+package com.questkeeper.inventory.items;
 
 import com.questkeeper.character.Character;
-import com.questkeeper.items.effects.UsageType;
+import com.questkeeper.inventory.items.effects.UsageType;
 
 /**
  * Interface for all item effects in the game.

@@ -1,4 +1,4 @@
-package com.questkeeper.items.effects;
+package com.questkeeper.inventory.items.effects;
 
 import com.questkeeper.character.Character;
 

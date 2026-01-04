@@ -5,18 +5,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import com.questkeeper.items.effects.AbilitySetEffect;
-import com.questkeeper.items.effects.BonusRollEffect;
-import com.questkeeper.items.effects.DamageReductionEffect;
-import com.questkeeper.items.effects.ExtraDamageEffect;
-import com.questkeeper.items.effects.MovementEffect;
-import com.questkeeper.items.effects.ResistanceEffect;
-import com.questkeeper.items.effects.SkillBonusEffect;
-import com.questkeeper.items.effects.SpellEffect;
-import com.questkeeper.items.effects.StatBonusEffect;
-import com.questkeeper.items.effects.TeleportEffect;
-import com.questkeeper.items.effects.UsageType;
-import com.questkeeper.items.effects.UtilityEffect;
+import com.questkeeper.inventory.items.effects.AbilitySetEffect;
+import com.questkeeper.inventory.items.effects.BonusRollEffect;
+import com.questkeeper.inventory.items.effects.DamageReductionEffect;
+import com.questkeeper.inventory.items.effects.ExtraDamageEffect;
+import com.questkeeper.inventory.items.effects.MovementEffect;
+import com.questkeeper.inventory.items.effects.ResistanceEffect;
+import com.questkeeper.inventory.items.effects.SkillBonusEffect;
+import com.questkeeper.inventory.items.effects.SpellEffect;
+import com.questkeeper.inventory.items.effects.StatBonusEffect;
+import com.questkeeper.inventory.items.effects.TeleportEffect;
+import com.questkeeper.inventory.items.effects.UsageType;
+import com.questkeeper.inventory.items.effects.UtilityEffect;
 
 import static org.junit.jupiter.api.Assertions.*;
 
