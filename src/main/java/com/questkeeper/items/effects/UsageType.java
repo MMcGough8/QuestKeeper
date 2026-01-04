@@ -1,4 +1,4 @@
-package com.questkeeper;
+package com.questkeeper.items.effects;
 
 /**
  * Defines how often an item effect can be used.
