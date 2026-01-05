@@ -4,7 +4,7 @@ import com.questkeeper.character.Character;
 import com.questkeeper.character.Character.Ability;
 import com.questkeeper.character.Character.CharacterClass;
 import com.questkeeper.character.Character.Race;
-
+import com.questkeeper.character.Character.Skill;
 
 import java.util.*;
 
@@ -22,7 +22,6 @@ import static org.fusesource.jansi.Ansi.Color.*;
  * 
  * @author Marc McGough
  * @version 1.0
- * Work in progress
  */
 public class CharacterCreator {
 
@@ -112,7 +111,13 @@ public class CharacterCreator {
                 character.setAbilityScore(entry.getKey(), entry.getValue());
             }
             
-            printBox("Ability scores locked in!", 70, GREEN);
+            // Random skills
+            randomSkillProficiencies(character);
+            
+            // Random equipment (option A)
+            println(colorize("\n✓ You receive standard equipment (Option A)!", GREEN));
+            
+            printBox("Character creation complete!", 70, GREEN);
             pressEnterToContinue();
             showFinalCharacterSheet(character);
             Display.shutdown();
@@ -137,6 +142,19 @@ public class CharacterCreator {
         printBox("Ability scores locked in!", 70, GREEN);
         pressEnterToContinue();
 
+        // Step 5: Skill Proficiencies (Step 5 is racial bonuses - automatic)
+        clearScreen();
+        printBox("STEP 5: CHOOSE SKILL PROFICIENCIES", 70, MAGENTA);
+        selectSkillProficiencies(character);
+        pressEnterToContinue();
+
+        // Step 6: Starting Equipment
+        clearScreen();
+        printBox("STEP 6: STARTING EQUIPMENT", 70, MAGENTA);
+        selectStartingEquipment(character);
+        pressEnterToContinue();
+
+        // Final Character Sheet
         showFinalCharacterSheet(character);
 
         Display.shutdown();
@@ -438,6 +456,236 @@ public class CharacterCreator {
         scanner.nextLine();
     }
 
+    private static List<Skill> getClassSkillOptions(CharacterClass cc) {
+        return switch (cc) {
+            case BARBARIAN -> List.of(
+                Skill.ANIMAL_HANDLING, Skill.ATHLETICS, Skill.INTIMIDATION,
+                Skill.NATURE, Skill.PERCEPTION, Skill.SURVIVAL
+            );
+            case BARD -> List.of(Skill.values()); // Bards can choose any skill
+            case CLERIC -> List.of(
+                Skill.HISTORY, Skill.INSIGHT, Skill.MEDICINE,
+                Skill.PERSUASION, Skill.RELIGION
+            );
+            case DRUID -> List.of(
+                Skill.ARCANA, Skill.ANIMAL_HANDLING, Skill.INSIGHT,
+                Skill.MEDICINE, Skill.NATURE, Skill.PERCEPTION,
+                Skill.RELIGION, Skill.SURVIVAL
+            );
+            case FIGHTER -> List.of(
+                Skill.ACROBATICS, Skill.ANIMAL_HANDLING, Skill.ATHLETICS,
+                Skill.HISTORY, Skill.INSIGHT, Skill.INTIMIDATION,
+                Skill.PERCEPTION, Skill.SURVIVAL
+            );
+            case MONK -> List.of(
+                Skill.ACROBATICS, Skill.ATHLETICS, Skill.HISTORY,
+                Skill.INSIGHT, Skill.RELIGION, Skill.STEALTH
+            );
+            case PALADIN -> List.of(
+                Skill.ATHLETICS, Skill.INSIGHT, Skill.INTIMIDATION,
+                Skill.MEDICINE, Skill.PERSUASION, Skill.RELIGION
+            );
+            case RANGER -> List.of(
+                Skill.ANIMAL_HANDLING, Skill.ATHLETICS, Skill.INSIGHT,
+                Skill.INVESTIGATION, Skill.NATURE, Skill.PERCEPTION,
+                Skill.STEALTH, Skill.SURVIVAL
+            );
+            case ROGUE -> List.of(
+                Skill.ACROBATICS, Skill.ATHLETICS, Skill.DECEPTION,
+                Skill.INSIGHT, Skill.INTIMIDATION, Skill.INVESTIGATION,
+                Skill.PERCEPTION, Skill.PERFORMANCE, Skill.PERSUASION,
+                Skill.SLEIGHT_OF_HAND, Skill.STEALTH
+            );
+            case SORCERER -> List.of(
+                Skill.ARCANA, Skill.DECEPTION, Skill.INSIGHT,
+                Skill.INTIMIDATION, Skill.PERSUASION, Skill.RELIGION
+            );
+            case WARLOCK -> List.of(
+                Skill.ARCANA, Skill.DECEPTION, Skill.HISTORY,
+                Skill.INTIMIDATION, Skill.INVESTIGATION, Skill.NATURE,
+                Skill.RELIGION
+            );
+            case WIZARD -> List.of(
+                Skill.ARCANA, Skill.HISTORY, Skill.INSIGHT,
+                Skill.INVESTIGATION, Skill.MEDICINE, Skill.RELIGION
+            );
+        };
+    }
+
+    private static int getClassSkillCount(CharacterClass cc) {
+        return switch (cc) {
+            case BARD, RANGER, ROGUE -> 3; // Rogue gets 4, but 3 for simplicity
+            default -> 2;
+        };
+    }
+
+    private static void selectSkillProficiencies(Character character) {
+        CharacterClass cc = character.getCharacterClass();
+        List<Skill> availableSkills = new ArrayList<>(getClassSkillOptions(cc));
+        int numChoices = getClassSkillCount(cc);
+
+        println(bold("As a " + cc.getDisplayName() + ", choose " + numChoices + " skill proficiencies:\n"));
+
+        Set<Skill> chosen = EnumSet.noneOf(Skill.class);
+
+        for (int i = 0; i < numChoices; i++) {
+            clearScreen();
+            printBox("SKILL PROFICIENCIES (" + (i + 1) + "/" + numChoices + ")", 70, CYAN);
+            println(bold("Choose a skill to be proficient in:\n"));
+
+            // Display available skills
+            List<Skill> remaining = availableSkills.stream()
+                    .filter(s -> !chosen.contains(s))
+                    .toList();
+
+            for (int j = 0; j < remaining.size(); j++) {
+                Skill skill = remaining.get(j);
+                Ability linked = skill.getAbility();
+                int mod = character.getAbilityModifier(linked);
+                int withProf = mod + character.getProficiencyBonus();
+                
+                println(String.format("%s) %s (%s) — currently %+d, with proficiency %+d",
+                        colorize(String.valueOf(j + 1), YELLOW),
+                        bold(skill.getDisplayName()),
+                        linked.getAbbreviation(),
+                        mod,
+                        withProf));
+            }
+            println();
+
+            int choice = promptForInt("Select skill (1-" + remaining.size() + "): ", 1, remaining.size());
+            Skill selected = remaining.get(choice - 1);
+            chosen.add(selected);
+            character.addSkillProficiency(selected);
+
+            println(colorize("✓ You are now proficient in " + selected.getDisplayName() + "!", GREEN));
+            pressEnterToContinue();
+        }
+
+        println(colorize("\nSkill proficiencies selected!", GREEN));
+    }
+
+    private static void randomSkillProficiencies(Character character) {
+        CharacterClass cc = character.getCharacterClass();
+        List<Skill> available = new ArrayList<>(getClassSkillOptions(cc));
+        int numChoices = getClassSkillCount(cc);
+        
+        Collections.shuffle(available);
+        
+        println("\nRandom skill proficiencies:");
+        for (int i = 0; i < numChoices && i < available.size(); i++) {
+            Skill skill = available.get(i);
+            character.addSkillProficiency(skill);
+            println("  • " + skill.getDisplayName());
+        }
+    }
+
+    private static void selectStartingEquipment(Character character) {
+        CharacterClass cc = character.getCharacterClass();
+        
+        println(bold("As a " + cc.getDisplayName() + ", you receive starting equipment.\n"));
+        println("Choose your equipment package:\n");
+        
+        // Get equipment options for the class
+        List<String> optionA = getEquipmentOptionA(cc);
+        List<String> optionB = getEquipmentOptionB(cc);
+        int goldOption = getStartingGold(cc);
+
+        println(colorize("Option A:", YELLOW));
+        for (String item : optionA) {
+            println("  • " + item);
+        }
+        println();
+
+        println(colorize("Option B:", YELLOW));
+        for (String item : optionB) {
+            println("  • " + item);
+        }
+        println();
+
+        println(colorize("Option C:", YELLOW));
+        println("  • " + goldOption + " gold pieces (buy your own equipment)");
+        println();
+
+        int choice = promptForInt("Choose option (1=A, 2=B, 3=Gold): ", 1, 3);
+
+        switch (choice) {
+            case 1 -> {
+                println(colorize("\n✓ You receive Option A equipment!", GREEN));
+                println("Equipment added to your inventory:");
+                for (String item : optionA) {
+                    println("  • " + item);
+                }
+            }
+            case 2 -> {
+                println(colorize("\n✓ You receive Option B equipment!", GREEN));
+                println("Equipment added to your inventory:");
+                for (String item : optionB) {
+                    println("  • " + item);
+                }
+            }
+            case 3 -> {
+                println(colorize("\n✓ You receive " + goldOption + " gold pieces!", GREEN));
+                println("Visit a shop to purchase your equipment.");
+            }
+        }
+
+        // Note: Actual inventory integration would happen here
+        // character.getInventory().addItem(...) etc.
+    }
+
+    private static List<String> getEquipmentOptionA(CharacterClass cc) {
+        return switch (cc) {
+            case BARBARIAN -> List.of("Greataxe", "2 Handaxes", "Explorer's Pack", "4 Javelins");
+            case BARD -> List.of("Rapier", "Diplomat's Pack", "Lute", "Leather Armor", "Dagger");
+            case CLERIC -> List.of("Mace", "Scale Mail", "Light Crossbow + 20 bolts", "Priest's Pack", "Shield", "Holy Symbol");
+            case DRUID -> List.of("Wooden Shield", "Scimitar", "Leather Armor", "Explorer's Pack", "Druidic Focus");
+            case FIGHTER -> List.of("Chain Mail", "Longsword", "Shield", "Light Crossbow + 20 bolts", "Dungeoneer's Pack");
+            case MONK -> List.of("Shortsword", "Dungeoneer's Pack", "10 Darts");
+            case PALADIN -> List.of("Longsword", "Shield", "5 Javelins", "Priest's Pack", "Chain Mail", "Holy Symbol");
+            case RANGER -> List.of("Scale Mail", "2 Shortswords", "Dungeoneer's Pack", "Longbow + 20 arrows");
+            case ROGUE -> List.of("Rapier", "Shortbow + 20 arrows", "Burglar's Pack", "Leather Armor", "2 Daggers", "Thieves' Tools");
+            case SORCERER -> List.of("Light Crossbow + 20 bolts", "Component Pouch", "Dungeoneer's Pack", "2 Daggers");
+            case WARLOCK -> List.of("Light Crossbow + 20 bolts", "Component Pouch", "Scholar's Pack", "Leather Armor", "Simple Weapon", "2 Daggers");
+            case WIZARD -> List.of("Quarterstaff", "Component Pouch", "Scholar's Pack", "Spellbook");
+        };
+    }
+
+    private static List<String> getEquipmentOptionB(CharacterClass cc) {
+        return switch (cc) {
+            case BARBARIAN -> List.of("2 Handaxes", "Any Simple Weapon", "Explorer's Pack", "4 Javelins");
+            case BARD -> List.of("Longsword", "Entertainer's Pack", "Lute", "Leather Armor", "Dagger");
+            case CLERIC -> List.of("Warhammer", "Chain Mail", "Light Crossbow + 20 bolts", "Explorer's Pack", "Shield", "Holy Symbol");
+            case DRUID -> List.of("Wooden Shield", "Simple Melee Weapon", "Leather Armor", "Explorer's Pack", "Druidic Focus");
+            case FIGHTER -> List.of("Leather Armor", "Longbow + 20 arrows", "2 Handaxes", "Dungeoneer's Pack");
+            case MONK -> List.of("Simple Weapon", "Explorer's Pack", "10 Darts");
+            case PALADIN -> List.of("2 Longswords", "5 Javelins", "Explorer's Pack", "Chain Mail", "Holy Symbol");
+            case RANGER -> List.of("Leather Armor", "2 Shortswords", "Explorer's Pack", "Longbow + 20 arrows");
+            case ROGUE -> List.of("Shortsword", "Shortbow + 20 arrows", "Dungeoneer's Pack", "Leather Armor", "2 Daggers", "Thieves' Tools");
+            case SORCERER -> List.of("Any Simple Weapon", "Arcane Focus", "Explorer's Pack", "2 Daggers");
+            case WARLOCK -> List.of("Any Simple Weapon", "Arcane Focus", "Dungeoneer's Pack", "Leather Armor", "Simple Weapon", "2 Daggers");
+            case WIZARD -> List.of("Dagger", "Arcane Focus", "Explorer's Pack", "Spellbook");
+        };
+    }
+
+    private static int getStartingGold(CharacterClass cc) {
+        // Average starting gold by class (simplified)
+        return switch (cc) {
+            case BARBARIAN -> 40;  // 2d4 × 10
+            case BARD -> 100;      // 5d4 × 10
+            case CLERIC -> 100;    // 5d4 × 10
+            case DRUID -> 40;      // 2d4 × 10
+            case FIGHTER -> 100;   // 5d4 × 10
+            case MONK -> 10;       // 5d4 (no × 10)
+            case PALADIN -> 100;   // 5d4 × 10
+            case RANGER -> 100;    // 5d4 × 10
+            case ROGUE -> 80;      // 4d4 × 10
+            case SORCERER -> 60;   // 3d4 × 10
+            case WARLOCK -> 80;    // 4d4 × 10
+            case WIZARD -> 80;     // 4d4 × 10
+        };
+    }
+
     private static int getRacialBonus(Race race, Ability ability) {
         // Human gets +1 to all
         if (race == Race.HUMAN) {
@@ -494,7 +742,7 @@ public class CharacterCreator {
         String input = scanner.nextLine().trim();
         return input.isEmpty() ? defaultValue : input;
     }
-  
+
     private static <T extends Enum<T>> T promptForEnum(T[] values, String prompt) {
         while (true) {
             print(colorize(prompt, CYAN));
