@@ -213,3 +213,52 @@ public static Character createCharacter() {
         }
     }
 
+    private static void rollForStats(Character character, Map<Ability, Integer> scores) {
+        clearScreen();
+        printBox("ROLLING FOR STATS — 4d6 drop lowest", 70, YELLOW);
+        println("Rolling six times...\n");
+        pressEnterToContinue();
+
+        List<Integer> rolls = new ArrayList<>();
+        Random rand = new Random();
+
+        for (int i = 1; i <= 6; i++) {
+            int[] dice = new int[4];
+            for (int j = 0; j < 4; j++) dice[j] = rand.nextInt(6) + 1;
+            Arrays.sort(dice);
+            int total = dice[1] + dice[2] + dice[3];
+
+            rolls.add(total);
+            println(String.format("Roll %d: [%d, %d, %d, %d] → drop %d → %s%d%s",
+                    i, dice[0], dice[1], dice[2], dice[3], dice[0],
+                    colorize("", GREEN), total, colorize("", WHITE)));
+            sleep(800);
+        }
+
+        rolls.sort(Collections.reverseOrder());
+        println("\nYour final rolled stats: " + bold(rolls.toString()));
+        pressEnterToContinue();
+
+        for (int value : rolls) {
+            clearScreen();
+            printBox("Assign " + bold(String.valueOf(value)) + " to which ability?", 70, CYAN);
+            for (Ability a : Ability.values()) {
+                int curr = scores.getOrDefault(a, 0);
+                String racial = character.getAbilityModifierFromRace(a) > 0
+                        ? colorize(" +" + character.getAbilityModifierFromRace(a), GREEN) : "";
+                println(String.format("  %s%-12s%s: %2d%s", colorize(a.getAbbreviation() + ":", WHITE),
+                        a.getFullName(), colorize("", WHITE), curr, racial));
+            }
+            println();
+
+            Ability ability;
+            do {
+                ability = promptForEnum(Ability.values(), "Choose ability: ");
+            } while (scores.containsKey(ability));
+
+            scores.put(ability, value);
+            println(colorize("✓ Assigned " + value + " to " + ability.getFullName(), GREEN));
+            pressEnterToContinue();
+        }
+    }
+
