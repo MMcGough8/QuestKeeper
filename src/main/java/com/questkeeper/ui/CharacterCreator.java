@@ -262,3 +262,43 @@ public static Character createCharacter() {
         }
     }
 
+    private static void randomFullCharacter(Character character) {
+        clearScreen();
+        printBox("FATE TAKES THE REINS...", 70, RED);
+        println("Randomizing everything except your name...\n");
+        sleep(1500);
+
+        Race[] races = Race.values();
+        Race randomRace = races[new Random().nextInt(races.length)];
+        character.setRace(randomRace);
+        println("Race: " + bold(randomRace.getDisplayName()));
+        sleep(1000);
+
+        CharacterClass[] classes = CharacterClass.values();
+        CharacterClass randomClass = classes[new Random().nextInt(classes.length)];
+        character.setCharacterClass(randomClass);
+        character.setLevel(1);
+        println("Class: " + bold(randomClass.getDisplayName()));
+        sleep(1000);
+
+        List<Integer> rolls = new ArrayList<>();
+        Random rand = new Random();
+        for (int i = 0; i < 6; i++) {
+            int[] d = new int[4];
+            for (int j = 0; j < 4; j++) d[j] = rand.nextInt(6) + 1;
+            Arrays.sort(d);
+            rolls.add(d[1] + d[2] + d[3]);
+        }
+        rolls.sort(Collections.reverseOrder());
+
+        Ability[] abilities = Ability.values();
+        for (int i = 0; i < 6; i++) {
+            character.setRawAbilityScore(abilities[i], rolls.get(i));
+        }
+
+        println("Stats assigned highest to lowest across abilities.");
+        sleep(1500);
+        println(colorize("\nYour destiny has been forged!", GREEN));
+        pressEnterToContinue();
+    }
+
