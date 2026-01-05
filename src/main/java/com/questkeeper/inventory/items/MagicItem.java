@@ -288,7 +288,64 @@ public class MagicItem extends Item {
                 .allMatch(e -> !e.isUsable());
     }
 
-    
+    @Override
+    public String getDetailedInfo() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getName());
+        if (getRarity() != Rarity.COMMON) {
+            sb.append(" [").append(getRarity().getDisplayName()).append("]");
+        }
+        sb.append("\n");
+
+        sb.append("Magic Item\n");
+
+        if (requiresAttunement) {
+            sb.append("Requires Attunement");
+            if (attunementRequirement != null) {
+                sb.append(" (").append(attunementRequirement).append(")");
+            }
+            if (attuned) {
+                sb.append(" - Attuned to ").append(attunedToName);
+            }
+            sb.append("\n");
+        }
+
+        if (!getDescription().isEmpty()) {
+            sb.append(getDescription()).append("\n");
+        }
+
+        if (!effects.isEmpty()) {
+            sb.append("\nEffects:\n");
+            for (ItemEffect effect : effects) {
+                sb.append("  • ").append(effect.getName());
+                sb.append(" (").append(effect.getChargeDisplay()).append(")");
+                sb.append("\n");
+                sb.append("    ").append(effect.getDescription()).append("\n");
+            }
+        }
+
+        sb.append(String.format("\nWeight: %.1f lb | Value: %d gp", getWeight(), getGoldValue()));
+
+        return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+        String attuneStr = requiresAttunement ? (attuned ? ", attuned" : ", requires attunement") : "";
+        return String.format("%s [%s, %d effect(s)%s]",
+                getName(), getRarity().getDisplayName(), effects.size(), attuneStr);
+    }
+
+    @Override
+    public Item copy() {
+        MagicItem copy = new MagicItem(getName(), getDescription(), getWeight(), 
+                getGoldValue(), getRarity());
+        copy.requiresAttunement = this.requiresAttunement;
+        copy.attunementRequirement = this.attunementRequirement;
+        // Effects are shared (not deep copied) - they're stateful
+        copy.effects.addAll(this.effects);
+        return copy;
+    }
 
 }
 
