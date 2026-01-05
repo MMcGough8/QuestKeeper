@@ -5,6 +5,9 @@ import com.questkeeper.character.Character.Race;
 import com.questkeeper.character.Character.CharacterClass;
 import com.questkeeper.inventory.Item.Rarity;
 import com.questkeeper.inventory.items.MagicItem;
+import com.questkeeper.inventory.items.effects.*;
+import com.questkeeper.inventory.items.*;
+
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -558,7 +561,7 @@ class MagicItemTest {
             String info = magicItem.getDetailedInfo();
             
             assertTrue(info.contains("Test Amulet"));
-            assertTrue(info.contains("UNCOMMON"));
+            assertTrue(info.contains("Uncommon"));
             assertTrue(info.contains("Effects:"));
         }
 
