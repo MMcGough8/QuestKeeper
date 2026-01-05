@@ -4,6 +4,7 @@ import com.questkeeper.character.Character;
 import com.questkeeper.character.Character.Race;
 import com.questkeeper.character.Character.CharacterClass;
 import com.questkeeper.inventory.Item.Rarity;
+import com.questkeeper.inventory.items.MagicItem;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
