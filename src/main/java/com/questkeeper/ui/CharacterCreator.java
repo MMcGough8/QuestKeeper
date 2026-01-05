@@ -127,7 +127,7 @@ public static Character createCharacter() {
         return character;
     }
 
-    
+
     private static void pointBuySystem(Character character, Map<Ability, Integer> scores) {
         clearScreen();
         printBox("POINT BUY — 27 points available", 70, YELLOW);
@@ -177,6 +177,38 @@ public static Character createCharacter() {
             scores.put(ability, current + 1);
             pointsLeft -= cost;
             println(colorize("✓ " + ability.getFullName() + " → " + (current + 1) + " (-" + cost + " pts)", GREEN));
+            pressEnterToContinue();
+        }
+    }
+
+    private static void standardArrayAssignment(Character character, Map<Ability, Integer> scores) {
+        clearScreen();
+        printBox("STANDARD ARRAY", 70, YELLOW);
+        println("Assign the values: " + bold("15, 14, 13, 12, 10, 8") + "\n");
+
+        int[] array = {15, 14, 13, 12, 10, 8};
+
+        for (int value : array) {
+            clearScreen();
+            printBox("Assign " + bold(String.valueOf(value)) + " to which ability?", 70, CYAN);
+            println("Current assignments:\n");
+
+            for (Ability a : Ability.values()) {
+                int curr = scores.getOrDefault(a, 0);
+                String racial = character.getAbilityModifierFromRace(a) > 0
+                        ? colorize(" +" + character.getAbilityModifierFromRace(a), GREEN) : "";
+                println(String.format("  %s%-12s%s: %2d%s", colorize(a.getAbbreviation() + ":", WHITE),
+                        a.getFullName(), colorize("", WHITE), curr, racial));
+            }
+            println();
+
+            Ability ability;
+            do {
+                ability = promptForEnum(Ability.values(), "Choose ability: ");
+            } while (scores.containsKey(ability));
+
+            scores.put(ability, value);
+            println(colorize("✓ Assigned " + value + " to " + ability.getFullName(), GREEN));
             pressEnterToContinue();
         }
     }
