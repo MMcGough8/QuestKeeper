@@ -124,3 +124,50 @@ public class SaveState {
             java.nio.file.StandardCopyOption.REPLACE_EXISTING,
             java.nio.file.StandardCopyOption.ATOMIC_MOVE);
     }
+
+     /**
+     * Loads a game state from a YAML file.
+     */
+    public static SaveState load(Path filepath) throws IOException {
+        Yaml yaml = new Yaml();
+        
+        try (Reader reader = Files.newBufferedReader(filepath)) {
+            Map<String, Object> data = yaml.load(reader);
+            return fromMap(data);
+        }
+    }
+
+    /**
+     * Quick save to default location.
+     */
+    public void quickSave() throws IOException {
+        String filename = sanitizeFilename(saveName) + ".yaml";
+        Path savePath = Path.of(DEFAULT_SAVE_DIR, filename);
+        save(savePath);
+    }
+
+    /**
+     * Lists all save files in the default save directory.
+     */
+    public static List<SaveInfo> listSaves() throws IOException {
+        Path saveDir = Path.of(DEFAULT_SAVE_DIR);
+        if (!Files.exists(saveDir)) {
+            return Collections.emptyList();
+        }
+        
+        List<SaveInfo> saves = new ArrayList<>();
+        try (var stream = Files.list(saveDir)) {
+            stream.filter(p -> p.toString().endsWith(".yaml"))
+                  .forEach(p -> {
+                      try {
+                          saves.add(SaveInfo.fromFile(p));
+                      } catch (IOException e) {
+                          // Skip corrupted saves
+                      }
+                  });
+        }
+        
+        // Sort by timestamp, newest first
+        saves.sort((a, b) -> b.timestamp().compareTo(a.timestamp()));
+        return saves;
+    }
