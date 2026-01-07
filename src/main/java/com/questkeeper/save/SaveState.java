@@ -200,4 +200,63 @@ public class SaveState {
         
         return map;
     }
+
+     @SuppressWarnings("unchecked")
+    private static SaveState fromMap(Map<String, Object> data) {
+        SaveState state = new SaveState();
+        
+        // Metadata
+        state.saveVersion = getString(data, "save_version", CURRENT_VERSION);
+        state.timestamp = Instant.parse(getString(data, "timestamp", Instant.now().toString()));
+        state.campaignId = getString(data, "campaign_id", "unknown");
+        state.saveName = getString(data, "save_name", "Unnamed Save");
+        
+        // Character
+        Map<String, Object> charData = (Map<String, Object>) data.get("character");
+        if (charData != null) {
+            state.character = CharacterData.fromMap(charData);
+        }
+        
+        // World state
+        state.currentLocationId = getString(data, "current_location", null);
+        List<String> visited = (List<String>) data.get("visited_locations");
+        if (visited != null) {
+            state.visitedLocations = new HashSet<>(visited);
+        }
+        
+        // Campaign progress
+        Map<String, Boolean> flags = (Map<String, Boolean>) data.get("flags");
+        if (flags != null) {
+            state.stateFlags = new HashMap<>(flags);
+        }
+        
+        Map<String, Integer> counters = (Map<String, Integer>) data.get("counters");
+        if (counters != null) {
+            state.stateCounters = new HashMap<>(counters);
+        }
+        
+        Map<String, String> strings = (Map<String, String>) data.get("strings");
+        if (strings != null) {
+            state.stateStrings = new HashMap<>(strings);
+        }
+        
+        // Inventory
+        List<String> inventory = (List<String>) data.get("inventory");
+        if (inventory != null) {
+            state.inventoryItems = new ArrayList<>(inventory);
+        }
+        
+        List<String> equipped = (List<String>) data.get("equipped");
+        if (equipped != null) {
+            state.equippedItems = new ArrayList<>(equipped);
+        }
+        
+        state.gold = getInt(data, "gold", 0);
+        
+        // Stats
+        state.totalPlayTimeSeconds = getLong(data, "play_time_seconds", 0);
+        state.saveCount = getInt(data, "save_count", 0);
+        
+        return state;
+    }
 }
