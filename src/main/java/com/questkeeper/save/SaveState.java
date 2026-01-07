@@ -343,4 +343,21 @@ public class SaveState {
         }
         return false;
     }
+
+    public void addPlayTime(long seconds) {
+        this.totalPlayTimeSeconds += seconds;
+    }
+
+    public String getFomattedPlayTime() {
+        long hours = totalPlayTimeSeconds / 3600;
+        long minutes = (totalPlayTimeSeconds % 3600) / 60;
+
+        if (hours > 0) {
+            return String.format("%dh %dm", hours, minutes);
+        } else {
+            return String.format("%dm", minutes);
+        }
+    }
+
+    
 }
