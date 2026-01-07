@@ -259,4 +259,36 @@ public class SaveState {
         
         return state;
     }
+
+    public void setFlag(String key, boolean value) {
+        stateFlags.put(key, value);
+    }
+
+    public boolean getFlag(String key) {
+        return stateFlags.getOrDefault(key, false);
+    }
+
+    public boolean hasFlag(String key) {
+        return stateFlags.getOrDefault(key, false);
+    }
+
+    public void setCounter(String key, int value) {
+        stateCounters.put(key, value);
+    }
+
+    public int getCounter(String key) {
+        return stateCounters.getOrDefault(key, 0);
+    }
+
+    public void incrementCounter(String key) {
+        stateCounters.merge(key, 1, Integer::sum);
+    }
+
+    public void setString(String key, String value) {
+        stateStrings.put(key, value);
+    }
+
+    public String getString(String key) {
+        return stateStrings.get(key);
+    }
 }
