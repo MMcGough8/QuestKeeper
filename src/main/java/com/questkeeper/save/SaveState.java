@@ -375,7 +375,7 @@ public class SaveState {
         return defaultValue;
     }
 
-    private static long getLong(Map<String, Object> map, String key, Long defaultValue) {
+    private static long getLong(Map<String, Object> map, String key, long defaultValue) {
         Object val = map.get(key);
         if (val instanceof Number) {
             return((Number) val).longValue();
