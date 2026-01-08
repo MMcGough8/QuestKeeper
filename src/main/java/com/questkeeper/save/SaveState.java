@@ -348,7 +348,7 @@ public class SaveState {
         this.totalPlayTimeSeconds += seconds;
     }
 
-    public String getFomattedPlayTime() {
+    public String getFormattedPlayTime() {
         long hours = totalPlayTimeSeconds / 3600;
         long minutes = (totalPlayTimeSeconds % 3600) / 60;
 
@@ -384,5 +384,73 @@ public class SaveState {
         return defaultValue;
     }
 
-    
+    public String getSaveVersion() { 
+        return saveVersion; 
+    }
+
+    public Instant getTimestamp() { 
+        return timestamp; 
+    }
+
+    public String getCampaignId() { 
+        return campaignId; 
+    }
+
+    public String getSaveName() { 
+        return saveName; 
+    }
+
+    public String getCurrentLocationId() { 
+        return currentLocationId; 
+    }
+
+    public Set<String> getVisitedLocations() { 
+        return Collections.unmodifiableSet(visitedLocations); 
+    }
+
+    public Map<String, Boolean> getStateFlags() { 
+        return Collections.unmodifiableMap(stateFlags); 
+    }
+
+    public Map<String, Integer> getStateCounters() { 
+        return Collections.unmodifiableMap(stateCounters); 
+    }
+
+    public Map<String, String> getStateStrings() { 
+        return Collections.unmodifiableMap(stateStrings); 
+    }
+
+    public List<String> getInventoryItems() { 
+        return Collections.unmodifiableList(inventoryItems); 
+    }
+
+    public List<String> getEquippedItems() { 
+        return Collections.unmodifiableList(equippedItems); 
+    }
+
+    public int getGold() { 
+        return gold; 
+    }
+
+    public long getTotalPlayTimeSeconds() { 
+        return totalPlayTimeSeconds; 
+    }
+
+    public int getSaveCount() { 
+        return saveCount; 
+    }
+
+    public void setSaveName(String saveName) { 
+        this.saveName = saveName; 
+    }
+
+    public void setCampaignId(String campaignId) { 
+        this.campaignId = campaignId; 
+    }
+
+    @Override
+    public String toString() {
+        return String.format("SaveState[%s, %s, %s, played: %s]",
+            saveName, campaignId, timestamp, getFormattedPlayTime());
+    }
 }
