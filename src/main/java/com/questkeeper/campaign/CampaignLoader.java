@@ -47,6 +47,7 @@ public class CampaignLoader {
     private final Yaml yaml;
     private final Path campaignRoot;
 
+    // Campaign metadata
     private String campaignId;
     private String campaignName;
     private String campaignDescription;
@@ -54,18 +55,18 @@ public class CampaignLoader {
     private String campaignVersion;
     private String startingLocationId;
 
+    // Loaded content (templates)
     private final Map<String, Monster> monsterTemplates;
     private final Map<String, NPC> npcs;
     private final Map<String, Item> items;
     private final Map<String, Weapon> weapons;
     private final Map<String, Armor> armors;
 
+    // Loading state
     private boolean loaded;
     private final List<String> loadErrors;
 
-    /**
-     * Creates a CampaignLoader for the specified campaign directory.
-     */
+
     public CampaignLoader(Path campaignPath) {
         this.yaml = new Yaml();
         this.campaignRoot = campaignPath;
@@ -80,18 +81,10 @@ public class CampaignLoader {
         this.loadErrors = new ArrayList<>();
     }
 
-    /**
-     * Creates a CampaignLoader for a campaign in the default campaigns directory.
-     * 
-     * @param campaignId The campaign identifier (directory name)
-     */
     public CampaignLoader(String campaignId) {
         this(Path.of("campaigns", campaignId));
     }
 
-    /**
-     * Loads all campaign content from YAML files.
-     */
     public boolean load() {
         loadErrors.clear();
         loaded = false;
@@ -101,20 +94,19 @@ public class CampaignLoader {
             return false;
         }
 
-        // Load campaign metadata (required)
         if (!loadCampaignMetadata()) {
             return false;
         }
 
-        // Load optional content files
         loadMonsters();
         loadNPCs();
         loadItems();
 
         loaded = true;
-        return loadErrors.isEmpty();
+        return true; 
     }
 
+    @SuppressWarnings("unchecked")
     private boolean loadCampaignMetadata() {
         Path campaignFile = campaignRoot.resolve(CAMPAIGN_FILE);
         
@@ -145,6 +137,7 @@ public class CampaignLoader {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void loadMonsters() {
         Path monstersFile = campaignRoot.resolve(MONSTERS_FILE);
         
@@ -174,6 +167,7 @@ public class CampaignLoader {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private Monster parseMonster(Map<String, Object> data) {
         String id = getString(data, "id", "unknown_monster");
         String name = getString(data, "name", "Unknown Monster");
@@ -219,6 +213,7 @@ public class CampaignLoader {
         return monster;
     }
 
+    @SuppressWarnings("unchecked")
     private void loadNPCs() {
         Path npcsFile = campaignRoot.resolve(NPCS_FILE);
         
@@ -248,6 +243,7 @@ public class CampaignLoader {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private NPC parseNPC(Map<String, Object> data) {
         String id = getString(data, "id", "unknown_npc");
         String name = getString(data, "name", "Unknown NPC");
@@ -263,7 +259,6 @@ public class CampaignLoader {
         npc.setGreeting(getString(data, "greeting", ""));
         npc.setReturnGreeting(getString(data, "return_greeting", ""));
 
-        // Dialogues
         if (data.containsKey("dialogues")) {
             Map<String, String> dialogueMap = (Map<String, String>) data.get("dialogues");
             for (Map.Entry<String, String> entry : dialogueMap.entrySet()) {
@@ -271,7 +266,6 @@ public class CampaignLoader {
             }
         }
 
-        // Sample lines
         if (data.containsKey("sample_lines")) {
             List<String> lines = (List<String>) data.get("sample_lines");
             for (String line : lines) {
@@ -282,6 +276,7 @@ public class CampaignLoader {
         return npc;
     }
 
+    @SuppressWarnings("unchecked")
     private void loadItems() {
         Path itemsFile = campaignRoot.resolve(ITEMS_FILE);
         
@@ -296,39 +291,43 @@ public class CampaignLoader {
                 return;
             }
 
-            // Load weapons
             if (data.containsKey("weapons")) {
                 List<Map<String, Object>> weaponList = (List<Map<String, Object>>) data.get("weapons");
                 for (Map<String, Object> weaponData : weaponList) {
                     try {
+                        String yamlId = getString(weaponData, "id", null);
                         Weapon weapon = parseWeapon(weaponData);
-                        weapons.put(weapon.getId(), weapon);
+                        // Use YAML id as key if provided, otherwise use generated id
+                        String key = yamlId != null ? yamlId : weapon.getId();
+                        weapons.put(key, weapon);
                     } catch (Exception e) {
                         loadErrors.add("Error parsing weapon: " + e.getMessage());
                     }
                 }
             }
 
-            // Load armor
             if (data.containsKey("armor")) {
                 List<Map<String, Object>> armorList = (List<Map<String, Object>>) data.get("armor");
                 for (Map<String, Object> armorData : armorList) {
                     try {
+                        String yamlId = getString(armorData, "id", null);
                         Armor armor = parseArmor(armorData);
-                        armors.put(armor.getId(), armor);
+                        String key = yamlId != null ? yamlId : armor.getId();
+                        armors.put(key, armor);
                     } catch (Exception e) {
                         loadErrors.add("Error parsing armor: " + e.getMessage());
                     }
                 }
             }
 
-            // Load generic items
             if (data.containsKey("items")) {
                 List<Map<String, Object>> itemList = (List<Map<String, Object>>) data.get("items");
                 for (Map<String, Object> itemData : itemList) {
                     try {
+                        String yamlId = getString(itemData, "id", null);
                         Item item = parseItem(itemData);
-                        items.put(item.getId(), item);
+                        String key = yamlId != null ? yamlId : item.getId();
+                        items.put(key, item);
                     } catch (Exception e) {
                         loadErrors.add("Error parsing item: " + e.getMessage());
                     }
@@ -339,6 +338,7 @@ public class CampaignLoader {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private Weapon parseWeapon(Map<String, Object> data) {
         String name = getString(data, "name", "Unknown Weapon");
         int diceCount = getInt(data, "damage_dice_count", 1);
@@ -363,7 +363,6 @@ public class CampaignLoader {
             weapon = new Weapon(name, diceCount, dieSize, damageType, category, weight, value);
         }
 
-        // Properties
         if (data.containsKey("properties")) {
             List<String> props = (List<String>) data.get("properties");
             for (String prop : props) {
@@ -398,6 +397,7 @@ public class CampaignLoader {
         return weapon;
     }
 
+    @SuppressWarnings("unchecked")
     private Armor parseArmor(Map<String, Object> data) {
         String name = getString(data, "name", "Unknown Armor");
         int baseAC = getInt(data, "base_ac", 10);
@@ -603,9 +603,3 @@ public class CampaignLoader {
         return defaultValue;
     }
 }
-
-
-
-
-
-
