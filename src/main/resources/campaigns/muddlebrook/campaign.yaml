@@ -1,0 +1,33 @@
+# Campaign metadata for Muddlebrook: Harlequin Trials
+# This file is required for campaign loading
+
+id: muddlebrook
+name: "Muddlebrook: Harlequin Trials"
+description: |
+  A comedic mystery adventure set in the quirky town of Muddlebrook.
+  The mayor has vanished, strange clockwork creatures roam the streets,
+  and a theatrical villain known as the Harlequin Machinist pulls strings
+  from the shadows. Navigate puzzle rooms, gather clues, and uncover
+  the truth behind the chaos.
+author: Andrew Mariani
+version: "1.0"
+starting_location: drunken_dragon_inn
+
+# Recommended party size and level
+recommended_level: 3
+recommended_party_size: 4
+
+# Campaign tags for filtering/categorization
+tags:
+  - mystery
+  - comedy
+  - puzzles
+  - clockwork
+  - theatrical
+
+# Special notes for the DM/game engine
+notes: |
+  This campaign features theatrical puzzle rooms called "trials" that
+  test different party abilities. Combat is secondary to investigation
+  and puzzle-solving. The tone should be lighthearted with moments
+  of genuine tension.

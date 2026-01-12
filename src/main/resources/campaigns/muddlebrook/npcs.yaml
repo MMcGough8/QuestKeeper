@@ -1,0 +1,265 @@
+# NPC definitions for Muddlebrook: Harlequin Trials
+
+npcs:
+  # ==========================================
+  # Norrin the Bard - Tavern, rumors, comic relief
+  # ==========================================
+  - id: norrin_bard
+    name: Norrin
+    role: bard
+    voice: "sing-song, theatrical"
+    personality: "friendly, dramatic, never gives full truth directly"
+    description: |
+      A flamboyant half-elf with a lute that's seen better days
+      and a smile that's seen better taverns. His fingers never stop moving,
+      always tapping out some rhythm only he can hear.
+    location_id: drunken_dragon_inn
+    shopkeeper: false
+    
+    greeting: |
+      Ah! New faces—new verses! Come, sit, let old Norrin
+      spin you a tale... or perhaps you have one for me?
+    return_greeting: |
+      My favorite audience returns! What news from
+      the world outside these warm walls?
+    
+    dialogues:
+      mayor: |
+        The mayor? Oh, that's a song still being written,
+        I'm afraid. Verse one: he was here. Verse two: he wasn't.
+        The chorus? Nobody knows it yet.
+      town: |
+        Muddlebrook! Where the mud is deep and the secrets deeper.
+        A fine place to lose yourself... or find trouble.
+      clocktower: |
+        That old tower? It stopped ticking when I was a boy.
+        Some say it's waiting. For what? *strums dramatically* That's the mystery.
+      machinist: |
+        Shh! *looks around* We don't sing that name here.
+        But if I were to hum a tune about masked figures and clockwork...
+        well, that's just a song, isn't it?
+      rumors: |
+        Rumors? I only deal in embarrassing songs, sometimes.
+        But I've heard the town hall has been... peculiar lately.
+        Strange sounds. Stranger visitors.
+      help: |
+        Help? Old Norrin knows many things, friend.
+        Ask me about the town, the mayor, or perhaps...
+        *lowers voice* ...the clocktower.
+    
+    sample_lines:
+      - "Ah! New faces—new verses!"
+      - "I only deal in embarrassing songs, sometimes."
+      - "*strums a chord* That reminds me of a ballad..."
+      - "Every story has three sides: yours, theirs, and the truth."
+
+  # ==========================================
+  # Mara Ember - Bartender, practical info
+  # ==========================================
+  - id: mara_bartender
+    name: Mara Ember
+    role: bartender
+    voice: "confident, no-nonsense"
+    personality: "warm but firm, reads the room, hates drama"
+    description: |
+      A sturdy human woman with calloused hands and sharp eyes
+      that miss nothing. Her apron is spotless despite the tavern's chaos,
+      and she polishes the same glass whether it needs it or not.
+    location_id: drunken_dragon_inn
+    shopkeeper: true
+    
+    greeting: |
+      If you're not buying, make it quick. If you are buying,
+      take a seat and I'll be with you.
+    return_greeting: "Back again? The usual, or something stronger?"
+    
+    dialogues:
+      mayor: |
+        Alderwick's a good man. Was. Is. I don't know anymore.
+        He came in three nights before he vanished. Looked scared.
+        Wouldn't say of what.
+      drinks: |
+        Ale's a copper. Wine's three. Anything fancy,
+        you're in the wrong tavern.
+      menu: |
+        Ale's a copper. Wine's three. Anything fancy,
+        you're in the wrong tavern.
+      rumors: |
+        Rumors are cheap. Facts cost. But I'll tell you this for free:
+        something's wrong in this town. People are nervous. And nervous people drink more,
+        so I shouldn't complain, but...
+      norrin: |
+        The bard? Harmless. Mostly. His songs are better than his secrets,
+        but he hears things. Just don't believe everything he sings.
+      work: |
+        Looking for work? Talk to the guard captain. Or check the notice board
+        in the square. Just... be careful what you sign up for these days.
+      darius: |
+        The hooded one in the corner? Been here a week. Pays in gold,
+        drinks in silence. Not my business what haunts a man.
+    
+    sample_lines:
+      - "If you're not buying, make it quick."
+      - "Rumors are cheap. Facts cost."
+      - "*wipes glass* I see everything. Remember that."
+      - "Don't start trouble in my tavern."
+
+  # ==========================================
+  # Darius - Dark recluse, mentor figure
+  # ==========================================
+  - id: darius_recluse
+    name: Darius
+    role: recluse
+    voice: "low, careful, intense"
+    personality: "speaks like every word has weight, hates the Machinist, respects cleverness"
+    description: |
+      A gaunt man in a hooded cloak, sitting alone in the darkest corner.
+      Scars trace his hands like a map of past mistakes. His eyes are old,
+      older than his face suggests.
+    location_id: drunken_dragon_inn
+    shopkeeper: false
+    
+    greeting: |
+      You have the look of someone who asks questions.
+      I have the look of someone who knows answers.
+      The question is: are you ready for them?
+    return_greeting: |
+      Still alive. Good. That means you're either lucky or clever.
+      I hope it's the latter.
+    
+    dialogues:
+      machinist: |
+        I've seen his work before. Years ago. Different town,
+        same games. He doesn't want to kill you—that's too easy.
+        He wants to *make* you. Into what, I never learned.
+      trials: |
+        His trials can be beaten. I've seen it done.
+        The trick is: never panic. That's what he wants. Stay clever. Stay calm.
+        And never, ever trust the obvious solution.
+      past: |
+        *long pause* I played his games once. I survived.
+        Not everyone did. That's all you need to know.
+      help: |
+        I can point you in the right direction. Elara at Clockwork Curio—
+        she knows things about mechanisms. And there's a back room in her shop...
+        but you didn't hear that from me.
+      mayor: |
+        Alderwick found something he shouldn't have. In the clocktower.
+        He tried to stop it. Now he's gone. Draw your own conclusions.
+      advice: |
+        Three rules: Don't trust the obvious. Don't split up.
+        And when the Machinist offers you a choice... question why those are your only options.
+      clocktower: |
+        That's where it started. Where the mayor found... something.
+        The gears still turn in there, you know. Even though the clock stopped years ago.
+    
+    sample_lines:
+      - "*stares intensely* Choose your next words carefully."
+      - "I've seen this before. It doesn't end well for the unprepared."
+      - "*nods slowly* Clever. You might survive after all."
+      - "Some doors are locked for a reason."
+
+  # ==========================================
+  # Elara - Shopkeeper, hints at secrets
+  # ==========================================
+  - id: elara_shopkeeper
+    name: Elara
+    role: shopkeeper
+    voice: "sharp, amused, confident"
+    personality: "tests customers, bargains hard, hints at hidden stock"
+    description: |
+      A wiry gnome woman with magnifying goggles pushed up on her forehead
+      and grease stains that might be intentional. Her fingers are nimble,
+      always fiddling with some tiny mechanism.
+    location_id: clockwork_curios
+    shopkeeper: true
+    
+    greeting: |
+      Browser or buyer? I don't mind either way, but touch anything
+      with more than three gears and you own it. Shop rules.
+    return_greeting: "Ah, you're back. Broke something already, or looking to upgrade?"
+    
+    dialogues:
+      shop: |
+        Everything here works. Mostly. Some things work in ways
+        you wouldn't expect. That's the fun of it.
+      buy: |
+        Looking to spend coin? Smart. My devices have saved more lives
+        than any sword. Probably. I don't keep count.
+      clocktower: |
+        *pauses* That old thing? Complicated mechanism. Very old.
+        If someone were to... examine it closely... they'd need to know what they're doing.
+        Lucky for you, I sell expertise.
+      machinist: |
+        Heard of him. Professional interest, you understand.
+        His work is... impressive. Terrible, but impressive.
+        Like a beautiful trap that takes your fingers off.
+      backroom: |
+        *glances at curtain* Back room? That's just storage.
+        Unless you're the sort who can appreciate... specialized inventory.
+        Are you that sort?
+      darius: |
+        The scarred one? He's bought from me before. Knows his mechanisms.
+        Whatever he's hunting, it's dangerous. And expensive.
+      upgrade: |
+        Upgrades, eh? Show me what you've got.
+        I might be able to... improve it. For a reasonable fee.
+    
+    sample_lines:
+      - "Browser or buyer?"
+      - "*adjusts goggles* Interesting. Very interesting."
+      - "You break it, you buy it. You buy it, you break it—that's your problem."
+      - "Everything has a price. Not everything has a value."
+
+  # ==========================================
+  # Captain Thorne - Guard captain, questgiver
+  # ==========================================
+  - id: captain_thorne
+    name: Captain Thorne
+    role: guard captain
+    voice: "gruff, tired, duty-bound"
+    personality: "overwhelmed but dedicated, suspicious of outsiders, desperate for help"
+    description: |
+      A weathered human man in dented armor, dark circles under his eyes.
+      His hand never strays far from his sword hilt, a habit born of
+      too many sleepless nights and not enough guards.
+    location_id: town_hall
+    shopkeeper: false
+    
+    greeting: |
+      Adventurers? Wonderful. Just what I need—more variables.
+      *sighs* What do you want? I'm busy keeping this town from falling apart.
+    return_greeting: |
+      You again. Please tell me you have good news.
+      I could really use some good news.
+    
+    dialogues:
+      mayor: |
+        Mayor Alderwick vanished five days ago. His office was locked from the inside.
+        No signs of struggle. No note. Just... gone.
+        I've got three guards and a town full of scared people. Help me.
+      work: |
+        Work? I've got plenty. Strange creatures in the streets.
+        Missing persons. That damned clocktower making noises again.
+        Take your pick. Payment's fair, if the town treasury holds out.
+      guards: |
+        I've got three guards left. The rest quit or... disappeared.
+        Don't look at me like that. I know how it sounds.
+      clocktower: |
+        Off limits. Mayor's orders—before he vanished, anyway.
+        Something's wrong in there. I can hear it at night.
+        Gears turning. In a clock that stopped twenty years ago.
+      machinist: |
+        *lowers voice* We don't say that name publicly.
+        But yes. I think he's back. Or never left.
+        The theatrical murders? The puzzle traps? It's his style.
+      help: |
+        You want to help? Good. Pick a problem: missing mayor,
+        clockwork creatures, or the townspeople who keep vanishing at night.
+        I'll take any progress on any of them.
+    
+    sample_lines:
+      - "*rubs temples* What now?"
+      - "I don't have time for complications."
+      - "If you're here to help, prove it. If not, stay out of my way."
+      - "This town deserves better. I'm trying to give it that."

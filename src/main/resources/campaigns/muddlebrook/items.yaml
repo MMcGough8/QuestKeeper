@@ -1,0 +1,294 @@
+# Item definitions for Muddlebrook: Harlequin Trials
+# Includes weapons, armor, and general items specific to this campaign
+
+weapons:
+  # ==========================================
+  # Campaign-Specific Weapons
+  # ==========================================
+  - id: clockwork_dagger
+    name: Clockwork Dagger
+    description: |
+      A dagger with tiny gears in the hilt that spin when it strikes.
+      The blade seems to find gaps in armor on its own.
+    damage_dice_count: 1
+    damage_die_size: 4
+    damage_type: PIERCING
+    category: SIMPLE_MELEE
+    weight: 1.0
+    value: 50
+    normal_range: 20
+    long_range: 60
+    properties:
+      - FINESSE
+      - LIGHT
+      - THROWN
+    rarity: UNCOMMON
+    # +1 to attack rolls
+    attack_bonus: 1
+
+  - id: razor_cane
+    name: Razor Cane
+    description: |
+      An elegant walking cane that conceals a wickedly sharp blade.
+      Favored by theatrical villains and eccentric nobles alike.
+    damage_dice_count: 1
+    damage_die_size: 6
+    damage_type: SLASHING
+    category: MARTIAL_MELEE
+    weight: 2.0
+    value: 75
+    properties:
+      - FINESSE
+    rarity: UNCOMMON
+
+  - id: gear_flinger
+    name: Gear Flinger
+    description: |
+      A clockwork hand crossbow that fires sharpened gears.
+      Reloads itself through an intricate spring mechanism.
+    damage_dice_count: 1
+    damage_die_size: 6
+    damage_type: PIERCING
+    category: MARTIAL_RANGED
+    weight: 3.0
+    value: 150
+    normal_range: 30
+    long_range: 120
+    properties:
+      - AMMUNITION
+      - LIGHT
+      # No LOADING - self-reloading mechanism
+    rarity: RARE
+
+  - id: performers_rapier
+    name: Performer's Rapier
+    description: |
+      A rapier designed for stage combat that's been sharpened for real use.
+      The ornate basket hilt is decorated with comedy/tragedy masks.
+    damage_dice_count: 1
+    damage_die_size: 8
+    damage_type: PIERCING
+    category: MARTIAL_MELEE
+    weight: 2.0
+    value: 40
+    properties:
+      - FINESSE
+    rarity: COMMON
+
+armor:
+  # ==========================================
+  # Campaign-Specific Armor
+  # ==========================================
+  - id: clockwork_leather
+    name: Clockwork Leather Armor
+    description: |
+      Leather armor reinforced with brass plates and small gears.
+      The mechanisms seem to anticipate incoming blows.
+    base_ac: 12
+    category: LIGHT
+    weight: 12.0
+    value: 200
+    rarity: UNCOMMON
+    # Provides +1 AC beyond normal leather
+    magic_bonus: 1
+
+  - id: performers_costume
+    name: Performer's Costume
+    description: |
+      A theatrical costume with hidden padding and reinforced seams.
+      Looks fancy, provides surprising protection.
+    base_ac: 11
+    category: LIGHT
+    weight: 4.0
+    value: 25
+    rarity: COMMON
+
+  - id: machinists_coat
+    name: Machinist's Reinforced Coat
+    description: |
+      A heavy leather coat lined with thin metal plates.
+      The pockets are full of tools and small gadgets.
+    base_ac: 14
+    category: MEDIUM
+    weight: 20.0
+    value: 350
+    max_dex_bonus: 2
+    rarity: RARE
+
+  - id: brass_buckler
+    name: Brass Buckler
+    description: |
+      A small shield made of polished brass with gear motifs.
+      Light enough to not impede spellcasting.
+    base_ac: 1
+    category: SHIELD
+    weight: 3.0
+    value: 15
+    rarity: COMMON
+
+items:
+  # ==========================================
+  # Quest Items
+  # ==========================================
+  - id: mayors_journal
+    name: Mayor Alderwick's Journal
+    type: QUEST_ITEM
+    description: |
+      A leather-bound journal filled with the mayor's increasingly frantic notes.
+      The last entries mention "the clockwork heart" and "he's watching."
+    weight: 0.5
+    value: 0
+    quest_item: true
+
+  - id: clockwork_key
+    name: Ornate Clockwork Key
+    type: QUEST_ITEM
+    description: |
+      A brass key with intricate gear-shaped teeth. It hums faintly
+      and seems to turn slightly on its own when near certain mechanisms.
+    weight: 0.1
+    value: 0
+    quest_item: true
+
+  - id: harlequin_mask_fragment
+    name: Harlequin Mask Fragment
+    type: QUEST_ITEM
+    description: |
+      A piece of a theatrical mask, painted in black and gold.
+      The paint is still fresh. Evidence of the Machinist's presence.
+    weight: 0.1
+    value: 0
+    quest_item: true
+
+  - id: theater_ticket
+    name: Mysterious Theater Ticket
+    type: QUEST_ITEM
+    description: |
+      A ticket to a show called "The Final Act" at a theater
+      that burned down years ago. The date reads "Tonight."
+    weight: 0
+    value: 0
+    quest_item: true
+
+  # ==========================================
+  # Consumables
+  # ==========================================
+  - id: gear_grease
+    name: Gear Grease
+    type: CONSUMABLE
+    description: |
+      A tin of specialized lubricant. Apply to a clockwork mechanism
+      to silence it for 1 hour or grant advantage on one Thieves' Tools check.
+    weight: 0.5
+    value: 25
+    stackable: true
+    rarity: COMMON
+
+  - id: smoke_pellet
+    name: Smoke Pellet
+    type: CONSUMABLE
+    description: |
+      A small clay ball that creates a 10-foot cloud of smoke when thrown.
+      The cloud lasts for 1 round and heavily obscures the area.
+    weight: 0.1
+    value: 10
+    stackable: true
+    rarity: COMMON
+
+  - id: flash_powder
+    name: Flash Powder
+    type: CONSUMABLE
+    description: |
+      Theatrical powder that creates a blinding flash when ignited.
+      Creatures within 10 feet must DC 12 CON save or be blinded for 1 round.
+    weight: 0.1
+    value: 30
+    stackable: true
+    rarity: UNCOMMON
+
+  - id: healing_tincture
+    name: Mudbrook Healing Tincture
+    type: CONSUMABLE
+    description: |
+      A local remedy made from marsh herbs. Restores 2d4+2 hit points.
+      Tastes terrible but works surprisingly well.
+    weight: 0.5
+    value: 50
+    stackable: true
+    rarity: COMMON
+
+  # ==========================================
+  # Tools & Miscellaneous
+  # ==========================================
+  - id: clockwork_lockpick
+    name: Clockwork Lockpicks
+    type: TOOL
+    description: |
+      A set of lockpicks with self-adjusting tumblers.
+      Grants advantage on one Thieves' Tools check, then needs 1 hour to reset.
+    weight: 1.0
+    value: 100
+    rarity: UNCOMMON
+
+  - id: spyglass_gear
+    name: Gear-Enhanced Spyglass
+    type: TOOL
+    description: |
+      A spyglass with clockwork lenses that auto-focus.
+      Can see clearly up to 1 mile. Tiny gears click as you adjust it.
+    weight: 1.0
+    value: 150
+    rarity: UNCOMMON
+
+  - id: music_box
+    name: Mysterious Music Box
+    type: MISCELLANEOUS
+    description: |
+      A small brass music box that plays a haunting melody.
+      Found in the mayor's office. The tune seems... familiar somehow.
+    weight: 1.0
+    value: 50
+    rarity: UNCOMMON
+
+  - id: confetti_sample
+    name: Confetti Ooze Sample
+    type: MISCELLANEOUS
+    description: |
+      A jar containing a small, inert sample of confetti ooze.
+      Useful for alchemical research or very festive parties.
+    weight: 1.0
+    value: 25
+    rarity: COMMON
+
+  # ==========================================
+  # Treasure
+  # ==========================================
+  - id: brass_pocket_watch
+    name: Brass Pocket Watch
+    type: TREASURE
+    description: |
+      A finely crafted pocket watch that keeps perfect time.
+      The back is engraved with the symbol of the Clockmakers' Guild.
+    weight: 0.2
+    value: 75
+    rarity: UNCOMMON
+
+  - id: theater_mask_gold
+    name: Golden Theater Mask
+    type: TREASURE
+    description: |
+      A decorative mask made of thin gold plate over wood.
+      Depicts a laughing face. Worth a fair sum to collectors.
+    weight: 1.0
+    value: 200
+    rarity: RARE
+
+  - id: clockwork_music_cylinder
+    name: Clockwork Music Cylinder
+    type: TREASURE
+    description: |
+      A brass cylinder with tiny pins that plays music when inserted
+      into a compatible music box. This one plays a waltz.
+    weight: 0.5
+    value: 30
+    rarity: COMMON

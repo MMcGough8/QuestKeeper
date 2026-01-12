@@ -1,0 +1,200 @@
+# Monster definitions for Muddlebrook: Harlequin Trials
+# These are templates - instances are created during gameplay
+
+monsters:
+  # ==========================================
+  # Clockwork Critter - CR 1/4
+  # ==========================================
+  - id: clockwork_critter
+    name: Clockwork Critter
+    size: SMALL
+    type: CONSTRUCT
+    alignment: neutral evil
+    armor_class: 13
+    hit_points: 11
+    speed: 30
+    challenge_rating: 0.25
+    xp: 50
+    attack_bonus: 4
+    damage_dice: "1d6+2"
+    abilities:
+      str: -1
+      dex: 2
+      con: 2
+      int: -4
+      wis: 0
+      cha: -4
+    description: |
+      A skittering mechanical creature with brass gears and glowing eyes.
+      On hit, target must DC 11 DEX save or drop a small item.
+    # Custom properties for special abilities
+    special_abilities:
+      - name: Disarm
+        description: "On hit, target DC 11 DEX save or drops one small held item"
+        save_dc: 11
+        save_ability: DEX
+
+  # ==========================================
+  # Confetti Ooze - CR 1/2
+  # ==========================================
+  - id: confetti_ooze
+    name: Confetti Ooze
+    size: MEDIUM
+    type: OOZE
+    alignment: chaotic neutral
+    armor_class: 8
+    hit_points: 30
+    speed: 20
+    challenge_rating: 0.5
+    xp: 100
+    attack_bonus: 3
+    damage_dice: "1d8+1"
+    abilities:
+      str: 1
+      dex: -2
+      con: 3
+      int: -4
+      wis: 0
+      cha: -4
+    description: |
+      A shimmering blob of animated glitter and confetti.
+      Glitter Burst: When hit by melee, attacker DC 11 CON or blinded 1 round.
+      On death: explodes into confetti, d6: 1-2 causes sneezing fit (disadv next roll).
+    special_abilities:
+      - name: Glitter Burst
+        description: "When hit by melee attack, attacker DC 11 CON or blinded 1 round"
+        trigger: on_melee_hit
+        save_dc: 11
+        save_ability: CON
+      - name: Death Burst
+        description: "On death, explodes. d6 roll 1-2: all within 10ft sneezing (disadv next roll)"
+        trigger: on_death
+        range: 10
+
+  # ==========================================
+  # Harlequin Machinist - CR 7 (Boss)
+  # ==========================================
+  - id: harlequin_machinist
+    name: Harlequin Machinist
+    size: MEDIUM
+    type: HUMANOID
+    alignment: chaotic evil
+    armor_class: 16
+    hit_points: 110
+    speed: 30
+    challenge_rating: 7
+    xp: 2900
+    attack_bonus: 8
+    damage_dice: "1d8+4"
+    abilities:
+      str: 0
+      dex: 4
+      con: 4
+      int: 3
+      wis: 1
+      cha: 4
+    description: |
+      A theatrical villain in a reinforced coat, masked face gleaming.
+      Multiattack (2), Razor Cane (+8, 1d8+4 slash + 1d6 psychic),
+      Clockwork Throw (30/90 ft, marks target for +1d6 on next hit).
+      Show Shield (Recharge 5-6): Reduce damage by 15, teleport 15 ft.
+      Curtain Call (1/day): 20-ft illusion zone, DC 15 WIS or move randomly.
+    is_boss: true
+    legendary_actions: 3
+    special_abilities:
+      - name: Multiattack
+        description: "Makes two Razor Cane attacks"
+      - name: Razor Cane
+        description: "+8 to hit, 1d8+4 slashing + 1d6 psychic damage"
+        attack_bonus: 8
+        damage: "1d8+4"
+        bonus_damage: "1d6"
+        bonus_damage_type: psychic
+      - name: Clockwork Throw
+        description: "Ranged 30/90 ft, marks target for +1d6 damage on next hit"
+        range: 30
+        long_range: 90
+      - name: Show Shield
+        description: "Reduce incoming damage by 15, teleport up to 15 ft"
+        recharge: "5-6"
+      - name: Curtain Call
+        description: "20-ft zone of illusions, DC 15 WIS or move randomly"
+        uses_per_day: 1
+        save_dc: 15
+        save_ability: WIS
+        range: 20
+
+  # ==========================================
+  # Mimic Prop - CR 1/2
+  # ==========================================
+  - id: mimic_prop
+    name: Mimic Prop
+    size: MEDIUM
+    type: MONSTROSITY
+    alignment: neutral
+    armor_class: 12
+    hit_points: 27
+    speed: 15
+    challenge_rating: 0.5
+    xp: 100
+    attack_bonus: 5
+    damage_dice: "1d8+3"
+    abilities:
+      str: 3
+      dex: 1
+      con: 2
+      int: -3
+      wis: 1
+      cha: -1
+    description: |
+      A theatrical prop that's actually a mimic! Could be a fancy chair,
+      a treasure chest, or a decorative suit of armor. Adhesive keeps
+      targets stuck on a failed DC 13 STR check.
+    special_abilities:
+      - name: Adhesive
+        description: "Target hit is adhered. DC 13 STR to escape."
+        save_dc: 13
+        save_ability: STR
+      - name: False Appearance
+        description: "Indistinguishable from ordinary prop while motionless"
+
+  # ==========================================
+  # Animated Costume - CR 1/4
+  # ==========================================
+  - id: animated_costume
+    name: Animated Costume
+    size: MEDIUM
+    type: CONSTRUCT
+    alignment: unaligned
+    armor_class: 11
+    hit_points: 14
+    speed: 30
+    challenge_rating: 0.25
+    xp: 50
+    attack_bonus: 3
+    damage_dice: "1d6+1"
+    abilities:
+      str: 1
+      dex: 1
+      con: 0
+      int: -5
+      wis: -4
+      cha: -5
+    description: |
+      An empty theatrical costume animated by clockwork magic.
+      Floats eerily, attacks with fabric tendrils. Surprisingly
+      flammable (vulnerability to fire damage).
+    vulnerabilities:
+      - fire
+    immunities:
+      - poison
+      - psychic
+    condition_immunities:
+      - blinded
+      - charmed
+      - deafened
+      - exhaustion
+      - frightened
+      - paralyzed
+      - petrified
+      - poisoned
