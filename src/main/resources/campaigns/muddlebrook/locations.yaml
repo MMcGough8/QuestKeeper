@@ -387,3 +387,31 @@ locations:
     flags:
       - hidden
       - magical
+
+  # ==========================================
+  # Harlequin's Lair - Trial #3 Finale
+  # ==========================================
+  - id: harlequin_lair
+    name: The Harlequin's Stage
+    description: |
+      A grand theatrical space hidden beneath the clocktower. Mechanical spotlights
+      illuminate a stage where the Harlequin Machinist performs his final act.
+    read_aloud_text: |
+      A hidden passage opens into a space that defies the cramped reality of the
+      clocktower above. It's a theater—a grand, impossible theater lit by mechanical
+      spotlights that swivel and track on their own. Velvet curtains frame a stage
+      where the Harlequin Machinist stands, arms spread wide in welcome. Behind him,
+      Mayor Alderwick hangs suspended in an elaborate clockwork cage, its gears
+      slowly turning. "Welcome to the finale!" the masked figure announces.
+      "You've played my games beautifully. Now, let's see how the story ends."
+    exits:
+      up: clocktower_mechanism
+    npcs:
+      - mayor_alderwick
+    items:
+      - theater_ticket
+    flags:
+      - trial_location
+      - trial_3
+      - boss_room
+      - locked

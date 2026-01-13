@@ -1,6 +1,6 @@
 package com.questkeeper.state;
 
-import com.questkeeper.campaign.CampaignLoader;
+import com.questkeeper.campaign.Campaign;
 import com.questkeeper.character.Character;
 import com.questkeeper.character.Character.CharacterClass;
 import com.questkeeper.character.Character.Race;
@@ -31,7 +31,7 @@ class GameStateTest {
     Path tempDir;
 
     private Path campaignDir;
-    private CampaignLoader campaign;
+    private Campaign campaign;
     private Character character;
 
     @BeforeEach
@@ -43,8 +43,7 @@ class GameStateTest {
         createCampaignYaml();
         createLocationsYaml();
 
-        campaign = new CampaignLoader(campaignDir);
-        campaign.load();
+        campaign = Campaign.loadFromYaml(campaignDir);
 
         character = new Character("TestHero", Race.HUMAN, CharacterClass.FIGHTER);
     }

@@ -1,6 +1,6 @@
 package com.questkeeper.state;
 
-import com.questkeeper.campaign.CampaignLoader;
+import com.questkeeper.campaign.Campaign;
 import com.questkeeper.character.Character;
 import com.questkeeper.save.SaveState;
 import com.questkeeper.world.Location;
@@ -32,7 +32,7 @@ public class GameState {
 
     private final String stateId;
     private final Character character;
-    private final CampaignLoader campaign;
+    private final Campaign campaign;
 
     private Location currentLocation;
     private final Set<String> visitedLocations;
@@ -49,7 +49,7 @@ public class GameState {
     /**
      * Creates a new GameState for a fresh game.
      */
-    public GameState(Character character, CampaignLoader campaign) {
+    public GameState(Character character, Campaign campaign) {
         this.stateId = UUID.randomUUID().toString();
         this.character = Objects.requireNonNull(character, "Character cannot be null");
         this.campaign = Objects.requireNonNull(campaign, "Campaign cannot be null");
@@ -65,23 +65,27 @@ public class GameState {
         this.previousPlayTimeSeconds = 0;
 
         // Set starting location
-        campaign.getStartingLocation().ifPresent(this::moveToLocation);
+        Location startingLocation = campaign.getStartingLocation();
+        if (startingLocation != null) {
+            moveToLocation(startingLocation);
+        }
     }
 
     /**
      * Creates a GameState from a SaveState (for loading saved games).
      */
-    public static GameState fromSaveState(SaveState saveState, CampaignLoader campaign) {
+    public static GameState fromSaveState(SaveState saveState, Campaign campaign) {
         Character character = saveState.restoreCharacter();
         GameState state = new GameState(character, campaign);
 
         // Restore location
         String locationId = saveState.getCurrentLocationId();
         if (locationId != null) {
-            campaign.getLocation(locationId).ifPresent(loc -> {
+            Location loc = campaign.getLocation(locationId);
+            if (loc != null) {
                 state.currentLocation = loc;
                 state.visitedLocations.add(locationId);
-            });
+            }
         }
 
         // Restore visited locations
@@ -111,7 +115,7 @@ public class GameState {
      * Converts this GameState to a SaveState for persistence.
      */
     public SaveState toSaveState() {
-        SaveState save = new SaveState(character, campaign.getCampaignId());
+        SaveState save = new SaveState(character, campaign.getId());
 
         // Location
         if (currentLocation != null) {
@@ -182,8 +186,11 @@ public class GameState {
             return false;
         }
 
-        Optional<Location> target = campaign.getLocation(targetId);
-        return target.map(this::moveToLocation).orElse(false);
+        Location target = campaign.getLocation(targetId);
+        if (target == null) {
+            return false;
+        }
+        return moveToLocation(target);
     }
 
     public Location getCurrentLocation() {
@@ -394,23 +401,23 @@ public class GameState {
         return character;
     }
 
-    public CampaignLoader getCampaign() {
+    public Campaign getCampaign() {
         return campaign;
     }
 
     public String getCampaignId() {
-        return campaign.getCampaignId();
+        return campaign.getId();
     }
 
     public String getCampaignName() {
-        return campaign.getCampaignName();
+        return campaign.getName();
     }
 
     @Override
     public String toString() {
         return String.format("GameState[%s in %s @ %s, flags=%d, played=%s]",
                 character.getName(),
-                campaign.getCampaignId(),
+                campaign.getId(),
                 currentLocation != null ? currentLocation.getName() : "nowhere",
                 flags.size(),
                 getFormattedPlayTime());

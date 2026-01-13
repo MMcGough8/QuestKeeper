@@ -6,6 +6,7 @@ import com.questkeeper.combat.Monster;
 import com.questkeeper.inventory.Armor;
 import com.questkeeper.inventory.Item;
 import com.questkeeper.inventory.Weapon;
+import com.questkeeper.inventory.items.MagicItem;
 import com.questkeeper.world.Location;
 
 import org.yaml.snakeyaml.Yaml;
@@ -22,10 +23,10 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Loads campaign content from YAML files.
+ * Internal class that loads campaign content from YAML files.
  *
- * Supports loading monsters, NPCs, items, trials, mini-games, and campaign
- * metadata from structured YAML files, enabling campaign-agnostic game content.
+ * This is a package-private implementation detail. External code should use
+ * {@link Campaign#loadFromYaml(String)} to load campaigns.
  *
  * Directory structure expected:
  * campaigns/
@@ -41,7 +42,7 @@ import java.util.Optional;
  * @author Marc McGough
  * @version 1.1
  */
-public class CampaignLoader {
+class CampaignLoader {
 
     private static final String CAMPAIGN_FILE = "campaign.yaml";
     private static final String MONSTERS_FILE = "monsters.yaml";
@@ -347,6 +348,21 @@ public class CampaignLoader {
                         items.put(key, item);
                     } catch (Exception e) {
                         loadErrors.add("Error parsing item: " + e.getMessage());
+                    }
+                }
+            }
+
+            // Load magic items (stored in items map for unified access)
+            if (data.containsKey("magic_items")) {
+                List<Map<String, Object>> magicItemList = (List<Map<String, Object>>) data.get("magic_items");
+                for (Map<String, Object> magicItemData : magicItemList) {
+                    try {
+                        String yamlId = getString(magicItemData, "id", null);
+                        Item magicItem = parseMagicItem(magicItemData);
+                        String key = yamlId != null ? yamlId : magicItem.getId();
+                        items.put(key, magicItem);
+                    } catch (Exception e) {
+                        loadErrors.add("Error parsing magic item: " + e.getMessage());
                     }
                 }
             }
@@ -694,10 +710,10 @@ public class CampaignLoader {
 
     private Item parseItem(Map<String, Object> data) {
         String name = getString(data, "name", "Unknown Item");
-        
+
         String typeStr = getString(data, "type", "MISCELLANEOUS");
         Item.ItemType type = Item.ItemType.valueOf(typeStr.toUpperCase());
-        
+
         String description = getString(data, "description", "");
         double weight = getDouble(data, "weight", 0);
         int value = getInt(data, "value", 0);
@@ -715,6 +731,40 @@ public class CampaignLoader {
         item.setQuestItem(getBoolean(data, "quest_item", false));
 
         return item;
+    }
+
+    private Item parseMagicItem(Map<String, Object> data) {
+        String name = getString(data, "name", "Unknown Magic Item");
+        String description = getString(data, "description", "");
+        double weight = getDouble(data, "weight", 0);
+        int value = getInt(data, "value", 0);
+
+        String rarityStr = getString(data, "rarity", "UNCOMMON");
+        Item.Rarity rarity;
+        try {
+            rarity = Item.Rarity.valueOf(rarityStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            loadErrors.add("Invalid rarity '" + rarityStr + "' for magic item " + name);
+            rarity = Item.Rarity.UNCOMMON;
+        }
+
+        MagicItem magicItem = new MagicItem(name, description, weight, value, rarity);
+
+        // Set attunement requirements
+        if (getBoolean(data, "requires_attunement", false)) {
+            magicItem.setRequiresAttunement(true);
+            String attunementReq = getString(data, "attunement_requirements", null);
+            if (attunementReq != null) {
+                magicItem.setAttunementRequirement(attunementReq);
+            }
+        }
+
+        // Mark as consumable if specified
+        if (getBoolean(data, "consumable", false)) {
+            magicItem.setStackable(true);
+        }
+
+        return magicItem;
     }
 
     public Optional<Monster> createMonster(String templateId, String instanceId) {
