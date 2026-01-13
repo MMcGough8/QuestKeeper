@@ -3,6 +3,9 @@ package com.questkeeper.combat;
 import com.questkeeper.character.Character;
 import com.questkeeper.character.Character.Ability;
 import com.questkeeper.core.Dice;
+import com.questkeeper.inventory.Inventory;
+import com.questkeeper.inventory.Item;
+import com.questkeeper.inventory.Weapon;
 import com.questkeeper.state.GameState;
 
 import java.util.ArrayList;
@@ -30,6 +33,7 @@ public class CombatSystem {
     private List<Combatant> initiative;
     private Map<Combatant, Integer> initiativeRolls;
     private Map<Combatant, Combatant> lastAttacker;  // Tracks who hit each combatant last
+    private List<Item> droppedItems;  // Items dropped during combat (e.g., from Disarm)
     private int currentTurn;
     private GameState currentState;
     private boolean inCombat;
@@ -40,6 +44,7 @@ public class CombatSystem {
         this.initiative = new ArrayList<>();
         this.initiativeRolls = new HashMap<>();
         this.lastAttacker = new HashMap<>();
+        this.droppedItems = new ArrayList<>();
         this.currentTurn = 0;
         this.currentState = null;
         this.inCombat = false;
@@ -67,6 +72,7 @@ public class CombatSystem {
         this.initiative = new ArrayList<>();
         this.initiativeRolls = new HashMap<>();
         this.lastAttacker = new HashMap<>();
+        this.droppedItems = new ArrayList<>();
         this.currentTurn = 0;
         this.playerFled = false;
 
@@ -246,14 +252,40 @@ public class CombatSystem {
      * Selects target based on aggro and behavior.
      */
     private Combatant selectTarget(Monster monster) {
-        // Check if someone hit this monster - target them first
+        // Check if someone hit this monster - target them first (aggro)
         Combatant attacker = lastAttacker.get(monster);
         if (attacker != null && attacker.isAlive()) {
             return attacker;
         }
 
+        // Tactical behavior: target lowest HP enemy
+        if (monster.getBehavior() == Monster.Behavior.TACTICAL) {
+            Combatant lowestHpTarget = findLowestHpTarget();
+            if (lowestHpTarget != null) {
+                return lowestHpTarget;
+            }
+        }
+
         // Default: attack the player
         return getPlayer();
+    }
+
+    /**
+     * Finds the living non-monster combatant with the lowest HP.
+     */
+    private Combatant findLowestHpTarget() {
+        Combatant lowestHpTarget = null;
+        int lowestHp = Integer.MAX_VALUE;
+
+        for (Combatant c : participants) {
+            if (!(c instanceof Monster) && c.isAlive()) {
+                if (c.getCurrentHitPoints() < lowestHp) {
+                    lowestHp = c.getCurrentHitPoints();
+                    lowestHpTarget = c;
+                }
+            }
+        }
+        return lowestHpTarget;
     }
 
     /**
@@ -309,7 +341,10 @@ public class CombatSystem {
                 // Track aggro - target remembers who hit them
                 lastAttacker.put(target, attacker);
 
-                return CombatResult.attackHit(attacker, target, attackRoll, targetAC, damage);
+                // Check for special ability on hit
+                String specialEffect = processSpecialAbilityOnHit(monster, target);
+
+                return CombatResult.attackHit(attacker, target, attackRoll, targetAC, damage, specialEffect);
             } else {
                 return CombatResult.attackMiss(attacker, target, attackRoll, targetAC);
             }
@@ -431,6 +466,38 @@ public class CombatSystem {
         return lastAttacker.get(target);
     }
 
+    /**
+     * Gets items dropped during combat (e.g., from Disarm ability).
+     */
+    public List<Item> getDroppedItems() {
+        return new ArrayList<>(droppedItems);
+    }
+
+    /**
+     * Checks if there are any dropped items in combat.
+     */
+    public boolean hasDroppedItems() {
+        return !droppedItems.isEmpty();
+    }
+
+    /**
+     * Allows a combatant to pick up a dropped item during combat.
+     * Returns true if successful.
+     */
+    public boolean pickUpDroppedItem(Combatant combatant, Item item) {
+        if (!droppedItems.contains(item)) {
+            return false;
+        }
+
+        if (combatant instanceof Character character) {
+            if (character.getInventory().addItem(item)) {
+                droppedItems.remove(item);
+                return true;
+            }
+        }
+        return false;
+    }
+
     // ==========================================
     // Private Helpers
     // ==========================================
@@ -487,10 +554,16 @@ public class CombatSystem {
             int xp = calculateXpReward();
             inCombat = false;
 
-            // Award XP to player
+            // Award XP to player and return dropped items
             Combatant player = getPlayer();
             if (player instanceof Character character) {
                 character.addExperience(xp);
+
+                // Return any dropped items to player's inventory
+                for (Item item : droppedItems) {
+                    character.getInventory().addItem(item);
+                }
+                droppedItems.clear();
             }
 
             return CombatResult.victory(xp);
@@ -563,12 +636,31 @@ public class CombatSystem {
     }
 
     /**
-     * Handles flee action.
+     * Handles flee action with opportunity attacks.
      */
     private CombatResult handleFlee() {
         Character player = (Character) getPlayer();
         if (player == null) {
             return CombatResult.error("No player to flee.");
+        }
+
+        StringBuilder fleeMessage = new StringBuilder();
+
+        // Opportunity attacks from all living enemies
+        List<Combatant> enemies = getLivingEnemies();
+        for (Combatant enemy : enemies) {
+            if (enemy instanceof Monster monster) {
+                CombatResult oppAttack = processOpportunityAttack(monster, player);
+                if (oppAttack != null) {
+                    fleeMessage.append(oppAttack.getMessage()).append("\n");
+                }
+
+                // Check if player died from opportunity attack
+                if (!player.isAlive()) {
+                    inCombat = false;
+                    return CombatResult.playerDefeated(player);
+                }
+            }
         }
 
         // Flee check: DEX check vs DC 10
@@ -578,11 +670,28 @@ public class CombatSystem {
         if (success) {
             playerFled = true;
             inCombat = false;
-            return CombatResult.fled();
+            fleeMessage.append("You fled from combat!");
+            return CombatResult.fled(fleeMessage.toString().trim());
         } else {
             advanceTurn();
-            return CombatResult.error(
-                String.format("Failed to flee! [DEX check vs DC %d]", FLEE_DC));
+            fleeMessage.append(String.format("Failed to flee! [DEX check vs DC %d]", FLEE_DC));
+            return CombatResult.error(fleeMessage.toString().trim());
+        }
+    }
+
+    /**
+     * Processes an opportunity attack (triggered by fleeing).
+     */
+    private CombatResult processOpportunityAttack(Monster monster, Combatant target) {
+        int attackRoll = monster.rollAttack();
+        int targetAC = target.getArmorClass();
+
+        if (attackRoll >= targetAC) {
+            int damage = monster.rollDamage();
+            target.takeDamage(damage);
+            return CombatResult.opportunityAttack(monster, target, attackRoll, targetAC, damage);
+        } else {
+            return CombatResult.opportunityAttackMiss(monster, target, attackRoll, targetAC);
         }
     }
 
@@ -609,5 +718,99 @@ public class CombatSystem {
             names.add(c.getName());
         }
         return String.join(", ", names);
+    }
+
+    // ==========================================
+    // Special Ability Handling
+    // ==========================================
+
+    /**
+     * Processes special ability effects when a monster hits a target.
+     * Returns a description of the effect, or null if no ability triggers.
+     */
+    private String processSpecialAbilityOnHit(Monster monster, Combatant target) {
+        if (!monster.hasSpecialAbility()) {
+            return null;
+        }
+
+        String ability = monster.getSpecialAbility().toLowerCase();
+
+        // Disarm ability (Clockwork Critter)
+        if (ability.contains("disarm")) {
+            return processDisarmAbility(monster, target);
+        }
+
+        // Adhesive ability (Mimic Prop)
+        if (ability.contains("adhesive")) {
+            return processAdhesiveAbility(monster, target);
+        }
+
+        // Generic special ability - just mention it triggered
+        if (monster.getBehavior() == Monster.Behavior.TACTICAL) {
+            return String.format("[%s triggered!]", monster.getSpecialAbility());
+        }
+
+        return null;
+    }
+
+    /**
+     * Processes the Disarm ability - target must make DEX save or drop their weapon.
+     */
+    private String processDisarmAbility(Monster monster, Combatant target) {
+        int dc = 11;  // Default DC for Disarm
+        int dexMod = 0;
+
+        if (target instanceof Character character) {
+            dexMod = character.getAbilityModifier(Ability.DEXTERITY);
+        }
+
+        boolean saved = Dice.checkAgainstDC(dexMod, dc);
+
+        if (saved) {
+            return String.format("[Disarm: DEX save DC %d - SAVED!]", dc);
+        } else {
+            // Actually drop the weapon from inventory
+            if (target instanceof Character character) {
+                Inventory inventory = character.getInventory();
+                Weapon weapon = inventory.getEquippedWeapon();
+
+                if (weapon != null) {
+                    // Unequip the weapon (puts it in inventory)
+                    inventory.unequip(Inventory.EquipmentSlot.MAIN_HAND);
+                    // Remove from inventory and add to dropped items
+                    inventory.removeItem(weapon);
+                    droppedItems.add(weapon);
+
+                    return String.format("[Disarm: DEX save DC %d - FAILED! %s drops %s!]",
+                        dc, target.getName(), weapon.getName());
+                } else {
+                    return String.format("[Disarm: DEX save DC %d - FAILED! (no weapon equipped)]", dc);
+                }
+            }
+            return String.format("[Disarm: DEX save DC %d - FAILED! %s drops a held item!]",
+                dc, target.getName());
+        }
+    }
+
+    /**
+     * Processes the Adhesive ability - target is stuck unless they pass STR save.
+     */
+    private String processAdhesiveAbility(Monster monster, Combatant target) {
+        int dc = 13;  // Default DC for Adhesive
+        int strMod = 0;
+
+        if (target instanceof Character character) {
+            strMod = character.getAbilityModifier(Ability.STRENGTH);
+        }
+
+        boolean saved = Dice.checkAgainstDC(strMod, dc);
+
+        if (saved) {
+            return String.format("[Adhesive: STR save DC %d - SAVED!]", dc);
+        } else {
+            // TODO: Apply restrained condition when status effects are implemented
+            return String.format("[Adhesive: STR save DC %d - FAILED! %s is stuck!]",
+                dc, target.getName());
+        }
     }
 }

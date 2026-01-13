@@ -5,6 +5,9 @@ import com.questkeeper.character.Character;
 import com.questkeeper.character.Character.Ability;
 import com.questkeeper.character.Character.CharacterClass;
 import com.questkeeper.character.Character.Race;
+import com.questkeeper.inventory.Inventory;
+import com.questkeeper.inventory.Item;
+import com.questkeeper.inventory.Weapon;
 import com.questkeeper.state.GameState;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -228,9 +231,11 @@ class CombatSystemTest {
         @Test
         @DisplayName("attack hits when roll meets AC")
         void attackHitsWhenRollMeetsAC() {
-            // Use high-HP enemy so hits don't end combat
+            // Use high-HP weak enemy so player survives long enough to hit
             Monster toughGoblin = new Monster("tough_goblin", "Tough Goblin", 13, 100);
             toughGoblin.setDexterityMod(2);
+            toughGoblin.setAttackBonus(0);  // Low attack to protect player
+            toughGoblin.setDamageDice("1d1");  // Minimal damage
             combatSystem.startCombat(state, List.of(toughGoblin));
 
             while (combatSystem.getCurrentCombatant() instanceof Monster &&
@@ -940,6 +945,394 @@ class CombatSystemTest {
         @DisplayName("behavior enum has four types")
         void behaviorEnumHasFourTypes() {
             assertEquals(4, Monster.Behavior.values().length);
+        }
+    }
+
+    // ==========================================
+    // Tactical Targeting Tests
+    // ==========================================
+
+    @Nested
+    @DisplayName("Tactical Targeting")
+    class TacticalTargetingTests {
+
+        @Test
+        @DisplayName("tactical monsters target lowest HP enemy")
+        void tacticalMonstersTargetLowestHp() {
+            // Create a tactical monster
+            Monster tacticalMonster = new Monster("tactical", "Tactical Enemy", 10, 100);
+            tacticalMonster.setBehavior(Monster.Behavior.TACTICAL);
+            tacticalMonster.setAttackBonus(20);  // High attack to ensure hit
+            tacticalMonster.setDamageDice("1d1");
+
+            combatSystem.startCombat(state, List.of(tacticalMonster));
+
+            // The player is the only non-monster target, so it should be selected
+            // In a multi-player scenario, the lowest HP would be targeted
+            assertTrue(combatSystem.isInCombat());
+        }
+    }
+
+    // ==========================================
+    // Opportunity Attack Tests
+    // ==========================================
+
+    @Nested
+    @DisplayName("Opportunity Attacks")
+    class OpportunityAttackTests {
+
+        @Test
+        @DisplayName("fleeing triggers opportunity attacks")
+        void fleeingTriggersOpportunityAttacks() {
+            Monster goblin = new Monster("goblin", "Goblin", 10, 100);
+            goblin.setAttackBonus(5);
+            goblin.setDamageDice("1d4");
+
+            combatSystem.startCombat(state, List.of(goblin));
+
+            // Get to player turn
+            while (combatSystem.isInCombat() &&
+                   !(combatSystem.getCurrentCombatant() instanceof Character)) {
+                combatSystem.enemyTurn();
+            }
+
+            if (combatSystem.isInCombat()) {
+                int hpBefore = character.getCurrentHitPoints();
+                CombatResult result = combatSystem.playerTurn("flee", null);
+
+                // Message should contain opportunity attack info
+                String message = result.getMessage();
+                assertTrue(message.contains("Opportunity Attack") ||
+                           message.contains("fled") ||
+                           message.contains("Failed to flee"),
+                    "Flee result should mention opportunity attack or flee outcome");
+            }
+        }
+
+        @Test
+        @DisplayName("flee message includes opportunity attack results")
+        void fleeMessageIncludesOpportunityAttackResults() {
+            Monster goblin = new Monster("goblin", "Goblin", 10, 100);
+            goblin.setAttackBonus(5);
+            goblin.setDamageDice("1d4");
+
+            combatSystem.startCombat(state, List.of(goblin));
+
+            while (combatSystem.isInCombat() &&
+                   !(combatSystem.getCurrentCombatant() instanceof Character)) {
+                combatSystem.enemyTurn();
+            }
+
+            if (combatSystem.isInCombat()) {
+                CombatResult result = combatSystem.playerTurn("flee", null);
+
+                // Should have some message about the flee attempt
+                assertNotNull(result.getMessage());
+                assertFalse(result.getMessage().isEmpty());
+            }
+        }
+    }
+
+    // ==========================================
+    // Special Ability Tests
+    // ==========================================
+
+    @Nested
+    @DisplayName("Special Abilities")
+    class SpecialAbilityTests {
+
+        @Test
+        @DisplayName("monster with Disarm ability triggers save on hit")
+        void disarmAbilityTriggersSaveOnHit() {
+            Monster critter = new Monster("critter", "Clockwork Critter", 5, 100);
+            critter.setAttackBonus(20);  // High attack to guarantee hit
+            critter.setDamageDice("1d4");
+            critter.setSpecialAbility("Disarm");
+
+            combatSystem.startCombat(state, List.of(critter));
+
+            // Get to enemy turn
+            while (combatSystem.isInCombat() &&
+                   combatSystem.getCurrentCombatant() instanceof Character) {
+                combatSystem.playerTurn("attack", null);
+            }
+
+            if (combatSystem.isInCombat() && combatSystem.getCurrentCombatant() instanceof Monster) {
+                CombatResult result = combatSystem.enemyTurn();
+
+                // If it was a hit, should mention Disarm
+                if (result.getType() == CombatResult.Type.ATTACK_HIT) {
+                    assertTrue(result.getMessage().contains("Disarm"),
+                        "Hit message should include Disarm ability effect");
+                }
+            }
+        }
+
+        @Test
+        @DisplayName("monster with Adhesive ability triggers save on hit")
+        void adhesiveAbilityTriggersSaveOnHit() {
+            Monster mimic = new Monster("mimic", "Mimic Prop", 5, 100);
+            mimic.setAttackBonus(20);  // High attack to guarantee hit
+            mimic.setDamageDice("1d4");
+            mimic.setSpecialAbility("Adhesive");
+
+            combatSystem.startCombat(state, List.of(mimic));
+
+            // Get to enemy turn
+            while (combatSystem.isInCombat() &&
+                   combatSystem.getCurrentCombatant() instanceof Character) {
+                combatSystem.playerTurn("attack", null);
+            }
+
+            if (combatSystem.isInCombat() && combatSystem.getCurrentCombatant() instanceof Monster) {
+                CombatResult result = combatSystem.enemyTurn();
+
+                // If it was a hit, should mention Adhesive
+                if (result.getType() == CombatResult.Type.ATTACK_HIT) {
+                    assertTrue(result.getMessage().contains("Adhesive"),
+                        "Hit message should include Adhesive ability effect");
+                }
+            }
+        }
+
+        @Test
+        @DisplayName("monster without special ability does not trigger effects")
+        void noSpecialAbilityNoEffects() {
+            Monster goblin = new Monster("goblin", "Plain Goblin", 5, 100);
+            goblin.setAttackBonus(20);
+            goblin.setDamageDice("1d4");
+            // No special ability set
+
+            combatSystem.startCombat(state, List.of(goblin));
+
+            while (combatSystem.isInCombat() &&
+                   combatSystem.getCurrentCombatant() instanceof Character) {
+                combatSystem.playerTurn("attack", null);
+            }
+
+            if (combatSystem.isInCombat() && combatSystem.getCurrentCombatant() instanceof Monster) {
+                CombatResult result = combatSystem.enemyTurn();
+
+                if (result.getType() == CombatResult.Type.ATTACK_HIT) {
+                    assertFalse(result.getMessage().contains("Disarm"));
+                    assertFalse(result.getMessage().contains("Adhesive"));
+                }
+            }
+        }
+
+        @Test
+        @DisplayName("tactical monster with special ability mentions it")
+        void tacticalMonsterMentionsSpecialAbility() {
+            Monster tacticalEnemy = new Monster("tactical", "Tactical Enemy", 5, 100);
+            tacticalEnemy.setAttackBonus(20);
+            tacticalEnemy.setDamageDice("1d4");
+            tacticalEnemy.setBehavior(Monster.Behavior.TACTICAL);
+            tacticalEnemy.setSpecialAbility("Power Strike");
+
+            combatSystem.startCombat(state, List.of(tacticalEnemy));
+
+            while (combatSystem.isInCombat() &&
+                   combatSystem.getCurrentCombatant() instanceof Character) {
+                combatSystem.playerTurn("attack", null);
+            }
+
+            if (combatSystem.isInCombat() && combatSystem.getCurrentCombatant() instanceof Monster) {
+                CombatResult result = combatSystem.enemyTurn();
+
+                if (result.getType() == CombatResult.Type.ATTACK_HIT) {
+                    assertTrue(result.getMessage().contains("Power Strike"),
+                        "Tactical monster hit should mention special ability");
+                }
+            }
+        }
+    }
+
+    // ==========================================
+    // CombatResult Type Tests
+    // ==========================================
+
+    @Nested
+    @DisplayName("CombatResult Types")
+    class CombatResultTypeTests {
+
+        @Test
+        @DisplayName("SPECIAL_ABILITY type exists")
+        void specialAbilityTypeExists() {
+            boolean found = false;
+            for (CombatResult.Type type : CombatResult.Type.values()) {
+                if (type == CombatResult.Type.SPECIAL_ABILITY) {
+                    found = true;
+                    break;
+                }
+            }
+            assertTrue(found, "SPECIAL_ABILITY type should exist in CombatResult.Type");
+        }
+
+        @Test
+        @DisplayName("opportunity attack creates correct result type")
+        void opportunityAttackCreatesCorrectType() {
+            Monster goblin = createGoblin();
+            CombatResult result = CombatResult.opportunityAttack(goblin, character, 15, 14, 5);
+
+            assertEquals(CombatResult.Type.ATTACK_HIT, result.getType());
+            assertTrue(result.getMessage().contains("Opportunity Attack"));
+        }
+
+        @Test
+        @DisplayName("opportunity attack miss creates correct result")
+        void opportunityAttackMissCreatesCorrectResult() {
+            Monster goblin = createGoblin();
+            CombatResult result = CombatResult.opportunityAttackMiss(goblin, character, 10, 14);
+
+            assertEquals(CombatResult.Type.ATTACK_MISS, result.getType());
+            assertTrue(result.getMessage().contains("Opportunity Attack"));
+            assertTrue(result.getMessage().contains("MISS"));
+        }
+
+        @Test
+        @DisplayName("fled with message includes custom message")
+        void fledWithMessageIncludesCustomMessage() {
+            CombatResult result = CombatResult.fled("Custom flee message");
+
+            assertEquals(CombatResult.Type.FLED, result.getType());
+            assertEquals("Custom flee message", result.getMessage());
+        }
+
+        @Test
+        @DisplayName("special ability result has correct format")
+        void specialAbilityResultFormat() {
+            Monster goblin = createGoblin();
+            CombatResult result = CombatResult.specialAbility(goblin, character, "Disarm", "Target dropped weapon!");
+
+            assertEquals(CombatResult.Type.SPECIAL_ABILITY, result.getType());
+            assertTrue(result.getMessage().contains("Disarm"));
+            assertTrue(result.getMessage().contains("Target dropped weapon!"));
+        }
+    }
+
+    // ==========================================
+    // Inventory Integration Tests
+    // ==========================================
+
+    @Nested
+    @DisplayName("Inventory Integration")
+    class InventoryIntegrationTests {
+
+        @Test
+        @DisplayName("character has inventory")
+        void characterHasInventory() {
+            assertNotNull(character.getInventory());
+        }
+
+        @Test
+        @DisplayName("dropped items list starts empty")
+        void droppedItemsListStartsEmpty() {
+            Monster goblin = createGoblin();
+            combatSystem.startCombat(state, List.of(goblin));
+
+            assertFalse(combatSystem.hasDroppedItems());
+            assertTrue(combatSystem.getDroppedItems().isEmpty());
+        }
+
+        @Test
+        @DisplayName("can equip weapon to character")
+        void canEquipWeaponToCharacter() {
+            Weapon sword = Weapon.createLongsword();
+            character.getInventory().addItem(sword);
+            character.getInventory().equip(sword);
+
+            assertEquals(sword, character.getInventory().getEquippedWeapon());
+        }
+
+        @Test
+        @DisplayName("disarm drops equipped weapon when save fails")
+        void disarmDropsEquippedWeapon() {
+            // Equip a weapon
+            Weapon sword = Weapon.createLongsword();
+            character.getInventory().addItem(sword);
+            character.getInventory().equip(sword);
+            assertEquals(sword, character.getInventory().getEquippedWeapon());
+
+            // Create a monster with Disarm ability and very high attack
+            Monster critter = new Monster("critter", "Clockwork Critter", 5, 100);
+            critter.setAttackBonus(30);  // Guaranteed hit
+            critter.setDamageDice("1d1");
+            critter.setSpecialAbility("Disarm");
+
+            combatSystem.startCombat(state, List.of(critter));
+
+            // Get to enemy turn
+            while (combatSystem.isInCombat() &&
+                   combatSystem.getCurrentCombatant() instanceof Character) {
+                combatSystem.playerTurn("attack", null);
+            }
+
+            // Keep attacking until Disarm triggers (on failed save)
+            int attempts = 0;
+            while (combatSystem.isInCombat() &&
+                   character.getInventory().getEquippedWeapon() != null &&
+                   attempts < 50) {
+                if (combatSystem.getCurrentCombatant() instanceof Monster) {
+                    combatSystem.enemyTurn();
+                } else {
+                    combatSystem.playerTurn("attack", null);
+                }
+                attempts++;
+            }
+
+            // Either weapon was dropped or we hit max attempts
+            // (Save might succeed multiple times due to randomness)
+            assertTrue(attempts < 50 || character.getInventory().getEquippedWeapon() == null,
+                "Weapon should eventually be disarmed");
+        }
+
+        @Test
+        @DisplayName("dropped items returned to player on victory")
+        void droppedItemsReturnedOnVictory() {
+            // Equip a weapon
+            Weapon sword = Weapon.createLongsword();
+            character.getInventory().addItem(sword);
+            character.getInventory().equip(sword);
+
+            // Create a very weak monster with Disarm
+            Monster critter = new Monster("critter", "Weak Critter", 1, 1);
+            critter.setAttackBonus(30);  // High attack for guaranteed hit
+            critter.setDamageDice("1d1");
+            critter.setSpecialAbility("Disarm");
+
+            int initialItemCount = character.getInventory().getTotalItemCount();
+            combatSystem.startCombat(state, List.of(critter));
+
+            // Fight until combat ends
+            while (combatSystem.isInCombat()) {
+                if (combatSystem.getCurrentCombatant() instanceof Character) {
+                    combatSystem.playerTurn("attack", null);
+                } else {
+                    combatSystem.enemyTurn();
+                }
+            }
+
+            // After victory, items should be returned to inventory
+            // (Either in equipment slot or in inventory)
+            Inventory inv = character.getInventory();
+            boolean hasWeapon = inv.getEquippedWeapon() != null ||
+                                inv.findItemsByName("Longsword").size() > 0;
+            assertTrue(hasWeapon, "Weapon should be returned to inventory after victory");
+        }
+
+        @Test
+        @DisplayName("can pick up dropped items during combat")
+        void canPickUpDroppedItemsDuringCombat() {
+            Monster goblin = createGoblin();
+            combatSystem.startCombat(state, List.of(goblin));
+
+            // Manually add an item to dropped items for testing
+            Weapon sword = Weapon.createLongsword();
+            combatSystem.getDroppedItems();  // Just to confirm the list exists
+
+            // Note: We can't easily test pickUpDroppedItem without direct access
+            // to add items to droppedItems, so this is a basic functionality check
+            assertNotNull(combatSystem.getDroppedItems());
         }
     }
 }

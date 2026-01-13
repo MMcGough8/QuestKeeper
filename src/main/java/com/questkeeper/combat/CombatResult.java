@@ -19,6 +19,7 @@ public class CombatResult {
         TURN_START,       // A combatant's turn begins
         ATTACK_HIT,       // Attack landed
         ATTACK_MISS,      // Attack missed
+        SPECIAL_ABILITY,  // Special ability triggered
         ENEMY_DEFEATED,   // Enemy HP <= 0
         PLAYER_DEFEATED,  // Player HP <= 0
         VICTORY,          // All enemies defeated
@@ -77,10 +78,25 @@ public class CombatResult {
      */
     public static CombatResult attackHit(Combatant attacker, Combatant defender,
                                          int attackRoll, int targetAC, int damage) {
-        String message = String.format("%s attacks %s! [Roll: %d vs AC %d] HIT! [Damage: %d] %s",
+        return attackHit(attacker, defender, attackRoll, targetAC, damage, null);
+    }
+
+    /**
+     * Creates an attack hit result with full roll details and optional special effect.
+     */
+    public static CombatResult attackHit(Combatant attacker, Combatant defender,
+                                         int attackRoll, int targetAC, int damage,
+                                         String specialEffect) {
+        StringBuilder message = new StringBuilder();
+        message.append(String.format("%s attacks %s! [Roll: %d vs AC %d] HIT! [Damage: %d] %s",
             attacker.getName(), defender.getName(), attackRoll, targetAC, damage,
-            defender.getCombatStatus());
-        return new CombatResult(Type.ATTACK_HIT, message, attacker, defender,
+            defender.getCombatStatus()));
+
+        if (specialEffect != null && !specialEffect.isEmpty()) {
+            message.append(" ").append(specialEffect);
+        }
+
+        return new CombatResult(Type.ATTACK_HIT, message.toString(), attacker, defender,
             attackRoll, targetAC, damage, 0, null);
     }
 
@@ -127,6 +143,56 @@ public class CombatResult {
      */
     public static CombatResult fled() {
         return new CombatResult(Type.FLED, "You fled from combat!", null, null,
+            0, 0, 0, 0, null);
+    }
+
+    /**
+     * Creates a fled result with custom message (includes opportunity attacks).
+     */
+    public static CombatResult fled(String message) {
+        return new CombatResult(Type.FLED, message, null, null,
+            0, 0, 0, 0, null);
+    }
+
+    /**
+     * Creates an opportunity attack hit result.
+     */
+    public static CombatResult opportunityAttack(Combatant attacker, Combatant defender,
+                                                  int attackRoll, int targetAC, int damage) {
+        String message = String.format("Opportunity Attack! %s strikes %s! [Roll: %d vs AC %d] HIT! [Damage: %d]",
+            attacker.getName(), defender.getName(), attackRoll, targetAC, damage);
+        return new CombatResult(Type.ATTACK_HIT, message, attacker, defender,
+            attackRoll, targetAC, damage, 0, null);
+    }
+
+    /**
+     * Creates an opportunity attack miss result.
+     */
+    public static CombatResult opportunityAttackMiss(Combatant attacker, Combatant defender,
+                                                      int attackRoll, int targetAC) {
+        String message = String.format("Opportunity Attack! %s strikes at %s! [Roll: %d vs AC %d] MISS!",
+            attacker.getName(), defender.getName(), attackRoll, targetAC);
+        return new CombatResult(Type.ATTACK_MISS, message, attacker, defender,
+            attackRoll, targetAC, 0, 0, null);
+    }
+
+    /**
+     * Creates a special ability triggered result.
+     */
+    public static CombatResult specialAbility(Combatant user, Combatant target,
+                                               String abilityName, String effect) {
+        String message = String.format("%s uses %s on %s! %s",
+            user.getName(), abilityName, target.getName(), effect);
+        return new CombatResult(Type.SPECIAL_ABILITY, message, user, target,
+            0, 0, 0, 0, null);
+    }
+
+    /**
+     * Creates a special ability triggered result (no target).
+     */
+    public static CombatResult specialAbility(Combatant user, String abilityName, String effect) {
+        String message = String.format("%s uses %s! %s", user.getName(), abilityName, effect);
+        return new CombatResult(Type.SPECIAL_ABILITY, message, user, null,
             0, 0, 0, 0, null);
     }
 

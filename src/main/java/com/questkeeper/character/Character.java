@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.questkeeper.combat.Combatant;
 import com.questkeeper.core.Dice;
+import com.questkeeper.inventory.Inventory;
 
 /**
  * Represents a player character in the game.
@@ -207,6 +208,8 @@ public class Character implements Combatant {
     private int armorBonus;
     private int shieldBonus;
 
+    private final Inventory inventory;
+
     public Character(String name, Race race, CharacterClass characterClass) {
         this.name = name;
         this.race = race;
@@ -231,6 +234,9 @@ public class Character implements Combatant {
         
         this.armorBonus = 0;
         this.shieldBonus = 0;
+
+        // Initialize inventory with strength-based carrying capacity
+        this.inventory = new Inventory(getAbilityScore(Ability.STRENGTH));
     }
 
     public Character(String name, Race race, CharacterClass characterClass,
@@ -397,6 +403,13 @@ public class Character implements Combatant {
     
     public int getPassivePerception() {
         return 10 + getSkillModifier(Skill.PERCEPTION);
+    }
+
+    /**
+     * Gets the character's inventory.
+     */
+    public Inventory getInventory() {
+        return inventory;
     }
 
     public void addSkillProficiency(Skill skill) {
