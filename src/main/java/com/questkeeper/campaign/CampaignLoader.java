@@ -106,6 +106,7 @@ public class CampaignLoader {
         loadNPCs();
         loadItems();
         loadLocations();
+        validateExitReferences();
 
         loaded = true;
         return true; 
@@ -423,6 +424,23 @@ public class CampaignLoader {
         }
 
         return location;
+    }
+
+    /**
+     * Validates that all exit references point to existing locations.
+     * Adds warnings for any invalid exit references found.
+     */
+    private void validateExitReferences() {
+        for (Location location : locations.values()) {
+            for (String direction : location.getExits()) {
+                String targetId = location.getExit(direction);
+                if (!locations.containsKey(targetId)) {
+                    loadErrors.add(String.format(
+                        "Invalid exit reference: '%s' exit '%s' points to unknown location '%s'",
+                        location.getId(), direction, targetId));
+                }
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")

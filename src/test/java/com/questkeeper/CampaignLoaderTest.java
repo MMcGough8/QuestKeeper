@@ -5,6 +5,7 @@ import com.questkeeper.combat.Monster;
 import com.questkeeper.inventory.Armor;
 import com.questkeeper.inventory.Item;
 import com.questkeeper.inventory.Weapon;
+import com.questkeeper.world.Location;
 import com.questkeeper.campaign.CampaignLoader;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -59,6 +60,10 @@ class CampaignLoaderTest {
 
     private void createItemsYaml(String content) throws IOException {
         Files.writeString(campaignDir.resolve("items.yaml"), content);
+    }
+
+    private void createLocationsYaml(String content) throws IOException {
+        Files.writeString(campaignDir.resolve("locations.yaml"), content);
     }
 
     private void createMinimalCampaign() throws IOException {
@@ -529,6 +534,283 @@ class CampaignLoaderTest {
     }
 
     // ==========================================
+    // Location Loading Tests
+    // ==========================================
+
+    @Nested
+    @DisplayName("Location Loading")
+    class LocationTests {
+
+        @BeforeEach
+        void setUpCampaign() throws IOException {
+            createMinimalCampaign();
+        }
+
+        @Test
+        @DisplayName("loads locations from YAML")
+        void loadsLocations() throws IOException {
+            createLocationsYaml("""
+                locations:
+                  - id: tavern
+                    name: The Tavern
+                    description: A warm and cozy tavern.
+                    read_aloud_text: You enter a warm tavern.
+                """);
+
+            loader = new CampaignLoader(campaignDir);
+            assertTrue(loader.load());
+
+            assertEquals(1, loader.getAllLocations().size());
+            assertTrue(loader.getLocation("tavern").isPresent());
+        }
+
+        @Test
+        @DisplayName("loads location with all fields")
+        void loadsLocationWithAllFields() throws IOException {
+            createLocationsYaml("""
+                locations:
+                  - id: test_location
+                    name: Test Location
+                    description: A test location for testing.
+                    read_aloud_text: You arrive at a mysterious place.
+                    exits:
+                      north: other_location
+                      east: another_location
+                    npcs:
+                      - npc_one
+                      - npc_two
+                    items:
+                      - item_one
+                    flags:
+                      - safe_zone
+                      - shop
+                """);
+
+            loader = new CampaignLoader(campaignDir);
+            loader.load();
+
+            Location location = loader.getLocation("test_location").orElseThrow();
+            assertEquals("Test Location", location.getName());
+            assertEquals("A test location for testing.", location.getDescription().trim());
+            assertTrue(location.getReadAloudText().contains("mysterious place"));
+
+            // Check exits
+            assertTrue(location.hasExit("north"));
+            assertTrue(location.hasExit("east"));
+            assertEquals("other_location", location.getExit("north"));
+            assertEquals("another_location", location.getExit("east"));
+
+            // Check NPCs
+            assertTrue(location.hasNpc("npc_one"));
+            assertTrue(location.hasNpc("npc_two"));
+            assertEquals(2, location.getNpcCount());
+
+            // Check items
+            assertTrue(location.hasItem("item_one"));
+            assertEquals(1, location.getItemCount());
+
+            // Check flags
+            assertTrue(location.hasFlag("safe_zone"));
+            assertTrue(location.hasFlag("shop"));
+        }
+
+        @Test
+        @DisplayName("handles locked locations")
+        void handlesLockedLocations() throws IOException {
+            createLocationsYaml("""
+                locations:
+                  - id: locked_room
+                    name: Locked Room
+                    description: A locked room.
+                    flags:
+                      - locked
+                  - id: unlocked_room
+                    name: Unlocked Room
+                    description: An unlocked room.
+                    flags: []
+                """);
+
+            loader = new CampaignLoader(campaignDir);
+            loader.load();
+
+            Location locked = loader.getLocation("locked_room").orElseThrow();
+            Location unlocked = loader.getLocation("unlocked_room").orElseThrow();
+
+            assertFalse(locked.isUnlocked());
+            assertTrue(unlocked.isUnlocked());
+        }
+
+        @Test
+        @DisplayName("gets starting location")
+        void getsStartingLocation() throws IOException {
+            createCampaignYaml("""
+                id: test
+                name: Test Campaign
+                starting_location: start_room
+                """);
+            createLocationsYaml("""
+                locations:
+                  - id: start_room
+                    name: Starting Room
+                    description: Where the adventure begins.
+                  - id: other_room
+                    name: Other Room
+                    description: Another room.
+                """);
+
+            loader = new CampaignLoader(campaignDir);
+            loader.load();
+
+            Optional<Location> starting = loader.getStartingLocation();
+            assertTrue(starting.isPresent());
+            assertEquals("start_room", starting.get().getId());
+            assertEquals("Starting Room", starting.get().getName());
+        }
+
+        @Test
+        @DisplayName("returns empty for nonexistent starting location")
+        void returnsEmptyForMissingStartingLocation() throws IOException {
+            createCampaignYaml("""
+                id: test
+                name: Test Campaign
+                starting_location: nonexistent
+                """);
+            createLocationsYaml("""
+                locations:
+                  - id: some_room
+                    name: Some Room
+                """);
+
+            loader = new CampaignLoader(campaignDir);
+            loader.load();
+
+            assertTrue(loader.getStartingLocation().isEmpty());
+        }
+
+        @Test
+        @DisplayName("loads without locations.yaml")
+        void loadsWithoutLocationsFile() throws IOException {
+            loader = new CampaignLoader(campaignDir);
+            assertTrue(loader.load());
+            assertTrue(loader.getAllLocations().isEmpty());
+        }
+
+        @Test
+        @DisplayName("handles empty locations list")
+        void handlesEmptyLocationsList() throws IOException {
+            createLocationsYaml("""
+                locations: []
+                """);
+
+            loader = new CampaignLoader(campaignDir);
+            assertTrue(loader.load());
+            assertTrue(loader.getAllLocations().isEmpty());
+        }
+
+        @Test
+        @DisplayName("loads multiple connected locations")
+        void loadsConnectedLocations() throws IOException {
+            createLocationsYaml("""
+                locations:
+                  - id: room_a
+                    name: Room A
+                    exits:
+                      east: room_b
+                      south: room_c
+                  - id: room_b
+                    name: Room B
+                    exits:
+                      west: room_a
+                  - id: room_c
+                    name: Room C
+                    exits:
+                      north: room_a
+                """);
+
+            loader = new CampaignLoader(campaignDir);
+            loader.load();
+
+            assertEquals(3, loader.getAllLocations().size());
+
+            Location roomA = loader.getLocation("room_a").orElseThrow();
+            Location roomB = loader.getLocation("room_b").orElseThrow();
+            Location roomC = loader.getLocation("room_c").orElseThrow();
+
+            // Verify connections
+            assertEquals("room_b", roomA.getExit("east"));
+            assertEquals("room_c", roomA.getExit("south"));
+            assertEquals("room_a", roomB.getExit("west"));
+            assertEquals("room_a", roomC.getExit("north"));
+        }
+
+        @Test
+        @DisplayName("includes locations in load summary")
+        void includesLocationsInSummary() throws IOException {
+            createLocationsYaml("""
+                locations:
+                  - id: loc1
+                    name: Location 1
+                  - id: loc2
+                    name: Location 2
+                  - id: loc3
+                    name: Location 3
+                """);
+
+            loader = new CampaignLoader(campaignDir);
+            loader.load();
+
+            String summary = loader.getLoadSummary();
+            assertTrue(summary.contains("Locations: 3"));
+        }
+
+        @Test
+        @DisplayName("validates exit references and reports invalid ones")
+        void validatesExitReferences() throws IOException {
+            createLocationsYaml("""
+                locations:
+                  - id: room_a
+                    name: Room A
+                    exits:
+                      north: room_b
+                      east: nonexistent_room
+                  - id: room_b
+                    name: Room B
+                    exits:
+                      south: room_a
+                """);
+
+            loader = new CampaignLoader(campaignDir);
+            assertTrue(loader.load()); // Still loads successfully
+
+            // But should have an error for the invalid exit
+            assertTrue(loader.hasErrors());
+            assertTrue(loader.getLoadErrors().stream()
+                    .anyMatch(e -> e.contains("Invalid exit reference")
+                               && e.contains("nonexistent_room")));
+        }
+
+        @Test
+        @DisplayName("no errors for valid exit references")
+        void noErrorsForValidExits() throws IOException {
+            createLocationsYaml("""
+                locations:
+                  - id: room_a
+                    name: Room A
+                    exits:
+                      north: room_b
+                  - id: room_b
+                    name: Room B
+                    exits:
+                      south: room_a
+                """);
+
+            loader = new CampaignLoader(campaignDir);
+            assertTrue(loader.load());
+            assertFalse(loader.hasErrors());
+        }
+    }
+
+    // ==========================================
     // Error Handling Tests
     // ==========================================
 
@@ -731,6 +1013,29 @@ class CampaignLoaderTest {
                     stackable: true
                 """);
 
+            createLocationsYaml("""
+                locations:
+                  - id: start
+                    name: Starting Location
+                    description: Where the adventure begins.
+                    read_aloud_text: You find yourself in a cozy inn.
+                    exits:
+                      north: dungeon
+                    npcs:
+                      - test_npc
+                    items:
+                      - test_item
+                    flags:
+                      - safe_zone
+                  - id: dungeon
+                    name: Dark Dungeon
+                    description: A dark and dangerous place.
+                    exits:
+                      south: start
+                    flags:
+                      - dangerous
+                """);
+
             loader = new CampaignLoader(campaignDir);
             assertTrue(loader.load());
             assertTrue(loader.isLoaded());
@@ -742,6 +1047,7 @@ class CampaignLoaderTest {
             assertEquals(1, loader.getAllWeapons().size());
             assertEquals(1, loader.getAllArmor().size());
             assertEquals(1, loader.getAllItems().size());
+            assertEquals(2, loader.getAllLocations().size());
 
             // Verify content details
             Monster monster = loader.createMonster("test_monster").orElseThrow();
@@ -762,6 +1068,20 @@ class CampaignLoaderTest {
 
             Item item = loader.getItem("test_item").orElseThrow();
             assertTrue(item.isStackable());
+
+            // Verify location details
+            Location startLocation = loader.getStartingLocation().orElseThrow();
+            assertEquals("start", startLocation.getId());
+            assertEquals("Starting Location", startLocation.getName());
+            assertTrue(startLocation.hasExit("north"));
+            assertEquals("dungeon", startLocation.getExit("north"));
+            assertTrue(startLocation.hasNpc("test_npc"));
+            assertTrue(startLocation.hasItem("test_item"));
+            assertTrue(startLocation.hasFlag("safe_zone"));
+
+            Location dungeon = loader.getLocation("dungeon").orElseThrow();
+            assertEquals("start", dungeon.getExit("south"));
+            assertTrue(dungeon.hasFlag("dangerous"));
         }
     }
 }
