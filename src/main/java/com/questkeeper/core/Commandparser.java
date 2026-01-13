@@ -22,6 +22,7 @@ public class CommandParser {
     private static final String VERB_DROP = "drop";
     private static final String VERB_USE = "use";
     private static final String VERB_TALK = "talk";
+    private static final String VERB_ASK = "ask";
     private static final String VERB_ATTACK = "attack";
     private static final String VERB_CAST = "cast";
     private static final String VERB_INVENTORY = "inventory";
@@ -40,9 +41,10 @@ public class CommandParser {
     private static final Map<String, String> SYNONYM_MAP = new HashMap<>();
 
     private static final Set<String> VALID_VERBS = Set.of(
-        VERB_GO, VERB_LOOK, VERB_TAKE, VERB_DROP, VERB_USE, VERB_TALK, VERB_ATTACK,
-        VERB_CAST, VERB_INVENTORY, VERB_STATS, VERB_HELP, VERB_SAVE, VERB_LOAD,
-        VERB_QUIT, VERB_REST, VERB_OPEN, VERB_CLOSE, VERB_READ, VERB_EQUIP, VERB_UNEQUIP
+        VERB_GO, VERB_LOOK, VERB_TAKE, VERB_DROP, VERB_USE, VERB_TALK, VERB_ASK,
+        VERB_ATTACK, VERB_CAST, VERB_INVENTORY, VERB_STATS, VERB_HELP, VERB_SAVE,
+        VERB_LOAD, VERB_QUIT, VERB_REST, VERB_OPEN, VERB_CLOSE, VERB_READ,
+        VERB_EQUIP, VERB_UNEQUIP
     );
 
     private static final Map<String, String> DIRECTION_ALIASES = Map.of(
@@ -97,7 +99,11 @@ public class CommandParser {
         SYNONYM_MAP.put("speak", VERB_TALK);
         SYNONYM_MAP.put("chat", VERB_TALK);
         SYNONYM_MAP.put("converse", VERB_TALK);
-        SYNONYM_MAP.put("ask", VERB_TALK);
+
+        // Ask synonyms → "ask"
+        SYNONYM_MAP.put("ask", VERB_ASK);
+        SYNONYM_MAP.put("inquire", VERB_ASK);
+        SYNONYM_MAP.put("question", VERB_ASK);
         
         // Attack synonyms → "attack"
         SYNONYM_MAP.put(VERB_ATTACK, VERB_ATTACK);
@@ -254,8 +260,8 @@ public class CommandParser {
     }
 
     private static String removeLeadingArticles(String noun) {
-        String[] articlesToRemove = {"the", "a", "an", "at", "to", "with", "on", "in"};
-        
+        String[] articlesToRemove = {"the", "a", "an", "at", "to", "with", "on", "in", "about"};
+
         String result = noun;
         for (String article : articlesToRemove) {
             if (result.startsWith(article + " ")) {
@@ -263,8 +269,42 @@ public class CommandParser {
                 break;                                            // Only remove one leading article
             }
         }
-        
+
         return result.trim();
+    }
+
+    /**
+     * Parses "ask [target] about [topic]" pattern.
+     * Returns array: [target, topic] or [null, topic] if no target.
+     */
+    public static String[] parseAskAbout(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            return new String[]{null, null};
+        }
+
+        String cleaned = cleanInput(input).toLowerCase();
+
+        // Remove "ask" prefix if present
+        if (cleaned.startsWith("ask ")) {
+            cleaned = cleaned.substring(4).trim();
+        }
+
+        // Check for "about" keyword
+        int aboutIndex = cleaned.indexOf(" about ");
+        if (aboutIndex > 0) {
+            // "mara about rumors" → target=mara, topic=rumors
+            String target = cleaned.substring(0, aboutIndex).trim();
+            String topic = cleaned.substring(aboutIndex + 7).trim();
+            return new String[]{target, topic};
+        }
+
+        // "about rumors" or just "rumors"
+        if (cleaned.startsWith("about ")) {
+            return new String[]{null, cleaned.substring(6).trim()};
+        }
+
+        // Just the topic
+        return new String[]{null, cleaned};
     }
 
     public static boolean isValidVerb(String verb) {

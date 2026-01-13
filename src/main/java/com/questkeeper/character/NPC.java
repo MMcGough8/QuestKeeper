@@ -32,6 +32,7 @@ public class NPC {
     private String locationId;                    // Where NPC is located (null if mobile)
 
     private final Map<String, String> dialogues;  // topic -> response
+    private final Map<String, String> dialogueRequiredFlags;  // topic -> required flag
     private String greeting;                      // First interaction greeting
     private String returnGreeting;                // Greeting after first meeting
     private final List<String> sampleLines;       // Roleplay flavor lines
@@ -63,6 +64,7 @@ public class NPC {
         this.locationId = null;
 
         this.dialogues = new HashMap<>();
+        this.dialogueRequiredFlags = new HashMap<>();
         this.greeting = "";
         this.returnGreeting = "";
         this.sampleLines = new ArrayList<>();
@@ -182,16 +184,95 @@ public class NPC {
         }
     }
 
-    public void removeDialogue(String topic) {
-        if (topic != null) {
-            dialogues.remove(topic.toLowerCase());
+    /**
+     * Adds a dialogue that requires a specific flag to be available.
+     */
+    public void addDialogue(String topic, String response, String requiredFlag) {
+        addDialogue(topic, response);
+        if (requiredFlag != null && !requiredFlag.trim().isEmpty()) {
+            dialogueRequiredFlags.put(topic.toLowerCase(), requiredFlag.toLowerCase());
         }
     }
 
+    /**
+     * Sets a required flag for an existing dialogue topic.
+     */
+    public void setDialogueRequiredFlag(String topic, String requiredFlag) {
+        if (topic != null && requiredFlag != null && !requiredFlag.trim().isEmpty()) {
+            dialogueRequiredFlags.put(topic.toLowerCase(), requiredFlag.toLowerCase());
+        }
+    }
+
+    /**
+     * Gets the required flag for a dialogue topic, or null if none.
+     */
+    public String getDialogueRequiredFlag(String topic) {
+        return topic != null ? dialogueRequiredFlags.get(topic.toLowerCase()) : null;
+    }
+
+    public void removeDialogue(String topic) {
+        if (topic != null) {
+            dialogues.remove(topic.toLowerCase());
+            dialogueRequiredFlags.remove(topic.toLowerCase());
+        }
+    }
+
+    /**
+     * Gets all topics (regardless of flag requirements).
+     */
     public List<String> getAvailableTopics() {
         List<String> topics = new ArrayList<>(dialogues.keySet());
         Collections.sort(topics);
         return Collections.unmodifiableList(topics);
+    }
+
+    /**
+     * Gets topics available based on active game flags.
+     * Topics with no required flag are always available.
+     * Topics with a required flag are only available if that flag is in activeFlags.
+     */
+    public List<String> getAvailableTopics(Set<String> activeFlags) {
+        Set<String> normalizedFlags = new HashSet<>();
+        if (activeFlags != null) {
+            for (String flag : activeFlags) {
+                normalizedFlags.add(flag.toLowerCase());
+            }
+        }
+
+        List<String> topics = new ArrayList<>();
+        for (String topic : dialogues.keySet()) {
+            String requiredFlag = dialogueRequiredFlags.get(topic);
+            if (requiredFlag == null || normalizedFlags.contains(requiredFlag)) {
+                topics.add(topic);
+            }
+        }
+        Collections.sort(topics);
+        return Collections.unmodifiableList(topics);
+    }
+
+    /**
+     * Checks if a dialogue topic is available based on active flags.
+     */
+    public boolean isDialogueAvailable(String topic, Set<String> activeFlags) {
+        if (topic == null || !dialogues.containsKey(topic.toLowerCase())) {
+            return false;
+        }
+
+        String requiredFlag = dialogueRequiredFlags.get(topic.toLowerCase());
+        if (requiredFlag == null) {
+            return true; // No flag required
+        }
+
+        if (activeFlags == null) {
+            return false;
+        }
+
+        for (String flag : activeFlags) {
+            if (flag.equalsIgnoreCase(requiredFlag)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public int getDialogueCount() {

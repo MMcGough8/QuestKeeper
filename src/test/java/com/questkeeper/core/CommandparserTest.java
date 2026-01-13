@@ -161,15 +161,28 @@ class CommandParserTest {
             "talk, talk",
             "speak, talk",
             "chat, talk",
-            "ask, talk"
+            "converse, talk"
         })
         @DisplayName("Talk synonyms map to 'talk'")
         void talkSynonyms(String input, String expected) {
             Command cmd = CommandParser.parse(input + " npc");
-            
+
             assertEquals(expected, cmd.getVerb());
         }
-        
+
+        @ParameterizedTest
+        @CsvSource({
+            "ask, ask",
+            "inquire, ask",
+            "question, ask"
+        })
+        @DisplayName("Ask synonyms map to 'ask'")
+        void askSynonyms(String input, String expected) {
+            Command cmd = CommandParser.parse(input + " topic");
+
+            assertEquals(expected, cmd.getVerb());
+        }
+
         @ParameterizedTest
         @CsvSource({
             "attack, attack",
@@ -559,9 +572,81 @@ class CommandParserTest {
         @DisplayName("Can attack Clockwork Critter")
         void attackClockworkCritter() {
             Command cmd = CommandParser.parse("attack clockwork critter");
-            
+
             assertEquals("attack", cmd.getVerb());
             assertEquals("clockwork critter", cmd.getNoun());
+        }
+    }
+
+    // ========================================================================
+    // ASK ABOUT PARSING TESTS
+    // ========================================================================
+
+    @Nested
+    @DisplayName("parseAskAbout Tests")
+    class ParseAskAboutTests {
+
+        @Test
+        @DisplayName("parses 'ask about topic' correctly")
+        void parsesAskAboutTopic() {
+            String[] result = CommandParser.parseAskAbout("ask about rumors");
+
+            assertNull(result[0]); // No target
+            assertEquals("rumors", result[1]);
+        }
+
+        @Test
+        @DisplayName("parses 'about topic' correctly")
+        void parsesAboutTopic() {
+            String[] result = CommandParser.parseAskAbout("about mayor");
+
+            assertNull(result[0]);
+            assertEquals("mayor", result[1]);
+        }
+
+        @Test
+        @DisplayName("parses 'ask npc about topic' correctly")
+        void parsesAskNpcAboutTopic() {
+            String[] result = CommandParser.parseAskAbout("ask mara about drinks");
+
+            assertEquals("mara", result[0]);
+            assertEquals("drinks", result[1]);
+        }
+
+        @Test
+        @DisplayName("parses just topic correctly")
+        void parsesJustTopic() {
+            String[] result = CommandParser.parseAskAbout("clocktower");
+
+            assertNull(result[0]);
+            assertEquals("clocktower", result[1]);
+        }
+
+        @Test
+        @DisplayName("handles null input")
+        void handlesNull() {
+            String[] result = CommandParser.parseAskAbout(null);
+
+            assertNull(result[0]);
+            assertNull(result[1]);
+        }
+
+        @Test
+        @DisplayName("handles empty input")
+        void handlesEmpty() {
+            String[] result = CommandParser.parseAskAbout("");
+
+            assertNull(result[0]);
+            assertNull(result[1]);
+        }
+
+        @Test
+        @DisplayName("is case-insensitive")
+        void caseInsensitive() {
+            String[] result = CommandParser.parseAskAbout("ASK MARA ABOUT RUMORS");
+
+            assertEquals("mara", result[0]);
+            assertEquals("rumors", result[1]);
         }
     }
 }
