@@ -1,0 +1,277 @@
+# Location definitions for Muddlebrook: Harlequin Trials
+# Each location has exits connecting to other locations by ID
+
+locations:
+  # ==========================================
+  # The Drunken Dragon Inn - Starting Location / Hub
+  # ==========================================
+  - id: drunken_dragon_inn
+    name: The Drunken Dragon Inn
+    description: |
+      A warm, bustling tavern with creaky wooden floors and the smell of hearty stew.
+      Lanterns cast dancing shadows across worn wooden tables where locals nurse their drinks.
+    read_aloud_text: |
+      You push open the heavy oak door and warmth washes over you. The Drunken Dragon Inn
+      is alive with the clink of mugs and murmur of conversation. A bard strums lazily in
+      the corner, and the bartender polishes glasses with practiced ease. Lanterns cast
+      dancing shadows across worn wooden tables where locals nurse their drinks.
+    exits:
+      north: town_square
+      door: town_square
+    npcs:
+      - norrin_bard
+      - mara_bartender
+      - darius_recluse
+    items: []
+    flags:
+      - safe_zone
+
+  # ==========================================
+  # Muddlebrook Town Square - Central Hub
+  # ==========================================
+  - id: town_square
+    name: Muddlebrook Town Square
+    description: |
+      The muddy center of town, surrounded by shops and the looming Town Hall.
+      A weathered notice board stands at the center, plastered with papers.
+    read_aloud_text: |
+      The town square squelches underfoot—Muddlebrook earns its name. A weathered
+      notice board stands at the center, plastered with papers. To the north, the
+      imposing Town Hall watches over the square. Shops line the east side, and the
+      warm glow of the Drunken Dragon Inn beckons from the south.
+    exits:
+      south: drunken_dragon_inn
+      north: town_hall
+      east: market_row
+      west: clocktower_hill
+      cemetery: cemetery
+    npcs: []
+    items: []
+    flags: []
+
+  # ==========================================
+  # Town Hall - Trial #1 Entry
+  # ==========================================
+  - id: town_hall
+    name: Muddlebrook Town Hall
+    description: |
+      An official building with creaky floors and the faint smell of old paper.
+      Portraits of past mayors line the walls, their painted eyes seeming to follow you.
+    read_aloud_text: |
+      The Town Hall's double doors open with a groan. Inside, dust motes dance in
+      shafts of light from high windows. Portraits of past mayors line the walls,
+      their painted eyes seeming to follow you. A grand staircase leads up to the
+      mayor's office. Something feels... off. Too quiet.
+    exits:
+      south: town_square
+      upstairs: mayors_office
+    npcs:
+      - captain_thorne
+    items: []
+    flags: []
+
+  # ==========================================
+  # Mayor's Office - Trial #1 Puzzle Room
+  # ==========================================
+  - id: mayors_office
+    name: Mayor's Office
+    description: |
+      A ransacked office with scattered papers and strange clockwork devices.
+      A clock on the wall ticks backwards. A mechanical frog sits on the desk.
+    read_aloud_text: |
+      You reach the top of the stairs and freeze. The mayor's office has been
+      transformed into something between a crime scene and a carnival. Papers are
+      scattered everywhere. A clock on the wall ticks backwards. A mechanical frog
+      sits on the desk, watching you with glass eyes. And pinned to the mayor's
+      empty chair is a note with a laughing mask drawn on it.
+    exits:
+      downstairs: town_hall
+    npcs: []
+    items:
+      - mayors_journal
+      - music_box
+    flags:
+      - trial_location
+      - trial_1
+
+  # ==========================================
+  # Old Market Row - Shopping District
+  # ==========================================
+  - id: market_row
+    name: Old Market Row
+    description: |
+      A narrow street lined with shops, stalls, and the occasional suspicious alley.
+      Colorful awnings shade stalls selling everything from fresh bread to questionable potions.
+    read_aloud_text: |
+      Market Row buzzes with haggling voices and the clatter of commerce. Colorful
+      awnings shade stalls selling everything from fresh bread to questionable potions.
+      One shop catches your eye—'Clockwork Curios' reads the sign, with gears turning
+      lazily in the window display.
+    exits:
+      west: town_square
+      shop: clockwork_curios
+      alley: back_alley
+    npcs: []
+    items: []
+    flags: []
+
+  # ==========================================
+  # Clockwork Curios - Elara's Shop
+  # ==========================================
+  - id: clockwork_curios
+    name: Clockwork Curios
+    description: |
+      A cramped shop filled with ticking, whirring, and occasionally sparking devices.
+      Shelves are crammed with mechanical oddities of every description.
+    read_aloud_text: |
+      A bell chimes as you enter, though you don't see one. The shop is a maze of
+      shelves crammed with mechanical oddities—music boxes that play themselves,
+      compasses that point to 'interesting', pocket watches with too many hands.
+      Behind the counter, a sharp-eyed gnome woman looks up from a disassembled device.
+      "Browser or buyer?" she asks.
+    exits:
+      out: market_row
+      back: back_room
+    npcs:
+      - elara_shopkeeper
+    items:
+      - clockwork_lockpick
+      - spyglass_gear
+      - gear_grease
+    flags:
+      - shop
+
+  # ==========================================
+  # Back Room - Elara's Secret Workshop
+  # ==========================================
+  - id: back_room
+    name: Elara's Back Room
+    description: |
+      A cluttered workshop filled with half-finished projects and exotic components.
+      Blueprints cover every surface, some marked with cryptic notes.
+    read_aloud_text: |
+      Elara parts the curtain with a knowing look. "Specialized inventory," she says.
+      The back room is a maze of workbenches covered in gears, springs, and devices
+      in various states of assembly. Blueprints cover the walls—some of mechanisms
+      you recognize, others of things that shouldn't exist. A large locked chest
+      sits in the corner.
+    exits:
+      out: clockwork_curios
+    npcs: []
+    items: []
+    flags:
+      - locked
+      - hidden
+
+  # ==========================================
+  # Back Alley - Shady Shortcut
+  # ==========================================
+  - id: back_alley
+    name: Shadowy Back Alley
+    description: |
+      A narrow, damp passage between buildings. The cobblestones are slick with
+      something you'd rather not identify.
+    read_aloud_text: |
+      You slip into the alley, leaving the bustle of Market Row behind. The passage
+      is narrow enough that you could touch both walls if you stretched your arms.
+      Somewhere ahead, water drips steadily. A rat watches you from atop a crate,
+      seemingly unimpressed by your presence.
+    exits:
+      market: market_row
+      north: clocktower_hill
+    npcs: []
+    items: []
+    flags: []
+
+  # ==========================================
+  # Clocktower Hill - Trial #2 Approach
+  # ==========================================
+  - id: clocktower_hill
+    name: Clocktower Hill
+    description: |
+      A steep hill crowned by an abandoned clocktower that hasn't told time in years.
+      The path is overgrown but well-worn by curious feet.
+    read_aloud_text: |
+      The path up Clocktower Hill is overgrown but well-worn by curious feet. The
+      clocktower looms above, its face frozen at an impossible time—all four hands
+      pointing in different directions. Locals say it stopped the night the old
+      mayor vanished, twenty years ago. The new mayor's disappearance has people
+      whispering about curses.
+    exits:
+      east: town_square
+      south: back_alley
+      up: clocktower_base
+    npcs: []
+    items: []
+    flags:
+      - locked
+
+  # ==========================================
+  # Clocktower Base - Trial #2 Entry
+  # ==========================================
+  - id: clocktower_base
+    name: Clocktower Base
+    description: |
+      The ground floor of the abandoned clocktower. Massive gears and mechanisms
+      fill the space, frozen in time yet somehow still humming with latent energy.
+    read_aloud_text: |
+      You push open the tower's rusted door and step into mechanical twilight.
+      Massive gears loom in the darkness, larger than wagon wheels, connected by
+      chains thick as your arm. Dust covers everything, but you notice fresh
+      footprints leading to a spiral staircase. Above, something clicks. Then clicks
+      again. The tower may be stopped, but it isn't sleeping.
+    exits:
+      down: clocktower_hill
+      up: clocktower_mechanism
+    npcs: []
+    items:
+      - clockwork_key
+    flags:
+      - trial_location
+      - trial_2
+
+  # ==========================================
+  # Clocktower Mechanism - Trial #2 Puzzle Room
+  # ==========================================
+  - id: clocktower_mechanism
+    name: Clocktower Mechanism Chamber
+    description: |
+      The heart of the clocktower—a vast chamber of interlocking gears, pendulums,
+      and mysterious machinery. The main clock mechanism dominates the center.
+    read_aloud_text: |
+      You emerge into a cathedral of clockwork. The mechanism chamber stretches
+      upward into shadow, filled with gears that range from palm-sized to enormous.
+      Pendulums hang motionless. Chains drape like mechanical vines. At the center,
+      the main drive shaft rises toward the clock face above—and wrapped around it,
+      like a metal spider in its web, is a figure in a harlequin mask.
+      "Welcome," says the Machinist. "Shall we play a game?"
+    exits:
+      down: clocktower_base
+    npcs: []
+    items:
+      - harlequin_mask_fragment
+    flags:
+      - trial_location
+      - trial_2
+      - boss_room
+
+  # ==========================================
+  # Muddlebrook Cemetery - Optional Area
+  # ==========================================
+  - id: cemetery
+    name: Muddlebrook Cemetery
+    description: |
+      A quiet graveyard on the edge of town. Weathered headstones lean at odd angles,
+      and ancient oaks cast long shadows over the graves.
+    read_aloud_text: |
+      Iron gates creak as you enter the cemetery. Weathered headstones stretch in
+      uneven rows, names worn smooth by decades of rain. An old oak spreads its
+      branches over a cluster of older graves—the founding families, perhaps.
+      Something about this place feels watched, but not unwelcome. The dead here
+      rest peacefully. Mostly.
+    exits:
+      south: town_square
+    npcs: []
+    items: []
+    flags:
+      - hidden
