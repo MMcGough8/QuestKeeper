@@ -105,5 +105,5 @@ The "Muddlebrook: Harlequin Trials" campaign includes:
 - 3 trials (Mayor's Office, Clocktower, Harlequin's Stage)
 - 14 mini-games with skill checks
 - 11 magic item rewards (Tier 1)
-- 4 NPCs (Norrin, Mara, Darius, Elara)
+- 6 NPCs (Norrin, Mara, Darius, Elara, Captain Thorne, Mayor Alderwick)
 - 3 monster types (Clockwork Critter, Confetti Ooze, Harlequin Machinist)

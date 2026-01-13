@@ -263,3 +263,57 @@ npcs:
       - "I don't have time for complications."
       - "If you're here to help, prove it. If not, stay out of my way."
       - "This town deserves better. I'm trying to give it that."
+
+  # ==========================================
+  # Mayor Alderwick - Missing mayor, rescue target
+  # ==========================================
+  - id: mayor_alderwick
+    name: Mayor Alderwick
+    role: mayor
+    voice: "dignified, weary, haunted"
+    personality: "honest, burdened by secrets, protective of his town"
+    description: |
+      A middle-aged human man with graying temples and kind eyes now shadowed
+      by fear. His fine clothes are rumpled, and his hands tremble slightly.
+      Whatever he discovered in the clocktower has left its mark on him.
+    location_id: harlequin_lair
+    shopkeeper: false
+
+    greeting: |
+      *looks up with desperate hope* You found me! Please—you have to listen.
+      The Machinist, he's not just playing games. He's building something.
+      Something terrible.
+    return_greeting: |
+      Thank the gods you're still alive. We don't have much time.
+      He's watching. He's always watching.
+
+    dialogues:
+      machinist: |
+        I found his workshop beneath the clocktower. Years of planning.
+        Blueprints for... I don't know what. But Muddlebrook is just the beginning.
+        He chose this town for a reason.
+      clocktower: |
+        I thought the old mechanisms were just that—old. Broken. But they're not.
+        They've been running this whole time. Counting down to something.
+        I tried to stop it and... well, you see where that got me.
+      help: |
+        Get me out of here. Warn the town. And whatever you do,
+        don't let him finish his final act. The whole town is his stage,
+        and we're all just... props to him.
+      town: |
+        Muddlebrook deserves better than this. Better than me.
+        I should have seen the signs sooner. The disappearances started months ago.
+        I thought they were coincidences. I was wrong.
+      gratitude: |
+        I can never repay what you've done. But Muddlebrook will remember.
+        *voice breaks* My family will remember. Thank you.
+      warning: |
+        Be careful. The Machinist doesn't lose gracefully.
+        Even if you beat him, he'll have a contingency. He always does.
+        This isn't over until he says it is—or until you make sure it is.
+
+    sample_lines:
+      - "*nervously* Is he watching? He's always watching."
+      - "I was a fool to think I could stop him alone."
+      - "Please, my family... are they safe?"
+      - "The clocktower holds all the answers. And all the horrors."
