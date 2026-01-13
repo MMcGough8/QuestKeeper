@@ -45,11 +45,6 @@ public class DialogueResult {
 
     /**
      * Creates a successful dialogue start result with greeting.
-     *
-     * @param npc the NPC being talked to
-     * @param greeting the NPC's greeting message
-     * @param topics available dialogue topics
-     * @return a success result
      */
     public static DialogueResult success(NPC npc, String greeting, List<String> topics) {
         return new DialogueResult(Type.SUCCESS, npc, greeting, null, topics);
@@ -87,6 +82,10 @@ public class DialogueResult {
         return new DialogueResult(Type.ENDED, null, message, null, List.of());
     }
 
+    // ==========================================
+    // Accessors
+    // ==========================================
+
     public Type getType() {
         return type;
     }
@@ -123,8 +122,13 @@ public class DialogueResult {
         return !availableTopics.isEmpty();
     }
 
+    // ==========================================
+    // Display
+    // ==========================================
+
     /**
-     * Formats the result for display.
+     * Formats the result for display in the game UI.
+     * Includes NPC name prefix, message, and available topics if applicable.
      */
     public String format() {
         StringBuilder sb = new StringBuilder();

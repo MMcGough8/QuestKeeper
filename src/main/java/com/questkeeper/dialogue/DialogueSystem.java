@@ -39,10 +39,6 @@ public class DialogueSystem {
      *
      * Finds the NPC by name or ID, displays their greeting (first meeting
      * or return greeting), and sets the met_[npc] flag in the game state.
-     *
-     * @param state the current game state
-     * @param npcIdentifier the NPC name or ID to talk to
-     * @return the dialogue result containing greeting and available topics
      */
     public DialogueResult startDialogue(GameState state, String npcIdentifier) {
         if (state == null) {
@@ -88,9 +84,6 @@ public class DialogueSystem {
      *
      * Uses D&D-style dialogue trees where topics may be gated by game flags.
      * If the topic isn't available, attempts partial matching before failing.
-     *
-     * @param topic the topic to ask about (case-insensitive)
-     * @return the dialogue result with the NPC's response or NO_TOPIC if unknown
      */
     public DialogueResult askAbout(String topic) {
         if (!inConversation || currentNpc == null) {
@@ -124,8 +117,6 @@ public class DialogueSystem {
 
     /**
      * Ends the current conversation.
-     *
-     * @return a farewell result indicating the conversation has ended
      */
     public DialogueResult endDialogue() {
         if (!inConversation || currentNpc == null) {
@@ -146,8 +137,6 @@ public class DialogueSystem {
 
     /**
      * Checks if currently in a conversation.
-     *
-     * @return true if talking to an NPC
      */
     public boolean isInConversation() {
         return inConversation;
@@ -155,8 +144,6 @@ public class DialogueSystem {
 
     /**
      * Gets the NPC currently being talked to.
-     *
-     * @return the current NPC, or null if not in conversation
      */
     public NPC getCurrentNpc() {
         return currentNpc;
@@ -164,9 +151,6 @@ public class DialogueSystem {
 
     /**
      * Lists NPCs available to talk to at the current location.
-     *
-     * @param state the current game state
-     * @return list of NPCs at the player's location
      */
     public List<NPC> getNpcsAtCurrentLocation(GameState state) {
         if (state == null || state.getCurrentLocation() == null) {
