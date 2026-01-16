@@ -111,6 +111,10 @@ public class DialogueSystem {
         }
 
         String response = currentNpc.getDialogue(normalizedTopic);
+        if (response == null || response.isEmpty()) {
+            return DialogueResult.noTopic(currentNpc, normalizedTopic,
+                currentNpc.getAvailableTopics(activeFlags));
+        }
         return DialogueResult.response(currentNpc, normalizedTopic, response,
             currentNpc.getAvailableTopics(activeFlags));
     }
