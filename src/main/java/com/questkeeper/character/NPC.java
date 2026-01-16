@@ -348,6 +348,37 @@ public class NPC {
         return sb.toString();
     }
 
+    /**
+     * Returns a short descriptor for display in location listings.
+     * Format: "the bartender" or "a traveling bard"
+     */
+    public String getShortDescriptor() {
+        if (role.isEmpty()) {
+            return "";
+        }
+
+        // Use "the" for unique roles, "a/an" for general ones
+        String article = isUniqueRole(role) ? "the " : getArticle(role);
+        return article + role.toLowerCase();
+    }
+
+    private boolean isUniqueRole(String role) {
+        String lower = role.toLowerCase();
+        return lower.contains("captain") ||
+               lower.contains("mayor") ||
+               lower.equals("bartender") ||
+               lower.equals("shopkeeper");
+    }
+
+    private String getArticle(String word) {
+        if (word == null || word.isEmpty()) {
+            return "a ";
+        }
+        char first = java.lang.Character.toLowerCase(word.charAt(0));
+        return (first == 'a' || first == 'e' || first == 'i' || first == 'o' || first == 'u')
+               ? "an " : "a ";
+    }
+
     @Override
     public String toString() {
         return String.format("NPC[id=%s, name=%s, role=%s, topics=%d]",

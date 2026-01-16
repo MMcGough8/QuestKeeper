@@ -36,6 +36,7 @@ public class Campaign {
     private final String id;
     private final String name;
     private final String description;
+    private final String intro;
     private final String author;
     private final String version;
     private final String startingLocationId;
@@ -60,6 +61,7 @@ public class Campaign {
         this.id = loader.getCampaignId();
         this.name = loader.getCampaignName();
         this.description = loader.getCampaignDescription();
+        this.intro = loader.getCampaignIntro();
         this.author = loader.getCampaignAuthor();
         this.version = loader.getCampaignVersion();
         this.startingLocationId = loader.getStartingLocationId();
@@ -434,6 +436,14 @@ public class Campaign {
 
     public String getDescription() {
         return description;
+    }
+
+    public String getIntro() {
+        return intro;
+    }
+
+    public boolean hasIntro() {
+        return intro != null && !intro.isEmpty();
     }
 
     public String getAuthor() {

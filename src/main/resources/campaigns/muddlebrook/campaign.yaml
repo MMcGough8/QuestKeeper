@@ -9,6 +9,34 @@ description: |
   and a theatrical villain known as the Harlequin Machinist pulls strings
   from the shadows. Navigate puzzle rooms, gather clues, and uncover
   the truth behind the chaos.
+
+intro: |
+  The evening at The Drunken Dragon Inn started like any other—warm
+  firelight, the clink of tankards, and Norrin the bard's questionable
+  singing filling the air.
+
+  Then the doors BURST open.
+
+  A breathless townsman stumbles in, mud-splattered and wide-eyed.
+
+  "The mayor! Mayor Alderwick—he's GONE! Vanished from his office,
+  locked from the inside! And there was... there was a NOTE. With a
+  LAUGHING MASK drawn on it!"
+
+  The tavern erupts in panicked whispers. Mara the bartender slams
+  down a glass. "Everyone CALM DOWN."
+
+  From the shadows of the corner booth, a hooded figure—Darius—rises
+  slowly. His scarred hands grip the table edge.
+
+  "It's him," Darius says, his voice like gravel. "The Harlequin
+  Machinist. He's returned to Muddlebrook... and he's chosen his
+  next players."
+
+  His eyes find yours across the crowded room.
+
+  "The question is: are YOU clever enough to survive his games?"
+
 author: Andrew Mariani
 version: "1.0"
 starting_location: drunken_dragon_inn

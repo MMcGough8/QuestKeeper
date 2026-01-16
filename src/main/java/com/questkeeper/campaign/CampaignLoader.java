@@ -59,6 +59,7 @@ class CampaignLoader {
     private String campaignId;
     private String campaignName;
     private String campaignDescription;
+    private String campaignIntro;
     private String campaignAuthor;
     private String campaignVersion;
     private String startingLocationId;
@@ -144,6 +145,7 @@ class CampaignLoader {
             campaignId = getString(data, "id", "unknown");
             campaignName = getString(data, "name", "Unnamed Campaign");
             campaignDescription = getString(data, "description", "");
+            campaignIntro = getString(data, "intro", "");
             campaignAuthor = getString(data, "author", "Unknown");
             campaignVersion = getString(data, "version", "1.0");
             startingLocationId = getString(data, "starting_location", null);
@@ -908,6 +910,10 @@ class CampaignLoader {
 
     public String getCampaignDescription() {
         return campaignDescription;
+    }
+
+    public String getCampaignIntro() {
+        return campaignIntro;
     }
 
     public String getCampaignAuthor() {

@@ -191,6 +191,9 @@ public class GameEngine {
     }
 
     private void runGameLoop() {
+        // Show campaign intro if available
+        displayCampaignIntro();
+
         // Show initial location
         displayCurrentLocation();
 
@@ -1556,6 +1559,31 @@ public class GameEngine {
     // Display Helpers
     // ==========================================
 
+    private void displayCampaignIntro() {
+        if (!campaign.hasIntro()) {
+            return;
+        }
+
+        Display.clearScreen();
+        Display.println();
+        Display.printBox("~ " + campaign.getName() + " ~", 60, MAGENTA);
+        Display.println();
+
+        // Display the intro text with dramatic pacing
+        String intro = campaign.getIntro();
+        String[] paragraphs = intro.split("\n\n");
+
+        for (String paragraph : paragraphs) {
+            Display.printWrapped(paragraph.trim(), 60);
+            Display.println();
+        }
+
+        Display.println();
+        Display.println(Display.colorize("Press Enter to begin your adventure...", YELLOW));
+        scanner.nextLine();
+        Display.clearScreen();
+    }
+
     private void displayCurrentLocation() {
         Location location = gameState.getCurrentLocation();
         if (location == null) {
@@ -1577,14 +1605,20 @@ public class GameEngine {
         Display.printWrapped(description, 60);
         Display.println();
 
-        // Show NPCs
+        // Show NPCs with descriptors
         List<String> npcIds = location.getNpcs();
         if (!npcIds.isEmpty()) {
             Display.println(Display.colorize("You see:", WHITE));
             for (String npcId : npcIds) {
                 NPC npc = campaign.getNPC(npcId);
                 if (npc != null) {
-                    Display.println("  - " + Display.colorize(npc.getName(), CYAN));
+                    String descriptor = npc.getShortDescriptor();
+                    if (descriptor.isEmpty()) {
+                        Display.println("  - " + Display.colorize(npc.getName(), CYAN));
+                    } else {
+                        Display.println("  - " + Display.colorize(npc.getName(), CYAN) +
+                                       " (" + descriptor + ")");
+                    }
                 }
             }
             Display.println();
