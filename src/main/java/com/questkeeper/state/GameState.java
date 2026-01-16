@@ -104,6 +104,17 @@ public class GameState {
         // Restore variables
         state.variables.putAll(saveState.getStateStrings());
 
+        // Restore inventory items from campaign
+        for (String itemId : saveState.getInventoryItems()) {
+            var item = campaign.getItem(itemId);
+            if (item != null) {
+                character.getInventory().addItem(item);
+            }
+        }
+
+        // Restore gold
+        character.getInventory().addGold(saveState.getGold());
+
         // Restore play time
         state.previousPlayTimeSeconds = saveState.getTotalPlayTimeSeconds();
         state.sessionStartTime = Instant.now();
@@ -124,9 +135,7 @@ public class GameState {
 
         // Copy visited locations
         for (String locationId : visitedLocations) {
-            if (!locationId.equals(save.getCurrentLocationId())) {
-                // setCurrentLocation already adds to visited, avoid duplicates
-            }
+            save.addVisitedLocation(locationId);
         }
 
         // Flags
@@ -143,6 +152,17 @@ public class GameState {
         for (Map.Entry<String, String> entry : variables.entrySet()) {
             save.setString(entry.getKey(), entry.getValue());
         }
+
+        // Inventory items
+        for (var stack : character.getInventory().getAllItems()) {
+            String itemId = stack.getItem().getId();
+            for (int i = 0; i < stack.getQuantity(); i++) {
+                save.addItem(itemId);
+            }
+        }
+
+        // Gold
+        save.addGold(character.getInventory().getGold());
 
         // Play time
         save.addPlayTime(getTotalPlayTimeSeconds());
@@ -219,6 +239,20 @@ public class GameState {
     public void setFlag(String flag) {
         if (flag != null && !flag.isEmpty()) {
             flags.add(flag.toLowerCase());
+        }
+    }
+
+    /**
+     * Sets or clears a game flag based on the value.
+     */
+    public void setFlag(String flag, boolean value) {
+        if (flag == null || flag.isEmpty()) {
+            return;
+        }
+        if (value) {
+            flags.add(flag.toLowerCase());
+        } else {
+            flags.remove(flag.toLowerCase());
         }
     }
 

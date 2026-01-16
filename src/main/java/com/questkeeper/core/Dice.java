@@ -20,11 +20,12 @@ import java.util.regex.Pattern;
 public final class Dice {
     
     private static final Random random = new Random();
- 
+
     private static final Pattern DICE_PATTERN = Pattern.compile(
             "^(\\d*)d(\\d+)([+-]\\d+)?$", Pattern.CASE_INSENSITIVE);
 
-    private static final List<String> rollHistory = new ArrayList<>();
+    // Thread-safe list for roll history
+    private static final List<String> rollHistory = Collections.synchronizedList(new ArrayList<>());
 
     private static final int MAX_HISTORY_SIZE = 1000;
 
@@ -33,23 +34,29 @@ public final class Dice {
     }
 
     public static List<String> getRollHistory() {
-        return Collections.unmodifiableList(new ArrayList<>(rollHistory));
+        synchronized (rollHistory) {
+            return Collections.unmodifiableList(new ArrayList<>(rollHistory));
+        }
     }
 
     public static String getLastRoll() {
-        if (rollHistory.isEmpty()) {
-            return null;
+        synchronized (rollHistory) {
+            if (rollHistory.isEmpty()) {
+                return null;
+            }
+            return rollHistory.get(rollHistory.size() - 1);
         }
-        return rollHistory.get(rollHistory.size() - 1);
     }
 
     public static List<String> getRecentRolls(int count) {
         if (count <= 0 || rollHistory.isEmpty()) {
             return Collections.emptyList();
         }
-        int startIndex = Math.max(0, rollHistory.size() - count);
-        return Collections.unmodifiableList(
-                new ArrayList<>(rollHistory.subList(startIndex, rollHistory.size())));
+        synchronized (rollHistory) {
+            int startIndex = Math.max(0, rollHistory.size() - count);
+            return Collections.unmodifiableList(
+                    new ArrayList<>(rollHistory.subList(startIndex, rollHistory.size())));
+        }
     }
     
     public static void clearRollHistory() {
@@ -61,11 +68,13 @@ public final class Dice {
     }
 
     private static void addToHistory(String entry) {
-        // Trim oldest entries if we're at capacity
-        if (rollHistory.size() >= MAX_HISTORY_SIZE) {
-            rollHistory.remove(0);
+        synchronized (rollHistory) {
+            // Trim oldest entries if we're at capacity
+            if (rollHistory.size() >= MAX_HISTORY_SIZE) {
+                rollHistory.remove(0);
+            }
+            rollHistory.add(entry);
         }
-        rollHistory.add(entry);
     }
 
     public static int roll(int sides) {

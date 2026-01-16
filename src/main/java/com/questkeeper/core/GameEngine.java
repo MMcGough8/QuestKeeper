@@ -73,9 +73,10 @@ public class GameEngine {
             Character character = createOrLoadCharacter();
             initializeGameState(character);
             runGameLoop();
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             Display.showError("Fatal error: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Stack trace for debugging:");
+            e.printStackTrace(System.err);
         } finally {
             Display.shutdown();
         }
@@ -112,8 +113,10 @@ public class GameEngine {
             Display.println();
             Display.println("Press Enter to continue...");
             scanner.nextLine();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load campaign: " + e.getMessage(), e);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load campaign files: " + e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid campaign data: " + e.getMessage(), e);
         }
     }
 
@@ -309,6 +312,11 @@ public class GameEngine {
 
             // Check for trial at new location
             checkForTrialAtLocation();
+
+            // Random encounters only when not at a trial location
+            if (campaign.getTrialAtLocation(gameState.getCurrentLocation().getId()) == null) {
+                checkForRandomEncounter();
+            }
         } else {
             Location target = campaign.getLocation(currentLocation.getExit(direction));
             if (target != null && !target.isUnlocked()) {
@@ -598,7 +606,9 @@ public class GameEngine {
 
         } catch (IOException e) {
             Display.showError("Failed to load save: " + e.getMessage());
-        } catch (Exception e) {
+        } catch (IllegalStateException e) {
+            Display.showError("Invalid save data: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
             Display.showError("Error restoring game state: " + e.getMessage());
         }
     }
@@ -1229,9 +1239,12 @@ public class GameEngine {
         // Extract DC from "d20(X) + Skill(+Y) = Z vs DC N"
         try {
             String[] parts = rollDescription.split("DC ");
+            if (parts.length < 2) {
+                return 10; // Default DC if format doesn't match
+            }
             return Integer.parseInt(parts[1].trim());
-        } catch (Exception e) {
-            return 10;
+        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+            return 10; // Default DC on parse failure
         }
     }
 
@@ -1260,33 +1273,36 @@ public class GameEngine {
         String failDamage = game.getFailConsequence();
         if (failDamage != null && failDamage.contains("damage")) {
             // Simple damage parsing - extract number
-            try {
-                int damage = 1; // Default
-                if (failDamage.contains("1d4")) {
-                    damage = Dice.parse("1d4");
-                } else if (failDamage.contains("1d6")) {
-                    damage = Dice.parse("1d6");
-                } else {
-                    // Try to extract single number
-                    String[] parts = failDamage.split(" ");
-                    for (String part : parts) {
-                        try {
-                            damage = Integer.parseInt(part);
-                            break;
-                        } catch (NumberFormatException ignored) {}
-                    }
-                }
+            int damage = 1; // Default
+            if (failDamage.contains("1d4")) {
+                damage = Dice.parse("1d4");
+            } else if (failDamage.contains("1d6")) {
+                damage = Dice.parse("1d6");
+            } else {
+                // Try to extract single number from the consequence text
+                damage = extractDamageNumber(failDamage);
+            }
 
-                gameState.getCharacter().takeDamage(damage);
-                Display.println(Display.colorize("You take " + damage + " damage!", RED));
-                Display.printHealthBar(
-                    gameState.getCharacter().getCurrentHitPoints(),
-                    gameState.getCharacter().getMaxHitPoints()
-                );
-            } catch (Exception e) {
-                // Couldn't parse damage, just show consequence text
+            gameState.getCharacter().takeDamage(damage);
+            Display.println(Display.colorize("You take " + damage + " damage!", RED));
+            Display.printHealthBar(
+                gameState.getCharacter().getCurrentHitPoints(),
+                gameState.getCharacter().getMaxHitPoints()
+            );
+        }
+    }
+
+    private int extractDamageNumber(String text) {
+        // Try to extract a single number from the text
+        String[] parts = text.split(" ");
+        for (String part : parts) {
+            try {
+                return Integer.parseInt(part);
+            } catch (NumberFormatException ignored) {
+                // Not a number, continue
             }
         }
+        return 1; // Default damage
     }
 
     private void completeTrial(Trial trial) {

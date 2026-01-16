@@ -147,13 +147,14 @@ public class SaveState {
 
     /**
      * Lists all save files in the default save directory.
+     * Corrupted save files are logged to stderr but still skipped.
      */
     public static List<SaveInfo> listSaves() throws IOException {
         Path saveDir = Path.of(DEFAULT_SAVE_DIR);
         if (!Files.exists(saveDir)) {
             return Collections.emptyList();
         }
-        
+
         List<SaveInfo> saves = new ArrayList<>();
         try (var stream = Files.list(saveDir)) {
             stream.filter(p -> p.toString().endsWith(".yaml"))
@@ -161,11 +162,13 @@ public class SaveState {
                       try {
                           saves.add(SaveInfo.fromFile(p));
                       } catch (IOException e) {
-                          // Skip corrupted saves
+                          // Log corrupted save files so user knows there's an issue
+                          System.err.println("Warning: Could not read save file " +
+                              p.getFileName() + ": " + e.getMessage());
                       }
                   });
         }
-        
+
         // Sort by timestamp, newest first
         saves.sort((a, b) -> b.timestamp().compareTo(a.timestamp()));
         return saves;
@@ -300,6 +303,12 @@ public class SaveState {
 
     public boolean hasVisited(String locationId) {
         return visitedLocations.contains(locationId);
+    }
+
+    public void addVisitedLocation(String locationId) {
+        if (locationId != null) {
+            visitedLocations.add(locationId);
+        }
     }
 
     public Character restoreCharacter() {
