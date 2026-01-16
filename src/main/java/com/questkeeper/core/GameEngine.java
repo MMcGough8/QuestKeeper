@@ -1568,7 +1568,12 @@ public class GameEngine {
         Display.println();
 
         // Show description (read-aloud for first visit, regular description otherwise)
+        // Get the description BEFORE marking as visited so read-aloud text shows
         String description = location.getDisplayDescription();
+
+        // Now mark as visited so subsequent looks show the short description
+        location.markVisited();
+
         Display.printWrapped(description, 60);
         Display.println();
 

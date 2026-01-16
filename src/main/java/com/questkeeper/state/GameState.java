@@ -88,8 +88,14 @@ public class GameState {
             }
         }
 
-        // Restore visited locations
-        state.visitedLocations.addAll(saveState.getVisitedLocations());
+        // Restore visited locations and mark them on Location objects
+        for (String visitedId : saveState.getVisitedLocations()) {
+            state.visitedLocations.add(visitedId);
+            Location visitedLoc = campaign.getLocation(visitedId);
+            if (visitedLoc != null) {
+                visitedLoc.markVisited();
+            }
+        }
 
         // Restore flags
         for (Map.Entry<String, Boolean> entry : saveState.getStateFlags().entrySet()) {
@@ -179,6 +185,8 @@ public class GameState {
 
     /**
      * Moves the player to a new location.
+     * Note: Does NOT mark the location as visited - that should happen
+     * after displaying the location, so read-aloud text can be shown.
      */
     public boolean moveToLocation(Location location) {
         if (location == null) {
@@ -191,7 +199,7 @@ public class GameState {
 
         this.currentLocation = location;
         this.visitedLocations.add(location.getId());
-        location.markVisited();
+        // Don't call location.markVisited() here - let GameEngine do it after display
 
         return true;
     }
