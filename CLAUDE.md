@@ -33,13 +33,31 @@ mvn exec:java -Dexec.mainClass="com.questkeeper.Main"
 mvn javadoc:javadoc
 ```
 
+## Playing the Game
+
+```bash
+mvn exec:java -Dexec.mainClass="com.questkeeper.Main" -q
+```
+
+**Basic Commands:**
+- `look` - Examine current location
+- `go <direction>` - Move (north, south, east, door, upstairs, etc.)
+- `talk <npc>` - Start conversation
+- `ask about <topic>` - Ask NPC about something
+- `bye` - End conversation
+- `inventory` / `i` - View items
+- `equip <item>` - Equip weapon/armor
+- `trial` - Start trial at current location
+- `save` / `load` - Save/load game
+- `help` - Show all commands
+
 ## Architecture
 
 ### Package Structure
 
 | Package | Purpose |
 |---------|---------|
-| `core` | Dice rolling (`Dice`) and command parsing (`CommandParser`) |
+| `core` | Game engine (`GameEngine`), dice rolling (`Dice`), command parsing (`CommandParser`) |
 | `character` | Player characters (`Character`) and NPCs (`NPC`) |
 | `combat` | Combat system (`CombatSystem`), monster definitions, `Combatant` interface, `CombatResult` |
 | `combat.status` | Status effects system: conditions, durations, effect management |
@@ -83,6 +101,18 @@ The `CombatSystem` class manages turn-based D&D 5e combat:
 - **Opportunity Attacks**: Triggered when fleeing combat
 - **CombatResult**: Immutable result objects with factory methods (`attackHit`, `attackMiss`, `enemyDefeated`, `victory`, `fled`, etc.)
 
+### Game Engine (`GameEngine`)
+
+The `GameEngine` class orchestrates the main game loop:
+
+- **Game Flow**: Title screen → Campaign loading → Character creation → Intro scene → Game loop
+- **Campaign Intro**: Displays dramatic opening scene from `campaign.yaml` intro field
+- **Location Display**: Shows read-aloud text on first visit, short description on subsequent visits
+- **NPC Display**: Shows NPCs with role descriptors (e.g., "Norrin (a bard)")
+- **Commands**: look, go, talk, ask, bye, attack, trial, attempt, inventory, equip, unequip, save, load, quit
+- **Dialogue System**: `talk <npc>` starts conversation, `ask about <topic>` queries, `bye` ends conversation
+- **Location Unlocking**: Completing trials unlocks new locations (e.g., trial_01 → clocktower_hill)
+
 ### Status Effects System (`combat.status` package)
 
 D&D 5e-compliant status effects using composition (not modifying Combatant interface):
@@ -121,7 +151,7 @@ Campaign files live in `src/main/resources/campaigns/{campaign-name}/`:
 
 | File | Purpose |
 |------|---------|
-| `campaign.yaml` | Metadata (id, name, starting location, DM notes) |
+| `campaign.yaml` | Metadata (id, name, intro scene, starting location, DM notes) |
 | `npcs.yaml` | NPC definitions with dialogue trees, voice, personality |
 | `monsters.yaml` | Monster templates with D&D 5e stats (AC, HP, abilities, attacks) |
 | `items.yaml` | Weapons, armor, consumables, quest items, and magic items |
@@ -147,9 +177,14 @@ Mini-games use D&D 5e skill checks:
 
 ## Testing
 
-Tests use JUnit 5 with `@Nested` classes for organization and `@TempDir` for file-based tests. Run all tests with `mvn test`.
+Tests use JUnit 5 with `@Nested` classes for organization and `@TempDir` for file-based tests.
 
-**Key test classes:** `CampaignTest`, `CombatSystemTest`, `CombatResultTest`, `InventoryTest`, `StatusEffectManagerTest`, `DialogueSystemTest`, `CharacterTest`, `MonsterTest`
+```bash
+mvn test                    # Run all 1764+ tests
+mvn test -Dtest=CampaignTest  # Run specific test class
+```
+
+**Key test classes:** `CampaignTest`, `CombatSystemTest`, `CombatResultTest`, `InventoryTest`, `StatusEffectManagerTest`, `DialogueSystemTest`, `CharacterTest`, `MonsterTest`, `GameStateTest`
 
 ## Key Implementation Details
 
@@ -174,8 +209,11 @@ Tests use JUnit 5 with `@Nested` classes for organization and `@TempDir` for fil
 ## Current Campaign: Muddlebrook
 
 The "Muddlebrook: Harlequin Trials" campaign includes:
-- 3 trials (Mayor's Office, Clocktower, Harlequin's Stage)
-- 14 mini-games with skill checks
-- 11 magic item rewards (Tier 1)
-- 6 NPCs (Norrin, Mara, Darius, Elara, Captain Thorne, Mayor Alderwick)
-- 3 monster types (Clockwork Critter, Confetti Ooze, Harlequin Machinist)
+- **Dramatic intro**: Townsman bursts in announcing the mayor's disappearance
+- **18 locations**: Tavern, town square, market, clocktower, cemetery, docks, forest, and more
+- **3 trials**: Mayor's Office, Clocktower Mechanism, Harlequin's Stage
+- **14 mini-games** with D&D skill checks
+- **11 magic item rewards** (Tier 1)
+- **6 NPCs**: Norrin (bard), Mara (bartender), Darius (recluse), Elara (shopkeeper), Captain Thorne, Mayor Alderwick
+- **3 monster types**: Clockwork Critter, Confetti Ooze, Harlequin Machinist
+- **Progressive unlocking**: Trial completion unlocks new areas (clocktower, harlequin's lair)

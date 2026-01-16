@@ -124,15 +124,35 @@ public class SaveState {
             java.nio.file.StandardCopyOption.ATOMIC_MOVE);
     }
 
-     /**
+    /**
      * Loads a game state from a YAML file.
+     *
+     * @throws IOException if the file cannot be read or is corrupted
      */
     public static SaveState load(Path filepath) throws IOException {
+        if (!Files.exists(filepath)) {
+            throw new IOException("Save file not found: " + filepath);
+        }
+
         Yaml yaml = new Yaml();
-        
+
         try (Reader reader = Files.newBufferedReader(filepath)) {
-            Map<String, Object> data = yaml.load(reader);
-            return fromMap(data);
+            Object loaded = yaml.load(reader);
+            if (loaded == null) {
+                throw new IOException("Save file is empty: " + filepath);
+            }
+            if (!(loaded instanceof Map)) {
+                throw new IOException("Save file has invalid format (expected YAML map): " + filepath);
+            }
+            @SuppressWarnings("unchecked")
+            Map<String, Object> data = (Map<String, Object>) loaded;
+            return fromMap(data, filepath.toString());
+        } catch (ClassCastException e) {
+            throw new IOException("Save file has corrupted data structure: " + filepath + " - " + e.getMessage(), e);
+        } catch (org.yaml.snakeyaml.scanner.ScannerException e) {
+            throw new IOException("Save file has invalid YAML syntax: " + filepath + " - " + e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            throw new IOException("Save file has invalid data: " + filepath + " - " + e.getMessage(), e);
         }
     }
 
@@ -203,63 +223,127 @@ public class SaveState {
         return map;
     }
 
-     @SuppressWarnings("unchecked")
-    private static SaveState fromMap(Map<String, Object> data) {
+    private static SaveState fromMap(Map<String, Object> data, String source) {
         SaveState state = new SaveState();
-        
+
         // Metadata
         state.saveVersion = getString(data, "save_version", CURRENT_VERSION);
-        state.timestamp = Instant.parse(getString(data, "timestamp", Instant.now().toString()));
+        String timestampStr = getString(data, "timestamp", null);
+        if (timestampStr != null) {
+            try {
+                state.timestamp = Instant.parse(timestampStr);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Invalid timestamp format in " + source + ": " + timestampStr);
+            }
+        }
         state.campaignId = getString(data, "campaign_id", "unknown");
         state.saveName = getString(data, "save_name", "Unnamed Save");
-        
-        // Character
-        Map<String, Object> charData = (Map<String, Object>) data.get("character");
-        if (charData != null) {
+
+        // Character - with defensive type checking
+        Object charObj = data.get("character");
+        if (charObj != null) {
+            if (!(charObj instanceof Map)) {
+                throw new IllegalArgumentException("Character data is not a valid map in " + source);
+            }
+            @SuppressWarnings("unchecked")
+            Map<String, Object> charData = (Map<String, Object>) charObj;
             state.character = CharacterData.fromMap(charData);
         }
-        
+
         // World state
         state.currentLocationId = getString(data, "current_location", null);
-        List<String> visited = (List<String>) data.get("visited_locations");
-        if (visited != null) {
-            state.visitedLocations = new HashSet<>(visited);
-        }
-        
-        // Campaign progress
-        Map<String, Boolean> flags = (Map<String, Boolean>) data.get("flags");
-        if (flags != null) {
-            state.stateFlags = new HashMap<>(flags);
-        }
-        
-        Map<String, Integer> counters = (Map<String, Integer>) data.get("counters");
-        if (counters != null) {
-            state.stateCounters = new HashMap<>(counters);
-        }
-        
-        Map<String, String> strings = (Map<String, String>) data.get("strings");
-        if (strings != null) {
-            state.stateStrings = new HashMap<>(strings);
-        }
-        
+        state.visitedLocations = getStringSet(data, "visited_locations");
+
+        // Campaign progress - with defensive type checking
+        state.stateFlags = getBooleanMap(data, "flags");
+        state.stateCounters = getIntegerMap(data, "counters");
+        state.stateStrings = getStringMap(data, "strings");
+
         // Inventory
-        List<String> inventory = (List<String>) data.get("inventory");
-        if (inventory != null) {
-            state.inventoryItems = new ArrayList<>(inventory);
-        }
-        
-        List<String> equipped = (List<String>) data.get("equipped");
-        if (equipped != null) {
-            state.equippedItems = new ArrayList<>(equipped);
-        }
-        
+        state.inventoryItems = getStringList(data, "inventory");
+        state.equippedItems = getStringList(data, "equipped");
         state.gold = getInt(data, "gold", 0);
-        
+
         // Stats
         state.totalPlayTimeSeconds = getLong(data, "play_time_seconds", 0);
         state.saveCount = getInt(data, "save_count", 0);
-        
+
         return state;
+    }
+
+    /**
+     * Safely extracts a list of strings from YAML data.
+     */
+    private static List<String> getStringList(Map<String, Object> data, String key) {
+        Object value = data.get(key);
+        if (value instanceof List<?> list) {
+            List<String> result = new ArrayList<>();
+            for (Object item : list) {
+                if (item != null) {
+                    result.add(item.toString());
+                }
+            }
+            return result;
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * Safely extracts a set of strings from YAML data.
+     */
+    private static Set<String> getStringSet(Map<String, Object> data, String key) {
+        return new HashSet<>(getStringList(data, key));
+    }
+
+    /**
+     * Safely extracts a map with string keys and boolean values.
+     */
+    private static Map<String, Boolean> getBooleanMap(Map<String, Object> data, String key) {
+        Object value = data.get(key);
+        if (value instanceof Map<?, ?> map) {
+            Map<String, Boolean> result = new HashMap<>();
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                if (entry.getKey() instanceof String keyStr && entry.getValue() instanceof Boolean boolVal) {
+                    result.put(keyStr, boolVal);
+                }
+            }
+            return result;
+        }
+        return new HashMap<>();
+    }
+
+    /**
+     * Safely extracts a map with string keys and integer values.
+     */
+    private static Map<String, Integer> getIntegerMap(Map<String, Object> data, String key) {
+        Object value = data.get(key);
+        if (value instanceof Map<?, ?> map) {
+            Map<String, Integer> result = new HashMap<>();
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                if (entry.getKey() instanceof String keyStr && entry.getValue() instanceof Number numVal) {
+                    result.put(keyStr, numVal.intValue());
+                }
+            }
+            return result;
+        }
+        return new HashMap<>();
+    }
+
+    /**
+     * Safely extracts a map with string keys and string values.
+     */
+    private static Map<String, String> getStringMap(Map<String, Object> data, String key) {
+        Object value = data.get(key);
+        if (value instanceof Map<?, ?> map) {
+            Map<String, String> result = new HashMap<>();
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                if (entry.getKey() instanceof String keyStr) {
+                    result.put(keyStr, entry.getValue() != null ? entry.getValue().toString() : "");
+                }
+            }
+            return result;
+        }
+        return new HashMap<>();
     }
 
     public void setFlag(String key, boolean value) {
@@ -474,30 +558,54 @@ public class SaveState {
         Instant timestamp,
         String playTime
     ) {
-        @SuppressWarnings("unchecked")
         public static SaveInfo fromFile(Path path) throws IOException {
             Yaml yaml = new Yaml();
             try (Reader reader = Files.newBufferedReader(path)) {
-                Map<String, Object> data = yaml.load(reader);
-                
+                Object loaded = yaml.load(reader);
+                if (loaded == null) {
+                    throw new IOException("Save file is empty: " + path.getFileName());
+                }
+                if (!(loaded instanceof Map)) {
+                    throw new IOException("Save file has invalid format: " + path.getFileName());
+                }
+                @SuppressWarnings("unchecked")
+                Map<String, Object> data = (Map<String, Object>) loaded;
+
                 String saveName = getString(data, "save_name", "Unknown");
                 String campaignId = getString(data, "campaign_id", "unknown");
-                Instant timestamp = Instant.parse(getString(data, "timestamp", Instant.now().toString()));
-                
+
+                Instant timestamp;
+                String timestampStr = getString(data, "timestamp", null);
+                if (timestampStr != null) {
+                    try {
+                        timestamp = Instant.parse(timestampStr);
+                    } catch (Exception e) {
+                        timestamp = Instant.now();
+                    }
+                } else {
+                    timestamp = Instant.now();
+                }
+
                 String characterName = "Unknown";
                 int characterLevel = 1;
-                Map<String, Object> charData = (Map<String, Object>) data.get("character");
-                if (charData != null) {
+                Object charObj = data.get("character");
+                if (charObj instanceof Map<?, ?> charMap) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> charData = (Map<String, Object>) charMap;
                     characterName = getString(charData, "name", "Unknown");
                     characterLevel = getInt(charData, "level", 1);
                 }
-                
+
                 long playSeconds = getLong(data, "play_time_seconds", 0);
                 long hours = playSeconds / 3600;
                 long minutes = (playSeconds % 3600) / 60;
                 String playTime = hours > 0 ? String.format("%dh %dm", hours, minutes) : String.format("%dm", minutes);
-                
+
                 return new SaveInfo(path, saveName, campaignId, characterName, characterLevel, timestamp, playTime);
+            } catch (org.yaml.snakeyaml.scanner.ScannerException e) {
+                throw new IOException("Save file has invalid YAML syntax: " + path.getFileName(), e);
+            } catch (ClassCastException e) {
+                throw new IOException("Save file has corrupted data: " + path.getFileName(), e);
             }
         }
 

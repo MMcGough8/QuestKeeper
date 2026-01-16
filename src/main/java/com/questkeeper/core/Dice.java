@@ -3,7 +3,7 @@ package com.questkeeper.core;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,8 +18,6 @@ import java.util.regex.Pattern;
  * @version 1.1.0
  */
 public final class Dice {
-    
-    private static final Random random = new Random();
 
     private static final Pattern DICE_PATTERN = Pattern.compile(
             "^(\\d*)d(\\d+)([+-]\\d+)?$", Pattern.CASE_INSENSITIVE);
@@ -81,7 +79,7 @@ public final class Dice {
         if (sides < 1) {
             throw new IllegalArgumentException("Die must have at least 1 side, got: " + sides);
         }
-        int result = random.nextInt(sides) + 1;
+        int result = ThreadLocalRandom.current().nextInt(sides) + 1;
         addToHistory(String.format("d%d: %d", sides, result));
         return result;
     }
@@ -126,7 +124,7 @@ public final class Dice {
         int total = 0;
         
         for (int i = 0; i < count; i++) {
-            rolls[i] = random.nextInt(sides) + 1;
+            rolls[i] = ThreadLocalRandom.current().nextInt(sides) + 1;
             total += rolls[i];
         }
 
@@ -147,7 +145,7 @@ public final class Dice {
             throw new IllegalArgumentException("Die must have at least 1 side, got: " + sides);
         }
         
-        int baseRoll = random.nextInt(sides) + 1;
+        int baseRoll = ThreadLocalRandom.current().nextInt(sides) + 1;
         int total = baseRoll + modifier;
 
         String modStr = modifier >= 0 ? String.format(" + %d", modifier) 
@@ -169,7 +167,7 @@ public final class Dice {
         int subtotal = 0;
         
         for (int i = 0; i < count; i++) {
-            rolls[i] = random.nextInt(sides) + 1;
+            rolls[i] = ThreadLocalRandom.current().nextInt(sides) + 1;
             subtotal += rolls[i];
         }
         
@@ -192,7 +190,7 @@ public final class Dice {
     }
 
     public static boolean checkAgainstDC(int modifier, int dc) {
-        int baseRoll = random.nextInt(20) + 1;
+        int baseRoll = ThreadLocalRandom.current().nextInt(20) + 1;
         int total = baseRoll + modifier;
         boolean success = total >= dc;
         
@@ -213,8 +211,8 @@ public final class Dice {
     }
 
     public static int rollWithAdvantage() {
-        int roll1 = random.nextInt(20) + 1;
-        int roll2 = random.nextInt(20) + 1;
+        int roll1 = ThreadLocalRandom.current().nextInt(20) + 1;
+        int roll2 = ThreadLocalRandom.current().nextInt(20) + 1;
         int result = Math.max(roll1, roll2);
         
         addToHistory(String.format("d20 (Advantage): [%d, %d] = %d", roll1, roll2, result));
@@ -223,8 +221,8 @@ public final class Dice {
     }
 
     public static int rollWithDisadvantage() {
-        int roll1 = random.nextInt(20) + 1;
-        int roll2 = random.nextInt(20) + 1;
+        int roll1 = ThreadLocalRandom.current().nextInt(20) + 1;
+        int roll2 = ThreadLocalRandom.current().nextInt(20) + 1;
         int result = Math.min(roll1, roll2);
         
         addToHistory(String.format("d20 (Disadvantage): [%d, %d] = %d", roll1, roll2, result));
@@ -233,8 +231,8 @@ public final class Dice {
     }
 
     public static int rollWithAdvantage(int modifier) {
-        int roll1 = random.nextInt(20) + 1;
-        int roll2 = random.nextInt(20) + 1;
+        int roll1 = ThreadLocalRandom.current().nextInt(20) + 1;
+        int roll2 = ThreadLocalRandom.current().nextInt(20) + 1;
         int baseResult = Math.max(roll1, roll2);
         int total = baseResult + modifier;
         
@@ -247,8 +245,8 @@ public final class Dice {
     }
 
     public static int rollWithDisadvantage(int modifier) {
-        int roll1 = random.nextInt(20) + 1;
-        int roll2 = random.nextInt(20) + 1;
+        int roll1 = ThreadLocalRandom.current().nextInt(20) + 1;
+        int roll2 = ThreadLocalRandom.current().nextInt(20) + 1;
         int baseResult = Math.min(roll1, roll2);
         int total = baseResult + modifier;
         

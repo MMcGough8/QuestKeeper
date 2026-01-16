@@ -157,23 +157,22 @@ class CampaignLoader {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void loadMonsters() {
         Path monstersFile = campaignRoot.resolve(MONSTERS_FILE);
-        
+
         if (!Files.exists(monstersFile)) {
             return;
         }
 
         try (InputStream is = Files.newInputStream(monstersFile)) {
             Map<String, Object> data = yaml.load(is);
-            
-            if (data == null || !data.containsKey("monsters")) {
+
+            if (data == null) {
                 return;
             }
 
-            List<Map<String, Object>> monsterList = (List<Map<String, Object>>) data.get("monsters");
-            
+            List<Map<String, Object>> monsterList = getListOfMaps(data, "monsters");
+
             for (Map<String, Object> monsterData : monsterList) {
                 try {
                     Monster monster = parseMonster(monsterData);
@@ -187,7 +186,6 @@ class CampaignLoader {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private Monster parseMonster(Map<String, Object> data) {
         String id = getString(data, "id", "unknown_monster");
         String name = getString(data, "name", "Unknown Monster");
@@ -218,8 +216,9 @@ class CampaignLoader {
         monster.setDamageDice(getString(data, "damage_dice", "1d4"));
         monster.setDescription(getString(data, "description", ""));
 
-        if (data.containsKey("abilities")) {
-            Map<String, Object> abilities = (Map<String, Object>) data.get("abilities");
+        // Parse ability modifiers safely
+        Map<String, Object> abilities = getMap(data, "abilities");
+        if (!abilities.isEmpty()) {
             monster.setAbilityModifiers(
                 getInt(abilities, "str", 0),
                 getInt(abilities, "dex", 0),
@@ -231,24 +230,20 @@ class CampaignLoader {
         }
 
         // Parse special abilities - combine names into a comma-separated string
-        if (data.containsKey("special_abilities")) {
-            List<Map<String, Object>> specialAbilities =
-                (List<Map<String, Object>>) data.get("special_abilities");
-            if (specialAbilities != null && !specialAbilities.isEmpty()) {
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < specialAbilities.size(); i++) {
-                    Map<String, Object> ability = specialAbilities.get(i);
-                    String abilityName = getString(ability, "name", "");
-                    if (!abilityName.isEmpty()) {
-                        if (sb.length() > 0) {
-                            sb.append(", ");
-                        }
-                        sb.append(abilityName);
+        List<Map<String, Object>> specialAbilities = getListOfMaps(data, "special_abilities");
+        if (!specialAbilities.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (Map<String, Object> ability : specialAbilities) {
+                String abilityName = getString(ability, "name", "");
+                if (!abilityName.isEmpty()) {
+                    if (sb.length() > 0) {
+                        sb.append(", ");
                     }
+                    sb.append(abilityName);
                 }
-                if (sb.length() > 0) {
-                    monster.setSpecialAbility(sb.toString());
-                }
+            }
+            if (sb.length() > 0) {
+                monster.setSpecialAbility(sb.toString());
             }
         }
 
@@ -265,23 +260,22 @@ class CampaignLoader {
         return monster;
     }
 
-    @SuppressWarnings("unchecked")
     private void loadNPCs() {
         Path npcsFile = campaignRoot.resolve(NPCS_FILE);
-        
+
         if (!Files.exists(npcsFile)) {
             return;
         }
 
         try (InputStream is = Files.newInputStream(npcsFile)) {
             Map<String, Object> data = yaml.load(is);
-            
-            if (data == null || !data.containsKey("npcs")) {
+
+            if (data == null) {
                 return;
             }
 
-            List<Map<String, Object>> npcList = (List<Map<String, Object>>) data.get("npcs");
-            
+            List<Map<String, Object>> npcList = getListOfMaps(data, "npcs");
+
             for (Map<String, Object> npcData : npcList) {
                 try {
                     NPC npc = parseNPC(npcData);
@@ -295,7 +289,6 @@ class CampaignLoader {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private NPC parseNPC(Map<String, Object> data) {
         String id = getString(data, "id", "unknown_npc");
         String name = getString(data, "name", "Unknown NPC");
@@ -311,93 +304,80 @@ class CampaignLoader {
         npc.setGreeting(getString(data, "greeting", ""));
         npc.setReturnGreeting(getString(data, "return_greeting", ""));
 
-        if (data.containsKey("dialogues")) {
-            Map<String, String> dialogueMap = (Map<String, String>) data.get("dialogues");
-            for (Map.Entry<String, String> entry : dialogueMap.entrySet()) {
-                npc.addDialogue(entry.getKey(), entry.getValue());
-            }
+        Map<String, String> dialogueMap = getStringMap(data, "dialogues");
+        for (Map.Entry<String, String> entry : dialogueMap.entrySet()) {
+            npc.addDialogue(entry.getKey(), entry.getValue());
         }
 
-        if (data.containsKey("sample_lines")) {
-            List<String> lines = (List<String>) data.get("sample_lines");
-            for (String line : lines) {
-                npc.addSampleLine(line);
-            }
+        List<String> lines = getStringList(data, "sample_lines");
+        for (String line : lines) {
+            npc.addSampleLine(line);
         }
 
         return npc;
     }
 
-    @SuppressWarnings("unchecked")
     private void loadItems() {
         Path itemsFile = campaignRoot.resolve(ITEMS_FILE);
-        
+
         if (!Files.exists(itemsFile)) {
             return;
         }
 
         try (InputStream is = Files.newInputStream(itemsFile)) {
             Map<String, Object> data = yaml.load(is);
-            
+
             if (data == null) {
                 return;
             }
 
-            if (data.containsKey("weapons")) {
-                List<Map<String, Object>> weaponList = (List<Map<String, Object>>) data.get("weapons");
-                for (Map<String, Object> weaponData : weaponList) {
-                    try {
-                        String yamlId = getString(weaponData, "id", null);
-                        Weapon weapon = parseWeapon(weaponData);
-                        // Use YAML id as key if provided, otherwise use generated id
-                        String key = yamlId != null ? yamlId : weapon.getId();
-                        weapons.put(key, weapon);
-                    } catch (Exception e) {
-                        loadErrors.add("Error parsing weapon: " + e.getMessage());
-                    }
+            List<Map<String, Object>> weaponList = getListOfMaps(data, "weapons");
+            for (Map<String, Object> weaponData : weaponList) {
+                try {
+                    String yamlId = getString(weaponData, "id", null);
+                    Weapon weapon = parseWeapon(weaponData);
+                    // Use YAML id as key if provided, otherwise use generated id
+                    String key = yamlId != null ? yamlId : weapon.getId();
+                    weapons.put(key, weapon);
+                } catch (Exception e) {
+                    loadErrors.add("Error parsing weapon: " + e.getMessage());
                 }
             }
 
-            if (data.containsKey("armor")) {
-                List<Map<String, Object>> armorList = (List<Map<String, Object>>) data.get("armor");
-                for (Map<String, Object> armorData : armorList) {
-                    try {
-                        String yamlId = getString(armorData, "id", null);
-                        Armor armor = parseArmor(armorData);
-                        String key = yamlId != null ? yamlId : armor.getId();
-                        armors.put(key, armor);
-                    } catch (Exception e) {
-                        loadErrors.add("Error parsing armor: " + e.getMessage());
-                    }
+            List<Map<String, Object>> armorList = getListOfMaps(data, "armor");
+            for (Map<String, Object> armorData : armorList) {
+                try {
+                    String yamlId = getString(armorData, "id", null);
+                    Armor armor = parseArmor(armorData);
+                    String key = yamlId != null ? yamlId : armor.getId();
+                    armors.put(key, armor);
+                } catch (Exception e) {
+                    loadErrors.add("Error parsing armor: " + e.getMessage());
                 }
             }
 
-            if (data.containsKey("items")) {
-                List<Map<String, Object>> itemList = (List<Map<String, Object>>) data.get("items");
-                for (Map<String, Object> itemData : itemList) {
-                    try {
-                        String yamlId = getString(itemData, "id", null);
-                        Item item = parseItem(itemData);
-                        String key = yamlId != null ? yamlId : item.getId();
-                        items.put(key, item);
-                    } catch (Exception e) {
-                        loadErrors.add("Error parsing item: " + e.getMessage());
-                    }
+            List<Map<String, Object>> itemList = getListOfMaps(data, "items");
+            for (Map<String, Object> itemData : itemList) {
+                try {
+                    String yamlId = getString(itemData, "id", null);
+                    Item item = parseItem(itemData);
+                    String key = yamlId != null ? yamlId : item.getId();
+                    items.put(key, item);
+                } catch (Exception e) {
+                    loadErrors.add("Error parsing item: " + e.getMessage());
                 }
             }
 
             // Load magic items (stored in items map for unified access)
-            if (data.containsKey("magic_items")) {
-                List<Map<String, Object>> magicItemList = (List<Map<String, Object>>) data.get("magic_items");
-                for (Map<String, Object> magicItemData : magicItemList) {
-                    try {
-                        String yamlId = getString(magicItemData, "id", null);
-                        Item magicItem = parseMagicItem(magicItemData);
-                        String key = yamlId != null ? yamlId : magicItem.getId();
-                        items.put(key, magicItem);
-                    } catch (Exception e) {
-                        loadErrors.add("Error parsing magic item: " + e.getMessage());
-                    }
+            List<Map<String, Object>> magicItemList = getListOfMaps(data, "magic_items");
+            for (Map<String, Object> magicItemData : magicItemList) {
+                try {
+                    String yamlId = getString(magicItemData, "id", null);
+                    Item magicItem = parseMagicItem(magicItemData);
+                    String key = yamlId != null ? yamlId : magicItem.getId();
+                    items.put(key, magicItem);
+                } catch (Exception e) {
+                    loadErrors.add("Error parsing magic item: " + e.getMessage());
                 }
             }
         } catch (IOException e) {
@@ -405,7 +385,6 @@ class CampaignLoader {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void loadLocations() {
         Path locationsFile = campaignRoot.resolve(LOCATIONS_FILE);
 
@@ -416,11 +395,11 @@ class CampaignLoader {
         try (InputStream is = Files.newInputStream(locationsFile)) {
             Map<String, Object> data = yaml.load(is);
 
-            if (data == null || !data.containsKey("locations")) {
+            if (data == null) {
                 return;
             }
 
-            List<Map<String, Object>> locationList = (List<Map<String, Object>>) data.get("locations");
+            List<Map<String, Object>> locationList = getListOfMaps(data, "locations");
 
             for (Map<String, Object> locationData : locationList) {
                 try {
@@ -435,7 +414,6 @@ class CampaignLoader {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private Location parseLocation(Map<String, Object> data) {
         String id = getString(data, "id", "unknown_location");
         String name = getString(data, "name", "Unknown Location");
@@ -445,49 +423,35 @@ class CampaignLoader {
         Location location = new Location(id, name, description, readAloudText);
 
         // Parse exits
-        if (data.containsKey("exits")) {
-            Map<String, String> exits = (Map<String, String>) data.get("exits");
-            for (Map.Entry<String, String> exit : exits.entrySet()) {
-                location.addExit(exit.getKey(), exit.getValue());
-            }
+        Map<String, String> exits = getStringMap(data, "exits");
+        for (Map.Entry<String, String> exit : exits.entrySet()) {
+            location.addExit(exit.getKey(), exit.getValue());
         }
 
         // Parse NPCs at this location
-        if (data.containsKey("npcs")) {
-            List<String> npcIds = (List<String>) data.get("npcs");
-            for (String npcId : npcIds) {
-                location.addNpc(npcId);
-            }
+        List<String> npcIds = getStringList(data, "npcs");
+        for (String npcId : npcIds) {
+            location.addNpc(npcId);
         }
 
         // Parse items at this location
-        if (data.containsKey("items")) {
-            List<String> itemIds = (List<String>) data.get("items");
-            for (String itemId : itemIds) {
-                location.addItem(itemId);
-            }
+        List<String> itemIds = getStringList(data, "items");
+        for (String itemId : itemIds) {
+            location.addItem(itemId);
         }
 
-        // Parse flags
-        if (data.containsKey("flags")) {
-            List<String> flags = (List<String>) data.get("flags");
-            for (String flag : flags) {
-                location.setFlag(flag);
-            }
+        // Parse flags and handle locked flag specially
+        List<String> flags = getStringList(data, "flags");
+        for (String flag : flags) {
+            location.setFlag(flag);
         }
-
-        // Handle locked flag specially
-        if (data.containsKey("flags")) {
-            List<String> flags = (List<String>) data.get("flags");
-            if (flags.contains("locked")) {
-                location.lock();
-            }
+        if (flags.contains("locked")) {
+            location.lock();
         }
 
         return location;
     }
 
-    @SuppressWarnings("unchecked")
     private void loadMiniGames() {
         Path miniGamesFile = campaignRoot.resolve(MINIGAMES_FILE);
 
@@ -498,11 +462,11 @@ class CampaignLoader {
         try (InputStream is = Files.newInputStream(miniGamesFile)) {
             Map<String, Object> data = yaml.load(is);
 
-            if (data == null || !data.containsKey("minigames")) {
+            if (data == null) {
                 return;
             }
 
-            List<Map<String, Object>> miniGameList = (List<Map<String, Object>>) data.get("minigames");
+            List<Map<String, Object>> miniGameList = getListOfMaps(data, "minigames");
 
             for (Map<String, Object> miniGameData : miniGameList) {
                 try {
@@ -572,7 +536,6 @@ class CampaignLoader {
         return miniGame;
     }
 
-    @SuppressWarnings("unchecked")
     private void loadTrials() {
         Path trialsFile = campaignRoot.resolve(TRIALS_FILE);
 
@@ -583,11 +546,11 @@ class CampaignLoader {
         try (InputStream is = Files.newInputStream(trialsFile)) {
             Map<String, Object> data = yaml.load(is);
 
-            if (data == null || !data.containsKey("trials")) {
+            if (data == null) {
                 return;
             }
 
-            List<Map<String, Object>> trialList = (List<Map<String, Object>>) data.get("trials");
+            List<Map<String, Object>> trialList = getListOfMaps(data, "trials");
 
             for (Map<String, Object> trialData : trialList) {
                 try {
@@ -602,7 +565,6 @@ class CampaignLoader {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private Trial parseTrial(Map<String, Object> data) {
         String id = getString(data, "id", "unknown_trial");
         String name = getString(data, "name", "Unknown Trial");
@@ -615,15 +577,13 @@ class CampaignLoader {
         trial.setStinger(getString(data, "stinger", ""));
 
         // Add mini-games to the trial by looking them up from the loaded miniGames
-        if (data.containsKey("mini_games")) {
-            List<String> miniGameIds = (List<String>) data.get("mini_games");
-            for (String miniGameId : miniGameIds) {
-                MiniGame miniGame = miniGames.get(miniGameId);
-                if (miniGame != null) {
-                    trial.addMiniGame(miniGame);
-                } else {
-                    loadErrors.add("Trial '" + id + "' references unknown minigame: " + miniGameId);
-                }
+        List<String> miniGameIds = getStringList(data, "mini_games");
+        for (String miniGameId : miniGameIds) {
+            MiniGame miniGame = miniGames.get(miniGameId);
+            if (miniGame != null) {
+                trial.addMiniGame(miniGame);
+            } else {
+                loadErrors.add("Trial '" + id + "' references unknown minigame: " + miniGameId);
             }
         }
 
@@ -647,18 +607,17 @@ class CampaignLoader {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private Weapon parseWeapon(Map<String, Object> data) {
         String name = getString(data, "name", "Unknown Weapon");
         int diceCount = getInt(data, "damage_dice_count", 1);
         int dieSize = getInt(data, "damage_die_size", 4);
-        
+
         String damageTypeStr = getString(data, "damage_type", "SLASHING");
         Weapon.DamageType damageType = Weapon.DamageType.valueOf(damageTypeStr.toUpperCase());
-        
+
         String categoryStr = getString(data, "category", "SIMPLE_MELEE");
         Weapon.WeaponCategory category = Weapon.WeaponCategory.valueOf(categoryStr.toUpperCase());
-        
+
         double weight = getDouble(data, "weight", 1.0);
         int value = getInt(data, "value", 1);
         int normalRange = getInt(data, "normal_range", 0);
@@ -666,20 +625,18 @@ class CampaignLoader {
 
         Weapon weapon;
         if (normalRange > 0) {
-            weapon = new Weapon(name, diceCount, dieSize, damageType, category, 
+            weapon = new Weapon(name, diceCount, dieSize, damageType, category,
                               normalRange, longRange, weight, value);
         } else {
             weapon = new Weapon(name, diceCount, dieSize, damageType, category, weight, value);
         }
 
-        if (data.containsKey("properties")) {
-            List<String> props = (List<String>) data.get("properties");
-            for (String prop : props) {
-                try {
-                    weapon.addProperty(Weapon.WeaponProperty.valueOf(prop.toUpperCase()));
-                } catch (IllegalArgumentException e) {
-                    loadErrors.add("Invalid weapon property: " + prop);
-                }
+        List<String> props = getStringList(data, "properties");
+        for (String prop : props) {
+            try {
+                weapon.addProperty(Weapon.WeaponProperty.valueOf(prop.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                loadErrors.add("Invalid weapon property: " + prop);
             }
         }
 
@@ -706,7 +663,6 @@ class CampaignLoader {
         return weapon;
     }
 
-    @SuppressWarnings("unchecked")
     private Armor parseArmor(Map<String, Object> data) {
         String name = getString(data, "name", "Unknown Armor");
         int baseAC = getInt(data, "base_ac", 10);
@@ -982,5 +938,81 @@ class CampaignLoader {
             return (Boolean) value;
         }
         return defaultValue;
+    }
+
+    /**
+     * Safely extracts a List from YAML data with type checking.
+     * Returns empty list if key doesn't exist or value is not a List.
+     */
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> getListOfMaps(Map<String, Object> data, String key) {
+        Object value = data.get(key);
+        if (value instanceof List<?> list) {
+            List<Map<String, Object>> result = new ArrayList<>();
+            for (Object item : list) {
+                if (item instanceof Map<?, ?> map) {
+                    // Verify all keys are strings
+                    boolean allStrings = map.keySet().stream().allMatch(k -> k instanceof String);
+                    if (allStrings) {
+                        result.add((Map<String, Object>) map);
+                    }
+                }
+            }
+            return result;
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * Safely extracts a Map from YAML data with type checking.
+     * Returns empty map if key doesn't exist or value is not a Map.
+     */
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> getMap(Map<String, Object> data, String key) {
+        Object value = data.get(key);
+        if (value instanceof Map<?, ?> map) {
+            // Verify all keys are strings
+            boolean allStrings = map.keySet().stream().allMatch(k -> k instanceof String);
+            if (allStrings) {
+                return (Map<String, Object>) map;
+            }
+        }
+        return Collections.emptyMap();
+    }
+
+    /**
+     * Safely extracts a List of Strings from YAML data.
+     * Returns empty list if key doesn't exist or value is not a List.
+     */
+    private List<String> getStringList(Map<String, Object> data, String key) {
+        Object value = data.get(key);
+        if (value instanceof List<?> list) {
+            List<String> result = new ArrayList<>();
+            for (Object item : list) {
+                if (item != null) {
+                    result.add(item.toString());
+                }
+            }
+            return result;
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * Safely extracts a Map with String keys and String values from YAML data.
+     * Returns empty map if key doesn't exist or value is not a valid Map.
+     */
+    private Map<String, String> getStringMap(Map<String, Object> data, String key) {
+        Object value = data.get(key);
+        if (value instanceof Map<?, ?> map) {
+            Map<String, String> result = new HashMap<>();
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                if (entry.getKey() instanceof String keyStr) {
+                    result.put(keyStr, entry.getValue() != null ? entry.getValue().toString() : "");
+                }
+            }
+            return result;
+        }
+        return Collections.emptyMap();
     }
 }

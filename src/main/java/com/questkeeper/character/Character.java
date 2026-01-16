@@ -344,13 +344,15 @@ public class Character implements Combatant {
     public void setAbilityScore(Ability ability, int score) {
         int clampedScore = Math.max(MIN_ABILITY_SCORE, Math.min(MAX_ABILITY_SCORE, score));
         baseAbilityScores.put(ability, clampedScore);
-        
+
         if (ability == Ability.CONSTITUTION) {
             int oldMax = maxHitPoints;
             maxHitPoints = calculateMaxHitPoints();
             if (oldMax > 0) {
                 currentHitPoints = (int) ((double) currentHitPoints / oldMax * maxHitPoints);
             }
+        } else if (ability == Ability.STRENGTH) {
+            inventory.setCarryingCapacityFromStrength(getAbilityScore(Ability.STRENGTH));
         }
     }
 
@@ -369,11 +371,14 @@ public class Character implements Combatant {
         baseAbilityScores.put(Ability.INTELLIGENCE, clampAbilityScore(intel));
         baseAbilityScores.put(Ability.WISDOM, clampAbilityScore(wis));
         baseAbilityScores.put(Ability.CHARISMA, clampAbilityScore(cha));
-        
+
         maxHitPoints = calculateMaxHitPoints();
         if (currentHitPoints > maxHitPoints) {
             currentHitPoints = maxHitPoints;
         }
+
+        // Update inventory carrying capacity based on new STR
+        inventory.setCarryingCapacityFromStrength(getAbilityScore(Ability.STRENGTH));
     }
     
     private int clampAbilityScore(int score) {
