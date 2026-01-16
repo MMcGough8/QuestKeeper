@@ -99,25 +99,19 @@ public class GameEngine {
         Display.println(Display.colorize("Loading campaign...", CYAN));
 
         // Try to load from classpath resources first (packaged JAR)
-        try {
-            Path resourcePath = findCampaignPath(DEFAULT_CAMPAIGN);
-            campaign = Campaign.loadFromYaml(resourcePath);
-            Display.println(Display.colorize("Loaded: " + campaign.getName(), GREEN));
-            Display.println();
+        Path resourcePath = findCampaignPath(DEFAULT_CAMPAIGN);
+        campaign = Campaign.loadFromYaml(resourcePath);
+        Display.println(Display.colorize("Loaded: " + campaign.getName(), GREEN));
+        Display.println();
 
-            if (campaign.hasValidationErrors()) {
-                Display.showWarning("Campaign has " + campaign.getValidationErrors().size() + " validation warnings.");
-            }
-
-            Display.println(campaign.getSummary());
-            Display.println();
-            Display.println("Press Enter to continue...");
-            scanner.nextLine();
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load campaign files: " + e.getMessage(), e);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Invalid campaign data: " + e.getMessage(), e);
+        if (campaign.hasValidationErrors()) {
+            Display.showWarning("Campaign has " + campaign.getValidationErrors().size() + " validation warnings.");
         }
+
+        Display.println(campaign.getSummary());
+        Display.println();
+        Display.println("Press Enter to continue...");
+        scanner.nextLine();
     }
 
     private Path findCampaignPath(String campaignId) {
