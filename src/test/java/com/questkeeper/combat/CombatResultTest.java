@@ -37,7 +37,7 @@ class CombatResultTest {
         @Test
         @DisplayName("enum has correct number of types")
         void enumHasCorrectNumberOfTypes() {
-            assertEquals(10, CombatResult.Type.values().length);
+            assertEquals(11, CombatResult.Type.values().length);
         }
 
         @Test
@@ -52,6 +52,7 @@ class CombatResultTest {
             assertNotNull(CombatResult.Type.PLAYER_DEFEATED);
             assertNotNull(CombatResult.Type.VICTORY);
             assertNotNull(CombatResult.Type.FLED);
+            assertNotNull(CombatResult.Type.INFO);
             assertNotNull(CombatResult.Type.ERROR);
         }
     }
@@ -561,6 +562,46 @@ class CombatResultTest {
 
             assertEquals(testCharacter, result.getAttacker());
             assertNull(result.getDefender());
+        }
+    }
+
+    @Nested
+    @DisplayName("info Factory Tests")
+    class InfoTests {
+
+        @Test
+        @DisplayName("creates result with INFO type")
+        void createsResultWithInfoType() {
+            CombatResult result = CombatResult.info("The enemy tries to flee!");
+            assertEquals(CombatResult.Type.INFO, result.getType());
+        }
+
+        @Test
+        @DisplayName("stores info message")
+        void storesInfoMessage() {
+            CombatResult result = CombatResult.info("Status update here");
+            assertEquals("Status update here", result.getMessage());
+        }
+
+        @Test
+        @DisplayName("isInfo returns true")
+        void isInfoReturnsTrue() {
+            CombatResult result = CombatResult.info("Info message");
+            assertTrue(result.isInfo());
+        }
+
+        @Test
+        @DisplayName("isError returns false for info")
+        void isErrorReturnsFalseForInfo() {
+            CombatResult result = CombatResult.info("Info message");
+            assertFalse(result.isError());
+        }
+
+        @Test
+        @DisplayName("isSuccess returns true for info")
+        void isSuccessReturnsTrueForInfo() {
+            CombatResult result = CombatResult.info("Info message");
+            assertTrue(result.isSuccess());
         }
     }
 

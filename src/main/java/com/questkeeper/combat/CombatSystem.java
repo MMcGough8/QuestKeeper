@@ -206,7 +206,10 @@ public class CombatSystem {
             return CombatResult.error("It's not an enemy's turn.");
         }
 
-        Monster monster = (Monster) current;
+        // Defensive check with pattern matching - isEnemy() should guarantee this
+        if (!(current instanceof Monster monster)) {
+            return CombatResult.error("Current combatant is not a valid enemy type.");
+        }
         Monster.Behavior behavior = monster.getBehavior();
 
         // Check for flee behavior based on HP
@@ -267,7 +270,7 @@ public class CombatSystem {
 
             String message = String.format("%s flees from combat! [DEX check vs DC %d - SUCCESS]",
                 monster.getName(), ENEMY_FLEE_DC);
-            return CombatResult.error(message);  // Use error type for info message
+            return CombatResult.info(message);
         }
         return null;  // Failed to flee
     }
@@ -325,10 +328,19 @@ public class CombatSystem {
         participants.clear();
         initiative.clear();
         initiativeRolls.clear();
+        lastAttacker.clear();
         currentTurn = 0;
         currentState = null;
 
         return CombatResult.victory(xp);
+    }
+
+    /**
+     * Removes dead combatants from tracking maps to prevent memory leaks during long combats.
+     */
+    private void cleanupDeadCombatants() {
+        lastAttacker.entrySet().removeIf(entry ->
+            !entry.getKey().isAlive() || !entry.getValue().isAlive());
     }
 
     // ==========================================
@@ -622,6 +634,9 @@ public class CombatSystem {
      * Checks if combat should end.
      */
     private CombatResult checkEndConditions() {
+        // Clean up tracking maps for dead combatants
+        cleanupDeadCombatants();
+
         if (playerFled) {
             inCombat = false;
             return CombatResult.fled();

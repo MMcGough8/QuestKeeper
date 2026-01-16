@@ -36,6 +36,14 @@ public class Location {
         this(id, name, "", "");
     }
 
+    /**
+     * Creates a new Location with the given properties.
+     *
+     * @param id required unique identifier
+     * @param name required display name
+     * @param description optional description (null becomes empty string)
+     * @param readAloudText optional atmospheric text for first visit (null becomes empty string)
+     */
     public Location(String id, String name, String description, String readAloudText) {
         if (id == null || id.trim().isEmpty()) {
             throw new IllegalArgumentException("Location ID cannot be null or empty");
@@ -46,6 +54,7 @@ public class Location {
 
         this.id = id;
         this.name = name;
+        // Convert null to empty string for optional fields to avoid null checks elsewhere
         this.description = description != null ? description : "";
         this.readAloudText = readAloudText != null ? readAloudText : "";
 
@@ -98,7 +107,7 @@ public class Location {
         return Collections.unmodifiableSet(exits.keySet());
     }
 
-    public String getExit (String direction){
+    public String getExit(String direction) {
         if (direction == null) {
             return null;
         }

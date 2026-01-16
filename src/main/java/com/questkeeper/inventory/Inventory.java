@@ -33,24 +33,57 @@ public class Inventory {
     private int gold;               // Currency
 
     /**
-     * Equipment slots for wearable/holdable items.
+     * Equipment slots for wearable/holdable items following D&D 5e conventions.
+     * Each slot can hold one item at a time. Two-handed weapons occupy both
+     * MAIN_HAND and OFF_HAND slots. Rings can be worn on either hand.
      */
     public enum EquipmentSlot {
+        /** Primary weapon hand */
         MAIN_HAND("Main Hand"),
+        /** Shield or secondary weapon hand */
         OFF_HAND("Off Hand"),
+        /** Body armor slot */
         ARMOR("Armor"),
+        /** Helmet or headgear slot */
         HEAD("Head"),
+        /** Amulet or necklace slot */
         NECK("Neck"),
+        /** Left hand ring slot */
         RING_LEFT("Left Ring"),
+        /** Right hand ring slot */
         RING_RIGHT("Right Ring");
-        
+
         private final String displayName;
-        
+
         EquipmentSlot(String displayName) {
             this.displayName = displayName;
         }
-        
+
         public String getDisplayName() { return displayName; }
+    }
+
+    /**
+     * Result of attempting to add an item to inventory.
+     * Provides detailed feedback about why an add operation succeeded or failed.
+     * Use {@link #isSuccess()} to check if the operation succeeded, and
+     * {@link #getMessage()} to get a user-friendly explanation.
+     */
+    public enum AddItemResult {
+        SUCCESS("Item added successfully."),
+        ITEM_NULL("Cannot add null item."),
+        INVALID_QUANTITY("Quantity must be positive."),
+        WEIGHT_EXCEEDED("Cannot carry that much weight."),
+        SLOTS_FULL("Inventory is full.");
+
+        private final String message;
+
+        AddItemResult(String message) {
+            this.message = message;
+        }
+
+        public String getMessage() { return message; }
+
+        public boolean isSuccess() { return this == SUCCESS; }
     }
 
     /**
@@ -74,43 +107,55 @@ public class Inventory {
     }
 
     public boolean addItem(Item item, int quantity) {
-        if (item == null || quantity <= 0) {
-            return false;
+        return tryAddItem(item, quantity).isSuccess();
+    }
+
+    /**
+     * Attempts to add items with detailed result.
+     * Use this when you need to know why an add failed.
+     */
+    public AddItemResult tryAddItem(Item item, int quantity) {
+        if (item == null) {
+            return AddItemResult.ITEM_NULL;
         }
-        
+        if (quantity <= 0) {
+            return AddItemResult.INVALID_QUANTITY;
+        }
+
         // Check weight limit
         double addedWeight = item.getWeight() * quantity;
         if (maxWeight > 0 && getCurrentWeight() + addedWeight > maxWeight) {
-            return false;
+            return AddItemResult.WEIGHT_EXCEEDED;
         }
-        
+
         // Try to stack with existing items
+        int remaining = quantity;
         if (item.isStackable()) {
             for (ItemStack stack : items) {
                 if (stack.canStackWith(item)) {
-                    int added = stack.add(quantity);
-                    if (added == quantity) {
-                        return true;
+                    int added = stack.add(remaining);
+                    if (added == remaining) {
+                        return AddItemResult.SUCCESS;
                     }
-                    quantity -= added;
+                    remaining -= added;
                 }
             }
         }
-        
+
         // Add remaining as new stacks
-        while (quantity > 0) {
+        while (remaining > 0) {
             // Check slot limit
             if (maxSlots > 0 && items.size() >= maxSlots) {
-                return false;
+                return AddItemResult.SLOTS_FULL;
             }
-            
-            int stackSize = item.isStackable() ? 
-                    Math.min(quantity, item.getMaxStackSize()) : 1;
+
+            int stackSize = item.isStackable() ?
+                    Math.min(remaining, item.getMaxStackSize()) : 1;
             items.add(new ItemStack(item.copy(), stackSize));
-            quantity -= stackSize;
+            remaining -= stackSize;
         }
-        
-        return true;
+
+        return AddItemResult.SUCCESS;
     }
 
     public boolean removeItem(Item item) {

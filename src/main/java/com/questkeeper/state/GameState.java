@@ -193,12 +193,17 @@ public class GameState {
             return false;
         }
 
+        String locationId = location.getId();
+        if (locationId == null || locationId.isEmpty()) {
+            return false;
+        }
+
         if (!location.isUnlocked()) {
             return false;
         }
 
         this.currentLocation = location;
-        this.visitedLocations.add(location.getId());
+        this.visitedLocations.add(locationId);
         // Don't call location.markVisited() here - let GameEngine do it after display
 
         return true;

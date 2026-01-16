@@ -24,6 +24,7 @@ public class CombatResult {
         PLAYER_DEFEATED,  // Player HP <= 0
         VICTORY,          // All enemies defeated
         FLED,             // Player escaped combat
+        INFO,             // Informational message (not an error)
         ERROR             // Invalid action or state
     }
 
@@ -197,6 +198,16 @@ public class CombatResult {
     }
 
     /**
+     * Creates an informational result (non-error status message).
+     * Use this for combat events that aren't errors but need to be communicated,
+     * such as enemy flee attempts or status changes.
+     */
+    public static CombatResult info(String message) {
+        return new CombatResult(Type.INFO, message, null, null,
+            0, 0, 0, 0, null);
+    }
+
+    /**
      * Creates an error result.
      */
     public static CombatResult error(String message) {
@@ -218,6 +229,10 @@ public class CombatResult {
 
     public boolean isError() {
         return type == Type.ERROR;
+    }
+
+    public boolean isInfo() {
+        return type == Type.INFO;
     }
 
     public boolean isCombatOver() {

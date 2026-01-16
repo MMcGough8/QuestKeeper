@@ -13,8 +13,10 @@ import com.questkeeper.combat.Monster;
 import com.questkeeper.core.CommandParser.Command;
 import com.questkeeper.dialogue.DialogueResult;
 import com.questkeeper.dialogue.DialogueSystem;
+import com.questkeeper.inventory.Inventory;
 import com.questkeeper.inventory.Inventory.EquipmentSlot;
 import com.questkeeper.inventory.Item;
+import com.questkeeper.inventory.Inventory.ItemStack;
 import com.questkeeper.save.SaveState;
 import com.questkeeper.state.GameState;
 import com.questkeeper.ui.CharacterCreator;
@@ -26,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -40,7 +43,7 @@ import static org.fusesource.jansi.Ansi.Color.*;
  * @author Marc McGough
  * @version 1.0
  */
-public class GameEngine {
+public class GameEngine implements AutoCloseable {
 
     private static final String DEFAULT_CAMPAIGN = "muddlebrook";
     private static final double RANDOM_ENCOUNTER_CHANCE = 0.15; // 15% chance when moving
@@ -80,7 +83,18 @@ public class GameEngine {
             System.err.println("Stack trace for debugging:");
             e.printStackTrace(System.err);
         } finally {
-            Display.shutdown();
+            close();
+        }
+    }
+
+    /**
+     * Closes resources used by the game engine.
+     */
+    @Override
+    public void close() {
+        Display.shutdown();
+        if (scanner != null) {
+            scanner.close();
         }
     }
 
@@ -397,14 +411,14 @@ public class GameEngine {
 
     private void handleInventory() {
         Character character = gameState.getCharacter();
-        var inventory = character.getInventory();
+        Inventory inventory = character.getInventory();
 
         Display.println();
         Display.printBox("INVENTORY", 50, YELLOW);
         Display.println();
 
         // Show key equipped items at a glance
-        var equipped = inventory.getEquippedItems();
+        Map<EquipmentSlot, Item> equipped = inventory.getEquippedItems();
         Display.println(Display.colorize("Equipped:", WHITE));
         Item weapon = equipped.get(EquipmentSlot.MAIN_HAND);
         Item armor = equipped.get(EquipmentSlot.ARMOR);
@@ -423,12 +437,12 @@ public class GameEngine {
             String.format("%.1f / %.1f lbs", inventory.getCurrentWeight(), inventory.getMaxWeight()));
         Display.println();
 
-        var items = inventory.getAllItems();
+        List<ItemStack> items = inventory.getAllItems();
         if (items.isEmpty()) {
             Display.println("Your pack is empty.");
         } else {
             Display.println(Display.colorize("Backpack:", WHITE));
-            for (var stack : items) {
+            for (ItemStack stack : items) {
                 String countStr = stack.getQuantity() > 1 ? " (x" + stack.getQuantity() + ")" : "";
                 Display.println("  - " + stack.getItem().getName() + countStr);
             }
