@@ -1,0 +1,426 @@
+# Location definitions for Eberron: Shards of the Fallen Sky
+# Olympic Convergence Games in Sharn
+
+locations:
+  # ==========================================
+  # Convergence Plaza - Starting Location / Hub
+  # ==========================================
+  - id: convergence_plaza
+    name: Convergence Plaza
+    description: |
+      A grand circular plaza at the heart of Sharn's tournament district. Banners
+      from all nations of Khorvaire flutter overhead, and the air buzzes with
+      excitement. Competitors and spectators mingle around food stalls and
+      betting booths.
+    read_aloud_text: |
+      You step into Convergence Plaza and your breath catches. The massive
+      circular space stretches before you, dominated by a towering obelisk of
+      pure dragonshard crystal that pulses with soft, rhythmic light—like a
+      heartbeat. Banners from every nation snap in the wind: the crown of Breland,
+      the wolf of Karrnath, the kraken of the Lhazaar Principalities.
+
+      Thousands of people mill about—competitors in colorful regalia, merchants
+      hawking lucky charms, scholars taking notes. And everywhere, you see them:
+      dragonshards. Set into jewelry, woven into clothing, embedded in weapons.
+      The shards seem to pulse in time with the great obelisk.
+
+      A booming voice echoes across the plaza: "WELCOME TO THE OLYMPIC CONVERGENCE
+      GAMES! May the worthy prove themselves, and may the worthy be found!"
+    exits:
+      north: registration_hall
+      east: competitor_quarters
+      west: merchant_row
+      south: grand_arena
+    npcs:
+      - herald_vox
+      - shardwarden_elara
+    items: []
+    flags:
+      - safe_zone
+
+  # ==========================================
+  # Registration Hall - Where competitors sign up
+  # ==========================================
+  - id: registration_hall
+    name: Registration Hall
+    description: |
+      A bustling administrative building where competitors register for events.
+      Clerks shuffle papers behind long counters while anxious participants wait
+      in winding queues.
+    read_aloud_text: |
+      The Registration Hall is organized chaos. Dozens of clerks work furiously
+      behind a long marble counter, processing competitors from across the
+      continent. A massive board covers the far wall, listing events, brackets,
+      and point standings in glowing magical script that updates in real-time.
+
+      You notice something odd: certain clerks wear small dragonshard pendants
+      that occasionally flicker when a competitor approaches. Most people don't
+      seem to notice, but you do.
+    exits:
+      south: convergence_plaza
+      up: observation_gallery
+    npcs:
+      - clerk_torvin
+      - skybound_watcher
+    items: []
+    flags: []
+
+  # ==========================================
+  # Competitor Quarters - Rest area
+  # ==========================================
+  - id: competitor_quarters
+    name: Competitor Quarters
+    description: |
+      Comfortable dormitory-style rooms for registered competitors. The walls
+      are thick to muffle sound, and each room features a small meditation
+      alcove.
+    read_aloud_text: |
+      The Competitor Quarters offer a welcome respite from the chaos outside.
+      Long hallways lined with doors stretch in both directions, each marked
+      with a competitor's name and nation. The air smells of lavender and
+      something else—ozone, perhaps, or magic.
+
+      A common room at the center features cushioned benches, a crackling
+      fireplace, and a rack of practice weapons. Several competitors eye each
+      other warily while pretending to relax.
+    exits:
+      west: convergence_plaza
+      north: training_grounds
+    npcs:
+      - rival_kira
+    items:
+      - practice_sword
+    flags:
+      - safe_zone
+
+  # ==========================================
+  # Merchant Row - Shopping district
+  # ==========================================
+  - id: merchant_row
+    name: Merchant Row
+    description: |
+      A narrow street packed with vendors selling everything from lucky charms
+      to questionable potions. Shard merchants display their wares under heavy
+      guard.
+    read_aloud_text: |
+      Merchant Row assaults your senses. Spice merchants compete with perfume
+      sellers, their scents warring in the crowded air. Fortune tellers beckon
+      from shadowed alcoves. Weapon smiths hawk "competition-legal" blades.
+
+      But your eye is drawn to the guarded stalls at the street's end: the
+      shard merchants. Their wares glow softly behind enchanted glass, and
+      armed guards watch every customer with suspicious eyes. A sign reads:
+      "DRAGONSHARDS - LICENSED VENDORS ONLY - POSSESSION PAPERS REQUIRED"
+    exits:
+      east: convergence_plaza
+      north: shard_emporium
+      alley: shadow_alley
+    npcs:
+      - merchant_vara
+    items: []
+    flags: []
+
+  # ==========================================
+  # Shard Emporium - Licensed dragonshard dealer
+  # ==========================================
+  - id: shard_emporium
+    name: The Shard Emporium
+    description: |
+      An upscale shop dealing in legally acquired dragonshards. Display cases
+      line the walls, each containing shards of various sizes and colors.
+    read_aloud_text: |
+      The Shard Emporium is hushed and reverent, like a temple. Thick carpets
+      muffle your footsteps. Display cases of polished glass contain dragonshards
+      ranging from thumbnail-sized chips to fist-sized gems, each pulsing with
+      inner light.
+
+      A well-dressed gnome watches you from behind an ornate counter. "Looking
+      is free," she says with a knowing smile. "Touching requires documentation.
+      Buying requires... more than most can offer."
+    exits:
+      south: merchant_row
+    npcs:
+      - gemkeeper_nyx
+    items: []
+    flags:
+      - shop
+
+  # ==========================================
+  # Shadow Alley - Hidden/shady area
+  # ==========================================
+  - id: shadow_alley
+    name: Shadow Alley
+    description: |
+      A narrow passage between buildings where the light seems reluctant to
+      reach. Figures lurk in doorways, and whispered deals happen in the dark.
+    read_aloud_text: |
+      You slip into Shadow Alley and the festive sounds of Merchant Row fade
+      to a distant murmur. The buildings press close here, blocking the sun.
+      Shadows pool in corners that seem deeper than they should be.
+
+      A figure detaches from the darkness ahead. "Looking for something the
+      licensed merchants won't sell?" a voice rasps. "Or perhaps... information
+      about what the Games really test for?"
+    locked_message: "The alley looks too dangerous to enter without a good reason."
+    exits:
+      out: merchant_row
+    npcs:
+      - shade_broker
+    items: []
+    flags:
+      - locked
+      - hidden
+      - dangerous
+
+  # ==========================================
+  # Grand Arena - Main competition venue
+  # ==========================================
+  - id: grand_arena
+    name: The Grand Arena
+    description: |
+      A massive coliseum-style arena where the main events take place. Tiered
+      seating surrounds an adaptable central stage that can transform to suit
+      different trials.
+    read_aloud_text: |
+      The Grand Arena takes your breath away. You've seen stadiums before, but
+      nothing like this. The oval structure rises seven stories high, with
+      seating for tens of thousands. But it's the floor that captures your
+      attention—a shimmering surface of interlocked dragonshard plates that
+      pulse and shift, capable of becoming anything.
+
+      As you watch, the floor ripples and reforms into a miniature mountain
+      range, then flattens into a mirror-smooth lake, then erupts into a maze
+      of crystalline walls. The crowd roars with each transformation.
+    exits:
+      north: convergence_plaza
+      gate: arena_floor
+    npcs: []
+    items: []
+    flags: []
+
+  # ==========================================
+  # Arena Floor - Where trials happen
+  # ==========================================
+  - id: arena_floor
+    name: Arena Floor
+    description: |
+      The adaptable competition floor of the Grand Arena. Dragonshard plates
+      can reshape into any terrain needed for the current trial.
+    read_aloud_text: |
+      You step onto the arena floor and feel the dragonshards beneath your
+      feet pulse with recognition. The ground here is alive with possibility—
+      each plate can rise, fall, heat, cool, or transform at the Arena
+      Master's command.
+
+      The crowd's roar is overwhelming from down here. Thousands of faces blur
+      into a single mass of anticipation. Somewhere above, judges watch with
+      enchanted scopes that miss nothing.
+
+      A horn sounds. "COMPETITOR READY?" the Arena Master's voice booms.
+      "LET THE TRIAL BEGIN!"
+    locked_message: "The gates to the arena floor are closed until your trial begins."
+    exits:
+      gate: grand_arena
+    npcs: []
+    items: []
+    flags:
+      - locked
+      - trial_location
+      - trial_1
+      - trial_2
+      - trial_3
+
+  # ==========================================
+  # Training Grounds - Practice area
+  # ==========================================
+  - id: training_grounds
+    name: Training Grounds
+    description: |
+      An open-air practice facility where competitors can hone their skills
+      before trials. Training dummies, obstacle courses, and sparring rings
+      fill the space.
+    read_aloud_text: |
+      The Training Grounds hum with activity. Competitors from across Khorvaire
+      practice their techniques—a Karrnathi soldier runs an obstacle course, a
+      Brelish acrobat flips between platforms, an Aundairian mage weaves
+      practice spells.
+
+      Training dummies made of enchanted wood reset themselves after each hit.
+      Balance beams shift and tilt to challenge those who dare. A section of
+      floor is marked off for sparring—non-lethal combat only, enforcers watching.
+    exits:
+      south: competitor_quarters
+    npcs:
+      - trainer_belgrak
+    items: []
+    flags:
+      - safe_zone
+
+  # ==========================================
+  # Observation Gallery - Overview area
+  # ==========================================
+  - id: observation_gallery
+    name: Observation Gallery
+    description: |
+      A windowed gallery above the Registration Hall offering views of the
+      entire tournament grounds. Faction representatives often meet here.
+    read_aloud_text: |
+      The Observation Gallery provides a commanding view of the Convergence
+      Games. Through enchanted glass that magnifies distant details, you can
+      see the Grand Arena, the training grounds, and the milling crowds below.
+
+      Comfortable chairs and refreshment tables suggest this is where the
+      powerful come to watch and scheme. You notice small groups clustered in
+      corners, speaking in hushed tones—representatives of different factions,
+      you suspect, each watching the competitors with calculating eyes.
+    exits:
+      down: registration_hall
+    npcs:
+      - depthbound_agent
+    items: []
+    flags: []
+
+  # ==========================================
+  # Trial of Balance Chamber
+  # ==========================================
+  - id: balance_chamber
+    name: Chamber of Balance
+    description: |
+      A specially prepared trial chamber where shifting platforms test
+      competitors' agility and teamwork.
+    read_aloud_text: |
+      The arena floor has transformed into a nightmare of shifting platforms.
+      Dozens of circular discs float at varying heights, rising and falling
+      in complex patterns. Some spin slowly. Others tilt without warning.
+      Far below, a shimmering net waits to catch the fallen—non-lethal, but
+      a fall means elimination.
+
+      Your goal glows on the far side: a pedestal holding a small dragonshard.
+      Between you and it lies a gauntlet of balance, timing, and trust.
+    locked_message: "The Balance Trial is not yet active."
+    exits:
+      complete: arena_floor
+    npcs: []
+    items: []
+    flags:
+      - locked
+      - trial_location
+
+  # ==========================================
+  # Trial of Insight Chamber
+  # ==========================================
+  - id: insight_chamber
+    name: Chamber of Insight
+    description: |
+      A riddle chamber filled with puzzles, hidden messages, and challenges
+      that test mental acuity.
+    read_aloud_text: |
+      The arena has become a vast library-maze. Towering bookshelves form
+      winding corridors, and floating platforms hold glowing puzzle boxes.
+      Riddles are carved into every surface—on floor tiles, shelf edges,
+      even the spines of books.
+
+      "KNOWLEDGE IS THE KEY," a voice echoes. "SEEK THE TRUTH HIDDEN IN
+      PLAIN SIGHT. THE WORTHY WILL SEE WHAT OTHERS CANNOT."
+
+      You notice something others might miss—certain letters on certain
+      books seem to glow more brightly than the rest.
+    locked_message: "The Insight Trial is not yet active."
+    exits:
+      complete: arena_floor
+    npcs: []
+    items: []
+    flags:
+      - locked
+      - trial_location
+
+  # ==========================================
+  # Trial of Strength Chamber
+  # ==========================================
+  - id: strength_chamber
+    name: Chamber of Strength
+    description: |
+      A trial chamber featuring massive levers, weighted puzzles, and
+      cooperative challenges requiring raw physical power.
+    read_aloud_text: |
+      The arena floor has risen into a construction site of impossible
+      scale. Massive stone blocks wait to be moved. Giant levers require
+      tremendous force to pull. Chains as thick as your arm dangle from
+      pulleys high above.
+
+      But this isn't just about brute force—you can see it immediately.
+      The levers are connected. The blocks must be moved in sequence.
+      One person can't do this alone.
+
+      "STRENGTH WITHOUT WISDOM IS WASTED," the Arena Master announces.
+      "WISDOM WITHOUT STRENGTH IS HELPLESS. SHOW US BOTH."
+    locked_message: "The Strength Trial is not yet active."
+    exits:
+      complete: arena_floor
+    npcs: []
+    items: []
+    flags:
+      - locked
+      - trial_location
+
+  # ==========================================
+  # Trial of Magic Chamber
+  # ==========================================
+  - id: magic_chamber
+    name: Chamber of Magic
+    description: |
+      A chamber where magical interactions and basic spellwork are tested
+      through creative problem-solving.
+    read_aloud_text: |
+      The arena has become a canvas of pure magic. Floating orbs of different
+      colors drift through the air—red, blue, white, green. Runes glow on
+      pedestals scattered throughout the space. Beams of magical energy
+      crisscross overhead, some helpful, some hazardous.
+
+      "MAGIC IS THE BLOOD OF ASTRAEL," the voice intones. "THOSE WHO
+      RESONATE WITH HER SHARDS WILL UNDERSTAND. OTHERS MUST LEARN."
+
+      Even if you're not a spellcaster, you sense patterns here. The orbs
+      react to proximity. The runes respond to touch. The beams can be
+      redirected.
+    locked_message: "The Magic Trial is not yet active."
+    exits:
+      complete: arena_floor
+    npcs: []
+    items: []
+    flags:
+      - locked
+      - trial_location
+
+  # ==========================================
+  # Mirror Battle Chamber - Final Trial
+  # ==========================================
+  - id: mirror_chamber
+    name: Chamber of Mirrors
+    description: |
+      The final trial chamber, where competitors face magical reflections
+      of themselves.
+    read_aloud_text: |
+      The arena has become a hall of infinite mirrors. Your reflection
+      stares back at you from every surface—but something is wrong. The
+      reflections don't quite match your movements. They're a half-second
+      ahead, or behind, or moving in ways you haven't.
+
+      Then one of them steps OUT of the mirror.
+
+      It's you. Same face. Same stance. Same equipment. But its eyes
+      hold something dark—every doubt you've ever had, every fear, every
+      flaw you try to hide.
+
+      "THE FINAL TEST," the Arena Master's voice is hushed now, reverent.
+      "FACE YOURSELF. OVERCOME YOURSELF. PROVE YOU ARE MORE THAN YOUR
+      SHADOW."
+    locked_message: "The Mirror Trial is not yet active. Complete the other trials first."
+    exits:
+      complete: arena_floor
+    npcs: []
+    items: []
+    flags:
+      - locked
+      - trial_location
+      - boss_room

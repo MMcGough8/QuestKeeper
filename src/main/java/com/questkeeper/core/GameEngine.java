@@ -1,6 +1,7 @@
 package com.questkeeper.core;
 
 import com.questkeeper.campaign.Campaign;
+import com.questkeeper.campaign.CampaignInfo;
 import com.questkeeper.campaign.MiniGame;
 import com.questkeeper.campaign.Trial;
 import com.questkeeper.character.Character;
@@ -45,7 +46,6 @@ import static org.fusesource.jansi.Ansi.Color.*;
  */
 public class GameEngine implements AutoCloseable {
 
-    private static final String DEFAULT_CAMPAIGN = "muddlebrook";
     private static final double RANDOM_ENCOUNTER_CHANCE = 0.15; // 15% chance when moving
 
     private final Scanner scanner;
@@ -112,12 +112,32 @@ public class GameEngine implements AutoCloseable {
 
     private void loadCampaign() {
         Display.clearScreen();
-        Display.println(Display.colorize("Loading campaign...", CYAN));
 
-        // Try to load from classpath resources first (packaged JAR)
-        Path resourcePath = findCampaignPath(DEFAULT_CAMPAIGN);
-        campaign = Campaign.loadFromYaml(resourcePath);
-        Display.println(Display.colorize("Loaded: " + campaign.getName(), GREEN));
+        // Discover available campaigns
+        List<CampaignInfo> availableCampaigns = Campaign.listAvailable();
+
+        if (availableCampaigns.isEmpty()) {
+            Display.showError("No campaigns found!");
+            Display.println("Please ensure campaign files are in the 'campaigns/' directory.");
+            throw new RuntimeException("No campaigns available");
+        }
+
+        CampaignInfo selectedCampaign;
+
+        if (availableCampaigns.size() == 1) {
+            // Only one campaign available, use it directly
+            selectedCampaign = availableCampaigns.get(0);
+            Display.println(Display.colorize("Loading campaign...", CYAN));
+        } else {
+            // Multiple campaigns available, show selection UI
+            selectedCampaign = showCampaignSelection(availableCampaigns);
+        }
+
+        // Load the selected campaign
+        Display.println();
+        Display.println(Display.colorize("Loading: " + selectedCampaign.name() + "...", CYAN));
+        campaign = Campaign.loadFromYaml(selectedCampaign.path());
+        Display.println(Display.colorize("Loaded successfully!", GREEN));
         Display.println();
 
         if (campaign.hasValidationErrors()) {
@@ -130,23 +150,32 @@ public class GameEngine implements AutoCloseable {
         scanner.nextLine();
     }
 
-    private Path findCampaignPath(String campaignId) {
-        // Try multiple possible locations
-        String[] possiblePaths = {
-            "src/main/resources/campaigns/" + campaignId,
-            "campaigns/" + campaignId,
-            "../resources/campaigns/" + campaignId
-        };
+    private CampaignInfo showCampaignSelection(List<CampaignInfo> campaigns) {
+        Display.printBox("SELECT A CAMPAIGN", 60, MAGENTA);
+        Display.println();
 
-        for (String pathStr : possiblePaths) {
-            Path path = Path.of(pathStr);
-            if (Files.exists(path) && Files.isDirectory(path)) {
-                return path;
-            }
+        for (int i = 0; i < campaigns.size(); i++) {
+            CampaignInfo info = campaigns.get(i);
+            Display.println(Display.colorize((i + 1) + ") " + info.getDisplayString(), YELLOW));
+            Display.println("   " + info.getSummary());
+            Display.println();
         }
 
-        // Default fallback
-        return Path.of("src/main/resources/campaigns/" + campaignId);
+        while (true) {
+            Display.showPrompt("Choose campaign (1-" + campaigns.size() + "): ");
+            String input = scanner.nextLine().trim();
+
+            try {
+                int choice = Integer.parseInt(input);
+                if (choice >= 1 && choice <= campaigns.size()) {
+                    return campaigns.get(choice - 1);
+                }
+            } catch (NumberFormatException e) {
+                // Invalid input, try again
+            }
+
+            Display.showError("Please enter a number between 1 and " + campaigns.size());
+        }
     }
 
     private Character createOrLoadCharacter() {
@@ -334,7 +363,7 @@ public class GameEngine implements AutoCloseable {
             }
         } else {
             Location target = campaign.getLocation(currentLocation.getExit(direction));
-            if (target != null && !target.isUnlocked()) {
+            if (target != null && !gameState.isLocationUnlocked(target.getId())) {
                 // Provide context-specific locked messages
                 String lockedMessage = getLockedLocationMessage(target.getId());
                 Display.showError(lockedMessage);
@@ -345,14 +374,12 @@ public class GameEngine implements AutoCloseable {
     }
 
     private String getLockedLocationMessage(String locationId) {
-        return switch (locationId) {
-            case "clocktower_hill" -> "The path to Clocktower Hill is blocked. Perhaps investigating " +
-                    "the Town Hall and completing the trial there will reveal a way forward.";
-            case "harlequin_lair" -> "A hidden passage, but it's sealed tight. You'll need to discover " +
-                    "the Clocktower's secrets first.";
-            case "back_room" -> "Elara's back room is off limits... unless you can earn her trust.";
-            default -> "That way is currently blocked or locked.";
-        };
+        // Data-driven: get locked message from the Location itself
+        Location location = campaign.getLocation(locationId);
+        if (location != null) {
+            return location.getLockedMessage();
+        }
+        return "That way is currently blocked or locked.";
     }
 
     private void handleTalk(String target) {
@@ -1109,7 +1136,7 @@ public class GameEngine implements AutoCloseable {
         String locationId = gameState.getCurrentLocation().getId();
         Trial trial = campaign.getTrialAtLocation(locationId);
 
-        if (trial == null || trial.isCompleted()) {
+        if (trial == null || gameState.hasCompletedTrial(trial.getId())) {
             return;
         }
 
@@ -1130,17 +1157,17 @@ public class GameEngine implements AutoCloseable {
     }
 
     private boolean checkTrialPrerequisites(Trial trial) {
-        // Check if location has prerequisites flag
-        // For now, check if previous trials are complete based on trial ID
-        String trialId = trial.getId();
-
-        if (trialId.equals("trial_02")) {
-            return gameState.hasFlag("trial_01_complete");
-        } else if (trialId.equals("trial_03")) {
-            return gameState.hasFlag("trial_02_complete");
+        // Data-driven prerequisite checking using Trial's prerequisites list
+        if (!trial.hasPrerequisites()) {
+            return true; // No prerequisites required
         }
 
-        return true; // No prerequisites for trial_01
+        for (String prerequisite : trial.getPrerequisites()) {
+            if (!gameState.hasFlag(prerequisite)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void handleTrial() {
@@ -1153,7 +1180,7 @@ public class GameEngine implements AutoCloseable {
             return;
         }
 
-        if (trial.isCompleted()) {
+        if (gameState.hasCompletedTrial(trial.getId())) {
             Display.println("You've already completed this trial.");
             return;
         }
@@ -1164,7 +1191,7 @@ public class GameEngine implements AutoCloseable {
         }
 
         // Start or continue the trial
-        if (!trial.isStarted()) {
+        if (!gameState.hasStartedTrial(trial.getId())) {
             startTrial(trial);
         } else {
             displayTrialStatus(trial);
@@ -1176,8 +1203,8 @@ public class GameEngine implements AutoCloseable {
         if (!trials.isEmpty()) {
             Display.println("Trials in this campaign:");
             for (Trial t : trials.values()) {
-                String status = t.isCompleted() ? "[COMPLETE]" :
-                               t.isStarted() ? "[IN PROGRESS]" : "[NOT STARTED]";
+                String status = gameState.hasCompletedTrial(t.getId()) ? "[COMPLETE]" :
+                               gameState.hasStartedTrial(t.getId()) ? "[IN PROGRESS]" : "[NOT STARTED]";
                 Display.println("  - " + Display.colorize(t.getName(), MAGENTA) +
                     " at " + t.getLocation() + " " + status);
             }
@@ -1193,8 +1220,11 @@ public class GameEngine implements AutoCloseable {
         Display.printDivider('=', 60, MAGENTA);
         Display.println();
 
+        // Mark the trial as started in GameState
+        gameState.startTrial(trial.getId());
+
         // Show entry narrative
-        String narrative = trial.start();
+        String narrative = trial.getEntryNarrative();
         Display.showNarrative(narrative);
         Display.println();
 
@@ -1257,7 +1287,7 @@ public class GameEngine implements AutoCloseable {
         String locationId = gameState.getCurrentLocation().getId();
         Trial trial = campaign.getTrialAtLocation(locationId);
 
-        if (trial == null || !trial.isStarted()) {
+        if (trial == null || !gameState.hasStartedTrial(trial.getId())) {
             Display.showError("You're not in an active trial. Use 'trial' to start one.");
             return;
         }
@@ -1505,24 +1535,26 @@ public class GameEngine implements AutoCloseable {
         Display.printDivider('=', 60, GREEN);
         Display.println();
 
-        Trial.CompletionResult result = trial.complete();
+        // Mark trial as completed in GameState
+        gameState.completeTrial(trial.getId());
 
         // Grant reward
-        if (result.hasReward()) {
-            String rewardId = trial.getCompletionReward();
+        String rewardId = trial.getCompletionReward();
+        if (rewardId != null && !rewardId.isEmpty()) {
             var item = campaign.getItem(rewardId);
             if (item != null) {
                 gameState.getCharacter().getInventory().addItem(item);
                 Display.showItemGained(item.getName(), item.getDescription());
             } else {
-                Display.println(Display.colorize("You received: " + result.reward(), YELLOW));
+                Display.println(Display.colorize("You received: " + rewardId, YELLOW));
             }
         }
 
         // Show stinger (villain message)
-        if (result.hasStinger()) {
+        String stinger = trial.getStinger();
+        if (stinger != null && !stinger.isEmpty()) {
             Display.println();
-            Display.showVillainMessage(result.stinger());
+            Display.showVillainMessage(stinger);
         }
 
         // Set completion flags
@@ -1535,42 +1567,32 @@ public class GameEngine implements AutoCloseable {
     }
 
     private void setTrialCompletionFlags(Trial trial) {
-        String trialId = trial.getId();
+        // Data-driven flag setting using Trial's completionFlags list
+        for (String flag : trial.getCompletionFlags()) {
+            gameState.setFlag(flag, true);
 
-        // Set standard completion flag
-        gameState.setFlag(trialId + "_complete", true);
+            // Check if this flag indicates a location unlock
+            if (flag.endsWith("_unlocked")) {
+                String locationId = flag.replace("_unlocked", "");
+                Location location = campaign.getLocation(locationId);
 
-        // Set specific flags and unlock locations based on trial
-        if (trialId.equals("trial_01")) {
-            gameState.setFlag("trial_01_complete", true);
-            gameState.setFlag("met_machinist", true);
-            gameState.setFlag("clocktower_unlocked", true);
+                if (location != null) {
+                    unlockLocation(locationId);
+                    Display.println();
+                    Display.println(Display.colorize(
+                        "New area unlocked: " + location.getName() + "!", CYAN));
+                }
+            }
 
-            // Unlock the clocktower area
-            unlockLocation("clocktower_hill");
-            Display.println();
-            Display.println(Display.colorize("The path to Clocktower Hill is now accessible!", CYAN));
-        } else if (trialId.equals("trial_02")) {
-            gameState.setFlag("trial_02_complete", true);
-            gameState.setFlag("workshop_discovered", true);
-            gameState.setFlag("harlequin_lair_unlocked", true);
-
-            // Unlock the Harlequin's Lair
-            unlockLocation("harlequin_lair");
-            Display.println();
-            Display.println(Display.colorize("A hidden passage to the Harlequin's Stage has been revealed!", CYAN));
-        } else if (trialId.equals("trial_03")) {
-            gameState.setFlag("trial_03_complete", true);
-            gameState.setFlag("mayor_rescued", true);
-            gameState.setFlag("machinist_revealed", true);
-            gameState.setFlag("campaign_complete", true);
-
-            // Campaign complete!
-            Display.println();
-            Display.printBox("CAMPAIGN COMPLETE!", 60, YELLOW);
-            Display.println();
-            Display.println(Display.colorize("Congratulations! You've completed the Muddlebrook campaign!", GREEN));
-            Display.println();
+            // Check for campaign completion
+            if (flag.equals("campaign_complete")) {
+                Display.println();
+                Display.printBox("CAMPAIGN COMPLETE!", 60, YELLOW);
+                Display.println();
+                Display.println(Display.colorize(
+                    "Congratulations! You've completed the " + campaign.getName() + "!", GREEN));
+                Display.println();
+            }
         }
     }
 
@@ -1578,9 +1600,8 @@ public class GameEngine implements AutoCloseable {
      * Unlocks a location by ID, making it accessible to the player.
      */
     private void unlockLocation(String locationId) {
-        Location location = campaign.getLocation(locationId);
-        if (location != null) {
-            location.unlock();
+        if (locationId != null && !locationId.isEmpty()) {
+            gameState.unlockLocation(locationId);
         }
     }
 
@@ -1625,11 +1646,16 @@ public class GameEngine implements AutoCloseable {
         Display.println();
 
         // Show description (read-aloud for first visit, regular description otherwise)
-        // Get the description BEFORE marking as visited so read-aloud text shows
-        String description = location.getDisplayDescription();
+        // Check visited status in GameState, not on Location object
+        String description;
+        boolean hasReadAloud = location.getReadAloudText() != null && !location.getReadAloudText().isEmpty();
+        if (!gameState.hasVisited(location.getId()) && hasReadAloud) {
+            description = location.getReadAloudText();
+        } else {
+            description = location.getDescription();
+        }
 
-        // Now mark as visited so subsequent looks show the short description
-        location.markVisited();
+        // GameState.moveToLocation already marked the location as visited
 
         Display.printWrapped(description, 60);
         Display.println();

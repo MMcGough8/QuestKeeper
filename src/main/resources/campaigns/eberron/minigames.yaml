@@ -1,0 +1,547 @@
+# Mini-game definitions for Eberron: Shards of the Fallen Sky
+# Olympic trial challenges with D&D skill checks
+
+minigames:
+  # ==========================================
+  # Trial of Balance Mini-Games
+  # ==========================================
+
+  - id: platform_leap
+    name: "Platform Leap"
+    type: TIMING
+    description: |
+      The first set of platforms rise and fall in a rhythmic pattern. You must
+      time your leap perfectly—too early and you'll land on a descending
+      platform, too late and you'll miss entirely.
+    hint: "Watch for three rises before each fall. The rhythm is your friend."
+
+    required_skill: ACROBATICS
+    alternate_skill: ATHLETICS
+    dc: 12
+
+    reward_text: "You land perfectly, the crowd cheering as you stick the landing!"
+
+    success_text: |
+      You watch, count, and leap at the perfect moment. Your feet touch down
+      just as the platform reaches its apex. The crowd roars approval.
+
+    fail_text: |
+      You mistime the jump! The platform drops away beneath you and you
+      tumble into the safety net below.
+    fail_consequence: "Caught by safety net, must restart section"
+    fail_damage: "0"
+
+  - id: spinning_disc
+    name: "Spinning Disc"
+    type: ALIGNMENT
+    description: |
+      A large disc spins slowly, its surface marked with colored segments.
+      You must cross while keeping your balance—but the disc changes speed
+      unpredictably.
+    hint: "Stay low and keep your weight centered."
+
+    required_skill: ACROBATICS
+    alternate_skill: PERCEPTION
+    dc: 13
+
+    reward_text: "You cross the spinning disc with graceful ease!"
+
+    success_text: |
+      You crouch low, arms extended for balance, reading the disc's rhythm.
+      Even when it lurches, you adjust smoothly and reach the other side.
+
+    fail_text: |
+      The disc suddenly accelerates and you spin off, tumbling through the air!
+    fail_consequence: "Flung to adjacent platform, minor bruising"
+    fail_damage: "1"
+
+  - id: trust_fall
+    name: "Trust Fall"
+    type: SKILL_CHECK
+    description: |
+      A gap too wide to jump alone. Your teammate must catch you on the other
+      side—or you must trust a stranger competitor to do the same. The arena
+      tests more than individual skill.
+    hint: "Trust is the bridge. Hesitation is the fall."
+
+    required_skill: ATHLETICS
+    alternate_skill: PERSUASION
+    dc: 11
+
+    reward_text: "Hands clasp yours firmly—trust rewarded!"
+
+    success_text: |
+      You leap without hesitation, arms reaching. Strong hands catch yours,
+      pulling you to safety. For a moment, you share a grin of victory with
+      your catcher.
+
+    fail_text: |
+      You hesitate at the edge, and the moment of connection passes. You must
+      find another way across.
+    fail_consequence: "Must take longer path, lose time"
+    fail_damage: "0"
+
+  - id: balance_beam
+    name: "Final Balance Beam"
+    type: TIMING
+    description: |
+      The final challenge: a narrow beam stretching to the prize pedestal.
+      The beam tilts left and right, testing your core strength and focus.
+      One step at a time, one breath at a time.
+    hint: "Don't look down. Eyes on the goal."
+
+    required_skill: ACROBATICS
+    alternate_skill: ATHLETICS
+    dc: 14
+
+    reward_item: balance_medal
+    reward_text: "You reach the pedestal and claim the Medal of Balance!"
+
+    success_text: |
+      Arms outstretched, breath steady, you walk the beam as if it were a
+      wide road. The final step brings you to the pedestal, where the medal
+      awaits. You've done it.
+
+    fail_text: |
+      The beam tilts sharply and you overcompensate. You fall, but not before
+      catching yourself—you hang by your hands, able to pull yourself back up.
+    fail_consequence: "Dramatic save, crowd gasps, second attempt allowed"
+    fail_damage: "0"
+
+  # ==========================================
+  # Trial of Insight Mini-Games
+  # ==========================================
+
+  - id: riddle_door
+    name: "Riddle Door"
+    type: DECODE
+    description: |
+      A massive stone door blocks your path. Carved into its surface is a
+      riddle in ancient Draconic script, glowing with soft blue light:
+      "I have cities, but no houses. I have mountains, but no trees.
+      I have water, but no fish. What am I?"
+    hint: "Think beyond the literal. The answer is always simpler than it seems."
+
+    required_skill: INVESTIGATION
+    alternate_skill: HISTORY
+    dc: 12
+
+    reward_text: "The door rumbles open, revealing the path ahead!"
+
+    success_text: |
+      "A map," you say confidently. The door's runes flare and it slides open
+      with a satisfying rumble. The path ahead is clear.
+
+    fail_text: |
+      Your answer echoes back incorrectly. A magical force gently but firmly
+      pushes you back to try again.
+    fail_consequence: "Pushed back, must solve another riddle"
+    fail_damage: "0"
+
+  - id: hidden_message
+    name: "Hidden Message"
+    type: SEARCH
+    description: |
+      Books float in the air around you, their spines facing outward. Certain
+      letters on certain titles glow faintly. Reading them in order reveals
+      a hidden message—but which order is correct?
+    hint: "The books are arranged in a specific pattern. Look for the spiral."
+
+    required_skill: PERCEPTION
+    alternate_skill: INVESTIGATION
+    dc: 13
+
+    reward_text: "The message reveals itself: 'TRUST YOUR RESONANCE'!"
+
+    success_text: |
+      You trace the spiral pattern, reading each glowing letter in sequence.
+      T-R-U-S-T Y-O-U-R R-E-S-O-N-A-N-C-E. The books rearrange themselves,
+      opening a path forward.
+
+    fail_text: |
+      You read the letters in the wrong order, spelling nonsense. The books
+      shuffle themselves, resetting the puzzle.
+    fail_consequence: "Puzzle resets, time penalty"
+    fail_damage: "0"
+
+  - id: puzzle_sequence
+    name: "Puzzle Sequence"
+    type: MECHANISM
+    description: |
+      A puzzle box floats before you, its sides covered in sliding panels
+      and rotating symbols. The symbols match those on nearby pedestals.
+      The correct sequence will unlock the next area.
+    hint: "The pedestals form a constellation. Which star comes first?"
+
+    required_skill: ARCANA
+    alternate_skill: INVESTIGATION
+    dc: 14
+
+    reward_text: "The box clicks open, releasing a burst of pleasant warmth!"
+
+    success_text: |
+      You recognize the constellation—the Dragon's Eye, representing Astrael.
+      Following the stars' order, you manipulate the panels. With a satisfying
+      click, the box opens.
+
+    fail_text: |
+      Wrong sequence! The box emits a discordant chime and a puff of
+      glittering dust that makes your eyes water.
+    fail_consequence: "Disadvantage on Perception for 1 minute"
+    fail_damage: "0"
+
+  - id: truth_illusion
+    name: "Truth and Illusion"
+    type: DECODE
+    description: |
+      Three doorways stand before you, each showing a different path. But
+      two are illusions—only one is real. The wrong choice means starting
+      over. Something about the way light falls on them seems significant.
+    hint: "Illusions cast no shadows. Reality always does."
+
+    required_skill: PERCEPTION
+    alternate_skill: ARCANA
+    dc: 13
+
+    reward_item: insight_medal
+    reward_text: "You step through the true door and claim the Medal of Insight!"
+
+    success_text: |
+      You study the shadows carefully. Two doors cast no shadow at all—only
+      the middle door has a proper shadow pooling beneath its frame. You
+      step through confidently.
+
+    fail_text: |
+      You step toward a door—and pass right through an illusion, emerging
+      back at the start. Laughter echoes from the crowd.
+    fail_consequence: "Must restart section, crowd laughs (embarrassing)"
+    fail_damage: "0"
+
+  # ==========================================
+  # Trial of Strength Mini-Games
+  # ==========================================
+
+  - id: heavy_lift
+    name: "Heavy Lift"
+    type: SKILL_CHECK
+    description: |
+      A massive stone block must be lifted and placed on a pressure plate.
+      It's too heavy for one person—you need technique, leverage, or help
+      from a fellow competitor.
+    hint: "Look for the handholds worn smooth by many attempts."
+
+    required_skill: ATHLETICS
+    alternate_skill: INVESTIGATION
+    dc: 14
+
+    reward_text: "The block settles onto the plate with a satisfying click!"
+
+    success_text: |
+      You find the perfect grip, brace your legs, and LIFT. Your muscles
+      scream but the block rises. You place it squarely on the plate,
+      which glows green with success.
+
+    fail_text: |
+      The block barely budges. You strain and strain, but it won't move.
+      You'll need to try again with better leverage.
+    fail_consequence: "1 exhaustion, must rest briefly"
+    fail_damage: "0"
+
+  - id: chain_pull
+    name: "Chain Pull"
+    type: TIMING
+    description: |
+      Heavy chains hang from above, connected to a gate mechanism. Pulling
+      them in sequence raises the gate—but they must be pulled in the right
+      order, at the right time.
+    hint: "Listen for the clicks. Each chain has a different tone."
+
+    required_skill: ATHLETICS
+    alternate_skill: PERCEPTION
+    dc: 13
+
+    reward_text: "The gate rises smoothly as you complete the sequence!"
+
+    success_text: |
+      You listen for the tones: high, low, middle. Grabbing each chain in
+      turn, you pull with steady rhythm. The gate rises inch by inch until
+      the path is clear.
+
+    fail_text: |
+      Wrong order! The chains go slack and the gate crashes back down.
+      The mechanism needs to reset.
+    fail_consequence: "Mechanism jams, must wait for reset"
+    fail_damage: "0"
+
+  - id: coordinated_push
+    name: "Coordinated Push"
+    type: TIMING
+    description: |
+      A massive wheel must be turned, but it requires two people pushing
+      in perfect synchronization. You must coordinate with a fellow
+      competitor—or somehow do the work of two.
+    hint: "Count together: one, two, THREE push."
+
+    required_skill: ATHLETICS
+    alternate_skill: PERSUASION
+    dc: 15
+
+    reward_text: "The wheel turns, opening the final chamber!"
+
+    success_text: |
+      "Together," you say to your partner. "One, two, THREE!" In perfect
+      unison, you push. The wheel groans and begins to turn, ancient
+      mechanisms grinding to life.
+
+    fail_text: |
+      Out of sync! The wheel barely moves. You'll need to try again with
+      better coordination.
+    fail_consequence: "Muscle strain, temporary -1 to Athletics"
+    fail_damage: "0"
+
+  - id: endurance_hold
+    name: "Endurance Hold"
+    type: SKILL_CHECK
+    description: |
+      A heavy platform must be held aloft while others complete their tasks.
+      The weight is immense. Seconds feel like hours. Your arms burn. Your
+      legs shake. But you must not let go.
+    hint: "Breathe. Focus on your breath. Let your body become stone."
+
+    required_skill: ATHLETICS
+    alternate_skill: CONSTITUTION
+    dc: 14
+
+    reward_item: strength_medal
+    reward_text: "You lower the platform and claim the Medal of Strength!"
+
+    success_text: |
+      You hold. And hold. And HOLD. Every muscle screams but you refuse to
+      yield. Finally, the signal comes—task complete. You lower the platform,
+      arms trembling, triumphant.
+
+    fail_text: |
+      The weight is too much! The platform crashes down, forcing others to
+      restart their tasks.
+    fail_consequence: "Platform falls, team must restart section"
+    fail_damage: "1d4"
+
+  # ==========================================
+  # Trial of Magic Mini-Games
+  # ==========================================
+
+  - id: orb_alignment
+    name: "Orb Alignment"
+    type: ALIGNMENT
+    description: |
+      Colored orbs float through the chamber—red, blue, green, white. They
+      must be guided to matching pedestals, but they repel your touch. You
+      must use magical currents or clever positioning.
+    hint: "Like colors attract. Unlike colors repel."
+
+    required_skill: ARCANA
+    alternate_skill: INVESTIGATION
+    dc: 13
+
+    reward_text: "The orbs settle into place, glowing with harmonious light!"
+
+    success_text: |
+      You trace the magical currents and realize: push red toward blue,
+      and both will arc toward their proper places. With careful nudges,
+      you guide each orb home.
+
+    fail_text: |
+      The orbs scatter chaotically, bouncing off each other in a rainbow
+      explosion. You'll need to wait for them to resettle.
+    fail_consequence: "Must wait for orbs to reset"
+    fail_damage: "0"
+
+  - id: rune_activation
+    name: "Rune Activation"
+    type: DECODE
+    description: |
+      Ancient runes cover several pedestals. Touching them in the wrong
+      order triggers a magical backlash. But touch them correctly, and
+      they reveal the path forward.
+    hint: "The runes tell a story. Read it from beginning to end."
+
+    required_skill: ARCANA
+    alternate_skill: HISTORY
+    dc: 14
+
+    reward_text: "The runes blaze with silver light, opening the way!"
+
+    success_text: |
+      You recognize the runic script—it tells the story of Astrael's fall.
+      Following the narrative from creation to shattering, you touch each
+      rune in order. They ignite with silver fire.
+
+    fail_text: |
+      You touch the wrong rune and magical energy courses through you!
+    fail_consequence: "1d4 force damage from magical backlash"
+    fail_damage: "1d4"
+
+  - id: beam_redirect
+    name: "Beam Redirect"
+    type: MECHANISM
+    description: |
+      Beams of magical energy crisscross the chamber. They power a door
+      mechanism, but they're misaligned. You must use mirrors and prisms
+      to redirect them properly.
+    hint: "Angle of incidence equals angle of reflection."
+
+    required_skill: INVESTIGATION
+    alternate_skill: ARCANA
+    dc: 15
+
+    reward_text: "The beams align, and the door mechanism hums to life!"
+
+    success_text: |
+      You adjust a mirror here, rotate a prism there. The beams dance
+      through the air, finally converging on the door's lock. With a
+      click and a flash, it opens.
+
+    fail_text: |
+      A beam reflects wrong and strikes you!
+    fail_consequence: "1d6 radiant damage from redirected beam"
+    fail_damage: "1d6"
+
+  - id: resonance_test
+    name: "Resonance Test"
+    type: SKILL_CHECK
+    description: |
+      A large dragonshard floats at the chamber's center. To complete the
+      trial, you must touch it and... something. Let it read you? Read it?
+      The instructions are unclear. Trust yourself.
+    hint: "Don't force it. Let it come to you."
+
+    required_skill: ARCANA
+    alternate_skill: INSIGHT
+    dc: 12
+
+    reward_item: magic_medal
+    reward_text: "The shard pulses in harmony with you—Medal of Magic earned!"
+
+    success_text: |
+      You approach the shard and simply... wait. It pulses. You breathe.
+      It brightens. You open your mind. And suddenly you FEEL it—a
+      connection, a thread, a song without words. You resonate.
+
+    fail_text: |
+      You try too hard. The shard dims and pulls away. But it doesn't
+      reject you—it just asks you to try again, gentler this time.
+    fail_consequence: "Must retry with calmer approach"
+    fail_damage: "0"
+
+  # ==========================================
+  # Mirror Battle Mini-Games
+  # ==========================================
+
+  - id: shadow_taunt
+    name: "Shadow Taunt"
+    type: DIALOGUE
+    description: |
+      Your reflection speaks your deepest fears. Your hidden shame. The
+      things you tell no one. It tries to break you before the fight
+      even begins.
+    hint: "Fear only has power if you deny it."
+
+    required_skill: INSIGHT
+    alternate_skill: WISDOM
+    dc: 14
+
+    reward_text: "You refuse to be shaken. Your reflection hesitates."
+
+    success_text: |
+      "I know," you say simply. "I know all of that. And I'm still here."
+      Your reflection's smirk wavers. It expected denial. It didn't expect
+      acceptance.
+
+    fail_text: |
+      The words cut deep. Tears spring to your eyes unbidden. Your hands
+      shake. But the trial continues—you must fight on despite the pain.
+    fail_consequence: "Frightened condition until end of next turn"
+    fail_damage: "0"
+
+  - id: mirror_combat
+    name: "Mirror Combat"
+    type: SKILL_CHECK
+    description: |
+      Your reflection attacks with everything you know—every technique,
+      every trick. But it can only mirror, never create. Find something
+      new, and you find victory.
+    hint: "Do what you've never done before."
+
+    required_skill: ATHLETICS
+    alternate_skill: ACROBATICS
+    dc: 15
+
+    reward_text: "Your unexpected move catches the reflection off-guard!"
+
+    success_text: |
+      You stop thinking. Stop planning. You move on pure instinct, doing
+      something you've never tried before. Your reflection hesitates—it
+      has no memory of this. You strike true.
+
+    fail_text: |
+      Every move is countered. Every strike blocked. The reflection
+      knows you too well. It lands a solid blow.
+    fail_consequence: "1d6 force damage from reflection's attack"
+    fail_damage: "1d6"
+
+  - id: accept_flaw
+    name: "Accept Your Flaw"
+    type: CHOICE
+    description: |
+      The reflection offers a choice: deny your greatest flaw and fight
+      forever, or accept it and transform. There is no wrong answer—
+      only different truths.
+    hint: "The mirror cannot lie. Neither should you."
+
+    required_skill: INSIGHT
+    alternate_skill: WISDOM
+    dc: 12
+
+    reward_text: "You speak your truth. The reflection's aggression fades."
+
+    success_text: |
+      "Yes," you say. "That's me. All of me. The light and the shadow."
+      Your reflection stops fighting. It tilts its head, almost curious.
+      "You understand," it whispers, and begins to dissolve into light.
+
+    fail_text: |
+      You try to accept, but the words ring hollow. More work is needed.
+      The reflection sighs sadly—but does not attack.
+    fail_consequence: "Must try again more honestly"
+    fail_damage: "0"
+
+  - id: final_choice
+    name: "Final Choice"
+    type: CHOICE
+    description: |
+      Your reflection, now more ally than enemy, offers something: the
+      chance to take its power and add it to your own—or to integrate
+      it gently, accepting limits. More power comes with more risk.
+    hint: "There is no wrong choice. Only consequences."
+
+    required_skill: WISDOM
+    alternate_skill: INSIGHT
+    dc: 10
+
+    reward_item: champions_shard
+    reward_text: "The Champion's Shard crystallizes in your hands!"
+
+    success_text: |
+      You make your choice with conviction. Your reflection nods, perhaps
+      even smiles, and dissolves into pure light. That light gathers in
+      your hands and crystallizes into something unique: a shard born
+      from your own acceptance.
+
+      You are changed. You can feel it. The dragonshards throughout the
+      arena pulse in welcome.
+
+    fail_text: |
+      You hesitate at the final moment. The reflection waits patiently.
+      Take your time—this choice matters.
+    fail_consequence: "Must choose; no wrong answer"
+    fail_damage: "0"

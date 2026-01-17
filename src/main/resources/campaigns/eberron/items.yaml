@@ -1,0 +1,726 @@
+# Item definitions for Eberron: Shards of the Fallen Sky
+# Dragonshards (6 types) and other equipment
+
+items:
+  # ==========================================
+  # DRAGONSHARDS - Fragments of Astrael
+  # ==========================================
+
+  # Shard of Might (Red)
+  - id: shard_of_might
+    name: Shard of Might
+    type: magic_item
+    rarity: rare
+    description: |
+      A deep crimson dragonshard that pulses with raw power. When held, you
+      feel your muscles tighten with potential energy. This is a fragment of
+      Astrael's strength, crystallized into physical form.
+    weight: 0.1
+    value: 500
+    properties:
+      - name: Passive
+        description: "+1 Strength while attuned"
+      - name: Active
+        description: "1/Long Rest: Add +1d6 damage to any attack"
+    effect_description: |
+      The Shard of Might resonates with physical power. Those who carry it
+      find their blows land harder, their grip grows firmer. But be warned—
+      the more shards you gather, the more Fybris notices.
+    attunement: true
+
+  # Shard of Insight (Blue)
+  - id: shard_of_insight
+    name: Shard of Insight
+    type: magic_item
+    rarity: rare
+    description: |
+      A deep sapphire dragonshard that seems to contain swirling depths.
+      When you look into it, you sometimes see things that aren't there—
+      or things that are hidden from normal sight.
+    weight: 0.1
+    value: 500
+    properties:
+      - name: Passive
+        description: "+1 to Investigation and Perception checks"
+      - name: Active
+        description: "1/Long Rest: Ask the DM one 'truthful hint' question"
+    effect_description: |
+      The Shard of Insight grants fragments of Astrael's perception. Truth
+      becomes clearer, lies more obvious. But some truths are better left
+      unknown, and the shard shows all without discrimination.
+    attunement: true
+
+  # Shard of Inspiration (Green)
+  - id: shard_of_inspiration
+    name: Shard of Inspiration
+    type: magic_item
+    rarity: rare
+    description: |
+      An emerald dragonshard that glows with warm, encouraging light. In its
+      presence, despair fades and hope kindles. This is a piece of Astrael's
+      wonder, her boundless optimism made manifest.
+    weight: 0.1
+    value: 500
+    properties:
+      - name: Passive
+        description: "Once per combat, automatically gain Inspiration"
+      - name: Active
+        description: "1/Day: Grant Inspiration to all allies within 30 feet"
+    effect_description: |
+      The Shard of Inspiration carries Astrael's gift for hope. It reminds
+      you why you fight, what you protect, what makes life worth living.
+      Some say it whispers encouragement in quiet moments.
+    attunement: true
+
+  # Shard of Speed (Yellow)
+  - id: shard_of_speed
+    name: Shard of Speed
+    type: magic_item
+    rarity: rare
+    description: |
+      A brilliant yellow dragonshard that seems to vibrate at frequencies
+      just beyond perception. Light bends around it strangely, as if time
+      itself moves differently in its presence.
+    weight: 0.1
+    value: 500
+    properties:
+      - name: Passive
+        description: "+5 feet movement speed"
+      - name: Active
+        description: "1/Long Rest: Take Dash as a bonus action"
+    effect_description: |
+      The Shard of Speed contains Astrael's quickness, her ability to be
+      everywhere at once. Those who carry it find their reflexes sharpened,
+      their movements more fluid. The world seems to slow around them.
+    attunement: true
+
+  # Shard of Resolve (Purple)
+  - id: shard_of_resolve
+    name: Shard of Resolve
+    type: magic_item
+    rarity: rare
+    description: |
+      A deep violet dragonshard that feels warm to the touch, like a
+      comforting hand on your shoulder. It pulses in time with your
+      heartbeat, strengthening your will with each beat.
+    weight: 0.1
+    value: 500
+    properties:
+      - name: Passive
+        description: "+1 to all saving throws"
+      - name: Active
+        description: "1/Day (Reaction): Turn a failed saving throw into a success"
+    effect_description: |
+      The Shard of Resolve holds Astrael's determination, her refusal to
+      yield even when facing her own death. Those who carry it find their
+      will strengthened, their fears diminished. They do not break easily.
+    attunement: true
+
+  # Shard of Shadow (Black)
+  - id: shard_of_shadow
+    name: Shard of Shadow
+    type: magic_item
+    rarity: rare
+    description: |
+      A dragonshard of deepest black that seems to drink in light. Shadows
+      gather around it like old friends, and those who carry it find
+      themselves harder to notice, easier to overlook.
+    weight: 0.1
+    value: 500
+    properties:
+      - name: Passive
+        description: "Advantage on Stealth checks in dim light or darkness"
+      - name: Active
+        description: "1/Day: Become invisible until end of your next turn"
+    effect_description: |
+      The Shard of Shadow contains the darkness of Astrael's death—not evil,
+      but the peaceful quiet of endings. Those who carry it walk between
+      shadows, noticed only when they choose to be. Some find this comfort;
+      others find it unsettling.
+    attunement: true
+
+  # ==========================================
+  # COMMON ITEMS
+  # ==========================================
+
+  - id: practice_sword
+    name: Practice Sword
+    type: weapon
+    subtype: melee
+    rarity: common
+    description: |
+      A wooden training sword with a padded edge. It won't cut, but it can
+      definitely bruise. Standard issue for the Training Grounds.
+    weight: 2
+    value: 1
+    damage: 1d4
+    damage_type: bludgeoning
+    properties:
+      - name: Non-Lethal
+        description: "Damage from this weapon is always non-lethal"
+
+  - id: competitor_badge
+    name: Competitor Badge
+    type: misc
+    rarity: common
+    description: |
+      An official Games badge that identifies you as a registered competitor.
+      It shimmers with a minor enchantment that prevents forgery.
+    weight: 0
+    value: 0
+    properties:
+      - name: Official
+        description: "Grants access to competitor-only areas"
+
+  - id: games_program
+    name: Games Program
+    type: misc
+    rarity: common
+    description: |
+      An enchanted pamphlet that updates with current schedules, scores,
+      and competitor information. The text rearranges itself as events
+      progress.
+    weight: 0
+    value: 2
+    properties:
+      - name: Self-Updating
+        description: "Shows current Games information"
+
+  - id: lucky_charm
+    name: Lucky Charm
+    type: misc
+    rarity: common
+    description: |
+      A small trinket sold by Merchant Row vendors. Probably not actually
+      magical, but it makes you feel better.
+    weight: 0
+    value: 5
+    properties:
+      - name: Placebo
+        description: "No actual effect, but very reassuring"
+
+  # ==========================================
+  # TRIAL REWARDS
+  # ==========================================
+
+  - id: balance_medal
+    name: Medal of Balance
+    type: magic_item
+    rarity: uncommon
+    description: |
+      A bronze medal awarded for completing the Trial of Balance. It depicts
+      a figure balancing on a single point, perfectly poised.
+    weight: 0.1
+    value: 50
+    properties:
+      - name: Balanced Footing
+        description: "Advantage on checks to avoid being knocked prone"
+    attunement: false
+
+  - id: insight_medal
+    name: Medal of Insight
+    type: magic_item
+    rarity: uncommon
+    description: |
+      A silver medal awarded for completing the Trial of Insight. It depicts
+      an open eye surrounded by swirling patterns.
+    weight: 0.1
+    value: 50
+    properties:
+      - name: Quick Thinking
+        description: "+1 to Intelligence checks"
+    attunement: false
+
+  - id: strength_medal
+    name: Medal of Strength
+    type: magic_item
+    rarity: uncommon
+    description: |
+      A bronze medal awarded for completing the Trial of Strength. It depicts
+      a clenched fist holding a lightning bolt.
+    weight: 0.1
+    value: 50
+    properties:
+      - name: Enduring Grip
+        description: "Advantage on checks to grapple or avoid being disarmed"
+    attunement: false
+
+  - id: magic_medal
+    name: Medal of Magic
+    type: magic_item
+    rarity: uncommon
+    description: |
+      A silver medal awarded for completing the Trial of Magic. It depicts
+      three interlocking circles representing the cosmic dragons.
+    weight: 0.1
+    value: 50
+    properties:
+      - name: Arcane Attunement
+        description: "Can sense magic within 10 feet"
+    attunement: false
+
+  - id: champions_shard
+    name: Champion's Shard
+    type: magic_item
+    rarity: rare
+    description: |
+      A small dragonshard awarded to those who complete the Mirror Battle.
+      It glows with a soft light that seems to respond to your emotions.
+      The first step on the path of true resonance.
+    weight: 0.1
+    value: 200
+    properties:
+      - name: Resonance Awakened
+        description: "You can now sense dragonshards within 30 feet"
+      - name: Self-Knowledge
+        description: "Advantage on saving throws against being charmed or frightened"
+    effect_description: |
+      The Champion's Shard is unique—it forms only when a competitor truly
+      accepts themselves in the Mirror Battle. It is the first sign that
+      you may be one of those who can hear Astrael's whispers.
+    attunement: true
+
+  # ==========================================
+  # GRIFFON'S SADDLEBAG ITEMS
+  # ==========================================
+
+  - id: sprinters_sandals
+    name: Sprinter's Sandals
+    type: magic_item
+    rarity: uncommon
+    description: |
+      These lightweight sandals are enchanted with wind magic. Small wings
+      decorating the heel flutter when you run, propelling you forward with
+      supernatural speed.
+    weight: 1
+    value: 300
+    properties:
+      - name: Fleet Footed
+        description: "+10 feet movement speed while wearing these sandals"
+      - name: Starting Burst
+        description: "When you take the Dash action, gain an additional 10 feet of movement"
+    attunement: true
+
+  - id: gloves_of_the_pugilist
+    name: Gloves of the Pugilist
+    type: magic_item
+    rarity: uncommon
+    description: |
+      These reinforced leather gloves are wrapped with strips of enchanted
+      cloth. They channel your fighting spirit into devastating unarmed blows.
+    weight: 1
+    value: 250
+    properties:
+      - name: Empowered Strikes
+        description: "Your unarmed strikes deal 1d6 bludgeoning damage instead of normal"
+      - name: Knockout Punch
+        description: "1/Long Rest: On a hit, force target to make DC 14 CON save or be stunned until end of your next turn"
+    attunement: true
+
+  - id: belt_of_the_mighty
+    name: Belt of the Mighty
+    type: magic_item
+    rarity: rare
+    description: |
+      A thick leather belt reinforced with dragonshard-infused metal. It was
+      worn by past champions of the strength trials and radiates raw power.
+    weight: 2
+    value: 600
+    properties:
+      - name: Giant's Strength
+        description: "Your Strength score becomes 19 while wearing this belt. Has no effect if your Strength is already 19 or higher."
+    attunement: true
+
+  - id: cloak_of_the_champion
+    name: Cloak of the Champion
+    type: magic_item
+    rarity: rare
+    description: |
+      A magnificent cloak that billows dramatically even without wind. It
+      changes color to match your nation's colors during competition and
+      inspires those who see you wear it.
+    weight: 2
+    value: 500
+    properties:
+      - name: Inspiring Presence
+        description: "Allies within 10 feet gain +1 to saving throws against fear"
+      - name: Dramatic Flourish
+        description: "Advantage on Intimidation and Performance checks"
+      - name: Never Dirty
+        description: "The cloak magically repels dirt, mud, and stains"
+    attunement: true
+
+  - id: javelin_of_returning
+    name: Javelin of Returning
+    type: weapon
+    subtype: melee
+    rarity: uncommon
+    description: |
+      An elegantly balanced javelin inscribed with arcane runes. When thrown,
+      it magically returns to your hand at the end of your turn. A favorite
+      of javelin throw competitors.
+    weight: 2
+    value: 250
+    damage: 1d6
+    damage_type: piercing
+    properties:
+      - name: Thrown
+        description: "Range 30/120"
+      - name: Returning
+        description: "Returns to your hand at the end of your turn after being thrown"
+
+  - id: discus_of_force
+    name: Discus of Force
+    type: weapon
+    subtype: melee
+    rarity: uncommon
+    description: |
+      A flat circular disc enchanted for the discus throw event. When thrown
+      with sufficient force, it releases a concussive wave on impact.
+    weight: 3
+    value: 300
+    damage: 1d8
+    damage_type: bludgeoning
+    properties:
+      - name: Thrown
+        description: "Range 60/180"
+      - name: Force Impact
+        description: "On a critical hit, target must make DC 13 STR save or be knocked prone"
+      - name: Returning
+        description: "Returns to your hand at the end of your turn"
+
+  - id: boots_of_leaping
+    name: Boots of Leaping
+    type: magic_item
+    rarity: uncommon
+    description: |
+      These knee-high boots have coiled springs woven into their soles with
+      magic. They were designed for the long jump and high jump events.
+    weight: 2
+    value: 300
+    properties:
+      - name: Enhanced Jump
+        description: "Your jump distance is tripled"
+      - name: Safe Landing
+        description: "You can subtract up to 20 feet when calculating fall damage"
+    attunement: true
+
+  # ==========================================
+  # STANDARD WEAPONS
+  # ==========================================
+
+  - id: longsword
+    name: Longsword
+    type: weapon
+    subtype: melee
+    rarity: common
+    description: |
+      A well-balanced blade favored by warriors across Khorvaire. This one
+      bears the mark of Sharn's finest smiths.
+    weight: 3
+    value: 15
+    damage: 1d8
+    damage_type: slashing
+    properties:
+      - name: Versatile
+        description: "Can be wielded with two hands for 1d10 damage"
+
+  - id: shortsword
+    name: Shortsword
+    type: weapon
+    subtype: melee
+    rarity: common
+    description: |
+      A light, quick blade ideal for agile fighters. Popular among competitors
+      who favor speed over raw power.
+    weight: 2
+    value: 10
+    damage: 1d6
+    damage_type: piercing
+    properties:
+      - name: Light
+        description: "Can be used for two-weapon fighting"
+      - name: Finesse
+        description: "Can use DEX instead of STR for attack and damage"
+
+  - id: quarterstaff
+    name: Quarterstaff
+    type: weapon
+    subtype: melee
+    rarity: common
+    description: |
+      A simple but effective weapon. Many competitors from Aundair prefer
+      the elegance of staff fighting techniques.
+    weight: 4
+    value: 2
+    damage: 1d6
+    damage_type: bludgeoning
+    properties:
+      - name: Versatile
+        description: "Can be wielded with two hands for 1d8 damage"
+
+  - id: longbow
+    name: Longbow
+    type: weapon
+    subtype: ranged
+    rarity: common
+    description: |
+      A tall bow requiring strength and skill to draw. Essential equipment
+      for the archery competition.
+    weight: 2
+    value: 50
+    damage: 1d8
+    damage_type: piercing
+    properties:
+      - name: Ammunition
+        description: "Requires arrows"
+      - name: Range
+        description: "150/600"
+      - name: Two-Handed
+        description: "Requires two hands to use"
+
+  - id: throwing_darts
+    name: Throwing Darts (6)
+    type: weapon
+    subtype: ranged
+    rarity: common
+    description: |
+      A set of six balanced throwing darts used in the precision throw event.
+      Fletched with bright feathers for visibility.
+    weight: 1.5
+    value: 3
+    damage: 1d4
+    damage_type: piercing
+    properties:
+      - name: Thrown
+        description: "Range 20/60"
+      - name: Finesse
+        description: "Can use DEX instead of STR for attack and damage"
+
+  # ==========================================
+  # STANDARD ARMOR
+  # ==========================================
+
+  - id: leather_armor
+    name: Leather Armor
+    type: armor
+    subtype: light
+    rarity: common
+    description: |
+      Supple leather armor that doesn't restrict movement. Preferred by
+      competitors who need to remain agile.
+    weight: 10
+    value: 10
+    armor_class: 11
+    properties:
+      - name: Light Armor
+        description: "AC = 11 + DEX modifier"
+
+  - id: chain_shirt
+    name: Chain Shirt
+    type: armor
+    subtype: medium
+    rarity: common
+    description: |
+      Interlocking metal rings worn under clothing. Provides solid protection
+      while allowing reasonable mobility.
+    weight: 20
+    value: 50
+    armor_class: 13
+    properties:
+      - name: Medium Armor
+        description: "AC = 13 + DEX modifier (max 2)"
+
+  - id: competitors_shield
+    name: Competitor's Shield
+    type: armor
+    subtype: shield
+    rarity: common
+    description: |
+      A round shield painted with your nation's colors. Standard issue for
+      the armed combat events.
+    weight: 6
+    value: 10
+    armor_class: 2
+    properties:
+      - name: Shield
+        description: "+2 AC when wielded"
+
+  # ==========================================
+  # CONSUMABLES & POTIONS
+  # ==========================================
+
+  - id: potion_of_healing
+    name: Potion of Healing
+    type: consumable
+    rarity: common
+    description: |
+      A small vial of red liquid that shimmers when agitated. Heals wounds
+      when consumed. Available from Games medical staff.
+    weight: 0.5
+    value: 50
+    stackable: true
+    max_stack: 5
+    properties:
+      - name: Healing
+        description: "Drink to regain 2d4+2 hit points"
+
+  - id: potion_of_greater_healing
+    name: Potion of Greater Healing
+    type: consumable
+    rarity: uncommon
+    description: |
+      A larger vial of deep crimson liquid. More potent than standard healing
+      potions, reserved for serious injuries.
+    weight: 0.5
+    value: 150
+    stackable: true
+    max_stack: 3
+    properties:
+      - name: Greater Healing
+        description: "Drink to regain 4d4+4 hit points"
+
+  - id: potion_of_speed
+    name: Potion of Speed
+    type: consumable
+    rarity: rare
+    description: |
+      A yellow liquid that swirls rapidly in its container. Banned in official
+      competition but available on the black market.
+    weight: 0.5
+    value: 400
+    stackable: true
+    max_stack: 2
+    properties:
+      - name: Haste
+        description: "Gain effects of Haste spell for 1 minute (no concentration)"
+      - name: Banned Substance
+        description: "Using this in official events results in disqualification"
+
+  - id: stamina_elixir
+    name: Stamina Elixir
+    type: consumable
+    rarity: uncommon
+    description: |
+      A thick green tonic that tastes of herbs and honey. Restores energy and
+      fights fatigue. Perfectly legal for competition use.
+    weight: 0.5
+    value: 100
+    stackable: true
+    max_stack: 3
+    properties:
+      - name: Endurance
+        description: "Remove one level of exhaustion"
+      - name: Second Wind
+        description: "Gain 10 temporary hit points for 1 hour"
+
+  - id: athletes_salve
+    name: Athlete's Salve
+    type: consumable
+    rarity: common
+    description: |
+      A medicinal ointment that soothes sore muscles and minor injuries. Every
+      competitor keeps a jar in their kit.
+    weight: 0.5
+    value: 25
+    stackable: true
+    max_stack: 5
+    properties:
+      - name: Muscle Relief
+        description: "Apply during short rest to regain one additional hit die"
+
+  # ==========================================
+  # COMPETITION EQUIPMENT
+  # ==========================================
+
+  - id: wrestling_oil
+    name: Wrestling Oil
+    type: consumable
+    rarity: common
+    description: |
+      A slippery oil applied before wrestling matches. Makes you harder to
+      grapple but also harder to hold onto opponents.
+    weight: 0.5
+    value: 5
+    stackable: true
+    max_stack: 3
+    properties:
+      - name: Slippery
+        description: "For 1 hour: +2 to escape grapple checks, -2 to maintain grapples"
+
+  - id: victory_wreath
+    name: Victory Wreath
+    type: magic_item
+    rarity: rare
+    description: |
+      A golden laurel wreath awarded to event champions. It never wilts and
+      glows faintly with residual magic from the blessing ceremony.
+    weight: 0.1
+    value: 750
+    properties:
+      - name: Champion's Glory
+        description: "+2 to Charisma checks when recognized as a Games champion"
+      - name: Astrael's Blessing
+        description: "Once per day, reroll a failed ability check"
+    attunement: true
+
+  - id: relay_baton
+    name: Enchanted Relay Baton
+    type: misc
+    rarity: uncommon
+    description: |
+      A short metal baton used in relay races. This one is enchanted to glow
+      brightly when passed between team members, ensuring fair exchanges.
+    weight: 0.5
+    value: 100
+    properties:
+      - name: Fair Play
+        description: "Glows when properly exchanged within the relay zone"
+      - name: Team Bond
+        description: "Allies who've held the baton gain +5 feet movement for 1 round"
+
+  - id: archery_quiver
+    name: Quiver of Plenty
+    type: magic_item
+    rarity: uncommon
+    description: |
+      An enchanted quiver that generates normal arrows at dawn. Essential for
+      archers who go through ammunition quickly during training.
+    weight: 1
+    value: 250
+    properties:
+      - name: Arrow Generation
+        description: "Creates 20 normal arrows at dawn each day"
+      - name: Never Empty
+        description: "Can still hold and carry magical arrows normally"
+    attunement: false
+
+  - id: training_dummy_whistle
+    name: Training Dummy Whistle
+    type: misc
+    rarity: common
+    description: |
+      A small brass whistle that summons and commands training dummies at the
+      official training grounds. Only works within the stadium complex.
+    weight: 0
+    value: 10
+    properties:
+      - name: Summon Dummy
+        description: "Blow to activate nearest training dummy"
+      - name: Limited Range
+        description: "Only functions within the Games grounds"
+
+  - id: champions_banner
+    name: Champion's Banner
+    type: misc
+    rarity: rare
+    description: |
+      A personal banner awarded to overall champions. It flies your colors
+      and achievements, inspiring allies and intimidating foes.
+    weight: 3
+    value: 500
+    properties:
+      - name: Rally
+        description: "Plant as action: allies within 30 feet gain +1 to attack rolls for 1 minute"
+      - name: Reputation
+        description: "NPCs in Khorvaire recognize you as a Games champion"

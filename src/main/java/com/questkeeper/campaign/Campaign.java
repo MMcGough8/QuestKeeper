@@ -7,12 +7,18 @@ import com.questkeeper.inventory.Item;
 import com.questkeeper.inventory.Weapon;
 import com.questkeeper.world.Location;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.yaml.snakeyaml.Yaml;
 
 /**
  * Represents a loaded campaign with all its content.
@@ -104,6 +110,103 @@ public class Campaign {
         campaign.validateCrossReferences();
 
         return campaign;
+    }
+
+    /**
+     * Discovers all available campaigns in the given campaigns directory.
+     * Only reads campaign.yaml metadata without loading full campaign content.
+     *
+     * @param campaignsDir the directory containing campaign subdirectories
+     * @return list of CampaignInfo objects for available campaigns
+     */
+    public static List<CampaignInfo> listAvailable(Path campaignsDir) {
+        List<CampaignInfo> campaigns = new ArrayList<>();
+
+        if (!Files.exists(campaignsDir) || !Files.isDirectory(campaignsDir)) {
+            return campaigns;
+        }
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(campaignsDir)) {
+            for (Path entry : stream) {
+                if (Files.isDirectory(entry)) {
+                    CampaignInfo info = readCampaignInfo(entry);
+                    if (info != null) {
+                        campaigns.add(info);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            // Return whatever we found so far
+        }
+
+        // Sort by name for consistent display
+        campaigns.sort((a, b) -> a.name().compareToIgnoreCase(b.name()));
+        return campaigns;
+    }
+
+    /**
+     * Discovers available campaigns by searching common locations.
+     *
+     * @return list of CampaignInfo objects for available campaigns
+     */
+    public static List<CampaignInfo> listAvailable() {
+        // Try multiple possible campaign directory locations
+        String[] possiblePaths = {
+            "src/main/resources/campaigns",
+            "campaigns",
+            "../resources/campaigns"
+        };
+
+        for (String pathStr : possiblePaths) {
+            Path path = Path.of(pathStr);
+            if (Files.exists(path) && Files.isDirectory(path)) {
+                List<CampaignInfo> campaigns = listAvailable(path);
+                if (!campaigns.isEmpty()) {
+                    return campaigns;
+                }
+            }
+        }
+
+        return new ArrayList<>();
+    }
+
+    /**
+     * Reads just the campaign.yaml metadata without loading full content.
+     */
+    @SuppressWarnings("unchecked")
+    private static CampaignInfo readCampaignInfo(Path campaignDir) {
+        Path campaignFile = campaignDir.resolve("campaign.yaml");
+
+        if (!Files.exists(campaignFile)) {
+            return null;
+        }
+
+        try (InputStream is = Files.newInputStream(campaignFile)) {
+            Yaml yaml = new Yaml();
+            Map<String, Object> data = yaml.load(is);
+
+            if (data == null) {
+                return null;
+            }
+
+            String id = getStringOrDefault(data, "id", campaignDir.getFileName().toString());
+            String name = getStringOrDefault(data, "name", "Unnamed Campaign");
+            String description = getStringOrDefault(data, "description", "");
+            String author = getStringOrDefault(data, "author", "Unknown");
+            String version = getStringOrDefault(data, "version", "1.0");
+
+            return new CampaignInfo(id, name, description, author, version, campaignDir);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    private static String getStringOrDefault(Map<String, Object> data, String key, String defaultValue) {
+        Object value = data.get(key);
+        if (value instanceof String s) {
+            return s;
+        }
+        return defaultValue;
     }
 
     /**

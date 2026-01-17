@@ -422,6 +422,12 @@ class CampaignLoader {
 
         Location location = new Location(id, name, description, readAloudText);
 
+        // Parse locked message (shown when player tries to enter a locked location)
+        String lockedMessage = getString(data, "locked_message", null);
+        if (lockedMessage != null) {
+            location.setLockedMessage(lockedMessage);
+        }
+
         // Parse exits
         Map<String, String> exits = getStringMap(data, "exits");
         for (Map.Entry<String, String> exit : exits.entrySet()) {
@@ -575,6 +581,14 @@ class CampaignLoader {
 
         trial.setCompletionReward(getString(data, "completion_reward", ""));
         trial.setStinger(getString(data, "stinger", ""));
+
+        // Parse prerequisites (flags that must be set to start this trial)
+        List<String> prerequisites = getStringList(data, "prerequisites");
+        trial.setPrerequisites(prerequisites);
+
+        // Parse completion flags (flags to set when trial is completed)
+        List<String> completionFlags = getStringList(data, "completion_flags");
+        trial.setCompletionFlags(completionFlags);
 
         // Add mini-games to the trial by looking them up from the loaded miniGames
         List<String> miniGameIds = getStringList(data, "mini_games");

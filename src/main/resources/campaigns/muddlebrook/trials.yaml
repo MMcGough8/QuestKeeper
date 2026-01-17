@@ -38,7 +38,7 @@ trials:
     completion_flags:
       - trial_01_complete
       - met_machinist
-      - clocktower_unlocked
+      - clocktower_hill_unlocked
 
   # ==========================================
   # Trial #2: The Clocktower's Secret

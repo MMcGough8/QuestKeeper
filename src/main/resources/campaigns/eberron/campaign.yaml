@@ -1,0 +1,78 @@
+# Eberron: Shards of the Fallen Sky
+# A myth-heavy, puzzle-forward campaign exploring cosmic origins and ancient powers
+# Beginner-Friendly | AI-Ready World Bible
+
+id: eberron
+name: "Eberron: Shards of the Fallen Sky"
+description: "A beginner-friendly, puzzle-forward campaign exploring cosmic origins and ancient powers. The deeper you go, the darker it gets."
+author: "Andrew Mariani & Marc McGough"
+version: "1.0"
+
+starting_location: convergence_plaza
+
+intro: |
+  Long before kingdoms, before magic schools, before war, three cosmic dragons
+  and a god shaped existence itself.
+
+  One dragon became the world.
+  One dragon became the sky.
+  One dragon became the prisoner.
+  And their shattered sister became power.
+
+  At the dawn of everything, a god known only as The First Spark shaped three
+  dragon siblings to help create the universe. EBERRON, the Guardian, loved the
+  world so fiercely she became it—her body the mountains and seas, her breath
+  the wind itself. FYBRIS, the Devourer, whose hunger knew no bounds, killed
+  their sister and was imprisoned deep within Eberron's earthen heart. And
+  ASTRAEL, the Fallen Sister, dragon of Balance, Wonder, and Possibility—her
+  body shattered across creation, becoming the stars, the dragonshards, and
+  magic as mortals know it.
+
+  Now, the Olympic Convergence Games have come to the great city of Sharn.
+  Champions from across Khorvaire gather to compete—to celebrate peace, to test
+  talent, to scout heroes.
+
+  But ancient factions watch from the shadows, seeking those with shard resonance.
+  The Games are designed to awaken dormant potential.
+
+  You feel it, don't you? That strange pull when you see the dragonshards glow.
+  That sense that something ancient is stirring.
+
+  The deeper you go into the world, the closer you get to the truth—and to
+  something that should never wake.
+
+  Welcome to the Games.
+
+dm_notes: |
+  CORE THEME: "The deeper you go, the darker it gets."
+
+  Surface: politics, magic, intrigue
+  Underground: ancient ruins, madness, corruption
+  Deep World: prisons, cosmic horror, Fybris' influence
+
+  THE WORLD IS ALIVE:
+  - Mountains = bone ridges
+  - Ley lines = veins
+  - Volcanoes = wounds
+  - The deep earth = Eberron's stomach, where Fybris is chained
+
+  TONE PROGRESSION:
+  - Sessions 1-2: Fun, competitive, puzzle-based, no lethal combat
+  - Mid-campaign: Mystery, faction intrigue, first hints of darkness
+  - Late campaign: Cosmic horror, difficult choices, sacrifice
+
+  SHARD MECHANIC WARNING:
+  The more shards a party collects, the more Fybris notices them.
+
+  VICTORY CONDITIONS (Final Boss):
+  Fybris is NOT meant to be fought directly. Winning means:
+  - Re-sealing him
+  - Bargaining with him
+  - Sacrifice
+  - Or choosing what kind of world survives
+
+  THEMES:
+  - Power has consequences
+  - Knowledge changes people
+  - The world protects you—but it's dying
+  - Heroes are chosen by choice, not destiny

@@ -1,0 +1,461 @@
+# NPC definitions for Eberron: Shards of the Fallen Sky
+# Faction representatives, competitors, and key characters
+
+npcs:
+  # ==========================================
+  # Herald Vox - Tournament Announcer
+  # ==========================================
+  - id: herald_vox
+    name: Herald Vox
+    short_descriptor: "the booming announcer"
+    description: |
+      A warforged with a magically amplified voice box, Herald Vox serves as
+      the official announcer for the Convergence Games. His bronze-and-gold
+      plating gleams under the sun, and his voice can reach every corner of
+      the plaza without magical assistance.
+    personality: enthusiastic, dramatic, slightly pompous
+    voice: "LOUD and theatrical, with occasional quiet asides"
+    role: announcer
+
+    greeting: |
+      WELCOME, COMPETITOR! The Games await those bold enough to test their
+      mettle! Have you registered yet? The trials begin SOON!
+
+    topics:
+      games:
+        keywords: [games, competition, tournament, trials, events]
+        response: |
+          The Olympic Convergence Games test mind, body, and spirit! We have
+          trials of Balance, Insight, Strength, and Magic—and for those who
+          excel, the legendary Mirror Battle awaits!
+        flags_required: []
+
+      registration:
+        keywords: [register, sign up, join, compete, enter]
+        response: |
+          The Registration Hall is just north of here! Clerk Torvin will get
+          you sorted. *quieter* Between you and me, they're looking for
+          something specific this year. Special potential, if you know what
+          I mean.
+        flags_required: []
+
+      shards:
+        keywords: [shards, dragonshards, crystals, magic stones]
+        response: |
+          *voice drops* Ah, you've noticed the shards. They say the Games
+          were originally designed to find those who... resonate with them.
+          Just a legend, of course! *louder* NOW GET OUT THERE AND COMPETE!
+        flags_required: []
+
+      factions:
+        keywords: [factions, shardwardens, depthbound, skybound, organizations]
+        response: |
+          *uncomfortable* I don't know anything about secret factions watching
+          the Games. That would be... *glances around* ...completely
+          unsubstantiated rumor. Ask at the Observation Gallery if you must.
+        flags_required: []
+
+  # ==========================================
+  # Shardwarden Elara - Faction Representative
+  # ==========================================
+  - id: shardwarden_elara
+    name: Shardwarden Elara
+    short_descriptor: "a silver-haired elf with ancient eyes"
+    description: |
+      An elven woman of indeterminate age, Elara wears simple gray robes that
+      seem to shift color in certain light. A small dragonshard pendant hangs
+      at her throat, never glowing. Her eyes hold centuries of secrets.
+    personality: wise, cautious, protective, secretive
+    voice: "Measured and calm, each word chosen with care"
+    role: faction_contact
+
+    greeting: |
+      *studies you intently* You have the look of someone who sees more
+      than most. Tell me—when you look at dragonshards, do they... respond?
+
+    topics:
+      shardwardens:
+        keywords: [shardwardens, your order, organization, who are you]
+        response: |
+          We are the Shardwardens. For millennia, we have watched over
+          Astrael's remains—the dragonshards. Our duty is to keep them
+          separated, monitored, controlled. Too many shards in one place...
+          *trails off* ...attracts unwanted attention.
+        flags_required: []
+
+      astrael:
+        keywords: [astrael, fallen sister, dragon sister, stars]
+        response: |
+          She was the dragon of Balance and Wonder. When Fybris murdered
+          her, her body shattered across all creation. The stars are her
+          largest fragments. The dragonshards are smaller pieces. And
+          magic itself... is her blood, still flowing.
+        flags_required: []
+
+      fybris:
+        keywords: [fybris, devourer, evil dragon, prisoner, underground]
+        response: |
+          *voice drops to whisper* He sleeps within Eberron's heart, but
+          he dreams. And when enough shards gather—when enough of Astrael's
+          power concentrates—he stirs. The deeper you go, the more you'll
+          feel him. His hunger. His whispers.
+        flags_required: []
+
+      resonance:
+        keywords: [resonance, potential, special, chosen, power]
+        response: |
+          Some mortals can feel the shards. Can communicate with them,
+          in a way. The Games... they're designed to find such people.
+          To test them. If you resonate, you'll know during the trials.
+          And then we must speak again.
+        flags_required: []
+
+      danger:
+        keywords: [danger, warning, careful, threat]
+        response: |
+          The Depthbound seek those with resonance too—but not to protect
+          them. They believe Fybris should be freed. That his hunger will
+          bring... renewal. *shakes head* Madness. But dangerous madness.
+          Watch for those who speak of "liberation" and "the sleeping god."
+        flags_required: []
+
+  # ==========================================
+  # Clerk Torvin - Registration Clerk
+  # ==========================================
+  - id: clerk_torvin
+    name: Clerk Torvin
+    short_descriptor: "a harried halfling with ink-stained fingers"
+    description: |
+      A halfling whose desk is a controlled explosion of papers, quills,
+      and registration forms. Despite the chaos, he seems to know exactly
+      where everything is. His dragonshard pendant occasionally flickers.
+    personality: efficient, stressed, secretly observant
+    voice: "Rapid-fire speech, always multitasking"
+    role: administrator
+
+    greeting: |
+      Next! Name, nation, and primary discipline! And yes, the dragonshards
+      in the arena ARE safe, we have documentation, please don't ask again!
+
+    topics:
+      registration:
+        keywords: [register, sign up, compete, forms, paperwork]
+        response: |
+          Right, right! Fill out Form 7-B, sign the liability waiver, and
+          report to Training Grounds for your assessment. Trials begin
+          tomorrow! *glances at pendant* Hmm. Interesting.
+        flags_required: []
+
+      trials:
+        keywords: [trials, events, competition, what trials]
+        response: |
+          Four preliminary trials—Balance, Insight, Strength, and Magic.
+          Score well in at least three, and you qualify for the Finals:
+          the Mirror Battle. *lowers voice* That's when things get...
+          interesting.
+        flags_required: []
+
+      pendant:
+        keywords: [pendant, your shard, necklace, crystal]
+        response: |
+          This? Standard issue for Games staff. Helps us identify...
+          *catches himself* ...competitors who might need extra attention.
+          Special accommodations, you know. Nothing sinister!
+        flags_required: []
+
+  # ==========================================
+  # Skybound Watcher - Faction Observer
+  # ==========================================
+  - id: skybound_watcher
+    name: Skybound Watcher
+    short_descriptor: "a robed figure watching the registration"
+    description: |
+      A human in deep blue robes embroidered with silver stars. They carry
+      a spyglass that seems to look at things that aren't there. Their
+      expression is one of detached academic curiosity.
+    personality: scholarly, detached, curious, analytical
+    voice: "Precise and measured, like reading from a textbook"
+    role: faction_contact
+
+    greeting: |
+      *looks up from notes* Ah, another competitor. Your aura is...
+      *consults strange device* ...marginally interesting. Proceed.
+
+    topics:
+      skybound:
+        keywords: [skybound, observers, your group, scholars]
+        response: |
+          The Skybound Observers study Astrael's remains—the stars, the
+          shards, the ley lines. We seek to understand, not control.
+          Knowledge for its own sake. The universe holds patterns, and
+          we read them.
+        flags_required: []
+
+      stars:
+        keywords: [stars, sky, constellations, night]
+        response: |
+          The stars are Astrael's largest fragments, still burning with
+          her essence. We chart their movements, their influences. When
+          certain stars align, shard resonance increases. The Games were
+          scheduled for such an alignment. Coincidence? *raises eyebrow*
+        flags_required: []
+
+      research:
+        keywords: [research, study, findings, discoveries]
+        response: |
+          We've documented 847 cases of shard resonance in the past century.
+          73% occurred during stellar convergences. 12% showed increased
+          sensitivity to Fybris's dreaming. *checks notes* You'll be case
+          848, perhaps. We shall observe with interest.
+        flags_required: []
+
+  # ==========================================
+  # Rival Kira - Competing champion
+  # ==========================================
+  - id: rival_kira
+    name: Kira Stormborn
+    short_descriptor: "a confident half-orc warrior"
+    description: |
+      A muscular half-orc woman with tribal tattoos and an easy smile. She
+      moves with the grace of a trained warrior but speaks with surprising
+      warmth. Her dragonshard earring glows faintly.
+    personality: competitive, friendly, honorable, protective
+    voice: "Warm and direct, with occasional battle-cry enthusiasm"
+    role: rival
+
+    greeting: |
+      Another competitor! *grins* Good. I was worried I'd have no real
+      challenge this year. I'm Kira. May we meet in the Finals!
+
+    topics:
+      competition:
+        keywords: [competition, fighting, trials, winning]
+        response: |
+          I've won the regional Games in Karrnath twice. But the Convergence
+          Games? Different beast entirely. They're not just testing strength
+          or speed. They're looking for something... deeper. Can you feel
+          it too? That pull when the shards are near?
+        flags_required: []
+
+      shards:
+        keywords: [shards, earring, your shard, dragonshards]
+        response: |
+          *touches earring* My grandmother gave this to me. Said it would
+          "find my true path." When I entered the arena for the first time,
+          it started glowing. The judges got very interested after that.
+          *laughs* Not sure if that's good or bad!
+        flags_required: []
+
+      friendship:
+        keywords: [friends, allies, team, together]
+        response: |
+          Look, the Games pit us against each other, but something tells me
+          we'll need allies before this is over. Strange things are happening.
+          Competitors disappearing. Recruiters from weird organizations.
+          Watch my back, and I'll watch yours?
+        flags_required: []
+
+  # ==========================================
+  # Merchant Vara - General merchant
+  # ==========================================
+  - id: merchant_vara
+    name: Merchant Vara
+    short_descriptor: "a shrewd dwarf with a cart of curiosities"
+    description: |
+      A dwarf woman with a magnificent braided beard and keen eyes that
+      miss nothing, especially the weight of your coin purse. Her cart
+      holds an eclectic mix of goods.
+    personality: shrewd, fair, gossipy, surprisingly helpful
+    voice: "Gravelly with a merchant's smooth patter"
+    role: merchant
+
+    greeting: |
+      Looking to buy? Looking to sell? Looking for information? Vara
+      provides all three, friend—though information costs extra!
+
+    topics:
+      goods:
+        keywords: [buy, sell, goods, wares, items]
+        response: |
+          Got potions, provisions, lucky charms—all competition-legal!
+          No shards, though. Need special licenses for those, and the
+          paperwork's murder. But I know who might help you...
+        flags_required: []
+
+      rumors:
+        keywords: [rumors, gossip, news, heard anything]
+        response: |
+          *leans close* Word is, competitors have been vanishing after the
+          Games. The ones who "resonate" strongest. Officials say they're
+          recruited for special programs, but... some don't come back.
+          Watch yourself if the shards start singing to you, friend.
+        flags_required: []
+
+  # ==========================================
+  # Gemkeeper Nyx - Shard dealer
+  # ==========================================
+  - id: gemkeeper_nyx
+    name: Gemkeeper Nyx
+    short_descriptor: "a well-dressed gnome with knowing eyes"
+    description: |
+      A gnome woman in expensive clothing, surrounded by carefully displayed
+      dragonshards. Every movement is precise, every word calculated. The
+      shards in her shop seem to pulse more slowly than those outside.
+    personality: professional, mysterious, knows more than she tells
+    voice: "Silky smooth with undertones of ancient secrets"
+    role: shard_merchant
+
+    greeting: |
+      *looks up slowly* Ah. The shards told me someone interesting would
+      visit today. Welcome to my humble emporium. Browse... but don't touch.
+
+    topics:
+      shards:
+        keywords: [shards, buy shards, dragonshards, crystals]
+        response: |
+          These are fragments of a god, child. Pieces of Astrael herself.
+          They are not bought—they are bonded. And they choose their
+          bearers as much as bearers choose them. *shard pulses* Hmm.
+          They seem interested in you.
+        flags_required: []
+
+      prices:
+        keywords: [price, cost, how much, afford]
+        response: |
+          Gold is the least of what shards cost. They demand resonance.
+          Commitment. And sometimes... sacrifice. But for one who truly
+          resonates? *smiles* The shard may simply... come to you.
+          Prove your worth in the Games. We'll talk after.
+        flags_required: []
+
+  # ==========================================
+  # Shade Broker - Black market contact
+  # ==========================================
+  - id: shade_broker
+    name: The Shade Broker
+    short_descriptor: "a cloaked figure with no visible face"
+    description: |
+      A figure whose cloak seems to be made of solid shadow. No features
+      are visible within the hood—only darkness, and occasionally, the
+      gleam of eyes.
+    personality: mysterious, dangerous, transactional, knows too much
+    voice: "A whisper that somehow carries perfectly"
+    role: information_broker
+
+    greeting: |
+      You found Shadow Alley. That means you're either very perceptive
+      or very desperate. Either way... I can help. For a price.
+
+    topics:
+      information:
+        keywords: [information, secrets, truth, what do you know]
+        response: |
+          I know that three factions watch the Games. I know that the
+          "winners" don't always choose their reward. I know that something
+          stirs in the deep places when the shards gather. And I know...
+          *leans closer* ...that you're more important than you realize.
+        flags_required: []
+
+      factions:
+        keywords: [factions, shardwardens, depthbound, skybound]
+        response: |
+          Wardens want to keep the shards apart. Depthbound want to bring
+          them together. Observers just want to watch it all burn—or not.
+          Each will approach you after you prove yourself. Choose carefully.
+          Or don't choose at all. That's a choice too.
+        flags_required: []
+
+      depthbound:
+        keywords: [depthbound, cultists, fybris worshippers]
+        response: |
+          *voice drops lower* The Depthbound believe Fybris will purify
+          the world. That his hunger will consume the corrupt and leave
+          only the worthy. Fanatics. But powerful ones. They're here,
+          watching. One of them watches from the Observation Gallery.
+        flags_required: []
+
+  # ==========================================
+  # Depthbound Agent - Cult representative
+  # ==========================================
+  - id: depthbound_agent
+    name: Magister Veris
+    short_descriptor: "an elegant man with unsettling intensity"
+    description: |
+      A human man in fine robes of deep purple, with gold embroidery
+      depicting descending spirals. His smile never reaches his eyes,
+      which seem to look through you to something deeper.
+    personality: charming, fanatical, manipulative, patient
+    voice: "Cultured and soothing, like honey hiding poison"
+    role: faction_contact
+
+    greeting: |
+      Ah, a competitor with potential! I am Magister Veris, patron of
+      the arts and... deeper truths. The Shardwardens have likely filled
+      your head with warnings. May I offer... perspective?
+
+    topics:
+      depthbound:
+        keywords: [depthbound, your group, who are you, organization]
+        response: |
+          We seek liberation. The dragon Eberron trapped Fybris out of
+          fear, not justice. The world has grown stagnant under his
+          slumber. Imagine what we could become if that power were freed!
+          Not destruction—transformation!
+        flags_required: []
+
+      fybris:
+        keywords: [fybris, devourer, prisoner, sleeping god]
+        response: |
+          They call him Devourer, but he is Renewal. His hunger consumes
+          only the weak, the corrupt, the unnecessary. Those who resonate
+          with the shards? They would be exalted in his new world. Think
+          of it—power beyond imagining, for the worthy.
+        flags_required: []
+
+      offer:
+        keywords: [offer, join, what do you want, help]
+        response: |
+          Win the Games. Prove your resonance. And when you do... come
+          find me. The Shardwardens will offer you servitude. The Observers
+          will offer you irrelevance. But I? I offer you a place at the
+          right hand of a god. *smiles* Think on it.
+        flags_required: []
+
+  # ==========================================
+  # Trainer Belgrak - Combat trainer
+  # ==========================================
+  - id: trainer_belgrak
+    name: Trainer Belgrak
+    short_descriptor: "a scarred veteran with a patient demeanor"
+    description: |
+      A middle-aged dwarf covered in battle scars, each with a story. He
+      moves with the economy of motion that marks a true master, and his
+      eyes evaluate every competitor who enters.
+    personality: gruff, fair, secretly caring, excellent teacher
+    voice: "Gruff and direct, with occasional warmth"
+    role: trainer
+
+    greeting: |
+      *looks you over* Hmph. Potential there. Rough around the edges.
+      Ready to work, or just here to pose for the crowd?
+
+    topics:
+      training:
+        keywords: [train, practice, prepare, help me, get better]
+        response: |
+          The trials test more than muscle. Balance requires trust—in
+          yourself and teammates. Insight requires humility—admitting
+          what you don't know. Strength requires wisdom—force without
+          thought is useless. And Magic? *shrugs* Magic requires
+          listening to things that don't speak.
+        flags_required: []
+
+      mirror:
+        keywords: [mirror, final trial, reflection, mirror battle]
+        response: |
+          *grows serious* The Mirror Battle is different. You'll face
+          yourself—every flaw, every fear. Can't train for that, not
+          really. But I'll tell you this: the ones who win aren't the
+          strongest or smartest. They're the ones who can accept what
+          they see. Think on that.
+        flags_required: []

@@ -30,6 +30,10 @@ public class Trial {
     private String completionReward;
     private String stinger;
 
+    // Data-driven prerequisites and completion flags
+    private List<String> prerequisites;
+    private List<String> completionFlags;
+
     private boolean started;
     private boolean completed;
 
@@ -50,6 +54,8 @@ public class Trial {
         this.miniGames = new HashMap<>();
         this.completionReward = "";
         this.stinger = "";
+        this.prerequisites = new ArrayList<>();
+        this.completionFlags = new ArrayList<>();
         this.started = false;
         this.completed = false;
     }
@@ -115,6 +121,58 @@ public class Trial {
 
     public void setStinger(String stinger) {
         this.stinger = stinger != null ? stinger : "";
+    }
+
+    // ==========================================
+    // Prerequisites and Completion Flags
+    // ==========================================
+
+    /**
+     * Gets the list of prerequisite flags that must be set before this trial can be started.
+     * @return unmodifiable list of prerequisite flag names
+     */
+    public List<String> getPrerequisites() {
+        return Collections.unmodifiableList(prerequisites);
+    }
+
+    /**
+     * Sets the list of prerequisite flags for this trial.
+     * @param prerequisites list of flag names that must be true to start this trial
+     */
+    public void setPrerequisites(List<String> prerequisites) {
+        this.prerequisites = prerequisites != null ? new ArrayList<>(prerequisites) : new ArrayList<>();
+    }
+
+    /**
+     * Checks if this trial has any prerequisites.
+     * @return true if there are prerequisites
+     */
+    public boolean hasPrerequisites() {
+        return !prerequisites.isEmpty();
+    }
+
+    /**
+     * Gets the list of flags to set when this trial is completed.
+     * @return unmodifiable list of completion flag names
+     */
+    public List<String> getCompletionFlags() {
+        return Collections.unmodifiableList(completionFlags);
+    }
+
+    /**
+     * Sets the list of flags to set when this trial is completed.
+     * @param completionFlags list of flag names to set on completion
+     */
+    public void setCompletionFlags(List<String> completionFlags) {
+        this.completionFlags = completionFlags != null ? new ArrayList<>(completionFlags) : new ArrayList<>();
+    }
+
+    /**
+     * Checks if this trial has completion flags defined.
+     * @return true if there are completion flags
+     */
+    public boolean hasCompletionFlags() {
+        return !completionFlags.isEmpty();
     }
 
     // ==========================================

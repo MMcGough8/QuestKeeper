@@ -752,4 +752,237 @@ class DiceTest {
             assertTrue(foundNat1, "Should detect a natural 1 within 1000 rolls");
         }
     }
+
+    // ========================================================================
+    // STATISTICAL DISTRIBUTION TESTS
+    // ========================================================================
+
+    @Nested
+    @DisplayName("Statistical Distribution Tests")
+    class StatisticalDistributionTests {
+
+        private static final int SAMPLE_SIZE = 5000;
+        private static final double TOLERANCE = 0.20; // 20% tolerance for random variance
+
+        @BeforeEach
+        void clearHistoryBeforeStatisticalTests() {
+            // Clear history to prevent memory buildup from high-volume tests
+            Dice.clearRollHistory();
+        }
+
+        @Test
+        @DisplayName("d6 distribution is approximately uniform")
+        void d6DistributionIsUniform() {
+            Dice.clearRollHistory(); // Ensure history is clear
+            int[] counts = new int[6];
+
+            for (int i = 0; i < SAMPLE_SIZE; i++) {
+                int roll = Dice.rollD6();
+                counts[roll - 1]++;
+            }
+
+            double expectedCount = SAMPLE_SIZE / 6.0;
+            double minExpected = expectedCount * (1 - TOLERANCE);
+            double maxExpected = expectedCount * (1 + TOLERANCE);
+
+            for (int i = 0; i < 6; i++) {
+                assertTrue(counts[i] >= minExpected && counts[i] <= maxExpected,
+                    String.format("Face %d count %d should be within %.0f-%.0f (expected ~%.0f)",
+                        i + 1, counts[i], minExpected, maxExpected, expectedCount));
+            }
+        }
+
+        @Test
+        @DisplayName("d20 distribution is approximately uniform")
+        void d20DistributionIsUniform() {
+            int[] counts = new int[20];
+
+            for (int i = 0; i < SAMPLE_SIZE; i++) {
+                int roll = Dice.rollD20();
+                counts[roll - 1]++;
+            }
+
+            double expectedCount = SAMPLE_SIZE / 20.0;
+            double minExpected = expectedCount * (1 - TOLERANCE);
+            double maxExpected = expectedCount * (1 + TOLERANCE);
+
+            for (int i = 0; i < 20; i++) {
+                assertTrue(counts[i] >= minExpected && counts[i] <= maxExpected,
+                    String.format("Face %d count %d should be within %.0f-%.0f (expected ~%.0f)",
+                        i + 1, counts[i], minExpected, maxExpected, expectedCount));
+            }
+        }
+
+        @Test
+        @DisplayName("d20 mean is approximately 10.5")
+        void d20MeanIsCorrect() {
+            long sum = 0;
+
+            for (int i = 0; i < SAMPLE_SIZE; i++) {
+                sum += Dice.rollD20();
+            }
+
+            double mean = (double) sum / SAMPLE_SIZE;
+            double expectedMean = 10.5;
+            double allowedDeviation = 0.5; // Allow 0.5 deviation from expected mean
+
+            assertTrue(Math.abs(mean - expectedMean) < allowedDeviation,
+                String.format("d20 mean %.2f should be close to expected %.1f", mean, expectedMean));
+        }
+
+        @Test
+        @DisplayName("2d6 distribution follows expected bell curve")
+        void twoD6DistributionIsBellCurve() {
+            int[] counts = new int[13]; // indices 0-12, but 0 and 1 unused (min roll is 2)
+
+            for (int i = 0; i < SAMPLE_SIZE; i++) {
+                int roll = Dice.rollMultiple(2, 6);
+                counts[roll]++;
+            }
+
+            // In 2d6, 7 is the most common (6/36 probability = 16.67%)
+            // 2 and 12 are least common (1/36 probability = 2.78%)
+
+            // Verify 7 is most common
+            int maxCount = 0;
+            int maxValue = 0;
+            for (int i = 2; i <= 12; i++) {
+                if (counts[i] > maxCount) {
+                    maxCount = counts[i];
+                    maxValue = i;
+                }
+            }
+            assertEquals(7, maxValue, "7 should be the most frequent result for 2d6");
+
+            // Verify extremes (2, 12) are less common than middle (6, 7, 8)
+            assertTrue(counts[7] > counts[2], "7 should appear more often than 2");
+            assertTrue(counts[7] > counts[12], "7 should appear more often than 12");
+            assertTrue(counts[6] > counts[3], "6 should appear more often than 3");
+            assertTrue(counts[8] > counts[11], "8 should appear more often than 11");
+        }
+
+        @Test
+        @DisplayName("advantage rolls are statistically higher than normal")
+        void advantageRollsAreHigher() {
+            long normalSum = 0;
+            long advantageSum = 0;
+
+            for (int i = 0; i < SAMPLE_SIZE; i++) {
+                normalSum += Dice.rollD20();
+                advantageSum += Dice.rollWithAdvantage();
+            }
+
+            double normalMean = (double) normalSum / SAMPLE_SIZE;
+            double advantageMean = (double) advantageSum / SAMPLE_SIZE;
+
+            // Advantage mean should be approximately 13.825 vs normal 10.5
+            assertTrue(advantageMean > normalMean,
+                String.format("Advantage mean (%.2f) should be higher than normal mean (%.2f)",
+                    advantageMean, normalMean));
+
+            // Advantage should increase mean by roughly 3+ points
+            assertTrue(advantageMean - normalMean > 2.5,
+                String.format("Advantage should increase mean by ~3.3, actual increase: %.2f",
+                    advantageMean - normalMean));
+        }
+
+        @Test
+        @DisplayName("disadvantage rolls are statistically lower than normal")
+        void disadvantageRollsAreLower() {
+            long normalSum = 0;
+            long disadvantageSum = 0;
+
+            for (int i = 0; i < SAMPLE_SIZE; i++) {
+                normalSum += Dice.rollD20();
+                disadvantageSum += Dice.rollWithDisadvantage();
+            }
+
+            double normalMean = (double) normalSum / SAMPLE_SIZE;
+            double disadvantageMean = (double) disadvantageSum / SAMPLE_SIZE;
+
+            // Disadvantage mean should be approximately 7.175 vs normal 10.5
+            assertTrue(disadvantageMean < normalMean,
+                String.format("Disadvantage mean (%.2f) should be lower than normal mean (%.2f)",
+                    disadvantageMean, normalMean));
+
+            // Disadvantage should decrease mean by roughly 3+ points
+            assertTrue(normalMean - disadvantageMean > 2.5,
+                String.format("Disadvantage should decrease mean by ~3.3, actual decrease: %.2f",
+                    normalMean - disadvantageMean));
+        }
+
+        @Test
+        @DisplayName("natural 20 occurs approximately 5% of the time")
+        void natural20OccursAtExpectedRate() {
+            int nat20Count = 0;
+
+            for (int i = 0; i < SAMPLE_SIZE; i++) {
+                if (Dice.rollD20() == 20) {
+                    nat20Count++;
+                }
+            }
+
+            double expectedRate = 0.05; // 5%
+            double actualRate = (double) nat20Count / SAMPLE_SIZE;
+
+            // Allow 1.5% tolerance (3.5% - 6.5%)
+            assertTrue(actualRate >= 0.035 && actualRate <= 0.065,
+                String.format("Natural 20 rate %.2f%% should be close to expected 5%%",
+                    actualRate * 100));
+        }
+
+        @Test
+        @DisplayName("natural 1 occurs approximately 5% of the time")
+        void natural1OccursAtExpectedRate() {
+            int nat1Count = 0;
+
+            for (int i = 0; i < SAMPLE_SIZE; i++) {
+                if (Dice.rollD20() == 1) {
+                    nat1Count++;
+                }
+            }
+
+            double expectedRate = 0.05; // 5%
+            double actualRate = (double) nat1Count / SAMPLE_SIZE;
+
+            // Allow 1.5% tolerance (3.5% - 6.5%)
+            assertTrue(actualRate >= 0.035 && actualRate <= 0.065,
+                String.format("Natural 1 rate %.2f%% should be close to expected 5%%",
+                    actualRate * 100));
+        }
+
+        @Test
+        @DisplayName("4d6 drop lowest produces expected range")
+        void fourD6DropLowestProducesExpectedRange() {
+            int minSeen = Integer.MAX_VALUE;
+            int maxSeen = Integer.MIN_VALUE;
+            long sum = 0;
+
+            for (int i = 0; i < SAMPLE_SIZE; i++) {
+                // Roll 4d6, drop lowest
+                int[] rolls = new int[4];
+                for (int j = 0; j < 4; j++) {
+                    rolls[j] = Dice.rollD6();
+                }
+
+                // Sort and sum top 3
+                java.util.Arrays.sort(rolls);
+                int result = rolls[1] + rolls[2] + rolls[3]; // indices 1,2,3 are top 3 after sort
+
+                minSeen = Math.min(minSeen, result);
+                maxSeen = Math.max(maxSeen, result);
+                sum += result;
+            }
+
+            double mean = (double) sum / SAMPLE_SIZE;
+
+            // Range should be 3-18 (minimum: three 1s after dropping a 1, maximum: three 6s)
+            assertTrue(minSeen >= 3, "Minimum should be at least 3");
+            assertTrue(maxSeen <= 18, "Maximum should be at most 18");
+
+            // Mean for 4d6 drop lowest is approximately 12.24
+            assertTrue(mean > 11.5 && mean < 13.0,
+                String.format("4d6 drop lowest mean %.2f should be around 12.24", mean));
+        }
+    }
 }

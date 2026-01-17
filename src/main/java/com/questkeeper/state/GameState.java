@@ -36,8 +36,10 @@ public class GameState {
 
     private Location currentLocation;
     private final Set<String> visitedLocations;
+    private final Set<String> unlockedLocations;
     private final Set<String> flags;
     private final Set<String> completedTrials;
+    private final Set<String> startedTrials;
     private final List<String> activeQuests;
 
     private final Map<String, Integer> counters;
@@ -55,9 +57,14 @@ public class GameState {
         this.campaign = Objects.requireNonNull(campaign, "Campaign cannot be null");
 
         this.visitedLocations = new HashSet<>();
+        this.unlockedLocations = new HashSet<>();
         this.flags = new HashSet<>();
         this.completedTrials = new HashSet<>();
+        this.startedTrials = new HashSet<>();
         this.activeQuests = new ArrayList<>();
+
+        // Initialize unlocked locations from campaign (locations without 'locked' flag are unlocked by default)
+        initializeUnlockedLocations();
         this.counters = new HashMap<>();
         this.variables = new HashMap<>();
 
@@ -88,13 +95,9 @@ public class GameState {
             }
         }
 
-        // Restore visited locations and mark them on Location objects
+        // Restore visited locations (no need to mark on Location objects - we track in GameState)
         for (String visitedId : saveState.getVisitedLocations()) {
             state.visitedLocations.add(visitedId);
-            Location visitedLoc = campaign.getLocation(visitedId);
-            if (visitedLoc != null) {
-                visitedLoc.markVisited();
-            }
         }
 
         // Restore flags
@@ -104,8 +107,19 @@ public class GameState {
             }
         }
 
-        // Restore location unlocks based on progression flags
-        restoreLocationUnlocks(campaign, state.flags);
+        // Restore location unlocks based on progression flags (data-driven)
+        restoreLocationUnlocks(state.unlockedLocations, campaign, state.flags);
+
+        // Restore trial states from flags
+        for (String flag : state.flags) {
+            if (flag.startsWith("started_")) {
+                String trialId = flag.substring("started_".length());
+                state.startedTrials.add(trialId);
+            } else if (flag.startsWith("completed_")) {
+                String trialId = flag.substring("completed_".length());
+                state.completedTrials.add(trialId);
+            }
+        }
 
         // Restore counters
         state.counters.putAll(saveState.getStateCounters());
@@ -184,6 +198,19 @@ public class GameState {
     // ==========================================
 
     /**
+     * Initializes the set of unlocked locations based on campaign data.
+     * Locations without the 'locked' flag are unlocked by default.
+     */
+    private void initializeUnlockedLocations() {
+        for (Location location : campaign.getLocations().values()) {
+            // A location is initially unlocked if it doesn't have the 'locked' flag
+            if (!location.hasFlag("locked")) {
+                unlockedLocations.add(location.getId());
+            }
+        }
+    }
+
+    /**
      * Moves the player to a new location.
      * Note: Does NOT mark the location as visited - that should happen
      * after displaying the location, so read-aloud text can be shown.
@@ -198,15 +225,52 @@ public class GameState {
             return false;
         }
 
-        if (!location.isUnlocked()) {
+        // Check unlock state in GameState, not on Location object
+        if (!isLocationUnlocked(locationId)) {
             return false;
         }
 
         this.currentLocation = location;
         this.visitedLocations.add(locationId);
-        // Don't call location.markVisited() here - let GameEngine do it after display
 
         return true;
+    }
+
+    /**
+     * Checks if a location is unlocked.
+     * @param locationId the location ID to check
+     * @return true if the location is unlocked
+     */
+    public boolean isLocationUnlocked(String locationId) {
+        return locationId != null && unlockedLocations.contains(locationId);
+    }
+
+    /**
+     * Unlocks a location, making it accessible to the player.
+     * @param locationId the location ID to unlock
+     */
+    public void unlockLocation(String locationId) {
+        if (locationId != null && !locationId.isEmpty()) {
+            unlockedLocations.add(locationId);
+        }
+    }
+
+    /**
+     * Locks a location, making it inaccessible.
+     * @param locationId the location ID to lock
+     */
+    public void lockLocation(String locationId) {
+        if (locationId != null) {
+            unlockedLocations.remove(locationId);
+        }
+    }
+
+    /**
+     * Gets all unlocked location IDs.
+     * @return unmodifiable set of unlocked location IDs
+     */
+    public Set<String> getUnlockedLocations() {
+        return Collections.unmodifiableSet(unlockedLocations);
     }
 
     /**
@@ -348,7 +412,36 @@ public class GameState {
     // ==========================================
 
     /**
+     * Marks a trial as started.
+     * @param trialId the trial ID to mark as started
+     */
+    public void startTrial(String trialId) {
+        if (trialId != null && !trialId.isEmpty()) {
+            startedTrials.add(trialId);
+            setFlag("started_" + trialId);
+        }
+    }
+
+    /**
+     * Checks if a trial has been started.
+     * @param trialId the trial ID to check
+     * @return true if the trial has been started
+     */
+    public boolean hasStartedTrial(String trialId) {
+        return trialId != null && startedTrials.contains(trialId);
+    }
+
+    /**
+     * Gets all started trial IDs.
+     * @return unmodifiable set of started trial IDs
+     */
+    public Set<String> getStartedTrials() {
+        return Collections.unmodifiableSet(startedTrials);
+    }
+
+    /**
      * Marks a trial as completed.
+     * @param trialId the trial ID to mark as completed
      */
     public void completeTrial(String trialId) {
         if (trialId != null && !trialId.isEmpty()) {
@@ -359,6 +452,8 @@ public class GameState {
 
     /**
      * Checks if a trial has been completed.
+     * @param trialId the trial ID to check
+     * @return true if the trial has been completed
      */
     public boolean hasCompletedTrial(String trialId) {
         return trialId != null && completedTrials.contains(trialId);
@@ -366,6 +461,7 @@ public class GameState {
 
     /**
      * Gets all completed trial IDs.
+     * @return unmodifiable set of completed trial IDs
      */
     public Set<String> getCompletedTrials() {
         return Collections.unmodifiableSet(completedTrials);
@@ -465,30 +561,22 @@ public class GameState {
 
     /**
      * Restores location unlocks based on game progress flags.
-     * Called when loading a saved game to ensure locations are accessible.
+     * Uses a data-driven approach: any flag ending in "_unlocked" will unlock
+     * the corresponding location (e.g., "clocktower_hill_unlocked" unlocks "clocktower_hill").
+     *
+     * @param unlockedLocations the set to add unlocked location IDs to
+     * @param campaign the campaign containing the locations
+     * @param flags the set of game progress flags
      */
-    private static void restoreLocationUnlocks(Campaign campaign, Set<String> flags) {
-        // Unlock clocktower if Trial #1 was completed
-        if (flags.contains("clocktower_unlocked") || flags.contains("trial_01_complete")) {
-            Location clocktower = campaign.getLocation("clocktower_hill");
-            if (clocktower != null) {
-                clocktower.unlock();
-            }
-        }
-
-        // Unlock Harlequin's Lair if Trial #2 was completed
-        if (flags.contains("harlequin_lair_unlocked") || flags.contains("trial_02_complete")) {
-            Location lair = campaign.getLocation("harlequin_lair");
-            if (lair != null) {
-                lair.unlock();
-            }
-        }
-
-        // Unlock Elara's back room if player has discovered it
-        if (flags.contains("back_room_unlocked")) {
-            Location backRoom = campaign.getLocation("back_room");
-            if (backRoom != null) {
-                backRoom.unlock();
+    private static void restoreLocationUnlocks(Set<String> unlockedLocations, Campaign campaign, Set<String> flags) {
+        for (String flag : flags) {
+            if (flag.endsWith("_unlocked")) {
+                // Extract location ID from flag (e.g., "clocktower_hill_unlocked" -> "clocktower_hill")
+                String locationId = flag.substring(0, flag.length() - "_unlocked".length());
+                Location location = campaign.getLocation(locationId);
+                if (location != null) {
+                    unlockedLocations.add(locationId);
+                }
             }
         }
     }

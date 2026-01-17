@@ -1,0 +1,113 @@
+# Whispers of the Drowned God
+# A gothic horror/cosmic horror campaign for seasoned players
+# Level Range: 5-15 | High Stakes | Multiple Endings
+
+id: drownedgod
+name: "Whispers of the Drowned God"
+description: "A dark, nautical horror campaign where ancient things stir in the deep. For experienced players who want meaningful choices, deadly consequences, and a villain who haunts their every step."
+author: "QuestKeeper Team"
+version: "1.0"
+
+starting_location: harbor_district
+
+intro: |
+  The sea gives, and the sea takes.
+
+  For three centuries, the city of Saltmire has prospered. Built on the bones of
+  an ancient civilization that sank beneath the waves long before human memory,
+  the city harvests relics from the Sunken Ruins—artifacts of impossible beauty
+  and terrible power that fetch fortunes in distant markets.
+
+  The Salvage Guild grows rich. The Tidekeepers maintain the ancient wards that
+  keep the waters calm and the things below... quiet. The noble houses of the
+  Abyssal Court trade in secrets and influence. And the common folk live their
+  lives on wooden walkways above the ever-present sea, trying not to think about
+  what lies beneath.
+
+  But something has changed.
+
+  Three weeks ago, the Prophet Mira—beloved oracle of the Tidekeepers, voice of
+  the sea itself—descended into the deepest ruins on a sacred pilgrimage. She
+  returned... different. Her eyes hold depths that weren't there before. Her
+  smile carries secrets that make strong men weep. And she speaks of a coming
+  tide that will "lift all souls to salvation."
+
+  The waters are rising. Each night, the tide climbs higher than the night before.
+  Districts that have been dry for generations now flood at moonrise. And in the
+  dark hours, people hear it—a sound like singing, coming from beneath the waves.
+
+  Those who listen too long... walk into the sea.
+
+  You arrived in Saltmire seeking fortune, adventure, or answers. What you found
+  was a city drowning in its own secrets, a prophet who speaks with the voice of
+  something ancient, and the growing certainty that the sea has noticed you.
+
+  The Drowned God is waking.
+
+  And it is hungry.
+
+dm_notes: |
+  CAMPAIGN PILLARS:
+  - Combat: HIGH (deadly encounters, intelligent enemies)
+  - Exploration: VERY HIGH (underwater dungeons, hidden areas)
+  - Social/RP: VERY HIGH (faction intrigue, moral dilemmas)
+
+  CORE THEME: "What would you sacrifice to save what you love?"
+
+  TONE: Gothic horror meets cosmic horror meets nautical adventure
+  - Think: Curse of Strahd meets Call of Cthulhu meets Ghosts of Saltmarsh
+  - The villain (Prophet Mira) should be PRESENT throughout, not just at the end
+  - She genuinely believes she's saving humanity from a worse fate
+  - Make players question whether she might be right
+
+  THE DROWNED GOD:
+  Not a deity in the traditional sense—an entity from beyond the stars that fell
+  into the ocean eons ago. It doesn't want worship; it wants to MERGE with all
+  consciousness, creating a collective existence beneath the waves. Is this evil?
+  Or just... different?
+
+  VILLAIN PRESENCE (like Strahd):
+  - Prophet Mira should appear in EVERY act
+  - Act 1: Helpful mentor figure, slightly unsettling
+  - Act 2: Warnings become threats, her true nature shows
+  - Act 3: Full antagonist, but still believes she's the hero
+  - She KNOWS the players, watches them through water, speaks in dreams
+
+  FACTION DYNAMICS:
+  - Salvage Guild: Profit-driven, will work with anyone
+  - Tidekeepers: Religious order, some corrupted, some fighting back
+  - Abyssal Court: Nobles who've made deals with deep things
+  - The Drowned: Mira's cult (hidden initially, revealed mid-campaign)
+  - Lighthouse Keepers: Monster hunters, potential allies
+
+  RISING STAKES MECHANIC:
+  Track "Flood Level" from 1-10. It increases each session:
+  - Level 1-3: Lower districts flood at night
+  - Level 4-6: Middle districts flood, creatures appear
+  - Level 7-9: Upper districts threatened, mass panic
+  - Level 10: The Drowned God fully awakens
+
+  MULTIPLE ENDINGS:
+  1. Destroy the Drowned God (requires great sacrifice)
+  2. Seal it away (temporary, buys time for future generations)
+  3. Bargain with it (what price is too high?)
+  4. Join it (the "bad" ending... or is it?)
+  5. Let Saltmire fall (save who you can, flee)
+
+  LEGENDARY ITEM DISTRIBUTION:
+  - Tarrasque Plate: Final dungeon reward
+  - Glaive of the Revenant King: Abyssal Court questline
+  - Bolide Blade: Lighthouse Keepers questline
+  - Mourningsteel Half Plate: Drowned temple reward
+
+  DIFFICULTY EXPECTATIONS:
+  - DCs should be 15+ for most challenges
+  - Enemies use tactics, target weak points
+  - Resources matter—no long rests in dangerous areas
+  - Death is possible; resurrection draws the God's attention
+
+  REPLAYABILITY:
+  - Faction allegiance changes available paths
+  - Prophet Mira's origin has three possible truths
+  - The Drowned God's nature can be interpreted multiple ways
+  - Different endings based on choices AND relationships

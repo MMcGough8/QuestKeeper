@@ -1,0 +1,448 @@
+# Monster definitions for Whispers of the Drowned God
+# Challenging enemies for seasoned players
+
+monsters:
+  # ==========================================
+  # THE DROWNED - Transformed Cultists
+  # ==========================================
+  - id: drowned_convert
+    name: Drowned Convert
+    description: |
+      Once human, now something else. They willingly walked into the sea
+      and emerged changed—gills splitting their necks, skin taking on a
+      grey-blue pallor, eyes grown large and dark. They still remember
+      being human. They pity those who haven't ascended yet.
+    size: medium
+    type: humanoid
+    alignment: neutral
+
+    armor_class: 13
+    hit_points: 45
+    speed: 30
+    swim_speed: 40
+
+    abilities:
+      strength: 14
+      dexterity: 14
+      constitution: 15
+      intelligence: 10
+      wisdom: 12
+      charisma: 8
+
+    challenge_rating: 2
+
+    attacks:
+      - name: Claw
+        attack_bonus: 4
+        damage: 1d6+2
+        damage_type: slashing
+        description: "Webbed fingers end in sharp nails."
+
+      - name: Drowning Embrace
+        attack_bonus: 4
+        damage: 1d8+2
+        damage_type: bludgeoning
+        description: "Grapples target. While grappled, target begins drowning even in air. DC 13 Constitution save or take 1d6 cold damage and can't breathe."
+
+    special_abilities:
+      - name: Amphibious
+        description: "Can breathe air and water."
+      - name: Siren Call
+        description: "Can spend action to sing. Creatures within 30 feet must make DC 13 Wisdom save or be charmed until end of next turn, moving toward the Drowned."
+      - name: Accepting Death
+        description: "When reduced to 0 HP, smiles peacefully. Last words are always 'The sea... welcomes...' This can be unsettling."
+
+    tactics: |
+      Drowned Converts prefer to grapple and drag targets toward water.
+      They fight without fear or self-preservation—death holds no terror
+      for those who have already drowned once.
+
+  # ==========================================
+  # DEPTH HORROR - Deep Sea Predator
+  # ==========================================
+  - id: depth_horror
+    name: Depth Horror
+    description: |
+      Something that evolved in the lightless depths where pressure would
+      crush steel and cold would freeze blood. Now they rise to serve the
+      Drowned God, bringing the darkness of the abyss with them.
+    size: large
+    type: aberration
+    alignment: chaotic evil
+
+    armor_class: 16
+    hit_points: 95
+    speed: 20
+    swim_speed: 60
+
+    abilities:
+      strength: 19
+      dexterity: 14
+      constitution: 18
+      intelligence: 6
+      wisdom: 12
+      charisma: 6
+
+    challenge_rating: 5
+
+    attacks:
+      - name: Tentacle
+        attack_bonus: 7
+        damage: 2d8+4
+        damage_type: bludgeoning
+        description: "Long, boneless limbs covered in suckers that leave circular scars."
+
+      - name: Bioluminescent Lure
+        attack_bonus: 0
+        damage: 0
+        damage_type: psychic
+        description: "Produces hypnotic light. All creatures within 30 feet who can see must make DC 14 Wisdom save or be incapacitated, staring at the light."
+
+      - name: Abyssal Bite
+        attack_bonus: 7
+        damage: 3d10+4
+        damage_type: piercing
+        description: "Rows of needle-like teeth. Only usable on incapacitated or grappled targets."
+
+    special_abilities:
+      - name: Pressure Adaptation
+        description: "Immune to cold damage. Resistant to bludgeoning damage."
+      - name: Lightless Existence
+        description: "Has blindsight 60 feet. Bright light causes disadvantage on attacks."
+      - name: Drag to the Deep
+        description: "When grappling, can move at full swim speed and drag target with it."
+
+    tactics: |
+      Depth Horrors use their lure to incapacitate targets, then grapple
+      and drag them into deep water where the Horror has every advantage.
+      They flee from bright light but return when it dims.
+
+  # ==========================================
+  # TIDEBOUND REVENANT - Undead Drowned
+  # ==========================================
+  - id: tidebound_revenant
+    name: Tidebound Revenant
+    description: |
+      The corpse of someone who drowned fighting the sea's call—their
+      refusal powerful enough to bind them to the mortal world as undead.
+      They hate the Drowned God with a fury that transcends death.
+    size: medium
+    type: undead
+    alignment: chaotic neutral
+
+    armor_class: 15
+    hit_points: 75
+    speed: 30
+    swim_speed: 30
+
+    abilities:
+      strength: 16
+      dexterity: 14
+      constitution: 16
+      intelligence: 12
+      wisdom: 14
+      charisma: 8
+
+    challenge_rating: 4
+
+    attacks:
+      - name: Drowned Blade
+        attack_bonus: 6
+        damage: 2d6+3
+        damage_type: slashing
+        description: "A barnacle-crusted weapon from their mortal life."
+
+      - name: Salt Spray
+        attack_bonus: 5
+        damage: 2d8
+        damage_type: necrotic
+        description: "Exhales concentrated brine. 15-foot cone, DC 14 Constitution save for half damage. Creatures that fail have disadvantage on their next attack."
+
+    special_abilities:
+      - name: Waterlogged
+        description: "Immune to cold damage. Resistant to necrotic damage."
+      - name: Hatred of the Deep
+        description: "Advantage on attacks against creatures with swim speed or water breathing."
+      - name: Undying Spite
+        description: "When reduced to 0 HP, makes one final attack with advantage before collapsing."
+      - name: Memory of Drowning
+        description: "Can spend action to force one creature within 30 feet to experience drowning. DC 14 Wisdom save or be frightened and unable to speak for 1 minute."
+
+    tactics: |
+      Revenants target Drowned Converts and other sea-creatures first,
+      ignoring other threats. They can be reasoned with if offered help
+      against the Drowned God, but their hatred makes them unpredictable.
+
+  # ==========================================
+  # ABYSSAL NOBLE - Transformed Aristocrat
+  # ==========================================
+  - id: abyssal_noble
+    name: Abyssal Noble
+    description: |
+      A member of the Abyssal Court whose family bargains have begun to
+      show. They retain their intelligence and charm, but their bodies
+      have started becoming something else—something older.
+    size: medium
+    type: humanoid
+    alignment: lawful evil
+
+    armor_class: 17
+    hit_points: 85
+    speed: 30
+    swim_speed: 50
+
+    abilities:
+      strength: 14
+      dexterity: 16
+      constitution: 14
+      intelligence: 16
+      wisdom: 14
+      charisma: 18
+
+    challenge_rating: 5
+
+    attacks:
+      - name: Rapier
+        attack_bonus: 6
+        damage: 1d8+3
+        damage_type: piercing
+        description: "An elegant blade of deep-sea metal that never rusts."
+
+      - name: Crushing Depths
+        attack_bonus: 7
+        damage: 3d8
+        damage_type: force
+        description: "Calls upon the pressure of the deep. 20-foot radius, DC 15 Constitution save for half damage. Creatures that fail are knocked prone."
+
+    special_abilities:
+      - name: Amphibious
+        description: "Can breathe air and water."
+      - name: Court Intrigue
+        description: "Advantage on Insight and Deception checks."
+      - name: Depth Touched
+        description: "Resistant to cold and psychic damage."
+      - name: Commanding Presence
+        description: "Can use bonus action to command Drowned Converts within 60 feet to attack specific target."
+      - name: Noble Escape
+        description: "When reduced below 20 HP, can teleport to nearest body of water within 60 feet as reaction."
+
+    tactics: |
+      Abyssal Nobles prefer to command others to fight while they stay at
+      range, using Crushing Depths to control the battlefield. They will
+      negotiate rather than fight to the death—their immortality depends
+      on survival.
+
+  # ==========================================
+  # REEF LEVIATHAN - Boss Monster
+  # ==========================================
+  - id: reef_leviathan
+    name: Reef Leviathan
+    description: |
+      A massive creature that has made the sunken ruins its territory.
+      Its body is encrusted with coral, barnacles, and the bones of
+      previous victims. It has guarded these waters for millennia.
+    size: gargantuan
+    type: monstrosity
+    alignment: unaligned
+
+    armor_class: 18
+    hit_points: 200
+    speed: 20
+    swim_speed: 80
+
+    abilities:
+      strength: 25
+      dexterity: 10
+      constitution: 22
+      intelligence: 4
+      wisdom: 12
+      charisma: 8
+
+    challenge_rating: 10
+
+    attacks:
+      - name: Bite
+        attack_bonus: 11
+        damage: 4d10+7
+        damage_type: piercing
+        description: "A maw large enough to swallow a horse."
+
+      - name: Tail Sweep
+        attack_bonus: 11
+        damage: 3d8+7
+        damage_type: bludgeoning
+        description: "Hits all creatures in 20-foot cone. DC 18 Strength save or be knocked back 15 feet and prone."
+
+      - name: Reef Breath
+        attack_bonus: 0
+        damage: 6d6
+        damage_type: slashing
+        description: "Exhales a cloud of razor-sharp coral fragments. 60-foot cone, DC 17 Dexterity save for half."
+
+    special_abilities:
+      - name: Coral Armor
+        description: "Resistant to bludgeoning, piercing, and slashing from nonmagical attacks."
+      - name: Ancient Predator
+        description: "Has blindsight 120 feet and tremorsense 60 feet."
+      - name: Living Reef
+        description: "Small creatures can hide in its coral-encrusted body. The Leviathan has advantage on saves against being charmed or frightened."
+      - name: Legendary Resistance
+        description: "3/day, can choose to succeed on a failed saving throw."
+
+    legendary_actions:
+      - name: Tail Attack
+        description: "Makes one tail sweep attack."
+      - name: Detect
+        description: "Makes a Perception check."
+      - name: Coral Explosion
+        description: "(Costs 2 actions) 20-foot radius around the Leviathan. All creatures must make DC 17 Dexterity save or take 2d10 piercing damage."
+
+    tactics: |
+      The Reef Leviathan is territorial, not malicious. It can be avoided
+      through stealth or distracted with offerings of food. Fighting it
+      directly is extremely dangerous—it should be an obstacle, not an
+      enemy, unless players insist on confrontation.
+
+  # ==========================================
+  # HERALD OF THE DEEP - Mini-Boss
+  # ==========================================
+  - id: herald_of_the_deep
+    name: Herald of the Deep
+    description: |
+      A prophet's prophet—one who touched the Drowned God directly and
+      became its voice. It no longer has a human form, but it still has
+      a human mind, trapped and screaming inside an alien shell.
+    size: large
+    type: aberration
+    alignment: neutral evil
+
+    armor_class: 16
+    hit_points: 150
+    speed: 30
+    swim_speed: 60
+
+    abilities:
+      strength: 18
+      dexterity: 14
+      constitution: 18
+      intelligence: 16
+      wisdom: 18
+      charisma: 20
+
+    challenge_rating: 8
+
+    attacks:
+      - name: Mind Lash
+        attack_bonus: 8
+        damage: 3d8+5
+        damage_type: psychic
+        description: "A tendril of pure thought that tears at sanity."
+
+      - name: Crushing Coils
+        attack_bonus: 7
+        damage: 2d10+4
+        damage_type: bludgeoning
+        description: "Constricting appendages. Target is grappled (escape DC 16). While grappled, target takes 2d10 bludgeoning at start of each turn."
+
+    special_abilities:
+      - name: Amphibious
+        description: "Can breathe air and water."
+      - name: Voice of the Deep
+        description: "All creatures within 60 feet who can hear must make DC 16 Wisdom save at start of their turn or be charmed until the start of their next turn."
+      - name: Prophet's Insight
+        description: "Can read surface thoughts of any creature within 30 feet. Knows when it's being lied to."
+      - name: Death Wish
+        description: "The human consciousness trapped inside actively helps enemies. Twice per fight, will telegraph its next action to one player (DM's choice)."
+      - name: Regeneration
+        description: "Regains 10 HP at the start of its turn if it is in water."
+
+    tactics: |
+      The Herald relies on its Voice to turn enemies against each other.
+      It prioritizes spellcasters and anyone who seems resistant to its
+      charms. The trapped human inside occasionally sabotages its own
+      attacks—this is intentional, not a mistake.
+
+  # ==========================================
+  # THE DROWNED GOD'S AVATAR - Final Boss
+  # ==========================================
+  - id: drowned_god_avatar
+    name: Avatar of the Drowned God
+    description: |
+      Not the Drowned God itself—that entity is beyond mortal combat—but
+      a fraction of its consciousness given form. Even this fragment is
+      terrible beyond imagining, beautiful beyond description, and hungry
+      beyond measure.
+    size: huge
+    type: aberration
+    alignment: neutral
+
+    armor_class: 19
+    hit_points: 300
+    speed: 0
+    swim_speed: 60
+    hover_speed: 30
+
+    abilities:
+      strength: 22
+      dexterity: 14
+      constitution: 24
+      intelligence: 22
+      wisdom: 20
+      charisma: 24
+
+    challenge_rating: 15
+
+    attacks:
+      - name: Void Tendril
+        attack_bonus: 11
+        damage: 4d8+6
+        damage_type: psychic
+        description: "Tendrils of un-light that reach from impossible angles."
+
+      - name: Drowning Gaze
+        attack_bonus: 0
+        damage: 6d8
+        damage_type: cold
+        description: "Targets one creature. DC 18 Charisma save or take damage and be paralyzed until end of next turn as they experience the peace of drowning."
+
+      - name: Call of the Deep
+        attack_bonus: 0
+        damage: 0
+        damage_type: psychic
+        description: "All creatures within 120 feet must make DC 18 Wisdom save. Failure: creature must use movement to approach the Avatar and cannot willingly attack it for 1 minute. Repeat save at end of each turn."
+
+    special_abilities:
+      - name: Alien Physiology
+        description: "Immune to cold, psychic, and poison damage. Resistant to all other damage from nonmagical sources."
+      - name: Aura of Pressure
+        description: "All creatures within 30 feet have disadvantage on Strength and Constitution saves."
+      - name: Legendary Resistance
+        description: "3/day can choose to succeed on a failed save."
+      - name: The Sea Remembers
+        description: "Can cast scrying at will without components, but only on creatures who have been submerged in seawater."
+      - name: Willing Sacrifice
+        description: "If a creature willingly dies within 30 feet of the Avatar, the Avatar regains 50 HP."
+
+    legendary_actions:
+      - name: Tendril Strike
+        description: "Makes one Void Tendril attack."
+      - name: Whisper
+        description: "Targets one creature within 60 feet. DC 18 Wisdom save or be frightened until end of next turn."
+      - name: Tidal Surge
+        description: "(Costs 2 actions) All creatures within 30 feet must make DC 18 Strength save or be pushed 20 feet and knocked prone."
+      - name: Moment of Peace
+        description: "(Costs 3 actions) Targets one creature within 60 feet. DC 18 Charisma save or be charmed indefinitely, believing they have achieved perfect peace. Repeat save when taking damage."
+
+    tactics: |
+      The Avatar cannot be truly killed—only driven back. When reduced to
+      0 HP, it dissolves into the sea, buying time but not ending the threat.
+      To truly defeat it, players must use the ancient sealing ritual, make
+      a bargain, or find another creative solution. Raw combat is not the
+      answer.
+
+    lair_actions: |
+      On initiative count 20, the Avatar can take one of the following lair
+      actions while in water:
+      - Water in a 30-foot radius becomes difficult terrain
+      - One creature must make DC 16 Wisdom save or see visions of peace
+      - The water level rises by 5 feet (to a maximum of 20 feet)

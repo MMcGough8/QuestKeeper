@@ -1,0 +1,875 @@
+# Item definitions for Whispers of the Drowned God
+# Includes items inspired by The Griffon's Saddlebag and campaign-specific rewards
+
+items:
+  # ==========================================
+  # GRIFFON'S SADDLEBAG INSPIRED - LEGENDARY
+  # ==========================================
+
+  - id: tarrasque_plate
+    name: Tarrasque Plate
+    type: armor
+    subtype: plate
+    rarity: legendary
+    description: |
+      This impenetrable armor is made from refined fragments of a tarrasque's
+      armored hide and retains some of its original defensive properties.
+      The scales shimmer with an iridescent pattern that seems to absorb
+      magical energy. In Saltmire, it was recovered from the deepest ruins
+      by a legendary diver who never dove again.
+    weight: 65
+    value: 50000
+    ac_bonus: 19
+    properties:
+      - name: Spell Resistance
+        description: "You have resistance to damage from spells"
+      - name: Enhanced Protection
+        description: "+1 bonus to AC while wearing this armor"
+      - name: Spell Reflection
+        description: "When targeted by magic missile, a line spell, or a spell requiring a ranged attack roll, roll a d6. On a 6, you are unaffected and the effect is reflected back at the caster"
+    attunement: true
+
+  - id: glaive_of_the_revenant_king
+    name: Glaive of the Revenant King
+    type: weapon
+    subtype: glaive
+    rarity: legendary
+    description: |
+      This long-lost silver glaive once belonged to an elven king who swore
+      to hunt fiends until his dying breath—and beyond. Its impeccable elven
+      make lets it be swung nimbly despite its size. The blade whispers of
+      vengeance in Elvish. In Saltmire, it was claimed from Lord Deepholm's
+      private collection.
+    weight: 6
+    value: 45000
+    damage: 1d10+3
+    damage_type: slashing
+    properties:
+      - name: Finesse
+        description: "Despite being a glaive, this weapon has the finesse property"
+      - name: Enhanced Strike
+        description: "+3 bonus to attack and damage rolls"
+      - name: Sentient
+        description: "INT 14, WIS 15, CHA 16. Communicates telepathically. Speaks Elvish and Sylvan. Darkvision 120 ft."
+      - name: Elven Kinship
+        description: "Elves and half-elves automatically gain proficiency. Advantage on Charisma checks with fey creatures."
+      - name: Energy Nullification
+        description: "When striking creatures resistant or immune to cold or fire damage, those resistances/immunities are negated until start of your next turn"
+    attunement: true
+
+  - id: bolide_blade
+    name: Bolide Blade
+    type: weapon
+    subtype: longsword
+    rarity: legendary
+    description: |
+      A longsword forged from meteorite metal, its black blade leaves a
+      cosmic plume of shooting stars and distant galaxies in its wake when
+      swung. The Lighthouse Keepers have guarded it for generations, waiting
+      for a champion worthy of its power.
+    weight: 3
+    value: 48000
+    damage: 1d8+3
+    damage_type: slashing
+    properties:
+      - name: Finesse
+        description: "This weapon has the finesse property"
+      - name: Enhanced Strike
+        description: "+3 bonus to attack and damage rolls"
+      - name: Cosmic Dilation
+        description: "At dusk, gain two illusory duplicates (as mirror image) that persist until destroyed or the blade leaves your possession"
+      - name: Starshower Saya
+        description: "1/Day: Sheath blade and teleport to space within 30ft near a creature. Attack with advantage. On hit: +4d12 radiant damage plus 7 magic missiles (4 on miss). Recharges at dusk."
+    attunement: true
+
+  - id: mourningsteel_half_plate
+    name: Mourningsteel Half Plate
+    type: armor
+    subtype: half_plate
+    rarity: legendary
+    description: |
+      Dark armor made from mourningsteel, a metal refined from ore found
+      beneath the battlefields of particularly vicious wars. Steeped in the
+      blood from relentless battles, this metal carries with it a magical
+      aversion to all things holy. Found in the Temple of the Deep.
+    weight: 40
+    value: 40000
+    ac_bonus: 16
+    properties:
+      - name: Enhanced Protection
+        description: "+1 bonus to AC while wearing this armor"
+      - name: Radiant Resistance
+        description: "Resistance to radiant damage"
+      - name: Death Transference
+        description: "1/Day (Reaction): When taking necrotic damage, take no damage and gain temp HP equal to half the necrotic damage dealt"
+      - name: Dark Spellcasting
+        description: "Can cast bestow curse, divine word, or nondetection 1/day each (DC 17)"
+      - name: Battlefield Memory
+        description: "Touch a weapon or armor that's seen battle to cast legend lore on it. 1/week."
+      - name: Unholy Aura
+        description: "Bonus action: 1 minute aura. Celestials have disadvantage on attacks against you and take 1d10 necrotic when moving within 5 feet."
+    attunement: true
+
+  # ==========================================
+  # GRIFFON'S SADDLEBAG INSPIRED - VERY RARE
+  # ==========================================
+
+  - id: divining_chain
+    name: Divining Chain
+    type: wondrous_item
+    rarity: very_rare
+    description: |
+      This magic silver chain has 8 charges, represented by the same number
+      of twists at its bottom. The twists hold the chain together into a
+      necklace. Elder Vorn kept it hidden in the Tidekeeper Crypts, knowing
+      it would be needed to track the Prophet's movements.
+    weight: 0.5
+    value: 15000
+    properties:
+      - name: Charges
+        description: "8 charges, regains 1d6+2 daily at dawn"
+      - name: Detection Spells
+        description: "1 charge: detect evil/good, detect magic, or detect poison and disease"
+      - name: Location Spells
+        description: "2 charges: locate animals or plants. 4 charges: locate creature"
+      - name: Swap Ability
+        description: "3 charges (reaction when targeted): Swap places with a creature within 60ft. DC 16 Charisma save negates."
+    attunement: true
+
+  - id: trifrost_trident
+    name: Trifrost Trident
+    type: weapon
+    subtype: trident
+    rarity: rare
+    description: |
+      This metal trident is covered in sharp icicles that never melt. It
+      pulses with cold energy and leaves frost trails in the air when swung.
+      Salvage divers prize these weapons for fighting the cold-resistant
+      creatures of the deep.
+    weight: 4
+    value: 5000
+    damage: 1d6+1
+    damage_type: piercing
+    properties:
+      - name: Enhanced Strike
+        description: "+1 bonus to attack and damage rolls"
+      - name: Frost Damage
+        description: "Deals an extra 1d6 cold damage on hit"
+      - name: Charges
+        description: "3 charges, regains all daily at dawn"
+      - name: Ice Explosion
+        description: "After hitting or missing, expend 1 charge: 10ft radius explosion. DC 15 Constitution save or 1d10 cold + 1d10 radiant damage, blinded until end of next turn. Allies gain cold resistance for 1 minute."
+    attunement: true
+
+  - id: splintering_spear
+    name: Splintering Spear
+    type: weapon
+    subtype: spear
+    rarity: rare
+    description: |
+      This spear is made from magical, intertwined willow branches that
+      constantly regrow. When it strikes—or misses—sharp splinters break off
+      and seek nearby enemies. Found in the Temple of the Deep.
+    weight: 3
+    value: 4500
+    damage: 1d6+2
+    damage_type: piercing
+    properties:
+      - name: Enhanced Strike
+        description: "+2 bonus to attack and damage rolls"
+      - name: Charges
+        description: "6 charges, regains 1d6 daily at dawn"
+      - name: Melee Miss
+        description: "On a miss with melee attack, expend 1 charge to reroll the attack"
+      - name: Ranged Splinter
+        description: "On a miss with ranged attack, splinters explode. 10ft radius: DC 15 Dexterity save or 2d6+2 piercing damage"
+    attunement: true
+
+  # ==========================================
+  # GRIFFON'S SADDLEBAG INSPIRED - UNCOMMON
+  # ==========================================
+
+  - id: third_lung_bag
+    name: Third Lung Bag
+    type: wondrous_item
+    rarity: uncommon
+    description: |
+      This canvas bag has a pattern resembling bronchial airways embroidered
+      on either side. At its top is a metal valve. Essential equipment for
+      any diver exploring the Sunken Ruins.
+    weight: 0.5
+    value: 500
+    properties:
+      - name: Air Capacity
+        description: "Holds 10 minutes of air, regains 1d10 minutes daily at dawn"
+      - name: Breathing Aid
+        description: "Inhale from the bag to hold your breath for that duration, unless you speak or exhale"
+    attunement: false
+
+  - id: ammunition_of_fireworks
+    name: Ammunition of Fireworks
+    type: ammunition
+    rarity: rare
+    description: |
+      This ammunition has a magical fuse that ignites with a hiss once
+      fired. When it strikes, it explodes in a spectacular display of fire
+      and light. Lighthouse Keepers use them as signal flares—and weapons.
+    weight: 0.1
+    value: 250
+    properties:
+      - name: Explosive
+        description: "20ft radius explosion on impact. 1d4+1d6+1d8+1d10+1d12 fire damage"
+      - name: Difficult Dodge
+        description: "Target has disadvantage on the save. DC 15 Dexterity for half damage"
+      - name: Grand Finale
+        description: "If damage dice match or show max, additional 1d20 fire damage to all creatures within 40ft"
+    attunement: false
+
+  # ==========================================
+  # CAMPAIGN-SPECIFIC ITEMS
+  # ==========================================
+
+  - id: depth_key_tide
+    name: Depth Key of the Tide
+    type: quest_item
+    rarity: rare
+    description: |
+      One of three ancient keys needed to access the Drowning Heart. This
+      one resonates with the rhythm of the tides and was held by the
+      Tidekeepers until the Prophet took it.
+    weight: 0.5
+    value: 0
+    properties:
+      - name: Tidal Sense
+        description: "Always know the current state of the tides and exact time until high/low tide"
+      - name: Key Fragment
+        description: "One of three keys needed to open the way to the Drowned God"
+    attunement: false
+
+  - id: depth_key_pressure
+    name: Depth Key of Pressure
+    type: quest_item
+    rarity: rare
+    description: |
+      One of three ancient keys needed to access the Drowning Heart. This
+      one grows heavier as you descend, reaching its true weight only at
+      the deepest point. The Abyssal Court has guarded it for centuries.
+    weight: 0.5
+    value: 0
+    properties:
+      - name: Pressure Sense
+        description: "Know your exact depth underwater and sense changes in water pressure"
+      - name: Key Fragment
+        description: "One of three keys needed to open the way to the Drowned God"
+    attunement: false
+
+  - id: depth_key_darkness
+    name: Depth Key of Darkness
+    type: quest_item
+    rarity: rare
+    description: |
+      One of three ancient keys needed to access the Drowning Heart. This
+      one drinks in light, creating a sphere of darkness around it that
+      only the worthy can see through. Hidden in the deepest ruins.
+    weight: 0.5
+    value: 0
+    properties:
+      - name: Darkvision
+        description: "While holding, gain darkvision 60ft if you don't have it, or extend existing by 30ft"
+      - name: Key Fragment
+        description: "One of three keys needed to open the way to the Drowned God"
+    attunement: false
+
+  - id: saltmire_diving_suit
+    name: Saltmire Diving Suit
+    type: armor
+    subtype: light
+    rarity: uncommon
+    description: |
+      A waterproof suit of treated leather and brass fittings, designed by
+      Salvage Guild engineers. Standard equipment for professional divers.
+    weight: 15
+    value: 750
+    ac_bonus: 12
+    properties:
+      - name: Water Breathing
+        description: "Can breathe underwater for up to 1 hour before needing to surface"
+      - name: Pressure Resistance
+        description: "Resistant to pressure damage from diving deep"
+      - name: Swim Speed
+        description: "Gain swim speed of 20ft if you don't have one"
+    attunement: false
+
+  - id: brine_ward_amulet
+    name: Brine Ward Amulet
+    type: wondrous_item
+    rarity: uncommon
+    description: |
+      A silver amulet etched with protective runes, designed to ward off
+      the influence of the deep. Tidekeepers wear them as a matter of course.
+      Recently, some have been removing them.
+    weight: 0.1
+    value: 800
+    properties:
+      - name: Mind Shield
+        description: "Advantage on saving throws against being charmed by creatures with swim speed"
+      - name: Silence the Call
+        description: "Dampens the singing that comes from the deep. Advantage on Wisdom saves against the Drowned"
+    attunement: true
+
+  - id: lighthouse_harpoon
+    name: Lighthouse Harpoon
+    type: weapon
+    subtype: javelin
+    rarity: rare
+    description: |
+      A heavy harpoon etched with light-runes, standard issue for Lighthouse
+      Keepers. The runes glow when pointed at creatures from the deep.
+    weight: 3
+    value: 1500
+    damage: 1d6+1
+    damage_type: piercing
+    properties:
+      - name: Enhanced Strike
+        description: "+1 bonus to attack and damage rolls"
+      - name: Deep Hunter
+        description: "Deals extra 1d6 radiant damage against aberrations and creatures with swim speed"
+      - name: Returning
+        description: "After thrown, returns to hand at end of turn"
+      - name: Detection
+        description: "Glows when within 60ft of aberrations"
+    attunement: true
+
+  - id: abyssal_pearl
+    name: Abyssal Pearl
+    type: wondrous_item
+    rarity: very_rare
+    description: |
+      A black pearl the size of a fist, taken from something that should
+      not exist. It pulses with cold light and whispers secrets to those
+      who hold it. The Abyssal Court prizes these above all other treasures.
+    weight: 0.5
+    value: 25000
+    properties:
+      - name: Water Breathing
+        description: "Permanent water breathing while attuned"
+      - name: Pressure Immunity
+        description: "Immune to pressure damage from depth"
+      - name: Deep Speech
+        description: "Can speak and understand Deep Speech"
+      - name: Whispers
+        description: "1/day, ask the pearl a question about something underwater. It will answer truthfully, but the answer may be disturbing"
+      - name: Corruption Risk
+        description: "Each week attuned, make DC 12 Wisdom save. Failure: gain one minor physical mutation (cosmetic, DM's choice)"
+    attunement: true
+
+  - id: prophets_tear
+    name: Prophet's Tear
+    type: wondrous_item
+    rarity: legendary
+    description: |
+      A crystallized tear shed by Prophet Mira during her transformation.
+      It contains a fragment of her original self—the part that still
+      remembers being human, that still grieves for what she has become.
+    weight: 0
+    value: 0
+    properties:
+      - name: Memory of Mira
+        description: "While holding, can speak telepathically with the Prophet regardless of distance"
+      - name: Moment of Clarity
+        description: "1/Day: Force the Prophet to make a DC 18 Wisdom save. On failure, she is stunned for 1 round as her human memories surface"
+      - name: Sacrifice
+        description: "Can be destroyed to permanently weaken the Prophet, reducing her HP maximum by 50. This cannot be undone."
+    attunement: true
+
+  # ==========================================
+  # COMMON EQUIPMENT
+  # ==========================================
+
+  - id: salvage_lantern
+    name: Salvage Lantern
+    type: equipment
+    rarity: common
+    description: |
+      A waterproof lantern using bioluminescent algae instead of fire.
+      Standard equipment for divers. Provides dim light in a 30-foot radius.
+    weight: 2
+    value: 25
+    properties:
+      - name: Waterproof
+        description: "Functions normally underwater"
+      - name: Dim Light
+        description: "Provides dim light in 30ft radius"
+      - name: No Fire
+        description: "Does not use flame; cannot start fires or consume oxygen"
+
+  - id: grappling_hook
+    name: Diver's Grappling Hook
+    type: equipment
+    rarity: common
+    description: |
+      A weighted grappling hook with 50 feet of waterproof rope. Essential
+      for navigating the vertical architecture of the Sunken Ruins.
+    weight: 4
+    value: 5
+    properties:
+      - name: Climbing Aid
+        description: "Advantage on checks to climb surfaces where the hook can find purchase"
+      - name: Weighted
+        description: "Sinks quickly, useful for anchoring in currents"
+
+  - id: pressure_pills
+    name: Pressure Pills
+    type: consumable
+    rarity: uncommon
+    description: |
+      Alchemical pills that help the body adjust to rapid pressure changes.
+      Essential for deep dives. Sold in sets of 6.
+    weight: 0
+    value: 150
+    properties:
+      - name: Pressure Resistance
+        description: "For 1 hour after taking, immune to damage from rapid pressure changes"
+      - name: Quantity
+        description: "Comes in set of 6 pills"
+
+  # ==========================================
+  # GRIFFON'S SADDLEBAG INSPIRED - ADDITIONAL
+  # ==========================================
+
+  - id: cloak_of_the_depths
+    name: Cloak of the Depths
+    type: wondrous_item
+    rarity: rare
+    description: |
+      This heavy cloak is woven from the shed skin of a deep-sea leviathan.
+      It billows as if underwater even in still air, and grants its wearer
+      an affinity with the crushing darkness of the abyss.
+    weight: 2
+    value: 4000
+    properties:
+      - name: Pressure Immunity
+        description: "Immune to damage from water pressure at any depth"
+      - name: Darkvision
+        description: "Gain darkvision 60ft while wearing, or extend existing by 30ft"
+      - name: Cold Resistance
+        description: "Resistance to cold damage"
+    attunement: true
+
+  - id: great_owls_bow
+    name: Great Owl's Bow
+    type: weapon
+    subtype: longbow
+    rarity: uncommon
+    description: |
+      This bow is crafted from pale wood and decorated with owl feathers.
+      Arrows fired from it fly silently through darkness, perfect for
+      ambushing creatures of the deep.
+    weight: 2
+    value: 1500
+    damage: 1d8
+    damage_type: piercing
+    properties:
+      - name: Silent Flight
+        description: "Arrows fired between dusk and dawn are completely silent"
+      - name: Charges
+        description: "5 charges, regains 1d4+1 daily at dawn"
+      - name: Feather Burst
+        description: "On hit, expend 1 charge: creatures within 5ft of target make DC 13 Dex save or take 1d4+3 force damage"
+    attunement: true
+
+  - id: wandblade
+    name: Wandblade
+    type: weapon
+    subtype: dagger
+    rarity: rare
+    description: |
+      This elegant dagger has a hollow blade of magical glass. Its handle
+      unscrews to reveal a compartment that can hold a single wand, allowing
+      the wielder to cast spells while armed.
+    weight: 1
+    value: 3500
+    damage: 1d4+1
+    damage_type: piercing
+    properties:
+      - name: Enhanced Strike
+        description: "+1 bonus to attack and damage rolls"
+      - name: Wand Slot
+        description: "Can hold one wand inside the handle. While held, can use the wand without a free hand"
+      - name: Spell Conduit
+        description: "Spells cast through the contained wand deal +1 damage per damage die"
+    attunement: true
+
+  - id: consecrated_crossbow
+    name: Consecrated Hunter's Crossbow
+    type: weapon
+    subtype: heavy_crossbow
+    rarity: rare
+    description: |
+      A heavy crossbow detailed with wings and an angelic face at its end.
+      The Lighthouse Keepers commissioned these to fight the aberrations
+      that rise from the depths.
+    weight: 18
+    value: 4000
+    damage: 1d10
+    damage_type: piercing
+    properties:
+      - name: Radiant Bolts
+        description: "Bolts deal an extra 1d4 radiant damage"
+      - name: Bane of Darkness
+        description: "Against fiends, undead, or shapechangers, radiant damage is maximized (always 4)"
+      - name: Holy Light
+        description: "Bolts shed dim light in a 5ft radius until removed"
+    attunement: true
+
+  - id: wisp_cloak
+    name: Wisp Cloak
+    type: wondrous_item
+    rarity: uncommon
+    description: |
+      This near-weightless cloak billows softly without wind, bound to
+      a spirit betrayed by a close friend. It offers protection but at
+      a terrible cost—one the desperate divers of Saltmire often accept.
+    weight: 0.5
+    value: 2000
+    properties:
+      - name: Death's Favor
+        description: "Advantage on death saving throws"
+      - name: Ethereal Movement
+        description: "Can move through spaces of Medium or smaller creatures (can't end turn there)"
+      - name: Cursed
+        description: "Cannot be removed without remove curse. When within 5ft of a dying ally for the first time each turn, they must make DC 10 Con save or die instantly"
+    attunement: true
+
+  - id: amulet_of_buoyancy
+    name: Amulet of Buoyancy
+    type: wondrous_item
+    rarity: uncommon
+    description: |
+      A glass sphere filled with enchanted air, worn on a silver chain.
+      The Salvage Guild sells these to novice divers who haven't learned
+      to control their depth naturally.
+    weight: 0.1
+    value: 500
+    properties:
+      - name: Controlled Descent
+        description: "Can sink or rise through water at will, up to 30ft per round"
+      - name: Emergency Surface
+        description: "1/Day: Immediately rise 60ft through water as a reaction"
+    attunement: false
+
+  # ==========================================
+  # STANDARD WEAPONS
+  # ==========================================
+
+  - id: sailors_cutlass
+    name: Sailor's Cutlass
+    type: weapon
+    subtype: shortsword
+    rarity: common
+    description: |
+      A curved blade favored by sailors throughout Saltmire. The brass
+      guard protects against salt corrosion.
+    weight: 2
+    value: 15
+    damage: 1d6
+    damage_type: slashing
+    properties:
+      - name: Finesse
+        description: "Can use Dexterity for attack and damage rolls"
+      - name: Light
+        description: "Can be used for two-weapon fighting"
+
+  - id: boarding_pike
+    name: Boarding Pike
+    type: weapon
+    subtype: pike
+    rarity: common
+    description: |
+      A long spear with a hook beneath the blade, used by sailors to
+      board enemy vessels or pull drowning comrades from the water.
+    weight: 18
+    value: 10
+    damage: 1d10
+    damage_type: piercing
+    properties:
+      - name: Reach
+        description: "10ft reach"
+      - name: Two-Handed
+        description: "Requires two hands to use"
+      - name: Hook
+        description: "Can be used to pull a creature within reach 5ft closer (Strength contest)"
+
+  - id: fishermans_net
+    name: Fisherman's Net
+    type: weapon
+    subtype: net
+    rarity: common
+    description: |
+      A weighted net used by Saltmire's fishermen—and occasionally by
+      adventurers dealing with slippery creatures.
+    weight: 3
+    value: 1
+    damage: 0
+    damage_type: none
+    properties:
+      - name: Special
+        description: "Large or smaller creature hit is restrained until freed (DC 10 Strength)"
+      - name: Thrown
+        description: "Range 5/15ft"
+
+  - id: harpoon
+    name: Harpoon
+    type: weapon
+    subtype: javelin
+    rarity: common
+    description: |
+      A barbed spear attached to a rope, designed to lodge in prey and
+      prevent escape. Standard equipment for anyone hunting sea creatures.
+    weight: 4
+    value: 5
+    damage: 1d6
+    damage_type: piercing
+    properties:
+      - name: Thrown
+        description: "Range 30/120ft"
+      - name: Tethered
+        description: "50ft rope attached. On hit, creature can't move more than 50ft away until harpoon is removed (DC 12 Strength check, deals 1d6 damage)"
+
+  # ==========================================
+  # STANDARD ARMOR
+  # ==========================================
+
+  - id: studded_leather
+    name: Studded Leather Armor
+    type: armor
+    subtype: light
+    rarity: common
+    description: |
+      Leather armor reinforced with close-set rivets or spikes. Popular
+      among Saltmire's less wealthy fighters.
+    weight: 13
+    value: 45
+    ac_bonus: 12
+    properties:
+      - name: Light Armor
+        description: "Add Dexterity modifier to AC"
+
+  - id: scale_mail
+    name: Scale Mail
+    type: armor
+    subtype: medium
+    rarity: common
+    description: |
+      Armor made of overlapping metal scales, often resembling fish scales
+      in Saltmire. Offers good protection but limits mobility.
+    weight: 45
+    value: 50
+    ac_bonus: 14
+    properties:
+      - name: Medium Armor
+        description: "Add Dexterity modifier to AC (max 2)"
+      - name: Stealth Disadvantage
+        description: "Disadvantage on Stealth checks"
+
+  - id: chain_shirt
+    name: Chain Shirt
+    type: armor
+    subtype: medium
+    rarity: common
+    description: |
+      A shirt of interlocking metal rings worn between layers of clothing.
+      Lighter than full chain mail and popular with divers who need mobility.
+    weight: 20
+    value: 50
+    ac_bonus: 13
+    properties:
+      - name: Medium Armor
+        description: "Add Dexterity modifier to AC (max 2)"
+
+  - id: shield_standard
+    name: Shield
+    type: armor
+    subtype: shield
+    rarity: common
+    description: |
+      A wooden or metal shield. In Saltmire, many are decorated with
+      nautical symbols or family crests.
+    weight: 6
+    value: 10
+    ac_bonus: 2
+    properties:
+      - name: Shield
+        description: "+2 AC when wielded"
+
+  # ==========================================
+  # POTIONS AND CONSUMABLES
+  # ==========================================
+
+  - id: potion_healing
+    name: Potion of Healing
+    type: consumable
+    rarity: common
+    description: |
+      A red liquid that shimmers when agitated. Standard healing potion
+      available from most merchants in Saltmire.
+    weight: 0.5
+    value: 50
+    properties:
+      - name: Healing
+        description: "Drink to regain 2d4+2 hit points"
+
+  - id: potion_greater_healing
+    name: Potion of Greater Healing
+    type: consumable
+    rarity: uncommon
+    description: |
+      A more potent healing potion with a deeper red color. More expensive
+      but essential for serious expeditions.
+    weight: 0.5
+    value: 150
+    properties:
+      - name: Greater Healing
+        description: "Drink to regain 4d4+4 hit points"
+
+  - id: potion_water_breathing
+    name: Potion of Water Breathing
+    type: consumable
+    rarity: uncommon
+    description: |
+      A cloudy green liquid that smells of the sea. Essential equipment
+      for any serious dive into the Sunken Ruins.
+    weight: 0.5
+    value: 180
+    properties:
+      - name: Water Breathing
+        description: "Drink to breathe underwater for 1 hour"
+
+  - id: antitoxin
+    name: Antitoxin
+    type: consumable
+    rarity: common
+    description: |
+      A vial of thick liquid that counteracts poison. Useful against
+      the venomous creatures of the deep.
+    weight: 0
+    value: 50
+    properties:
+      - name: Poison Resistance
+        description: "Drink to gain advantage on saves against poison for 1 hour"
+
+  - id: oil_of_slipperiness
+    name: Oil of Slipperiness
+    type: consumable
+    rarity: uncommon
+    description: |
+      This sticky black oil covers a creature or object, making escape
+      from grapples much easier. Popular with divers.
+    weight: 0.5
+    value: 200
+    properties:
+      - name: Slippery
+        description: "Apply to self: advantage on escaping grapples for 8 hours"
+      - name: Freedom of Movement
+        description: "Can also cast freedom of movement on yourself (concentration, 10 minutes)"
+
+  # ==========================================
+  # ADDITIONAL CAMPAIGN ITEMS
+  # ==========================================
+
+  - id: coral_blade
+    name: Coral Blade
+    type: weapon
+    subtype: shortsword
+    rarity: uncommon
+    description: |
+      A blade grown rather than forged, shaped from living red coral by
+      Saltmire's artisans. It's sharper than steel and never rusts.
+    weight: 2
+    value: 350
+    damage: 1d6+1
+    damage_type: slashing
+    properties:
+      - name: Enhanced Strike
+        description: "+1 bonus to attack and damage rolls"
+      - name: Living Weapon
+        description: "If broken, regrows fully over 1 week if submerged in seawater"
+      - name: Finesse
+        description: "Can use Dexterity for attack and damage rolls"
+
+  - id: jellyfish_lantern
+    name: Jellyfish Lantern
+    type: equipment
+    rarity: uncommon
+    description: |
+      A living bioluminescent jellyfish kept in a specially enchanted glass
+      container. Brighter than standard salvage lanterns.
+    weight: 1
+    value: 100
+    properties:
+      - name: Bright Light
+        description: "Provides bright light in 20ft radius, dim light for additional 20ft"
+      - name: Waterproof
+        description: "Functions normally underwater"
+      - name: Living Light
+        description: "Must be fed small fish weekly or light dims"
+
+  - id: gill_ring
+    name: Ring of Gills
+    type: wondrous_item
+    rarity: rare
+    description: |
+      A platinum ring engraved with fish scales that grants the wearer
+      the ability to breathe underwater indefinitely. Extremely valuable
+      to serious divers.
+    weight: 0
+    value: 5000
+    properties:
+      - name: Amphibious
+        description: "Can breathe underwater as easily as air while wearing this ring"
+    attunement: true
+
+  - id: depths_compass
+    name: Depths Compass
+    type: wondrous_item
+    rarity: uncommon
+    description: |
+      A brass compass that always points toward the nearest dragonshard
+      or magical relic, rather than north. Invaluable for salvage work.
+    weight: 0.5
+    value: 750
+    properties:
+      - name: Relic Detection
+        description: "Points toward nearest magic item within 500ft"
+      - name: Depth Reading
+        description: "Shows current depth below surface"
+
+  - id: sea_salts
+    name: Sea Salts
+    type: consumable
+    rarity: common
+    description: |
+      Blessed salt from the Temple of the Tides. Effective against
+      the Drowned and other creatures of the deep.
+    weight: 0.5
+    value: 25
+    properties:
+      - name: Holy Salt
+        description: "Throw at undead or aberration within 10ft: 2d6 radiant damage, DC 12 Dex save for half"
+      - name: Ward
+        description: "Create 5ft circle that Drowned cannot willingly enter for 1 hour"
+
+  - id: salvage_toolkit
+    name: Salvage Toolkit
+    type: equipment
+    rarity: common
+    description: |
+      A waterproof case containing pry bars, lockpicks, small saws, and
+      other tools needed to extract valuables from the ruins.
+    weight: 5
+    value: 50
+    properties:
+      - name: Salvage Proficiency
+        description: "Advantage on checks to open containers or extract objects from wreckage"
+      - name: Waterproof
+        description: "Tools function normally underwater"

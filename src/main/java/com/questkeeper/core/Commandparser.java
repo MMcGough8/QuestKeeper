@@ -37,6 +37,10 @@ public class CommandParser {
     private static final String VERB_READ = "read";
     private static final String VERB_EQUIP = "equip";
     private static final String VERB_UNEQUIP = "unequip";
+    private static final String VERB_BYE = "bye";
+    private static final String VERB_TRIAL = "trial";
+    private static final String VERB_ATTEMPT = "attempt";
+    private static final String VERB_EQUIPMENT = "equipment";
 
     private static final Map<String, String> SYNONYM_MAP = new HashMap<>();
 
@@ -44,7 +48,7 @@ public class CommandParser {
         VERB_GO, VERB_LOOK, VERB_TAKE, VERB_DROP, VERB_USE, VERB_TALK, VERB_ASK,
         VERB_ATTACK, VERB_CAST, VERB_INVENTORY, VERB_STATS, VERB_HELP, VERB_SAVE,
         VERB_LOAD, VERB_QUIT, VERB_REST, VERB_OPEN, VERB_CLOSE, VERB_READ,
-        VERB_EQUIP, VERB_UNEQUIP
+        VERB_EQUIP, VERB_UNEQUIP, VERB_BYE, VERB_TRIAL, VERB_ATTEMPT, VERB_EQUIPMENT
     );
 
     private static final Map<String, String> DIRECTION_ALIASES = Map.of(
@@ -148,10 +152,11 @@ public class CommandParser {
         // Note: "bye" and "farewell" are handled as dialogue-ending commands
 
         // Dialogue ending → "bye"
-        SYNONYM_MAP.put("bye", "bye");
-        SYNONYM_MAP.put("farewell", "bye");
-        SYNONYM_MAP.put("goodbye", "bye");
-        SYNONYM_MAP.put("later", "bye");
+        SYNONYM_MAP.put("bye", VERB_BYE);
+        SYNONYM_MAP.put("farewell", VERB_BYE);
+        SYNONYM_MAP.put("goodbye", VERB_BYE);
+        SYNONYM_MAP.put("later", VERB_BYE);
+        SYNONYM_MAP.put("leave", VERB_BYE);
         
         // Rest synonyms → "rest"
         SYNONYM_MAP.put("rest", VERB_REST);
@@ -175,6 +180,24 @@ public class CommandParser {
         // Unequip synonyms → "unequip"
         SYNONYM_MAP.put(VERB_UNEQUIP, VERB_UNEQUIP);
         SYNONYM_MAP.put("remove", VERB_UNEQUIP);
+
+        // Trial synonyms → "trial"
+        SYNONYM_MAP.put(VERB_TRIAL, VERB_TRIAL);
+        SYNONYM_MAP.put("trials", VERB_TRIAL);
+        SYNONYM_MAP.put("challenge", VERB_TRIAL);
+        SYNONYM_MAP.put("puzzle", VERB_TRIAL);
+
+        // Attempt synonyms → "attempt"
+        SYNONYM_MAP.put(VERB_ATTEMPT, VERB_ATTEMPT);
+        SYNONYM_MAP.put("try", VERB_ATTEMPT);
+        SYNONYM_MAP.put("solve", VERB_ATTEMPT);
+        SYNONYM_MAP.put("do", VERB_ATTEMPT);
+
+        // Equipment synonyms → "equipment"
+        SYNONYM_MAP.put(VERB_EQUIPMENT, VERB_EQUIPMENT);
+        SYNONYM_MAP.put("equipped", VERB_EQUIPMENT);
+        SYNONYM_MAP.put("gear", VERB_EQUIPMENT);
+        SYNONYM_MAP.put("worn", VERB_EQUIPMENT);
     }
     
     private CommandParser() {

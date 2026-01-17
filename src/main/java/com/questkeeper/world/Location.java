@@ -22,10 +22,13 @@ public class Location {
     private static final String FLAG_VISITED = "visited";
     private static final String FLAG_UNLOCKED = "unlocked";
 
+    private static final String DEFAULT_LOCKED_MESSAGE = "That way is currently blocked or locked.";
+
     private final String id;
     private String name;
     private String description;
     private String readAloudText;
+    private String lockedMessage;
 
     private final Map<String, String> exits;
     private final List<String> npcs;
@@ -57,6 +60,7 @@ public class Location {
         // Convert null to empty string for optional fields to avoid null checks elsewhere
         this.description = description != null ? description : "";
         this.readAloudText = readAloudText != null ? readAloudText : "";
+        this.lockedMessage = DEFAULT_LOCKED_MESSAGE;
 
         this.exits = new HashMap<>();
         this.npcs = new ArrayList<>();
@@ -94,6 +98,24 @@ public class Location {
 
     public void setReadAloudText(String readAloudText) {
         this.readAloudText = readAloudText != null ? readAloudText : "";
+    }
+
+    /**
+     * Gets the message to display when the player tries to enter this location while it's locked.
+     * @return the locked message, or a default if not set
+     */
+    public String getLockedMessage() {
+        return lockedMessage;
+    }
+
+    /**
+     * Sets the message to display when the player tries to enter this location while it's locked.
+     * @param lockedMessage the message to display, or null for default
+     */
+    public void setLockedMessage(String lockedMessage) {
+        this.lockedMessage = (lockedMessage != null && !lockedMessage.trim().isEmpty())
+            ? lockedMessage
+            : DEFAULT_LOCKED_MESSAGE;
     }
 
     public String getDisplayDescription() {

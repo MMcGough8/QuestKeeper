@@ -1,0 +1,339 @@
+# Trial definitions for Whispers of the Drowned God
+# Complex challenges for seasoned players with meaningful consequences
+
+trials:
+  # ==========================================
+  # Trial 1: The Flooded Underdock
+  # First dungeon - introduces underwater mechanics
+  # ==========================================
+  - id: trial_underdock
+    name: "Descent into the Underdock"
+    location_id: flooded_underdock
+
+    entry_narrative: |
+      The entrance to the Underdock yawns before you—a dark throat leading
+      down into flooded chambers that haven't seen light in decades. The
+      smell of brine and rot rises on cold air. Somewhere below, water
+      laps against stone with a rhythm that sounds almost like breathing.
+
+      "No one goes down there anymore," Nessa says, checking her equipment.
+      "Not since the Prophet returned. Things have been... moving. But if
+      you want answers, this is where they're buried."
+
+      She hands you a Third Lung Bag. "You'll need this. The lower chambers
+      are completely submerged. And if you hear singing—" She doesn't finish.
+
+      You begin your descent into darkness.
+
+    completion_reward: third_lung_bag
+    completion_reward_text: "Third Lung Bag"
+
+    stinger: |
+      As you surface from the Underdock, gasping air, you realize the tide
+      has risen significantly while you were below. Water laps at walkways
+      that were dry when you entered.
+
+      And there, standing at the dock's edge, is Prophet Mira.
+
+      "You survived," she says, and there's genuine warmth in her voice.
+      "I knew you would. The sea shows me potential, and you have so much
+      of it." She tilts her head. "What you found down there is just the
+      beginning. The ruins go deeper. The truth goes deeper. When you're
+      ready to see it all... come find me."
+
+      She steps backward off the dock—and vanishes into the water without
+      a splash, without a ripple, as if the sea simply absorbed her.
+
+    mini_games:
+      - underdock_descent
+      - flooded_corridor
+      - drowned_ambush
+      - pressure_lock
+
+    completion_flags:
+      - trial_underdock_complete
+      - met_prophet_twice
+      - sunken_ruins_entrance_unlocked
+
+  # ==========================================
+  # Trial 2: The Keeper's Test
+  # Lighthouse Keepers faction questline
+  # ==========================================
+  - id: trial_keepers
+    name: "Trial of the Flame"
+    location_id: lighthouse_beacon
+
+    entry_narrative: |
+      Commander Storm leads you to the beacon chamber, where the sacred
+      flame flickers in its ancient brazier. The light that has protected
+      Saltmire for three centuries is visibly weakening—guttering like a
+      candle in wind.
+
+      "The flame feeds on something in the ruins," Storm explains. "A
+      crystal. A heart. We don't know exactly. Our founders took that
+      knowledge to their graves." She hands you a map covered in their
+      notes. "This is everything we know about where it might be."
+
+      She meets your eyes. "The Court knows about the crystal too. So do
+      the Tidekeepers—or what's left of them. You'll have competition.
+      And the things in the deep... they don't want the light renewed."
+
+      "Find the Flame Heart. Bring it back. Save Saltmire. Simple."
+
+      Her smile is grim. "Nothing in Saltmire is simple anymore."
+
+    completion_reward: lighthouse_harpoon
+    completion_reward_text: "Lighthouse Harpoon"
+
+    stinger: |
+      The Flame Heart pulses in your hands as you return to the lighthouse.
+      It's warm—alive, somehow, in a way that defies explanation. When you
+      place it in the brazier, the sacred flame ROARS to life, brighter
+      than it's been in years.
+
+      For a moment, all of Saltmire is bathed in golden light.
+
+      Then the screaming starts. From the water. Hundreds of voices,
+      crying out as the light burns them. You see shapes thrashing in
+      the harbor—Drowned, caught in the open when the flame renewed.
+
+      Commander Storm watches grimly. "We bought time. But they'll adapt.
+      They always adapt." She clasps your shoulder. "Thank you. Whatever
+      happens next... the Keepers won't forget this."
+
+      In the distance, you see Prophet Mira standing on the Temple's
+      highest spire. Even from here, you can tell she's smiling.
+
+    mini_games:
+      - keeper_initiation
+      - flame_heart_dive
+      - depth_horror_fight
+      - light_ritual
+
+    prerequisites:
+      - trial_underdock_complete
+
+    completion_flags:
+      - trial_keepers_complete
+      - lighthouse_renewed
+      - keepers_allied
+      - bolide_blade_unlocked
+
+  # ==========================================
+  # Trial 3: The Court's Bargain
+  # Abyssal Court faction questline
+  # ==========================================
+  - id: trial_court
+    name: "The Deepholm Descent"
+    location_id: deepholm_manor
+
+    entry_narrative: |
+      Lord Deepholm's smile shows too many teeth as he leads you into the
+      depths of his manor. Below the elegant ballrooms and silk-draped
+      chambers lies something else—passages carved from living coral, lit
+      by bioluminescent growths, leading down into waters that have never
+      seen the sun.
+
+      "My family's true wealth lies below," he explains. "Treasures beyond
+      imagination. Power beyond mortal understanding. All freely given by
+      our... patrons... in the deep." His eyes flash in the darkness.
+
+      "We need something retrieved. Something we gave as payment long ago
+      that we now require returned. A glaive. Elven-made. It belonged to
+      someone who tried to destroy what we serve." His voice hardens.
+      "Retrieve it, and I'll give you what you need to reach the Drowned
+      God's heart. Refuse... and you'll discover how deep our influence
+      runs in Saltmire."
+
+      Behind you, the passage seals. You're committed now.
+
+    completion_reward: depth_key_pressure
+    completion_reward_text: "Depth Key of Pressure"
+
+    stinger: |
+      You surface in the Deepholm grotto, the Glaive of the Revenant King
+      heavy in your hands. The blade whispers warnings—it knows where it
+      is. It knows what these people are.
+
+      Lord Deepholm claps slowly. "Magnificent. You've exceeded our
+      expectations." He extends his hand for the glaive.
+
+      The blade grows warm. "Do not," it whispers. "They will use it to
+      silence the last voices that oppose the deep."
+
+      This is a choice. Give Deepholm the glaive and earn his trust—along
+      with the Depth Key you need. Or keep it, make an enemy of the Court,
+      and find another way.
+
+      Lord Deepholm's smile doesn't waver. "Well? We had an arrangement."
+
+      What do you do?
+
+    mini_games:
+      - court_politics
+      - deep_descent
+      - revenant_guardian
+      - bargain_choice
+
+    prerequisites:
+      - trial_underdock_complete
+
+    completion_flags:
+      - trial_court_complete
+      - court_allied_or_enemy
+      - glaive_choice_made
+
+  # ==========================================
+  # Trial 4: The Prophet's Truth
+  # Discovering what really happened to Mira
+  # ==========================================
+  - id: trial_prophet
+    name: "Whispers in the Temple"
+    location_id: tidekeeper_crypts
+
+    entry_narrative: |
+      Elder Vorn's hands shake as he leads you into the crypts beneath
+      the Temple. The air is thick with salt and something else—a presence
+      that presses against your mind like deep water.
+
+      "Mira kept a journal," he says. "From before. She documented
+      everything—her visions, her doubts, what she found in the ruins."
+      He pauses at a sealed door. "It's in her old chambers, beyond the
+      crypts. But the dead walk there now. My brothers and sisters who
+      couldn't resist her call."
+
+      He presses something into your hands. A silver key, warm to the
+      touch. "This will open her chambers. The journal will show you
+      what she was before. And maybe—maybe—it will show you how to reach
+      whatever's left of the woman I raised."
+
+      Behind him, something moves in the darkness. Many somethings.
+
+      "Run," he says. "I'll hold them as long as I can. Find the truth.
+      SAVE HER."
+
+    completion_reward: prophets_tear
+    completion_reward_text: "Prophet's Tear"
+
+    stinger: |
+      The journal tells a story of faith, dedication, and slow corruption.
+      Mira heard the voice of the deep for years before she descended. She
+      thought she could understand it. Study it. Use it to protect Saltmire.
+
+      She was wrong.
+
+      The last entry reads: "I understand now. It doesn't want slaves. It
+      wants family. It's so lonely in the dark. So hungry for connection.
+      How can I refuse something that just wants to love?"
+
+      A tear falls on the page. Not yours.
+
+      Prophet Mira stands behind you, her eyes glistening. "Now you know,"
+      she says softly. "I'm not a monster. I'm a missionary. And the thing
+      I serve isn't evil—it's just... different. Alien. Alone."
+
+      She reaches out, and for a moment, she looks entirely human.
+
+      "Help me save everyone. Or stop me. But at least now you understand
+      why I have to try."
+
+    mini_games:
+      - crypt_guardians
+      - dead_tidekeeper_puzzle
+      - mira_memory
+      - truth_choice
+
+    prerequisites:
+      - trial_keepers_complete
+      - trial_court_complete
+
+    completion_flags:
+      - trial_prophet_complete
+      - mira_understood
+      - depth_key_tide_unlocked
+      - final_trial_unlocked
+
+  # ==========================================
+  # Trial 5: The Drowning Heart (Final)
+  # Confrontation with the Drowned God
+  # ==========================================
+  - id: trial_final
+    name: "The Drowning Heart"
+    location_id: the_drowning_heart
+
+    entry_narrative: |
+      Three keys. Three doors. And then... nothing.
+
+      You descend through passages that twist in ways that hurt to think
+      about, past murals depicting the history of a civilization that chose
+      to drown, through waters that grow colder and darker with every stroke.
+
+      And then you emerge into the Drowning Heart.
+
+      The chamber is vast beyond measure. At its center, something floats—
+      a presence so large and so wrong that your mind refuses to fully
+      perceive it. Eyes that contain galaxies. Tendrils that stretch into
+      dimensions you can't name. A voice that is all voices, speaking words
+      that bypass your ears entirely.
+
+      "YOU CAME."
+
+      Prophet Mira rises from the darkness, fully transformed now—beautiful
+      and terrible, human and other, suspended between what she was and
+      what she's becoming.
+
+      "It's time to choose," she says. "Join us, and know peace forever.
+      Fight us, and drown alone. Or..." Her human eyes flicker. "...find
+      another way. If you can."
+
+      The Drowned God waits.
+
+      The choice is yours.
+
+    completion_reward: tarrasque_plate
+    completion_reward_text: "Tarrasque Plate"
+
+    stinger: |
+      [This varies based on player choice]
+
+      ENDING 1 - SEAL: The ancient ritual tears at your soul as you pour
+      everything you have into the binding. The Drowned God screams—and
+      sleeps again. Saltmire is saved. But the sea remembers. It always
+      remembers.
+
+      ENDING 2 - BARGAIN: The deal is struck. Saltmire survives, but changed.
+      The sea gives, and the sea takes. What rises from the depths is neither
+      salvation nor damnation—just different. Some will adapt. Some won't.
+      Life continues.
+
+      ENDING 3 - DESTROY: With the Prophet's Tear and the Glaive of the
+      Revenant King, you strike at something that should be immortal. The
+      Drowned God dies—but so does something else. The magic drains from
+      Saltmire. The relics turn to dust. What's left is just a city on the
+      water, ordinary and mortal.
+
+      ENDING 4 - ASCEND: You let go. The water takes you. And in the
+      darkness, in the pressure, in the silence... you find peace. You
+      find connection. You find the family the Drowned God promised. Was
+      it worth it? Only you know.
+
+      ENDING 5 - FLEE: Sometimes wisdom is knowing when you can't win. You
+      take who you can and run. Saltmire falls behind you, but you survive.
+      Others survive. That has to be enough. The Drowned God will spread
+      eventually. But not today. Not you.
+
+    mini_games:
+      - final_descent
+      - avatar_battle
+      - mira_confrontation
+      - ultimate_choice
+
+    prerequisites:
+      - trial_prophet_complete
+      - depth_key_tide
+      - depth_key_pressure
+      - depth_key_darkness
+
+    completion_flags:
+      - campaign_complete
+      - ending_chosen

@@ -1,0 +1,639 @@
+# Location definitions for Whispers of the Drowned God
+# A city built on water, hiding horrors beneath
+
+locations:
+  # ==========================================
+  # HARBOR DISTRICT - Starting Area / Main Hub
+  # ==========================================
+  - id: harbor_district
+    name: Harbor District
+    description: |
+      The beating heart of Saltmire's commerce. Wooden walkways connect taverns,
+      warehouses, and merchant stalls. The smell of salt and fish is ever-present,
+      mixed with the tang of exotic spices from distant lands.
+    read_aloud_text: |
+      The Harbor District sprawls before you—a maze of wooden platforms, swaying
+      rope bridges, and barnacle-crusted pillars rising from the grey-green sea.
+      Ships of all sizes crowd the docks: fishing vessels, merchant galleons, and
+      the reinforced salvage boats of the Guild.
+
+      Above, gulls wheel and cry. Below, the water laps hungrily at the pylons,
+      dark and deep. You notice the waterline on the nearest pillar—fresh stains
+      show the tide has been climbing higher than the old marks suggest it should.
+
+      Locals hurry past on the walkways, casting nervous glances at the water.
+      A weathered sign points toward THE BARNACLE'S REST, and in the distance,
+      the great LIGHTHOUSE stands sentinel over the harbor mouth.
+
+      Something feels wrong here. The air is too heavy. The silence between waves
+      is too long. And you could swear—just for a moment—you heard singing.
+    exits:
+      north: market_square
+      east: salvage_guild
+      west: lighthouse_base
+      south: drowned_quarter
+      down: flooded_underdock
+    npcs:
+      - harbormaster_keel
+      - salvage_diver_nessa
+    items: []
+    flags:
+      - safe_zone
+      - hub_location
+
+  # ==========================================
+  # THE BARNACLE'S REST - Safe Haven / Inn
+  # ==========================================
+  - id: barnacles_rest
+    name: The Barnacle's Rest
+    description: |
+      A weathered tavern built from salvaged ship timbers. The interior is warm
+      and dry, a welcome respite from the damp of Saltmire. Captain Silas runs
+      a clean establishment with rooms for rent and information for sale.
+    read_aloud_text: |
+      You push through the salt-stained door into warmth and light. The Barnacle's
+      Rest is built from the bones of old ships—figureheads mounted on walls,
+      porthole windows, a bar made from a ship's wheel and mast.
+
+      A fire crackles in a massive hearth fashioned from an anchor. The smell of
+      fish stew and fresh bread cuts through the eternal salt-smell of Saltmire.
+      A dozen patrons nurse drinks, their conversations hushed.
+
+      Behind the bar, a grizzled man with a captain's coat and an eyepatch polishes
+      glasses with methodical precision. He looks up as you enter, his one good eye
+      taking your measure in a single sweep.
+
+      "New to Saltmire?" His voice is rough as barnacles. "Best find a room before
+      nightfall. The tides have been... unpredictable lately. And what comes with
+      them, even more so."
+    exits:
+      out: harbor_district
+    npcs:
+      - captain_silas
+      - barmaid_coral
+    items: []
+    flags:
+      - safe_zone
+      - rest_location
+      - shop
+
+  # ==========================================
+  # SALVAGE GUILD HALL - Faction Hub
+  # ==========================================
+  - id: salvage_guild
+    name: Salvage Guild Hall
+    description: |
+      The headquarters of Saltmire's most powerful organization. Part warehouse,
+      part museum, part fortress. Ancient relics line the walls, and the smell
+      of brine and gold hangs in the air.
+    read_aloud_text: |
+      The Guild Hall rises from the water like a fortress—which, in many ways,
+      it is. Thick stone walls, iron-reinforced doors, and windows too narrow
+      for anything larger than an arrow. The wealth of centuries flows through
+      these halls.
+
+      Inside, display cases hold relics from the Sunken Ruins: weapons of strange
+      metal, jewelry that glows faintly in darkness, tablets covered in symbols
+      that hurt to look at directly. Each item has a price tag. Each price is
+      staggering.
+
+      Divers in waterproof gear compare hauls. Merchants argue over authenticity.
+      Guards in Guild livery watch everything with hard eyes. At the far end,
+      a massive map of the seafloor shows explored and unexplored regions—mostly
+      unexplored.
+
+      A well-dressed woman with cold eyes approaches. "Looking to dive? Looking
+      to buy? Or just looking?" Her smile doesn't reach her eyes. "Everything
+      in Saltmire has a price. The Guild can help you pay it."
+    exits:
+      west: harbor_district
+      down: guild_vault
+    npcs:
+      - guildmaster_vex
+      - relic_appraiser_thom
+    items: []
+    flags:
+      - faction_hub
+      - shop
+
+  # ==========================================
+  # TIDEKEEPER TEMPLE - Religious Center
+  # ==========================================
+  - id: tidekeeper_temple
+    name: Temple of the Tides
+    description: |
+      The spiritual heart of Saltmire. The Tidekeepers maintain the ancient wards
+      that have protected the city for centuries. Recently, something has changed
+      within these walls.
+    read_aloud_text: |
+      The Temple of the Tides is the oldest structure in Saltmire—built not by
+      human hands, but by whatever civilization came before. Its walls are smooth
+      black stone that never grows barnacles or algae. Its spires reach toward
+      the sky like drowning hands.
+
+      Inside, blue-robed Tidekeepers move in slow procession, their chanting a
+      constant rhythm that matches the waves outside. Pools of seawater dot the
+      floor, each one perfectly still—reflecting not the ceiling above, but
+      something deeper. Darker.
+
+      At the far end, a massive window looks out over the harbor. Before it stands
+      a woman in white robes, her back to you. Her hair moves as if underwater,
+      though the air is still.
+
+      "I've been expecting you," Prophet Mira says without turning. Her voice is
+      layered—as if many people are speaking in perfect unison. "The sea told me
+      you would come. It tells me many things now."
+
+      She turns. Her eyes are the color of deep water. Her smile is warm.
+      Something in your chest goes cold.
+    exits:
+      south: market_square
+      down: tidekeeper_crypts
+    npcs:
+      - prophet_mira
+      - elder_tidekeeper_vorn
+      - acolyte_shell
+    items: []
+    flags:
+      - faction_hub
+
+  # ==========================================
+  # MARKET SQUARE - Commerce Hub
+  # ==========================================
+  - id: market_square
+    name: Market Square
+    description: |
+      The commercial center of Saltmire, where merchants from across the world
+      come to trade in relics, fish, and secrets.
+    read_aloud_text: |
+      Market Square is a chaotic symphony of commerce. Stalls crowd every inch
+      of the broad wooden platform, selling everything from fresh catch to
+      ancient artifacts of dubious authenticity. Merchants shout their wares
+      in a dozen languages.
+
+      The square is one of the highest points in Saltmire, built on ancient
+      stone foundations that predate the city itself. Even here, you notice
+      water stains climbing the pillars—higher than they should be.
+
+      A fortuneteller beckons from a silk-draped booth. A weapons merchant
+      displays blades of strange metal. A fishmonger argues with a customer
+      about whether his catch is "fresh" or "touched." You're not sure what
+      "touched" means, but the fish's eyes are wrong.
+
+      At the square's center, a statue depicts Saltmire's founder raising a
+      relic toward the sky. Water seeps from the statue's eyes like tears.
+    exits:
+      south: harbor_district
+      north: tidekeeper_temple
+      east: noble_district
+      west: lighthouse_base
+    npcs:
+      - merchant_vara
+      - fortuneteller_whisper
+      - fishmonger_gill
+    items: []
+    flags:
+      - safe_zone
+      - shop
+
+  # ==========================================
+  # NOBLE DISTRICT - Abyssal Court Territory
+  # ==========================================
+  - id: noble_district
+    name: The Abyssal Court
+    description: |
+      Where Saltmire's old families dwell in mansions built to mimic underwater
+      palaces. They've made deals with things below—and those deals are coming due.
+    read_aloud_text: |
+      The Noble District is beautiful and wrong. Mansions of pearl-white stone
+      rise from the water, their architecture flowing and organic—more grown
+      than built. Bioluminescent plants light the walkways in ghostly blue.
+      Servants move silently, their eyes downcast, their movements too fluid.
+
+      The nobles here are old money—families that have ruled Saltmire since its
+      founding. They wear jewelry of deep-sea pearl and metals that don't exist
+      on land. Their skin has a faint iridescence. Their smiles show too many
+      teeth.
+
+      "Ah, visitors!" A man in an elaborate coat approaches, his movements
+      graceful as a eel. "How delightful. We so rarely see... fresh faces...
+      in the Court." His eyes flicker to the water, then back to you. "Do stay
+      for dinner. We're having fish. We're always having fish."
+    exits:
+      west: market_square
+      north: deepholm_manor
+      east: sunken_garden
+    npcs:
+      - lord_deepholm
+      - lady_coralline
+      - servant_gills
+    items: []
+    flags:
+      - faction_hub
+      - dangerous
+
+  # ==========================================
+  # LIGHTHOUSE - Keeper Headquarters
+  # ==========================================
+  - id: lighthouse_base
+    name: Lighthouse Base
+    description: |
+      The great lighthouse that has guided ships safely to Saltmire for centuries.
+      Now home to the Lighthouse Keepers—monster hunters who protect the city
+      from what lurks in the deep.
+    read_aloud_text: |
+      The Lighthouse stands apart from the rest of Saltmire, built on a rocky
+      outcrop connected by a single reinforced bridge. Its white stone walls
+      are covered in protective runes that glow faintly at night. This is
+      neutral ground—a place where even the Abyssal Court treads carefully.
+
+      Inside, the base level serves as headquarters for the Lighthouse Keepers.
+      Weapons line the walls: harpoons, spears, strange devices that crackle
+      with contained lightning. A massive board displays recent sightings—
+      creatures from the deep, disappearances, areas to avoid.
+
+      A scarred woman in practical armor looks up from cleaning a harpoon gun.
+      "You have the look of trouble," she says. "Good. We need trouble-makers.
+      Something's stirring down there, and our usual methods aren't working
+      anymore. The light keeps the worst things at bay, but lately..." She
+      glances up at the tower. "Lately, some things don't fear the light."
+    exits:
+      east: market_square
+      up: lighthouse_beacon
+      down: keeper_armory
+    npcs:
+      - keeper_commander_storm
+      - keeper_veteran_hark
+    items: []
+    flags:
+      - faction_hub
+      - safe_zone
+
+  # ==========================================
+  # DROWNED QUARTER - Dangerous Lower District
+  # ==========================================
+  - id: drowned_quarter
+    name: The Drowned Quarter
+    description: |
+      Once a prosperous district, now flooded and abandoned. Home to the
+      desperate, the mad, and those who worship what lies beneath.
+    read_aloud_text: |
+      The Drowned Quarter was once a thriving residential district. Now the
+      lower floors are permanently submerged, and only the upper levels remain
+      accessible via precarious bridges and ladders. The people who live here
+      couldn't afford to leave when the waters rose.
+
+      Buildings lean at dangerous angles, their foundations rotted by salt water.
+      Candlelight flickers in upper windows. Something moves in the flooded
+      streets below—dark shapes that might be fish. Might be.
+
+      Somewhere in the darkness, you hear singing. A lullaby, sweet and sad,
+      in a language you don't recognize but somehow almost understand. The
+      sound comes from below the water line.
+
+      "Don't listen," a voice hisses. A ragged figure emerges from shadows—
+      too thin, eyes too wide. "Don't ever listen. That's how they get you.
+      That's how the Drowned get everyone eventually." They laugh, high and
+      broken. "But you'll listen. Everyone does."
+    exits:
+      north: harbor_district
+      down: flooded_streets
+      east: cult_hideout
+    npcs:
+      - mad_prophet_jorah
+      - desperate_mother
+    items: []
+    flags:
+      - dangerous
+      - hidden
+
+  # ==========================================
+  # FLOODED UNDERDOCK - First Dungeon Area
+  # ==========================================
+  - id: flooded_underdock
+    name: Flooded Underdock
+    description: |
+      The submerged lower level of the Harbor District. Once used for repairs
+      and storage, now a dangerous maze of partially flooded chambers.
+    read_aloud_text: |
+      You descend into darkness. The Underdock was built before Saltmire
+      learned to respect the sea—before they knew what lived in it. Stone
+      chambers stretch into the murk, some filled with air pockets, others
+      completely submerged.
+
+      Your light catches movement in the water. Something large. Something
+      watching.
+
+      Rotting crates float in the shallows. A skeleton is tangled in old
+      fishing nets, its skull turned toward you, jaw open in a silent scream.
+      The walls are covered in barnacles and something else—handprints, pressed
+      into the stone as if by desperate fingers.
+
+      The water is cold. The silence is worse. And somewhere in the distance,
+      you hear the echo of that singing again.
+    locked_message: "The entrance is barred. The locals say it's for everyone's safety."
+    exits:
+      up: harbor_district
+      north: drowned_warehouse
+      down: sunken_ruins_entrance
+    npcs: []
+    items:
+      - third_lung_bag
+    flags:
+      - locked
+      - underwater
+      - dangerous
+      - trial_location
+
+  # ==========================================
+  # SUNKEN RUINS ENTRANCE - Mega-Dungeon Start
+  # ==========================================
+  - id: sunken_ruins_entrance
+    name: Entrance to the Sunken Ruins
+    description: |
+      The gateway to the ancient civilization that built beneath Saltmire.
+      What lies below has slept for millennia. It is waking now.
+    read_aloud_text: |
+      The passage opens into something vast. You emerge from the cramped
+      Underdock tunnels into a space that shouldn't exist—a cathedral of
+      black stone, perfectly preserved beneath the waves, filled with
+      trapped air and ancient silence.
+
+      Pillars carved with spiraling symbols rise toward a ceiling lost in
+      darkness. Bioluminescent growths provide dim, unsettling light. The
+      architecture is wrong—angles that don't quite connect, doorways too
+      tall or too narrow for human use.
+
+      At the chamber's center, a massive statue depicts a figure with too
+      many arms, too many eyes, and a mouth that spirals inward forever.
+      Before it, an altar holds offerings: coins, jewelry, bones. Some of
+      the offerings are fresh.
+
+      You are not alone down here. You never were.
+
+      "Beautiful, isn't it?" Prophet Mira's voice echoes from everywhere
+      and nowhere. "This is where I heard the truth. Where I learned what
+      the sea really wants. You've come so far... but you have so much
+      farther to fall."
+    locked_message: "The way is blocked by collapsed stone. You'll need another route."
+    exits:
+      up: flooded_underdock
+      north: temple_of_the_deep
+      east: relic_vault
+      west: breeding_pools
+      down: the_drowning_heart
+    npcs: []
+    items: []
+    flags:
+      - locked
+      - dungeon_entrance
+      - dangerous
+      - boss_room
+
+  # ==========================================
+  # TEMPLE OF THE DEEP - Mid-Dungeon
+  # ==========================================
+  - id: temple_of_the_deep
+    name: Temple of the Deep
+    description: |
+      The religious center of the ancient civilization. Here, they worshipped
+      what came from the stars. Here, they learned to serve it.
+    read_aloud_text: |
+      The Temple of the Deep is vast beyond reason. Rows of stone pews face
+      a raised dais where something massive once sat—or still sits, waiting
+      in the darkness beyond your light's reach.
+
+      The walls are covered in murals that move when you're not looking directly
+      at them. They depict a history: a civilization that discovered something
+      in the ocean depths. Something that offered them power, knowledge,
+      transcendence. Something they learned to worship.
+
+      The final mural shows the civilization descending into the sea willingly,
+      their faces twisted with what might be ecstasy or agony. Above them,
+      a shape rises from the water—something made of eyes and hunger and
+      eternal patience.
+
+      "They didn't drown," whispers a voice in your mind. "They ascended."
+    locked_message: "Sealed doors block the way. The Tidekeepers might know how to open them."
+    exits:
+      south: sunken_ruins_entrance
+      down: sanctum_of_whispers
+    npcs:
+      - deep_priest_specter
+    items:
+      - splintering_spear
+    flags:
+      - locked
+      - dangerous
+      - trial_location
+
+  # ==========================================
+  # THE DROWNING HEART - Final Dungeon
+  # ==========================================
+  - id: the_drowning_heart
+    name: The Drowning Heart
+    description: |
+      The deepest point of the Sunken Ruins. Here, the Drowned God dreams.
+      Here, all choices lead to endings.
+    read_aloud_text: |
+      You have reached the bottom of the world.
+
+      The Drowning Heart is not a room but a presence—a vast spherical chamber
+      filled with water that doesn't flow, darkness that has weight, and a
+      heartbeat that shakes your bones with each slow pulse.
+
+      At its center, something floats. Something massive. Something that might
+      once have fallen from the stars and found the ocean a suitable home.
+      It is awake. It has been waiting. It knows your name.
+
+      Prophet Mira stands before it, arms raised, her body half-transformed
+      into something beautiful and terrible. Scales. Fins. Eyes that reflect
+      the infinite.
+
+      "You're just in time," she says, her voice carrying the weight of
+      fathoms. "The ascension is beginning. Saltmire will be the first. Then
+      the coast. Then the world. No more loneliness. No more death. Just the
+      sea, and the silence, and us."
+
+      The Drowned God opens eyes that contain galaxies.
+
+      "All you have to do is let go."
+    locked_message: "The way is sealed by ancient wards. You must gather the three Depth Keys."
+    exits:
+      up: sanctum_of_whispers
+    npcs:
+      - prophet_mira
+      - the_drowned_god
+    items:
+      - tarrasque_plate
+    flags:
+      - locked
+      - boss_room
+      - final_dungeon
+      - dangerous
+
+  # ==========================================
+  # DEEPHOLM MANOR - Abyssal Court Questline
+  # ==========================================
+  - id: deepholm_manor
+    name: Deepholm Manor
+    description: |
+      The ancestral home of House Deepholm, the oldest and most powerful of
+      Saltmire's noble families. They have kept their bargains for centuries.
+    read_aloud_text: |
+      Deepholm Manor is ancient and alien. The building seems to grow from
+      the water rather than stand on it—organic curves, windows like eyes,
+      doorways like mouths. Inside, the decorations are beautiful and deeply
+      unsettling: paintings of undersea vistas, sculptures of things that
+      shouldn't exist, a chandelier made of bioluminescent jellyfish.
+
+      Lord Deepholm receives you in a drawing room where the floor is glass
+      over dark water. Things move beneath your feet as he speaks.
+
+      "My family has served the deep for generations. We've been given gifts—
+      long life, prosperity, certain... abilities. In exchange, we prepare
+      the way. The Prophet thinks she's special, but she's just the latest
+      instrument." He smiles, showing teeth that are slightly too sharp.
+      "The question is: what role will YOU play? We have need of capable
+      agents. And the deep rewards its servants generously."
+
+      Something large passes beneath the floor. Lord Deepholm doesn't look down.
+    exits:
+      south: noble_district
+      down: deepholm_depths
+    npcs:
+      - lord_deepholm
+      - heir_sirena
+    items: []
+    flags:
+      - dangerous
+      - faction_hub
+
+  # ==========================================
+  # LIGHTHOUSE BEACON - Keeper Questline
+  # ==========================================
+  - id: lighthouse_beacon
+    name: Lighthouse Beacon Chamber
+    description: |
+      The top of the great lighthouse, where the sacred flame burns.
+      The light has protected Saltmire for centuries. Now it flickers.
+    read_aloud_text: |
+      The climb is long, but the view is worth it. From the beacon chamber,
+      you can see all of Saltmire spread below—and the dark water stretching
+      to every horizon. The sacred flame burns in its ancient brazier, casting
+      light that seems to push back against the very night.
+
+      Commander Storm stands at the window, watching the sea.
+
+      "The flame is dying," she says without preamble. "It's been burning for
+      three hundred years, fed by relics we don't fully understand. But since
+      the Prophet returned, it grows weaker each day. When it goes out..."
+      She doesn't finish.
+
+      On clear nights, Keepers have seen what gathers at the edge of the light.
+      Shapes in the water. Waiting.
+
+      "We need someone to go deeper than any diver has gone. To find the
+      source of the flame's power—or something that can replace it. The
+      Guild won't help; they profit from fear. The Court won't help; they
+      want the light to fail. The Temple..." She laughs bitterly. "The
+      Temple IS the problem."
+
+      She turns to you. "Will you help us? Will you help Saltmire?"
+    exits:
+      down: lighthouse_base
+    npcs:
+      - keeper_commander_storm
+    items:
+      - bolide_blade
+    flags:
+      - safe_zone
+      - questline_start
+
+  # ==========================================
+  # CULT HIDEOUT - Hidden Enemy Base
+  # ==========================================
+  - id: cult_hideout
+    name: The Drowned Sanctuary
+    description: |
+      Hidden beneath the Drowned Quarter, the servants of the Prophet gather
+      to prepare for the ascension. They were your neighbors once.
+    read_aloud_text: |
+      The sanctuary was once a warehouse basement. Now it's something else.
+      Seawater seeps through the walls, pooling in channels carved into the
+      floor to form a pattern—a symbol that seems to writhe in your peripheral
+      vision.
+
+      The Drowned gather here. Dozens of them. Some still look human. Others
+      have begun to change—gills splitting their necks, fingers webbing
+      together, eyes growing large and dark. They sway together, singing
+      that song, that endless song.
+
+      They turn as one when you enter. Their expressions aren't hostile.
+      They're pitying.
+
+      "You still breathe air," one of them says, her voice bubbling. "You
+      still fear the depths. But you don't have to. The Prophet showed us.
+      The sea takes away pain, fear, loneliness. All you have to do is
+      let it in."
+
+      She smiles, and her teeth are sharp.
+
+      "All you have to do is drown."
+    locked_message: "The entrance is hidden. You'll need to find another way in."
+    exits:
+      west: drowned_quarter
+      down: underwater_passage
+    npcs:
+      - cult_leader_wave
+      - transformed_child
+    items: []
+    flags:
+      - locked
+      - hidden
+      - dangerous
+      - trial_location
+
+  # ==========================================
+  # TIDEKEEPER CRYPTS - Hidden Area
+  # ==========================================
+  - id: tidekeeper_crypts
+    name: Tidekeeper Crypts
+    description: |
+      Beneath the Temple lie the crypts where generations of Tidekeepers rest.
+      Or should rest. Some have woken.
+    read_aloud_text: |
+      The crypts are older than the Temple above—older than Saltmire itself.
+      The Tidekeepers didn't build here; they inherited this place from
+      whatever came before.
+
+      Alcoves line the walls, each containing the wrapped body of a Tidekeeper
+      who served faithfully and was granted the honor of eternal rest in
+      sacred ground. But something is wrong. Some of the wrappings have
+      been disturbed. Some of the alcoves are empty.
+
+      And some of the dead are standing in the darkness, watching you with
+      eyes that glow faintly blue.
+
+      "They hear the call too," Elder Vorn's voice echoes from somewhere
+      ahead. "The Prophet's voice reaches even the dead. They want to serve
+      again. To join the ascension." His footsteps approach. "I've been
+      fighting her influence, but I'm old. I'm tired. And every day, her
+      voice gets louder in my head."
+
+      He emerges from the shadows. He looks exhausted. He looks afraid.
+
+      "Help me stop her. Before I become one of them."
+    locked_message: "The crypt entrance is sealed. Only Tidekeepers may enter."
+    exits:
+      up: tidekeeper_temple
+      north: inner_sanctum
+    npcs:
+      - elder_tidekeeper_vorn
+      - awakened_dead
+    items:
+      - divining_chain
+    flags:
+      - locked
+      - dangerous
+      - undead

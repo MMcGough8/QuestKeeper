@@ -1,0 +1,217 @@
+# Trial definitions for Eberron: Shards of the Fallen Sky
+# Olympic Convergence Games Trials - test mind, body, and spirit
+
+trials:
+  # ==========================================
+  # Trial #1: Trial of Balance
+  # Location: Chamber of Balance
+  # ==========================================
+  - id: trial_balance
+    name: "Trial of Balance"
+    location_id: balance_chamber
+
+    entry_narrative: |
+      The arena floor transforms before your eyes. Dozens of circular platforms
+      rise from the ground, floating at varying heights. Some spin slowly. Others
+      tilt without warning. Far below, a shimmering net waits to catch the fallen.
+
+      "COMPETITORS!" the Arena Master's voice booms. "The Trial of Balance tests
+      not just your body, but your trust—in yourself and your teammates. Cross
+      the platforms. Reach the shard. Do not fall."
+
+      The crowd falls silent. A single dragonshard glows on a pedestal at the
+      far end of the course.
+
+    completion_reward: balance_medal
+    completion_reward_text: "Medal of Balance"
+
+    stinger: |
+      As you claim the Medal of Balance, you feel something strange—a warmth
+      spreading from the dragonshard you passed. Did it... pulse in time with
+      your heartbeat? The judges exchange knowing glances, marking something
+      on their enchanted clipboards.
+
+    mini_games:
+      - platform_leap
+      - spinning_disc
+      - trust_fall
+      - balance_beam
+
+    completion_flags:
+      - trial_balance_complete
+      - balance_chamber_unlocked
+
+  # ==========================================
+  # Trial #2: Trial of Insight
+  # Location: Chamber of Insight
+  # ==========================================
+  - id: trial_insight
+    name: "Trial of Insight"
+    location_id: insight_chamber
+
+    entry_narrative: |
+      The arena becomes a vast library-maze. Towering bookshelves form winding
+      corridors, and floating platforms hold glowing puzzle boxes. Riddles are
+      carved into every surface—on floor tiles, shelf edges, even book spines.
+
+      "KNOWLEDGE IS THE KEY," a voice intones. "SEEK THE TRUTH HIDDEN IN PLAIN
+      SIGHT. THE WORTHY WILL SEE WHAT OTHERS CANNOT."
+
+      You notice something others might miss—certain letters on certain books
+      seem to glow more brightly than the rest. A pattern is forming.
+
+    completion_reward: insight_medal
+    completion_reward_text: "Medal of Insight"
+
+    stinger: |
+      The Medal of Insight settles around your neck, and suddenly the world
+      seems... sharper. Colors are more vivid. You notice details you missed
+      before. And in the corner of your eye, you could swear you see the
+      dragonshards throughout the arena pulsing in a deliberate pattern.
+
+    mini_games:
+      - riddle_door
+      - hidden_message
+      - puzzle_sequence
+      - truth_illusion
+
+    completion_flags:
+      - trial_insight_complete
+      - insight_chamber_unlocked
+
+  # ==========================================
+  # Trial #3: Trial of Strength
+  # Location: Chamber of Strength
+  # ==========================================
+  - id: trial_strength
+    name: "Trial of Strength"
+    location_id: strength_chamber
+
+    entry_narrative: |
+      The arena floor rises into a construction site of impossible scale. Massive
+      stone blocks wait to be moved. Giant levers require tremendous force to
+      pull. Chains as thick as your arm dangle from pulleys high above.
+
+      But this isn't just about brute force—you can see it immediately. The
+      levers are connected. The blocks must be moved in sequence. One person
+      can't do this alone.
+
+      "STRENGTH WITHOUT WISDOM IS WASTED," the Arena Master announces.
+      "WISDOM WITHOUT STRENGTH IS HELPLESS. SHOW US BOTH."
+
+    completion_reward: strength_medal
+    completion_reward_text: "Medal of Strength"
+
+    stinger: |
+      You feel stronger than when you started—not just in body, but in purpose.
+      The Medal of Strength hums against your chest. You notice that other
+      competitors who completed this trial move differently now, as if aware
+      of burdens they didn't carry before.
+
+    mini_games:
+      - heavy_lift
+      - chain_pull
+      - coordinated_push
+      - endurance_hold
+
+    completion_flags:
+      - trial_strength_complete
+      - strength_chamber_unlocked
+
+  # ==========================================
+  # Trial #4: Trial of Magic
+  # Location: Chamber of Magic
+  # ==========================================
+  - id: trial_magic
+    name: "Trial of Magic"
+    location_id: magic_chamber
+
+    entry_narrative: |
+      The arena becomes a canvas of pure magic. Floating orbs of different
+      colors drift through the air—red, blue, white, green. Runes glow on
+      pedestals scattered throughout the space. Beams of magical energy
+      crisscross overhead, some helpful, some hazardous.
+
+      "MAGIC IS THE BLOOD OF ASTRAEL," the voice intones. "THOSE WHO RESONATE
+      WITH HER SHARDS WILL UNDERSTAND. OTHERS MUST LEARN."
+
+      Even if you're not a spellcaster, you sense patterns here. The orbs
+      react to proximity. The runes respond to touch. The beams can be
+      redirected.
+
+    completion_reward: magic_medal
+    completion_reward_text: "Medal of Magic"
+
+    stinger: |
+      As you complete the trial, every dragonshard in the arena flares
+      brightly—just for a moment. The crowd gasps. The judges lean forward.
+      You feel a connection now, a thread of awareness linking you to
+      something vast and ancient. Somewhere, something has noticed you.
+
+    mini_games:
+      - orb_alignment
+      - rune_activation
+      - beam_redirect
+      - resonance_test
+
+    prerequisites:
+      - trial_balance_complete
+      - trial_insight_complete
+      - trial_strength_complete
+
+    completion_flags:
+      - trial_magic_complete
+      - magic_chamber_unlocked
+      - mirror_chamber_unlocked
+
+  # ==========================================
+  # Trial #5: Mirror Battle (Finals)
+  # Location: Chamber of Mirrors
+  # ==========================================
+  - id: trial_mirror
+    name: "The Mirror Battle"
+    location_id: mirror_chamber
+
+    entry_narrative: |
+      The arena has become a hall of infinite mirrors. Your reflection stares
+      back at you from every surface—but something is wrong. The reflections
+      don't quite match your movements. They're a half-second ahead, or behind,
+      or moving in ways you haven't.
+
+      Then one of them steps OUT of the mirror.
+
+      It's you. Same face. Same stance. Same equipment. But its eyes hold
+      something dark—every doubt you've ever had, every fear, every flaw
+      you try to hide.
+
+      "THE FINAL TEST," the Arena Master's voice is hushed now, reverent.
+      "FACE YOURSELF. OVERCOME YOURSELF. PROVE YOU ARE MORE THAN YOUR SHADOW."
+
+    completion_reward: champions_shard
+    completion_reward_text: "Champion's Shard"
+
+    stinger: |
+      Your reflection dissolves into light—not defeated, but accepted. The
+      light gathers into your hands and crystallizes into a dragonshard unlike
+      any other. It formed from YOU. From your acceptance of yourself.
+
+      The crowd is silent. Even the judges seem shaken.
+
+      A silver-haired elf in gray robes—Shardwarden Elara—appears at the arena's
+      edge. "It seems," she says quietly, "that we need to talk. The Games were
+      designed to find people like you. And now... others will be looking too."
+
+    mini_games:
+      - shadow_taunt
+      - mirror_combat
+      - accept_flaw
+      - final_choice
+
+    prerequisites:
+      - trial_magic_complete
+
+    completion_flags:
+      - trial_mirror_complete
+      - games_champion
+      - resonance_awakened
+      - faction_contact_available

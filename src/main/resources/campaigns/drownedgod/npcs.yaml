@@ -1,0 +1,622 @@
+# NPC definitions for Whispers of the Drowned God
+# Faction representatives, allies, and the villain who haunts every act
+
+npcs:
+  # ==========================================
+  # PROPHET MIRA - Main Villain
+  # Present throughout, sympathetic, terrifying
+  # ==========================================
+  - id: prophet_mira
+    name: Prophet Mira
+    short_descriptor: "a woman whose eyes hold the depths of the sea"
+    description: |
+      Once the most beloved oracle in Saltmire, Prophet Mira descended into the
+      deepest ruins three weeks ago and returned... changed. She speaks with a
+      voice that echoes, moves as if underwater even on dry land, and her eyes
+      reflect things that shouldn't exist. She genuinely believes she is saving
+      humanity from a worse fate. She may even be right.
+    personality: serene, maternal, terrifying, sympathetic, absolutely certain
+    voice: "Layered and echoing, as if many voices speak in perfect unison. Warm but unsettling."
+    role: main_villain
+
+    greeting: |
+      The Prophet turns to face you, and for a moment—just a moment—you see
+      something vast and ancient looking out through her eyes.
+
+      "Ah. You've come." Her smile is warm. Her voice resonates in your chest.
+      "I've been watching you. The sea shows me things now. It showed me you.
+      It showed me what you might become... if you're brave enough to let go."
+
+    topics:
+      the_sea:
+        keywords: [sea, water, ocean, depths, deep]
+        response: |
+          "The sea is not cruel. It simply is. It takes, yes—but it also gives.
+          Shelter from the burning sky. Peace from the chaos above. Connection
+          to something greater than ourselves." Her eyes grow distant. "I heard
+          it calling for so long before I finally answered. The silence. The
+          belonging. You hear it too, don't you? In the quiet moments?"
+        flags_required: []
+
+      the_drowned_god:
+        keywords: [drowned god, entity, creature, thing below, what is it]
+        response: |
+          "God is a human word for something beyond human understanding. What
+          sleeps beneath Saltmire is not a god—it is a possibility. A way of
+          being. It fell from the stars eons ago and found the ocean welcoming.
+          It does not want worship." She tilts her head. "It wants connection.
+          Union. An end to the loneliness of individual existence. Is that
+          so terrible?"
+        flags_required: []
+
+      her_transformation:
+        keywords: [changed, different, transformation, what happened to you]
+        response: |
+          "I touched it. Just once. Just for a moment." Her voice softens.
+          "And I understood everything. The fear, the struggle, the desperate
+          clinging to separate existence—all of it unnecessary. There is peace
+          in the depths. There is belonging." She reaches toward you, and you
+          notice her fingers have begun to web. "I want to share that peace
+          with everyone. Is that not what prophets do?"
+        flags_required: []
+
+      stop_her:
+        keywords: [stop, fight, resist, won't let you, prevent]
+        response: |
+          *She looks at you with something like pity*
+          "You could try. Others have. But you cannot fight the tide—only
+          delay it. And every moment you delay, more people suffer alone in
+          their separate skins." She sighs. "I was afraid too, once. But fear
+          is just another form of drowning—slower and more cruel. Let me show
+          you a better way."
+        flags_required: []
+
+      bargain:
+        keywords: [deal, bargain, negotiate, compromise, agreement]
+        response: |
+          *Her eyes flicker with something ancient*
+          "The deep remembers all bargains. The nobles of the Abyssal Court
+          learned this long ago—and have prospered for it. You could join them.
+          Serve the rising tide and be spared its worst... or stand against it
+          and drown in the old way." She smiles. "There are no neutral parties
+          in the sea. Only the swimming and the sinking."
+        flags_required: []
+
+  # ==========================================
+  # CAPTAIN SILAS - Barnacle's Rest Owner
+  # Quest giver, information source, reluctant hero
+  # ==========================================
+  - id: captain_silas
+    name: Captain Silas
+    short_descriptor: "a grizzled one-eyed sailor with secrets of his own"
+    description: |
+      Former salvage diver turned tavern keeper. Lost his eye—and his crew—
+      to something in the depths twenty years ago. He knows more about what's
+      happening than he lets on, and he's been quietly preparing for this
+      day.
+    personality: gruff, pragmatic, haunted, protective, secretly hopeful
+    voice: "Rough as barnacles, with the cadence of someone who's seen too much"
+    role: ally
+
+    greeting: |
+      The old sailor looks up from his glass, his one good eye narrowing.
+
+      "New faces. That's rare these days—most folk are leaving, not arriving."
+      He gestures to a seat. "Sit. Drink. And tell me what brings you to a
+      city that's slowly drowning in more ways than one."
+
+    topics:
+      the_situation:
+        keywords: [happening, situation, problem, tides, flooding]
+        response: |
+          "The short version? Something woke up. Something old. The Prophet
+          went down into the ruins a prophet and came back... something else."
+          He drinks. "The tides rise higher each night. Folk are disappearing.
+          And that singing you hear at night? Don't listen. Don't ever listen."
+          His hand goes to his eyepatch. "I learned that the hard way."
+        flags_required: []
+
+      his_past:
+        keywords: [your eye, crew, what happened, past, story]
+        response: |
+          *He's quiet for a long moment*
+          "Twenty years ago, my crew found something in the deep. A chamber
+          that shouldn't exist. A voice that offered us everything we'd ever
+          wanted." He touches his eyepatch. "I was the only one who said no.
+          The only one who came back. They're still down there. Still serving.
+          Still waiting for me to join them."
+        flags_required: []
+
+      help:
+        keywords: [help, what can we do, how to stop, fight back]
+        response: |
+          "The Lighthouse Keepers are trying to hold back the darkness—talk
+          to Commander Storm. Elder Vorn at the Temple is fighting the Prophet
+          from within. And the Salvage Guild..." He spits. "They'll help anyone
+          who pays, but be careful—Guildmaster Vex has made bargains of her
+          own." He leans in. "There might be a way to seal it back up. The
+          ancients did it once. But it'll cost. Everything worth doing costs."
+        flags_required: []
+
+      the_prophecy:
+        keywords: [prophecy, destiny, chosen, meant to happen]
+        response: |
+          "I don't believe in prophecy. I believe in choices. The Prophet
+          thinks the ascension is inevitable—that humanity was always meant
+          to drown. But I've been drowning in guilt for twenty years, and
+          I'm still here fighting." He meets your eye. "The future isn't
+          written. It's earned. Now finish your drink and go earn it."
+        flags_required: []
+
+  # ==========================================
+  # GUILDMASTER VEX - Salvage Guild Leader
+  # Morally grey, profit-driven, knows secrets
+  # ==========================================
+  - id: guildmaster_vex
+    name: Guildmaster Vex
+    short_descriptor: "a cold-eyed woman whose smile never reaches her eyes"
+    description: |
+      The most powerful merchant in Saltmire. She's made the Salvage Guild
+      into an empire by being smarter, more ruthless, and better informed
+      than anyone else. She's also made deals with the Abyssal Court that
+      she regrets less than she should.
+    personality: calculating, pragmatic, ambitious, secretly afraid
+    voice: "Smooth and measured, every word chosen for maximum effect"
+    role: faction_contact
+
+    greeting: |
+      The Guildmaster looks up from a ledger filled with numbers that seem
+      to writhe on the page.
+
+      "New contractors? Or just tourists?" Her smile is sharp. "Either way,
+      you're in the right place. The Guild can provide anything you need—
+      information, equipment, access to the ruins. All it costs is gold.
+      And occasionally, other things."
+
+    topics:
+      the_guild:
+        keywords: [guild, salvage, organization, business]
+        response: |
+          "We pull relics from the ruins, authenticate them, and sell them
+          to the highest bidder. Simple. Profitable. Morally uncomplicated."
+          She taps a ledger. "The ruins have been there for millennia. The
+          Prophet's awakening has just... increased urgency. Prices are up
+          thirty percent this month alone."
+        flags_required: []
+
+      the_ruins:
+        keywords: [ruins, sunken, below, ancient]
+        response: |
+          "A civilization lived here before humans discovered fire. They
+          built beneath the waves, worshipped something from the stars, and
+          eventually... became part of the sea." She shrugs. "Their loss.
+          Our profit. Every relic they left behind is worth a fortune to
+          collectors who don't ask too many questions."
+        flags_required: []
+
+      deals:
+        keywords: [deal, hire, contract, work]
+        response: |
+          "I have several contracts available for capable individuals.
+          Exploration teams are disappearing faster than I can recruit them,
+          and certain clients have... time-sensitive requirements." Her eyes
+          narrow. "Fair warning: the deep is more dangerous than ever. But
+          the hazard pay reflects that. What do you say?"
+        flags_required: []
+
+      the_court:
+        keywords: [abyssal court, nobles, deepholm, bargains]
+        response: |
+          *Her smile tightens almost imperceptibly*
+          "The noble families and I have... arrangements. They provide
+          protection and access. I provide discretion and certain services."
+          She meets your eye. "Everyone in Saltmire has made compromises.
+          Mine just happen to be more profitable than most. I suggest you
+          not judge too harshly—before this is over, you'll make compromises
+          too."
+        flags_required: []
+
+  # ==========================================
+  # KEEPER COMMANDER STORM - Lighthouse Leader
+  # Potential ally, monster hunter, desperate
+  # ==========================================
+  - id: keeper_commander_storm
+    name: Commander Storm
+    short_descriptor: "a scarred warrior whose eyes have seen things from the deep"
+    description: |
+      Leader of the Lighthouse Keepers, the monster hunters who protect
+      Saltmire from what lives in the ocean. She's fought things that would
+      break most minds and kept fighting. Now she faces something that might
+      be too big to fight.
+    personality: determined, pragmatic, haunted, fierce, protective
+    voice: "Clipped and military, with undertones of exhaustion"
+    role: faction_contact
+
+    greeting: |
+      The Commander doesn't look up from the map she's studying—a chart of
+      the seafloor covered in red marks indicating attacks, sightings, and
+      disappearances.
+
+      "If you're here to gawk, leave. If you're here to help, sit down and
+      tell me what you can do. We're losing this fight, and I don't have
+      time for tourists."
+
+    topics:
+      the_keepers:
+        keywords: [keepers, lighthouse, organization, who are you]
+        response: |
+          "We've protected Saltmire for three hundred years. Hunting the
+          things that come up from the depths. Maintaining the light that
+          keeps the worst at bay. My grandmother did this job. Her grandmother
+          did this job." She looks at the dying flame above. "We've never
+          faced anything like this. The Prophet... she's not just a cultist.
+          She's the real thing. And the real thing is waking up."
+        flags_required: []
+
+      the_light:
+        keywords: [light, flame, beacon, protection]
+        response: |
+          "The sacred flame has burned since Saltmire was founded. It's not
+          just light—it's hope. Faith. Defiance. The things in the deep fear
+          it." Her jaw tightens. "But since the Prophet returned, it's
+          weakening. Dying. When it goes out..." She doesn't finish. "We
+          need to find the source of its power. Deep in the ruins. Deeper
+          than anyone has gone and returned."
+        flags_required: []
+
+      monsters:
+        keywords: [creatures, monsters, things, what's out there]
+        response: |
+          "Before? Mostly animals. Giant sharks. Aggressive squid. The
+          occasional deep dweller that strayed too close to the surface."
+          She shows you her scarred arms. "Now? Things with intelligence.
+          Things with purpose. Things that used to be human." She meets your
+          eye. "The Prophet is calling them. Organizing them. Building an
+          army beneath the waves."
+        flags_required: []
+
+      help_us:
+        keywords: [help, join, fight, ally]
+        response: |
+          "I need fighters. Divers. People crazy enough to go into the ruins
+          and smart enough to come back out. The Guild won't help—they're
+          making too much money from the chaos. The Temple is compromised.
+          The Court..." She spits. "The Court is part of the problem."
+          She extends her hand. "Will you stand with us? Will you fight for
+          Saltmire's soul?"
+        flags_required: []
+
+  # ==========================================
+  # LORD DEEPHOLM - Abyssal Court Patriarch
+  # Villain faction, tempter, tragic
+  # ==========================================
+  - id: lord_deepholm
+    name: Lord Deepholm
+    short_descriptor: "a noble whose smile shows too many teeth"
+    description: |
+      Patriarch of House Deepholm, the oldest noble family in Saltmire.
+      His ancestors made bargains with the deep centuries ago, and the
+      family has prospered ever since. The cost of those bargains is
+      becoming clear.
+    personality: charming, cultured, predatory, tragic, resigned
+    voice: "Elegant and cultured, with an undercurrent of something alien"
+    role: faction_contact
+
+    greeting: |
+      Lord Deepholm rises from his chair with fluid grace, and you notice
+      his shadow moves a half-second behind him.
+
+      "Visitors! How delightful. We receive so few these days—everyone is
+      so focused on survival. But survival is such a limited ambition,
+      don't you think? There are so many more interesting things to pursue."
+
+    topics:
+      the_court:
+        keywords: [court, nobles, family, house]
+        response: |
+          "The Abyssal Court has ruled Saltmire's high society since its
+          founding. We have certain... advantages that other families lack.
+          Longer lives. Keener senses. Connections that run deeper than
+          politics." He smiles. "Our ancestors made wise investments. We
+          simply reap the dividends."
+        flags_required: []
+
+      bargains:
+        keywords: [bargain, deal, price, what did you give]
+        response: |
+          "Every gift has a price. Our ancestors offered service in exchange
+          for power. Small services at first—information, access, the
+          occasional sacrifice." His eyes flicker. "The services have grown
+          larger over the generations. But so have the rewards. Soon, when
+          the ascension comes, we will be elevated above the common masses.
+          Rulers of the new world beneath the waves."
+        flags_required: []
+
+      prophet:
+        keywords: [prophet, mira, oracle]
+        response: |
+          "Ah, Mira. Sweet, devoted Mira. She thinks she's special—the chosen
+          voice of the deep. But my family has been preparing for this for
+          centuries. We will be the administrators of the new order. She
+          will be..." He waves a hand. "Useful, for a time. Then absorbed
+          like everyone else."
+        flags_required: []
+
+      join:
+        keywords: [join, serve, your side, offer]
+        response: |
+          "You have potential—I can smell it on you. The deep finds you
+          interesting, and what interests the deep interests me." He gestures
+          to the water beneath the glass floor. "There are roles for capable
+          servants in what's coming. Comfortable roles. Powerful roles.
+          Survival roles." His smile widens. "The alternative is to drown
+          with the rest. Your choice."
+        flags_required: []
+
+  # ==========================================
+  # ELDER TIDEKEEPER VORN - Resistance Inside
+  # Hidden ally, fighting corruption, desperate
+  # ==========================================
+  - id: elder_tidekeeper_vorn
+    name: Elder Vorn
+    short_descriptor: "an old priest whose hands shake as he fights possession"
+    description: |
+      The senior Tidekeeper, who has served the Temple for sixty years.
+      He remembers what Mira was like before, and he's fighting her
+      influence from within—even as it slowly consumes him.
+    personality: wise, desperate, faithful, terrified, determined
+    voice: "Trembling but firm, the voice of someone who won't break"
+    role: ally
+
+    greeting: |
+      The old priest looks up with eyes that flicker between clarity and
+      something else—something deeper.
+
+      "You... you're not one of them. Not yet." His voice is strained, as
+      if speaking requires effort. "I can still tell. I can still... fight."
+      He grips your arm with surprising strength. "Help me. Help me stop her
+      before I become like the others."
+
+    topics:
+      the_prophet:
+        keywords: [prophet, mira, what happened]
+        response: |
+          "I trained her. Raised her, almost. She was brilliant, devoted,
+          pure. When she went into the ruins, I told her to be careful. To
+          not listen to the whispers." His hands shake. "She came back wrong.
+          But she came back believing she was right. That's the horror of it.
+          She thinks she's saving us. She thinks the drowning is mercy."
+        flags_required: []
+
+      the_temple:
+        keywords: [temple, tidekeepers, order, faith]
+        response: |
+          "The Tidekeepers were meant to protect Saltmire—to maintain the
+          wards, to guard against the deep. For centuries, we held. But Mira's
+          voice... it corrupts." He looks around fearfully. "Half my brothers
+          and sisters have joined her. The rest are fighting. Every day,
+          someone else stops fighting. Every night, I hear her voice in my
+          dreams."
+        flags_required: []
+
+      stop_her:
+        keywords: [stop, how, solution, defeat]
+        response: |
+          "The ancient wards can be restored—but it requires sacrifice. Great
+          sacrifice. The founders sealed the Drowned God away by giving
+          everything they had." He pulls out an old journal. "I've been
+          researching. There may be another way. The entity feeds on willing
+          submission. If enough people refuse—truly refuse, even unto death—
+          it starves. But who would choose death over peace?"
+        flags_required: []
+
+      fight:
+        keywords: [resist, fighting, how are you]
+        response: |
+          *His face contorts with effort*
+          "Faith. Memory. Spite." He laughs weakly. "Mostly spite. I will
+          not let her win. I will not let the thing that took my Mira use
+          her body to destroy everything we built. Even if I have to die
+          with clarity, I will NOT. DROWN."
+        flags_required: []
+
+  # ==========================================
+  # SALVAGE DIVER NESSA - Potential Companion
+  # Skilled guide, tragic backstory, loyal
+  # ==========================================
+  - id: salvage_diver_nessa
+    name: Nessa
+    short_descriptor: "a young diver with haunted eyes and steady hands"
+    description: |
+      One of the best salvage divers in Saltmire—until her entire team
+      disappeared into the ruins last month. She's the only one who came
+      back, and she won't talk about what she saw. But she'll guide you
+      down there, if you pay enough.
+    personality: traumatized, competent, loyal, brave, haunted
+    voice: "Quiet and clipped, using as few words as possible"
+    role: guide
+
+    greeting: |
+      The diver doesn't look up from the equipment she's maintaining.
+
+      "I know who you are. Strangers asking questions. Looking for someone
+      to take them into the ruins." She finally meets your eye. Her gaze is
+      hollow. "I can do it. For the right price. But I won't lie to you—
+      I'm not sure either of us will come back."
+
+    topics:
+      the_ruins:
+        keywords: [ruins, below, dive, expedition]
+        response: |
+          "The upper levels are picked clean. Anything worth finding is
+          deeper—past the wards, past the light, past anything safe." She
+          checks her equipment obsessively. "I've been down there. I've seen
+          things. I've lost people." Her hands still. "I'll take you. But
+          you do exactly what I say, when I say it. Or we all die."
+        flags_required: []
+
+      your_team:
+        keywords: [team, crew, lost, what happened]
+        response: |
+          *She's silent for a long moment*
+          "Six of us went down. Best divers in the Guild. We found a new
+          chamber—untouched, full of relics. And full of..." She doesn't
+          finish. "They started hearing something. Singing. One by one, they
+          stopped swimming up and started swimming down. I ran. I'm the only
+          one who ran."
+        flags_required: []
+
+      the_singing:
+        keywords: [singing, voice, calling, heard]
+        response: |
+          "Don't. Listen." Her voice is intense. "It sounds beautiful. It
+          sounds like everything you've ever wanted. It sounds like home."
+          She touches a scar on her ear—self-inflicted, you realize. "I cut
+          myself to make it stop. The pain helped. The blood helped. When
+          you start hearing it... hurt yourself. Stay awake. Or you'll walk
+          into the water like all the others."
+        flags_required: []
+
+      hire:
+        keywords: [hire, guide, pay, job]
+        response: |
+          "500 gold. Half up front, half when we surface. If we surface."
+          She finally shows emotion—a grim smile. "I know what you're
+          thinking. If I'm so scared, why go back?" She returns to her
+          equipment. "Because they're still down there. My team. My friends.
+          And if there's any chance they're still... them... I have to try.
+          Even if I know there isn't."
+        flags_required: []
+
+  # ==========================================
+  # MAD PROPHET JORAH - Cassandra Figure
+  # Knows truth, no one believes, comic relief
+  # ==========================================
+  - id: mad_prophet_jorah
+    name: Mad Jorah
+    short_descriptor: "a wild-eyed vagrant who screams truth no one wants to hear"
+    description: |
+      A former Tidekeeper who went mad years ago—or perhaps saw too much
+      truth. He lives in the Drowned Quarter, raving about the end times.
+      Everyone ignores him. He's been right about everything so far.
+    personality: unhinged, prophetic, tragic, darkly humorous, desperate
+    voice: "Rapid and uneven, shifting between whispers and screams"
+    role: information
+
+    greeting: |
+      A ragged figure emerges from shadows, eyes too wide, teeth bared in
+      what might be a smile or a grimace.
+
+      "You! YOU! The sea told me you were coming! The sea tells me everything
+      now—that's the problem, see? TOO MUCH TRUTH! Can't un-know what you
+      know!" He laughs, high and broken. "Want to hear what happens next?
+      NO YOU DON'T! But I'll tell you anyway!"
+
+    topics:
+      the_future:
+        keywords: [future, prophecy, what happens, fate]
+        response: |
+          "IT ALL DROWNS! Everything! Everyone! The sea rises and rises and
+          the singing gets louder and one day—ONE DAY—we all wake up underwater
+          and THANK IT for the privilege!" He grabs your arm. "Unless. Unless.
+          Unless someone drowns FIRST. Drowns WILLING. Drowns so the rest
+          don't have to. But who would do that? WHO WOULD BE THAT STUPID?"
+          He stares at you meaningfully.
+        flags_required: []
+
+      the_prophet:
+        keywords: [prophet, mira, oracle]
+        response: |
+          "MIRA MIRA ON THE WALL, WHO'S THE DROWNEST OF THEM ALL?" He cackles,
+          then suddenly grows serious. "I knew her. Before. She was kind. She
+          was good. She still IS good—that's the horror. She looked into the
+          void and the void said 'I LOVE YOU' and she believed it." He weeps.
+          "I looked too. I ran. She stayed. Who's the mad one, really?"
+        flags_required: []
+
+      the_truth:
+        keywords: [truth, tell me, secret, know]
+        response: |
+          *He leans close, suddenly lucid*
+          "The Drowned God isn't evil. It's just... different. It wants to
+          end loneliness. End separation. End death. All it asks is that you
+          stop being YOU and start being EVERYONE." His eyes focus. "Some
+          people would call that salvation. Some would call it annihilation.
+          It's both. It's neither. It's something we don't have words for."
+          *His madness returns* "WORDS! USELESS! SWIMMING! DROWNING! YES!"
+        flags_required: []
+
+      help:
+        keywords: [help, stop, save, solution]
+        response: |
+          "CAN'T STOP THE TIDE! Can't fight the moon! Can't—" He stops
+          suddenly. "But you can BARGAIN. Everything in the deep loves
+          bargains. Souls for souls. Drowning for drowning." He grins
+          madly. "The founders knew. They paid in flesh and faith. You
+          could too. IF YOU'RE WILLING TO DROWN. ARE YOU? ARE YOU?"
+        flags_required: []
+
+  # ==========================================
+  # FORTUNETELLER WHISPER - Information Merchant
+  # Mysterious, accurate, morally ambiguous
+  # ==========================================
+  - id: fortuneteller_whisper
+    name: Whisper
+    short_descriptor: "a veiled figure whose predictions are never wrong"
+    description: |
+      A fortuneteller in the Market Square whose readings are eerily accurate.
+      No one knows where she came from or how she knows what she knows.
+      Her prices are steep—not always in gold.
+    personality: mysterious, cryptic, amoral, helpful, unsettling
+    voice: "Soft and sibilant, like waves on sand"
+    role: information
+
+    greeting: |
+      A veiled figure beckons from a silk-draped booth. You cannot see their
+      face, but you feel their attention like pressure on your skin.
+
+      "You seek answers. Everyone who comes to Whisper seeks answers. I can
+      give them—but knowledge has weight." A pale hand emerges from silk
+      sleeves, palm up. "What will you trade for truth?"
+
+    topics:
+      fortune:
+        keywords: [fortune, future, reading, tell me]
+        response: |
+          *She shuffles cards made of something that isn't paper*
+          "The cards show... water. Rising. Choices. A drowned woman who
+          speaks with a god's voice. A light dying. And you—" She pauses.
+          "You stand at the center, where all currents meet. What you choose
+          changes everything." She looks up. "But not whether it drowns.
+          Only how."
+        flags_required: []
+
+      prophet:
+        keywords: [prophet, mira, oracle, villain]
+        response: |
+          "The Prophet sees truth. That is her tragedy. She looked into
+          infinity and infinity looked back with love. How does one refuse
+          love?" Whisper's voice carries sadness. "She is not evil. She is
+          converted. There is no unconverting someone who has found genuine
+          peace. Only stopping them."
+        flags_required: []
+
+      escape:
+        keywords: [escape, leave, survive, run]
+        response: |
+          "Running is always an option. Many have fled Saltmire already.
+          The roads are clear. The ships sail daily." A pause. "But the
+          Drowned God's hunger will not stop at Saltmire. The sea touches
+          every shore. What you run from today will find you tomorrow—or
+          your children. Or theirs. There is no escaping water."
+        flags_required: []
+
+      price:
+        keywords: [price, payment, cost, trade]
+        response: |
+          "For small truths, gold suffices. For larger truths, I require...
+          memories. Secrets. Things you don't want to give." She extends
+          her palm. "For the largest truths—how to stop what is coming—
+          I require a promise. That you will see this through, whatever
+          the cost. Do you wish to make such a promise?"
+        flags_required: []

@@ -84,6 +84,8 @@
                         <include>**/*Test.java</include>
                         <include>**/*Tests.java</include>
                     </includes>
+                    <!-- Disable forking to avoid JVM exit issues on Java 25 -->
+                    <forkCount>0</forkCount>
                 </configuration>
             </plugin>
 

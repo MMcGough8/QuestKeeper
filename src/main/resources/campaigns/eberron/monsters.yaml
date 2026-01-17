@@ -1,0 +1,245 @@
+# Monster definitions for Eberron: Shards of the Fallen Sky
+# Mirror reflections and training constructs
+
+monsters:
+  # ==========================================
+  # Mirror Reflection - Final Trial Enemy
+  # ==========================================
+  - id: mirror_reflection
+    name: Mirror Reflection
+    description: |
+      A perfect magical copy of the competitor, stepping out of the mirror
+      with dark, knowing eyes. It has all your strengths—and all your flaws.
+    size: medium
+    type: construct
+    alignment: neutral
+
+    armor_class: 14
+    hit_points: 25
+    speed: 30
+
+    abilities:
+      strength: 12
+      dexterity: 14
+      constitution: 12
+      intelligence: 10
+      wisdom: 10
+      charisma: 10
+
+    challenge_rating: 1
+
+    attacks:
+      - name: Mirrored Strike
+        attack_bonus: 4
+        damage: 1d8+2
+        damage_type: force
+        description: "The reflection mimics your fighting style perfectly."
+
+      - name: Shadow Taunt
+        attack_bonus: 0
+        damage: 0
+        damage_type: psychic
+        description: "The reflection speaks your deepest fears, forcing a DC 12 Wisdom save or become frightened until end of next turn."
+
+    special_abilities:
+      - name: Mirror Match
+        description: "The reflection has the same AC and attack bonus as its source."
+      - name: Flaw Echo
+        description: "The reflection knows all the source's weaknesses and exploits them."
+      - name: Non-Lethal
+        description: "Damage from this creature is non-lethal. Reduced to 0 HP means defeat, not death."
+
+    tactics: |
+      The Mirror Reflection fights exactly as its source would, but exploits
+      every hesitation and self-doubt. It can be defeated through combat,
+      but also through acceptance of one's flaws or creative problem-solving.
+
+  # ==========================================
+  # Training Golem - Practice dummy
+  # ==========================================
+  - id: training_golem
+    name: Training Golem
+    description: |
+      A humanoid construct made of enchanted wood and bronze, designed for
+      non-lethal combat practice. It resets after each bout.
+    size: medium
+    type: construct
+    alignment: unaligned
+
+    armor_class: 12
+    hit_points: 15
+    speed: 25
+
+    abilities:
+      strength: 14
+      dexterity: 10
+      constitution: 14
+      intelligence: 3
+      wisdom: 6
+      charisma: 1
+
+    challenge_rating: 0.25
+
+    attacks:
+      - name: Padded Strike
+        attack_bonus: 4
+        damage: 1d6+2
+        damage_type: bludgeoning
+        description: "A cushioned blow that stings but doesn't injure."
+
+    special_abilities:
+      - name: Auto-Reset
+        description: "After being reduced to 0 HP, the golem reforms after 1 minute."
+      - name: Training Mode
+        description: "All damage dealt is non-lethal."
+      - name: Adjustable Difficulty
+        description: "Can be set to various skill levels by the trainer."
+
+    tactics: |
+      Training golems follow predictable patterns that experienced fighters
+      can learn to exploit. They're meant for practice, not real challenge.
+
+  # ==========================================
+  # Shard Sprite - Magical manifestation
+  # ==========================================
+  - id: shard_sprite
+    name: Shard Sprite
+    description: |
+      A tiny manifestation of dragonshard energy, appearing as a crystalline
+      humanoid no larger than a hand. They're drawn to those with resonance.
+    size: tiny
+    type: elemental
+    alignment: neutral
+
+    armor_class: 14
+    hit_points: 7
+    speed: 0
+    fly_speed: 40
+
+    abilities:
+      strength: 3
+      dexterity: 18
+      constitution: 10
+      intelligence: 8
+      wisdom: 12
+      charisma: 14
+
+    challenge_rating: 0.25
+
+    attacks:
+      - name: Shard Spark
+        attack_bonus: 6
+        damage: 1d4
+        damage_type: radiant
+        description: "A tiny bolt of crystalline light."
+
+    special_abilities:
+      - name: Resonance Sense
+        description: "Can detect those with dragonshard resonance within 60 feet."
+      - name: Incorporeal Movement
+        description: "Can move through solid objects but takes 1d4 damage if ending turn inside."
+      - name: Astrael's Whisper
+        description: "Those with resonance can understand its chiming speech."
+
+    tactics: |
+      Shard sprites are not aggressive—they're curious. They may help or
+      hinder based on the character's treatment of dragonshards. Harming
+      one draws attention from the Shardwardens.
+
+  # ==========================================
+  # Arena Hazard - Environmental challenge
+  # ==========================================
+  - id: arena_hazard
+    name: Arena Hazard Elemental
+    description: |
+      A manifestation of the arena's magical defenses, appearing when
+      competitors stray too far from the trial's intended path.
+    size: large
+    type: elemental
+    alignment: unaligned
+
+    armor_class: 13
+    hit_points: 30
+    speed: 30
+
+    abilities:
+      strength: 16
+      dexterity: 10
+      constitution: 14
+      intelligence: 4
+      wisdom: 10
+      charisma: 6
+
+    challenge_rating: 1
+
+    attacks:
+      - name: Hazard Pulse
+        attack_bonus: 5
+        damage: 2d6
+        damage_type: force
+        description: "A wave of arena energy that pushes competitors back on track."
+
+    special_abilities:
+      - name: Boundary Enforcer
+        description: "Only appears when competitors violate trial rules or boundaries."
+      - name: Non-Lethal
+        description: "Damage is non-lethal; 0 HP means disqualification, not death."
+      - name: Arena Bound
+        description: "Cannot leave the arena floor."
+
+    tactics: |
+      Arena hazards don't pursue—they redirect. They exist to keep the
+      trials fair and competitors safe, not to cause real harm.
+
+  # ==========================================
+  # Corrupted Shard Beast - Late game enemy
+  # ==========================================
+  - id: corrupted_shard_beast
+    name: Corrupted Shard Beast
+    description: |
+      A creature formed from dragonshards that have been exposed to Fybris's
+      influence. Its crystalline body is shot through with dark veins, and
+      its hunger is insatiable.
+    size: medium
+    type: aberration
+    alignment: chaotic evil
+
+    armor_class: 15
+    hit_points: 45
+    speed: 35
+
+    abilities:
+      strength: 16
+      dexterity: 14
+      constitution: 14
+      intelligence: 6
+      wisdom: 8
+      charisma: 4
+
+    challenge_rating: 2
+
+    attacks:
+      - name: Crystal Claw
+        attack_bonus: 5
+        damage: 1d8+3
+        damage_type: slashing
+        description: "Razor-sharp crystalline claws tear at flesh."
+
+      - name: Hunger Drain
+        attack_bonus: 5
+        damage: 1d6+3
+        damage_type: necrotic
+        description: "The beast feeds on life force. Target must succeed on DC 13 Constitution save or have max HP reduced by damage dealt until long rest."
+
+    special_abilities:
+      - name: Fybris's Hunger
+        description: "Heals half of necrotic damage dealt."
+      - name: Shard Sense
+        description: "Can sense dragonshards and those with resonance within 120 feet."
+      - name: Corruptive Presence
+        description: "Dragonshards within 30 feet dim and pulse erratically."
+
+    tactics: |
+      Corrupted shard beasts are drawn to those with strong resonance. They
+      prioritize targets carrying dragonshards. A sign that Fybris's
+      influence is growing stronger.

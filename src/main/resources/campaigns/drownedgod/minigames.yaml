@@ -1,0 +1,632 @@
+# Mini-game definitions for Whispers of the Drowned God
+# High-DC challenges for seasoned players with meaningful consequences
+
+minigames:
+  # ==========================================
+  # TRIAL 1: Underdock Mini-Games
+  # ==========================================
+
+  - id: underdock_descent
+    name: "The Descent"
+    type: SKILL_CHECK
+    description: |
+      The passage down is treacherous—slick with algae, half-collapsed in
+      places, with the occasional sharp drop into black water. One wrong
+      step means a long fall into the unknown.
+    hint: "Move slow. Test every handhold. The ruins have been here for millennia—they can wait another minute."
+
+    required_skill: ACROBATICS
+    alternate_skill: ATHLETICS
+    dc: 15
+
+    reward_text: "You descend smoothly, conserving energy for what lies below."
+
+    success_text: |
+      Every step is calculated, every handhold tested. You move like water
+      yourself, flowing around obstacles, finding the safe path through
+      treacherous terrain. Below, the darkness waits—but you're ready.
+
+    fail_text: |
+      Your foot slips on algae-slick stone. You catch yourself—barely—but
+      not before your shin cracks against a sharp edge. The noise echoes
+      through the underdock. Something below shifts in response.
+    fail_consequence: "2d6 bludgeoning damage, and something below heard you fall"
+    fail_damage: "2d6"
+
+  - id: flooded_corridor
+    name: "Flooded Corridor"
+    type: MECHANISM
+    description: |
+      A completely submerged passage stretches before you—thirty feet at
+      least, with no air pockets visible. Ancient machinery lines the walls,
+      still faintly humming with power. If you can figure out the mechanism,
+      you might be able to drain it.
+    hint: "The ancients built for the long term. Their machines still work—if you can understand them."
+
+    required_skill: INVESTIGATION
+    alternate_skill: ARCANA
+    dc: 16
+
+    reward_text: "The machinery groans to life, draining the corridor!"
+
+    success_text: |
+      You trace the connections—power flows from here to there, valves
+      control water flow, this lever should... yes. With a grinding protest,
+      ancient pumps engage. The water level drops rapidly, revealing a dry
+      passage and something gleaming on the floor.
+
+    fail_text: |
+      Wrong lever. The machinery shudders and sprays pressurized water
+      directly at you, slamming you against the wall. Worse, the water
+      level is rising instead of falling.
+    fail_consequence: "3d6 bludgeoning damage from water pressure, corridor begins flooding faster"
+    fail_damage: "3d6"
+
+  - id: drowned_ambush
+    name: "The Drowned Ambush"
+    type: SKILL_CHECK
+    description: |
+      They emerge from the water without warning—three Drowned Converts,
+      their singing filling the chamber with terrible beauty. Behind them,
+      something larger stirs. You have seconds to act.
+    hint: "The singing is their weapon. Block it out. Focus on what you can control."
+
+    required_skill: WISDOM
+    alternate_skill: CONSTITUTION
+    dc: 17
+
+    reward_text: "You resist the call and ready yourself for combat!"
+
+    success_text: |
+      The song washes over you like a wave—and breaks. You feel its pull,
+      that promise of peace and belonging, but you've heard worse lies.
+      Your weapon is in your hand before they can close the distance. The
+      larger shape below hesitates, surprised by your resistance.
+
+    fail_text: |
+      The singing fills your mind like drowning. For a terrible moment,
+      you understand why they walked into the sea. It would be so easy.
+      So peaceful. You take a step toward the water before pain snaps
+      you back—they've already drawn blood.
+    fail_consequence: "Charmed for 1 round (lost turn), 2d8 damage from attacks during vulnerability"
+    fail_damage: "2d8"
+
+  - id: pressure_lock
+    name: "Pressure Lock"
+    type: MECHANISM
+    description: |
+      The way forward is sealed by an ancient lock—but not a lock that
+      uses keys. Channels carved into the door require water pressure to
+      be applied in the correct sequence. Too much pressure, and the door
+      will remain sealed. Too little, and you'll trigger the trap.
+    hint: "The symbols show sea creatures. Their sizes might indicate the pressure sequence."
+
+    required_skill: INVESTIGATION
+    alternate_skill: PERCEPTION
+    dc: 16
+
+    reward_item: depth_key_darkness
+    reward_text: "The lock clicks open, revealing the path to the Sunken Ruins—and the Depth Key of Darkness."
+
+    success_text: |
+      Whale. Shark. Fish. The sequence is size, smallest to largest—or
+      rather, depth. You apply pressure in the correct order, and ancient
+      mechanisms grind to life. The door splits down the middle, revealing
+      passage into true darkness. On a pedestal just inside, a black
+      crystal drinks in your light.
+
+    fail_text: |
+      Wrong sequence. The trap activates—pressurized water slams into you
+      from hidden vents, each jet hitting like a fist. The door remains
+      sealed, and you'll need to reset the mechanism to try again.
+    fail_consequence: "4d6 bludgeoning damage from water jets, mechanism resets"
+    fail_damage: "4d6"
+
+  # ==========================================
+  # TRIAL 2: Keepers Mini-Games
+  # ==========================================
+
+  - id: keeper_initiation
+    name: "Keeper Initiation"
+    type: DIALOGUE
+    description: |
+      Commander Storm tests every recruit personally. Not with weapons—
+      with questions. She needs to know you can be trusted. That you won't
+      break when the darkness closes in. That you understand what you're
+      fighting for.
+    hint: "She doesn't want heroes. She wants survivors who know why survival matters."
+
+    required_skill: INSIGHT
+    alternate_skill: PERSUASION
+    dc: 15
+
+    reward_text: "Storm nods slowly. 'You'll do. Welcome to the Keepers.'"
+
+    success_text: |
+      "Why fight?" she asks. You tell her. Not about glory or duty, but
+      about the people who matter. The small things worth protecting. The
+      stubborn refusal to let the darkness win. She watches you the whole
+      time, reading things you don't say. Finally, she nods. "You'll do."
+
+    fail_text: |
+      Your answers are wrong—not technically, but essentially. She hears
+      hesitation. Doubt. The kind of cracks the deep exploits. "Come back
+      when you know what you're fighting for," she says. "We have enough
+      bodies. We need believers."
+    fail_consequence: "Must complete a dangerous patrol mission before being accepted"
+    fail_damage: "0"
+
+  - id: flame_heart_dive
+    name: "Dive for the Flame Heart"
+    type: SKILL_CHECK
+    description: |
+      The Flame Heart lies at the bottom of a flooded shaft—two hundred
+      feet down, in water so cold it burns. Even with equipment, this
+      dive will push you to your limits. And something is circling below.
+    hint: "Conserve your air. Move efficiently. And don't look at the shape in the darkness."
+
+    required_skill: ATHLETICS
+    alternate_skill: CONSTITUTION
+    dc: 18
+
+    reward_text: "Your fingers close around the Flame Heart—warm even in the freezing water."
+
+    success_text: |
+      Down. Down. Down. The pressure builds. The cold seeps through your
+      suit. Something massive passes beneath you, close enough to touch,
+      but you don't flinch. Don't stop. The Flame Heart glows on its
+      pedestal—a beacon in the darkness. Your fingers close around it,
+      and warmth floods through you.
+
+    fail_text: |
+      You lose focus—just for a moment—and that's enough. The cold gets
+      in. Your muscles seize. You drift, helpless, as something rises
+      from below. It doesn't attack—just watches as you claw your way
+      back to the surface, having failed to reach the Heart.
+    fail_consequence: "3d8 cold damage, must retry with disadvantage from hypothermia"
+    fail_damage: "3d8"
+
+  - id: depth_horror_fight
+    name: "Face the Depth Horror"
+    type: SKILL_CHECK
+    description: |
+      It rises from the black water—all tentacles and teeth and light that
+      shouldn't exist. The Depth Horror has guarded this place for centuries.
+      It does not intend to let you leave with the Flame Heart.
+    hint: "Don't look at its light. Don't listen to its whispers. Just survive."
+
+    required_skill: CONSTITUTION
+    alternate_skill: WISDOM
+    dc: 17
+
+    reward_text: "You resist its alien presence and prepare to fight!"
+
+    success_text: |
+      The Horror's bioluminescent lure flashes, trying to hypnotize you.
+      Its whispers probe your mind, offering visions of dark peace. But
+      you've faced darkness before. You close your eyes, follow sound and
+      movement, and meet its attack with steel instead of surrender.
+
+    fail_text: |
+      The light catches you. Just for a moment, you're somewhere else—
+      floating in warm darkness, safe, loved, drowning in something that
+      feels like peace. When you snap back, the Horror's tentacles are
+      already closing around you.
+    fail_consequence: "Incapacitated for 1 round, 4d8 damage from tentacles before you break free"
+    fail_damage: "4d8"
+
+  - id: light_ritual
+    name: "Renewal Ritual"
+    type: DECODE
+    description: |
+      The Flame Heart must be placed in the brazier with the correct words.
+      Ancient Keeper texts describe the ritual, but the language is archaic
+      and some pages are water-damaged. One mistake could destroy the Heart.
+    hint: "The words are about hope. Remember what you're fighting for."
+
+    required_skill: ARCANA
+    alternate_skill: RELIGION
+    dc: 16
+
+    reward_item: bolide_blade
+    reward_text: "The flame roars to life—and Commander Storm presents you with the Keepers' greatest treasure: the Bolide Blade."
+
+    success_text: |
+      The words come haltingly at first, then flow as you understand their
+      meaning. Not just sounds, but concepts: Light endures. Darkness is
+      not endless. Hope is stronger than fear. The Flame Heart pulses in
+      your hands—and ignites. Golden light fills the chamber.
+
+    fail_text: |
+      The words feel wrong in your mouth. The Flame Heart flickers,
+      dims, grows cold. For a terrible moment, you think you've destroyed
+      Saltmire's only protection. Then Storm's hand covers yours, guiding
+      you through the correct pronunciation. The flame lives—barely.
+    fail_consequence: "Flame renewal is incomplete. Will fail again in 1d4 days unless another Heart is found."
+    fail_damage: "0"
+
+  # ==========================================
+  # TRIAL 3: Court Mini-Games
+  # ==========================================
+
+  - id: court_politics
+    name: "Court Intrigue"
+    type: DIALOGUE
+    description: |
+      The Abyssal Court plays a different kind of game. Before you can
+      descend to retrieve their prize, you must navigate a dinner party
+      where every smile hides teeth and every compliment is a trap.
+    hint: "They respect cunning. Show them you're not prey."
+
+    required_skill: DECEPTION
+    alternate_skill: INSIGHT
+    dc: 17
+
+    reward_text: "The Court is impressed. You've earned their grudging respect—and their map."
+
+    success_text: |
+      You match them move for move. When they probe for weakness, you
+      deflect. When they offer poisoned compliments, you return them with
+      interest. By the end of the evening, Lord Deepholm is laughing—
+      genuinely, for perhaps the first time in decades. "Delightful," he
+      says. "Perhaps you'll survive after all."
+
+    fail_text: |
+      They see through you. Every lie, every hesitation, catalogued and
+      filed away. Lady Coralline's smile sharpens. "How... rustic," she
+      murmurs. The Court will help you—but you've shown weakness. They'll
+      expect payment beyond the glaive now.
+    fail_consequence: "Court demands additional service: eliminate a Lighthouse Keeper who's been 'problematic'"
+    fail_damage: "0"
+
+  - id: deep_descent
+    name: "The Deepholm Depths"
+    type: SKILL_CHECK
+    description: |
+      Below the manor lies a passage carved from living coral, descending
+      into waters that have never seen the sun. The pressure is immense.
+      The darkness is absolute. And something down there is watching.
+    hint: "The coral passages twist. Mark your path, or you'll never find your way back."
+
+    required_skill: SURVIVAL
+    alternate_skill: PERCEPTION
+    dc: 18
+
+    reward_text: "You navigate the maze and reach the heart of the Deepholm depths."
+
+    success_text: |
+      You mark each turning, counting steps, building a mental map. The
+      coral tries to confuse you—passages shift when you're not looking,
+      sounds echo from impossible directions—but you've faced worse.
+      Finally, the passage opens into a vast chamber where something
+      ancient and silver gleams on a pedestal of bone.
+
+    fail_text: |
+      Lost. The passage has doubled back on itself. You've been swimming
+      in circles while your air runs low and the coral seems to tighten
+      around you. Something brushes your leg—something with far too many
+      limbs. You find your way out, but you'll have to try again.
+    fail_consequence: "Lost time, 2d6 psychic damage from panic, must retry with exhaustion"
+    fail_damage: "2d6"
+
+  - id: revenant_guardian
+    name: "The Revenant King"
+    type: SKILL_CHECK
+    description: |
+      The glaive's guardian rises from centuries of slumber—the Revenant
+      King himself, bound to protect his weapon from those who would
+      misuse it. He does not speak. He does not negotiate. He tests.
+    hint: "He was a warrior who fought fiends. He respects strength and conviction."
+
+    required_skill: ATHLETICS
+    alternate_skill: CHARISMA
+    dc: 18
+
+    reward_item: glaive_of_the_revenant_king
+    reward_text: "The Revenant King bows—and dissolves, leaving only the glaive."
+
+    success_text: |
+      You meet his attack with your own. Not just strength—conviction. You
+      fight like someone who knows what they're fighting for. The Revenant
+      King's ghostly eyes study you between blows. Finally, he steps back.
+      Nods once. And extends the glaive, hilt first. "Serve well," his
+      voice echoes. "Do not become like them."
+
+    fail_text: |
+      He overwhelms you—not through power alone, but through certainty.
+      His strikes carry the weight of a vow kept for centuries. When you
+      fall, he doesn't kill you. He turns away, disappointed. "Not yet,"
+      he says. "Come back when you know why you fight."
+    fail_consequence: "4d8 damage, must find another way to prove worth before he'll grant the glaive"
+    fail_damage: "4d8"
+
+  - id: bargain_choice
+    name: "The Bargain"
+    type: CHOICE
+    description: |
+      Lord Deepholm extends his hand for the glaive. The blade whispers
+      warnings. The choice is yours: honor your agreement and gain the
+      Court's alliance, or keep the weapon and make powerful enemies.
+    hint: "There's no wrong choice—only consequences. What matters more: allies or weapons?"
+
+    required_skill: WISDOM
+    alternate_skill: CHARISMA
+    dc: 15
+
+    reward_item: depth_key_pressure
+    reward_text: "Your choice is made. The consequences will follow."
+
+    success_text: |
+      Whatever you choose, you choose it fully. No hesitation. No doubt.
+      Lord Deepholm sees this—and respects it, even if your choice opposes
+      him. "Conviction," he murmurs. "That's rare. That's valuable."
+
+      Either way, he produces the Depth Key. Either as reward or as
+      bribe. "The game continues," he says. "I look forward to seeing
+      how it ends."
+
+    fail_text: |
+      You hesitate. The glaive. The key. The alliance. The enemy. Your
+      indecision shows, and Deepholm's respect evaporates. "Choose," he
+      commands, his voice dropping to something cold and ancient. "Or I
+      will choose for you."
+    fail_consequence: "Deepholm makes the choice: takes the glaive, gives the key, considers you weak"
+    fail_damage: "0"
+
+  # ==========================================
+  # TRIAL 4: Prophet Mini-Games
+  # ==========================================
+
+  - id: crypt_guardians
+    name: "The Awakened Dead"
+    type: SKILL_CHECK
+    description: |
+      Former Tidekeepers rise from their alcoves—dead bodies animated by
+      Mira's call, still wearing their ceremonial robes, still carrying
+      their sacred implements. Elder Vorn falls behind to hold them back.
+      You have to reach Mira's chambers before they overwhelm him.
+    hint: "They're not fast, but they don't tire. Speed is your ally."
+
+    required_skill: ATHLETICS
+    alternate_skill: ACROBATICS
+    dc: 16
+
+    reward_text: "You slip past the dead and reach the sealed door."
+
+    success_text: |
+      You move like water through the grasping hands. The dead are slow—
+      still new to their animation—and you use every advantage. Behind
+      you, you hear Vorn's prayers echoing off stone, his voice strong
+      despite his fear. The sealed door looms ahead.
+
+    fail_text: |
+      Too slow. A dead hand catches your ankle, and you go down. More
+      pile on, their grip cold and unyielding. You fight free, but not
+      before their touch leaves its mark—a cold that seeps into your
+      soul.
+    fail_consequence: "3d6 necrotic damage, disadvantage on saves against fear until long rest"
+    fail_damage: "3d6"
+
+  - id: dead_tidekeeper_puzzle
+    name: "Memory Lock"
+    type: DECODE
+    description: |
+      Mira's chamber is sealed by a puzzle lock that responds to memories.
+      Four symbols must be touched in the order of her life: birth,
+      training, ascension, transformation. The journal entries you've
+      found might help—if you paid attention.
+    hint: "The symbols represent moments. Think about what you learned of her life."
+
+    required_skill: INVESTIGATION
+    alternate_skill: HISTORY
+    dc: 17
+
+    reward_text: "The lock clicks open, and you enter Prophet Mira's private chamber."
+
+    success_text: |
+      Birth—the waves. Training—the lantern. Ascension—the eye. Trans-
+      formation—the spiral. You trace her life in symbols, and the door
+      recognizes the story. It swings open onto a room frozen in time—
+      her bed still made, her books still open, her normal life waiting
+      for someone who will never return.
+
+    fail_text: |
+      Wrong sequence. The lock pulses with cold light, and something
+      stirs behind you. The dead have found another way in. Worse, the
+      lock has reset, and the puzzle has changed.
+    fail_consequence: "Dead Tidekeepers catch up, combat while solving altered puzzle"
+    fail_damage: "0"
+
+  - id: mira_memory
+    name: "Mira's Journal"
+    type: SEARCH
+    description: |
+      The journal is here, somewhere. Her chamber is cluttered with books,
+      scrolls, relics from her research. Finding the right journal—the
+      one that matters—means understanding who she was before.
+    hint: "She was methodical. Look for her system, and the journal will find you."
+
+    required_skill: INVESTIGATION
+    alternate_skill: PERCEPTION
+    dc: 15
+
+    reward_text: "You find it—worn leather, marked with her initials, heavy with truth."
+
+    success_text: |
+      Her organization system is intuitive once you see it. Books by
+      subject, journals by year, relics by type. The one you need is in
+      a locked drawer, warded against casual discovery. But you're not
+      casual. The lock yields, and the journal falls open to the last
+      entry.
+
+    fail_text: |
+      So many books. So many possibilities. You grab what seems right,
+      but it's the wrong journal—early years, before her descent. Useful
+      context, but not the truth you need. You'll have to keep searching
+      while the sounds of battle grow closer.
+    fail_consequence: "Time pressure increases, Vorn is overwhelmed—must choose: save him or find journal"
+    fail_damage: "0"
+
+  - id: truth_choice
+    name: "Face the Prophet"
+    type: CHOICE
+    description: |
+      She's here. Prophet Mira. Standing in the doorway of her old life,
+      tears on her inhuman face. "You read it," she says. "Now you know.
+      The question is... what will you do with that knowledge?"
+    hint: "There are no wrong answers. Only honest ones."
+
+    required_skill: INSIGHT
+    alternate_skill: PERSUASION
+    dc: 16
+
+    reward_item: prophets_tear
+    reward_text: "The Prophet's Tear crystallizes in her palm, and she presses it into your hand."
+
+    success_text: |
+      Whatever you say, you say it honestly. And Mira—the part of her
+      that's still human—hears that honesty. Her face crumples. For just
+      a moment, she's not a prophet or a monster. She's a woman who made
+      a terrible mistake and can't undo it.
+
+      A tear runs down her cheek and crystallizes before it falls.
+      "Take it," she whispers. "It's all that's left of who I was."
+
+    fail_text: |
+      You lie. Or you judge. Or you miss the point entirely. The human
+      in her eyes retreats, replaced by something cold and vast. "I see,"
+      she says. "Then we have nothing more to discuss."
+
+      She vanishes into the water, and the chance for connection is lost.
+    fail_consequence: "No Prophet's Tear, final confrontation will be significantly harder"
+    fail_damage: "0"
+
+  # ==========================================
+  # TRIAL 5: Final Mini-Games
+  # ==========================================
+
+  - id: final_descent
+    name: "The Final Descent"
+    type: SKILL_CHECK
+    description: |
+      Three keys. Three doors. Each opened with a different kind of pain.
+      Beyond them lies the Drowning Heart—and the end of everything, one
+      way or another.
+    hint: "This is not a test of strength. It's a test of will. Remember why you came."
+
+    required_skill: CONSTITUTION
+    alternate_skill: WISDOM
+    dc: 18
+
+    reward_text: "You pass through the final door and enter the presence of a god."
+
+    success_text: |
+      Each door extracts its toll. Pressure. Darkness. Time. You feel
+      yourself being unmade and remade with each threshold. But you hold
+      on—to memory, to purpose, to the faces of those you're fighting for.
+      And then you're through, and the Drowned God's attention falls on
+      you like the weight of the entire ocean.
+
+    fail_text: |
+      The passage breaks something in you. Not physically—deeper. You
+      emerge into the Drowning Heart, but you're not whole. Part of you
+      is still back there, lost between doors, already half-drowned.
+    fail_consequence: "Enter final chamber with exhaustion and disadvantage on saves against the God's influence"
+    fail_damage: "0"
+
+  - id: avatar_battle
+    name: "The Avatar Rises"
+    type: SKILL_CHECK
+    description: |
+      The Drowned God's Avatar manifests—not the entity itself, but enough
+      of its power to destroy anyone who approaches. It cannot be truly
+      killed. It can only be endured, distracted, survived.
+    hint: "You can't win this fight. You can only create an opening. Make it count."
+
+    required_skill: ATHLETICS
+    alternate_skill: ACROBATICS
+    dc: 19
+
+    reward_text: "You survive long enough to reach the Prophet—the true battle."
+
+    success_text: |
+      Tentacles sweep. Psychic pressure builds. The very water becomes a
+      weapon. But you've trained for this. Prepared for this. You don't
+      try to win—you try to survive. And in surviving, you create openings.
+      Moments. Chances. Until finally, you're close enough to reach what
+      matters.
+
+    fail_text: |
+      It's too much. Too vast. Too alien. A tentacle catches you, lifts
+      you, holds you before eyes that contain infinities. You feel your
+      sense of self beginning to dissolve in that gaze. Only a desperate
+      surge of will breaks you free—damaged, but not destroyed.
+    fail_consequence: "5d8 psychic damage, one permanent minor mutation (cosmetic)"
+    fail_damage: "5d8"
+
+  - id: mira_confrontation
+    name: "The Prophet's Choice"
+    type: DIALOGUE
+    description: |
+      Prophet Mira floats between you and her god—transformed, beautiful,
+      terrible, and still somehow human enough to hesitate. This is your
+      last chance to reach her. To remind her of what she was. To make
+      her choose.
+    hint: "She's not evil. She's converted. Appeal to what remains of who she was."
+
+    required_skill: PERSUASION
+    alternate_skill: INSIGHT
+    dc: 18
+
+    reward_text: "Something shifts in her eyes. The human remembers."
+
+    success_text: |
+      You speak her name. Not 'Prophet.' Not 'vessel.' Mira. You tell her
+      about her journal. About Vorn, who still believes in her. About the
+      city that loved her before she heard the call. And something in
+      those alien eyes... wavers.
+
+      "I remember," she whispers. "I remember being afraid. Being lonely.
+      Being..." She looks at her transformed hands. "I remember being human."
+
+    fail_text: |
+      Your words wash over her like waves over stone. Whatever humanity
+      remained has submerged too deep to reach. "I understand," she says
+      gently. "You're afraid. But fear is the last illusion." Her hands
+      rise. "Let me show you peace."
+    fail_consequence: "Mira attacks, no peaceful resolution possible, must defeat her to proceed"
+    fail_damage: "0"
+
+  - id: ultimate_choice
+    name: "The Ultimate Choice"
+    type: CHOICE
+    description: |
+      The moment has come. The Drowned God waits. The Prophet watches.
+      Saltmire's fate—and perhaps the world's—rests on what you do next.
+      There is no right answer. Only consequences.
+    hint: "Choose what you can live with. That's all anyone can do."
+
+    required_skill: WISDOM
+    alternate_skill: CHARISMA
+    dc: 15
+
+    reward_item: tarrasque_plate
+    reward_text: "The choice is made. The story ends. But what ending depends on you."
+
+    success_text: |
+      You choose. Not perfectly—there is no perfect choice—but completely.
+      Whatever happens next, you face it without doubt or hesitation.
+
+      The Drowned God responds. The Prophet responds. The sea itself
+      responds. And Saltmire's story reaches its conclusion.
+
+      Whether that conclusion is triumph or tragedy, salvation or damnation,
+      ending or beginning... that depends on what you chose.
+
+    fail_text: |
+      You hesitate. And in that hesitation, the choice is made for you.
+      The Drowned God sees weakness and surges forward. Mira sees doubt
+      and abandons hope. The ending that follows is not what anyone wanted—
+      not quite victory, not quite defeat. Just... entropy.
+    fail_consequence: "Ending is compromised—survival without victory, escape without resolution"
+    fail_damage: "0"

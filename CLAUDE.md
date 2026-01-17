@@ -6,8 +6,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 QuestKeeper is a CLI-based D&D 5e adventure game written in Java 17. It features YAML-driven campaign data, a modular item/effect system, D&D skill check mechanics, and support for multiple campaigns. All campaign-specific content (monsters, NPCs, locations, items, trials, mini-games) is loaded from YAML files.
 
-**Tech Stack:** Java 17, Maven, SnakeYAML (data files), Jansi (terminal colors), JUnit 5
-
 ## Build Commands
 
 ```bash
@@ -28,9 +26,6 @@ mvn test -Dtest=CampaignTest#testMethodName
 
 # Run the application
 mvn exec:java -Dexec.mainClass="com.questkeeper.Main"
-
-# Generate Javadoc
-mvn javadoc:javadoc
 ```
 
 ## Playing the Game
@@ -81,6 +76,16 @@ mvn exec:java -Dexec.mainClass="com.questkeeper.Main" -q
 ### Data Flow
 
 Campaign data flows from YAML files (`src/main/resources/campaigns/`) through `Campaign.loadFromYaml()`, which internally uses `CampaignLoader` and returns unmodifiable collections. Cross-references between entities (location exits, NPC locations, trial mini-games) are validated on load. Monsters are loaded as templates and instantiated via `Campaign.createMonster()`. Trials reference mini-games by ID.
+
+### Multi-Campaign Support
+
+The system supports multiple campaigns through data-driven design:
+
+- **Campaign Discovery**: `Campaign.listAvailable()` scans `campaigns/` directory for subdirectories with `campaign.yaml`
+- **Campaign Selection**: When multiple campaigns exist, GameEngine displays a selection menu
+- **State Isolation**: Each `GameState` instance tracks its own location/trial state independently
+- **Data-Driven Unlocks**: Location unlocks use `*_unlocked` flag convention (e.g., `clocktower_hill_unlocked` unlocks `clocktower_hill`)
+- **State Tracking**: `GameState` tracks visited locations, unlocked locations, started/completed trials (not on Campaign objects)
 
 ### Inventory System
 
@@ -177,12 +182,7 @@ Mini-games use D&D 5e skill checks:
 
 ## Testing
 
-Tests use JUnit 5 with `@Nested` classes for organization and `@TempDir` for file-based tests.
-
-```bash
-mvn test                    # Run all 1764+ tests
-mvn test -Dtest=CampaignTest  # Run specific test class
-```
+Tests use JUnit 5 with `@Nested` classes for organization and `@TempDir` for file-based tests. Run `mvn test` for all tests.
 
 **Key test classes:** `CampaignTest`, `CombatSystemTest`, `CombatResultTest`, `InventoryTest`, `StatusEffectManagerTest`, `DialogueSystemTest`, `CharacterTest`, `MonsterTest`, `GameStateTest`
 
@@ -206,14 +206,35 @@ mvn test -Dtest=CampaignTest  # Run specific test class
 6. Every trial can be won without violence
 7. Every trial can be failed without death (unless reckless)
 
-## Current Campaign: Muddlebrook
+## Available Campaigns
 
-The "Muddlebrook: Harlequin Trials" campaign includes:
-- **Dramatic intro**: Townsman bursts in announcing the mayor's disappearance
-- **18 locations**: Tavern, town square, market, clocktower, cemetery, docks, forest, and more
-- **3 trials**: Mayor's Office, Clocktower Mechanism, Harlequin's Stage
-- **14 mini-games** with D&D skill checks
-- **11 magic item rewards** (Tier 1)
-- **6 NPCs**: Norrin (bard), Mara (bartender), Darius (recluse), Elara (shopkeeper), Captain Thorne, Mayor Alderwick
-- **3 monster types**: Clockwork Critter, Confetti Ooze, Harlequin Machinist
-- **Progressive unlocking**: Trial completion unlocks new areas (clocktower, harlequin's lair)
+### Muddlebrook: Harlequin Trials (Beginner)
+Comedic mystery campaign with theatrical villain and puzzle rooms.
+- **18 locations**, 3 trials, 14 mini-games, 6 NPCs, 34 items
+- **Tone**: Scooby-Doo meets Monty Python
+- **DCs**: 10-14 (beginner-friendly)
+
+### Eberron: Shards of the Fallen Sky (Intermediate)
+Olympic Games competition with cosmic mythology and dragonshard rewards.
+- **11 locations**, 5 trials, 17 mini-games, 10 NPCs, 41 items
+- **Tone**: Heroic competition with hidden cosmic stakes
+- **DCs**: 12-16 (intermediate)
+
+### Whispers of the Drowned God (Advanced)
+Gothic horror nautical campaign with Lovecraftian elements and multiple endings.
+- **17 locations**, 5 trials, 20 mini-games, 12 NPCs, 42 items
+- **Tone**: Cosmic horror, player agency in faction choices
+- **DCs**: 15-19 (experienced players)
+
+## Adding a New Campaign
+
+Create a new directory under `src/main/resources/campaigns/` with these YAML files:
+- `campaign.yaml` (required): id, name, starting_location, intro
+- `locations.yaml`: locations with exits, NPCs, items, flags (`locked` flag for initially locked locations, `locked_message` for custom messages)
+- `npcs.yaml`: NPC definitions with dialogue trees
+- `monsters.yaml`: monster templates with D&D 5e stats
+- `items.yaml`: weapons, armor, consumables, magic items
+- `trials.yaml`: trial definitions with `prerequisites` and `completion_flags` lists
+- `minigames.yaml`: mini-game definitions with skill checks
+
+The campaign selection menu appears automatically when multiple campaigns exist.

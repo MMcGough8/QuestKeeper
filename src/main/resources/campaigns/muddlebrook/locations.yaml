@@ -157,6 +157,7 @@ locations:
       in various states of assembly. Blueprints cover the walls—some of mechanisms
       you recognize, others of things that shouldn't exist. A large locked chest
       sits in the corner.
+    locked_message: "Elara's back room is off limits... unless you can earn her trust."
     exits:
       out: clockwork_curios
     npcs: []
@@ -199,6 +200,7 @@ locations:
       pointing in different directions. Locals say it stopped the night the old
       mayor vanished, twenty years ago. The new mayor's disappearance has people
       whispering about curses.
+    locked_message: "The path to Clocktower Hill is blocked. Perhaps investigating the Town Hall and completing the trial there will reveal a way forward."
     exits:
       east: town_square
       south: back_alley
@@ -404,6 +406,7 @@ locations:
       Mayor Alderwick hangs suspended in an elaborate clockwork cage, its gears
       slowly turning. "Welcome to the finale!" the masked figure announces.
       "You've played my games beautifully. Now, let's see how the story ends."
+    locked_message: "A hidden passage, but it's sealed tight. You'll need to discover the Clocktower's secrets first."
     exits:
       up: clocktower_mechanism
     npcs:
