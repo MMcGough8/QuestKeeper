@@ -261,13 +261,14 @@ class DisplayTest {
         @DisplayName("showSkillCheck displays full check information")
         void showSkillCheckDisplaysAll() {
             Display.showSkillCheck("Investigation", 15, 3, 12, true);
-            
+
             String output = getOutput();
-            assertTrue(output.contains("INVESTIGATION CHECK"), "Should show skill name");
-            assertTrue(output.contains("d20: 15"), "Should show raw roll");
+            assertTrue(output.contains("[ROLL]"), "Should have [ROLL] prefix");
+            assertTrue(output.contains("Investigation Check"), "Should show skill name");
+            assertTrue(output.contains("d20:"), "Should show d20 notation");
+            assertTrue(output.contains("15"), "Should show raw roll");
             assertTrue(output.contains("+3"), "Should show modifier");
-            assertTrue(output.contains("= 18"), "Should show total");
-            assertTrue(output.contains("DC 12"), "Should show DC");
+            assertTrue(output.contains("18"), "Should show total");
             assertTrue(output.contains("SUCCESS"), "Should show result");
         }
         
@@ -567,23 +568,285 @@ class DisplayTest {
     @Nested
     @DisplayName("Prompt Tests")
     class PromptTests {
-        
+
         @Test
         @DisplayName("showPrompt displays default prompt")
         void showPromptDefault() {
             Display.showPrompt();
-            
+
             String output = getOutput();
             assertTrue(output.contains(">"), "Should contain prompt character");
         }
-        
+
         @Test
         @DisplayName("showPrompt displays custom prompt")
         void showPromptCustom() {
             Display.showPrompt("Enter command:");
-            
+
             String output = getOutput();
             assertTrue(output.contains("Enter command:"), "Should contain custom prompt");
+        }
+    }
+
+    // ========================================================================
+    // ENHANCED UI TESTS
+    // ========================================================================
+
+    @Nested
+    @DisplayName("Enhanced UI Tests")
+    class EnhancedUITests {
+
+        @Test
+        @DisplayName("showHeader displays title and session status")
+        void showHeaderDisplays() {
+            Display.showHeader();
+
+            String output = getOutput();
+            assertTrue(output.contains("QUESTKEEPER"), "Should contain title");
+            assertTrue(output.contains("SESSION"), "Should contain session info");
+        }
+
+        @Test
+        @DisplayName("showStatusPanel displays HP, Level, and Trials")
+        void showStatusPanelDisplays() {
+            Display.showStatusPanel(24, 28, 2, 1, 10);
+
+            String output = getOutput();
+            assertTrue(output.contains("HP:"), "Should contain HP label");
+            assertTrue(output.contains("24"), "Should contain current HP");
+            assertTrue(output.contains("28"), "Should contain max HP");
+            assertTrue(output.contains("LEVEL:"), "Should contain level label");
+            assertTrue(output.contains("2"), "Should contain level value");
+            assertTrue(output.contains("TRIALS:"), "Should contain trials label");
+            assertTrue(output.contains("1"), "Should contain completed trials");
+            assertTrue(output.contains("10"), "Should contain total trials");
+        }
+
+        @Test
+        @DisplayName("showGameMessage displays with [GAME] prefix")
+        void showGameMessageDisplays() {
+            Display.showGameMessage("Game loaded successfully!");
+
+            String output = getOutput();
+            assertTrue(output.contains("[GAME]"), "Should have [GAME] prefix");
+            assertTrue(output.contains("Game loaded successfully"), "Should contain message");
+        }
+
+        @Test
+        @DisplayName("showNarrationLabel displays with [NARRATION] prefix")
+        void showNarrationLabelDisplays() {
+            Display.showNarrationLabel("The scene unfolds...");
+
+            String output = getOutput();
+            assertTrue(output.contains("[NARRATION]"), "Should have [NARRATION] prefix");
+            assertTrue(output.contains("scene unfolds"), "Should contain text");
+        }
+
+        @Test
+        @DisplayName("showBlockquote displays text with border")
+        void showBlockquoteDisplays() {
+            Display.showBlockquote("The tavern is warm and inviting.");
+
+            String output = getOutput();
+            assertTrue(output.contains("│"), "Should have blockquote border");
+            assertTrue(output.contains("tavern"), "Should contain text");
+        }
+
+        @Test
+        @DisplayName("showBlockquote handles multiple lines")
+        void showBlockquoteMultiLine() {
+            Display.showBlockquote(new String[]{"Line one", "Line two", "Line three"});
+
+            String output = getOutput();
+            assertTrue(output.contains("Line one"), "Should contain first line");
+            assertTrue(output.contains("Line two"), "Should contain second line");
+            assertTrue(output.contains("Line three"), "Should contain third line");
+        }
+
+        @Test
+        @DisplayName("showBlockquote handles null gracefully")
+        void showBlockquoteNullSafe() {
+            assertDoesNotThrow(() -> {
+                Display.showBlockquote((String) null);
+                Display.showBlockquote((String[]) null);
+            });
+        }
+
+        @Test
+        @DisplayName("showQuestStarted displays quest notification")
+        void showQuestStartedDisplays() {
+            Display.showQuestStarted("The Harlequin Trials");
+
+            String output = getOutput();
+            assertTrue(output.contains("QUEST STARTED"), "Should contain quest started label");
+            assertTrue(output.contains("Harlequin Trials"), "Should contain quest name");
+            assertTrue(output.contains("+"), "Should have + prefix");
+        }
+
+        @Test
+        @DisplayName("showClueGained displays clue notification")
+        void showClueGainedDisplays() {
+            Display.showClueGained("The villain's mask was found!");
+
+            String output = getOutput();
+            assertTrue(output.contains("CLUE GAINED"), "Should contain clue gained label");
+            assertTrue(output.contains("mask"), "Should contain clue description");
+            assertTrue(output.contains("+"), "Should have + prefix");
+        }
+
+        @Test
+        @DisplayName("showTutorialTip displays bordered tip box")
+        void showTutorialTipDisplays() {
+            Display.showTutorialTip("Use 'look' to examine your surroundings.");
+
+            String output = getOutput();
+            assertTrue(output.contains("TUTORIAL TIP"), "Should contain tutorial tip header");
+            assertTrue(output.contains("look"), "Should contain tip text");
+            assertTrue(output.contains("┌"), "Should have top border");
+            assertTrue(output.contains("└"), "Should have bottom border");
+        }
+
+        @Test
+        @DisplayName("showActionPrompt displays prompt with suggestions")
+        void showActionPromptDisplays() {
+            Display.showActionPrompt(new String[]{"look", "go north", "help"});
+
+            String output = getOutput();
+            assertTrue(output.contains("What do you do?"), "Should contain prompt question");
+            assertTrue(output.contains("Suggestions:"), "Should contain suggestions label");
+            assertTrue(output.contains("look"), "Should list suggestions");
+            assertTrue(output.contains("go north"), "Should list all suggestions");
+        }
+
+        @Test
+        @DisplayName("showActionPrompt handles null suggestions")
+        void showActionPromptNullSuggestions() {
+            assertDoesNotThrow(() -> {
+                Display.showActionPrompt(null);
+            });
+
+            String output = getOutput();
+            assertTrue(output.contains("What do you do?"), "Should still show prompt");
+            assertFalse(output.contains("Suggestions:"), "Should not show suggestions label when null");
+        }
+
+        @Test
+        @DisplayName("showActionPrompt handles empty suggestions")
+        void showActionPromptEmptySuggestions() {
+            Display.showActionPrompt(new String[]{});
+
+            String output = getOutput();
+            assertTrue(output.contains("What do you do?"), "Should still show prompt");
+            assertFalse(output.contains("Suggestions:"), "Should not show suggestions label when empty");
+        }
+
+        @Test
+        @DisplayName("echoUserInput echoes command")
+        void echoUserInputDisplays() {
+            Display.echoUserInput("go north");
+
+            String output = getOutput();
+            assertTrue(output.contains("> go north"), "Should echo input with > prefix");
+        }
+
+        @Test
+        @DisplayName("italic returns text when colors disabled")
+        void italicReturnsPlainWhenDisabled() {
+            Display.setColorsEnabled(false);
+            String result = Display.italic("test text");
+            assertEquals("test text", result, "Should return plain text when colors disabled");
+        }
+
+        @Test
+        @DisplayName("showEnhancedSkillCheck displays full check with [ROLL] prefix")
+        void showEnhancedSkillCheckDisplays() {
+            Display.showEnhancedSkillCheck("Persuasion", 15, 3, 18, 12, true);
+
+            String output = getOutput();
+            assertTrue(output.contains("[ROLL]"), "Should have [ROLL] prefix");
+            assertTrue(output.contains("Persuasion"), "Should contain skill name");
+            assertTrue(output.contains("d20:"), "Should show dice notation");
+            assertTrue(output.contains("15"), "Should show roll");
+            assertTrue(output.contains("+3"), "Should show modifier");
+            assertTrue(output.contains("18"), "Should show total");
+            assertTrue(output.contains("SUCCESS"), "Should show result");
+        }
+
+        @Test
+        @DisplayName("showEnhancedSkillCheck shows failure")
+        void showEnhancedSkillCheckFailure() {
+            Display.showEnhancedSkillCheck("Stealth", 5, 2, 7, 15, false);
+
+            String output = getOutput();
+            assertTrue(output.contains("FAILURE"), "Should show failure");
+        }
+
+        @Test
+        @DisplayName("showEnhancedSkillCheck highlights natural 20")
+        void showEnhancedSkillCheckNat20() {
+            Display.showEnhancedSkillCheck("Athletics", 20, 2, 22, 15, true);
+
+            String output = getOutput();
+            assertTrue(output.contains("NATURAL 20"), "Should highlight nat 20");
+        }
+
+        @Test
+        @DisplayName("showEnhancedSkillCheck highlights natural 1")
+        void showEnhancedSkillCheckNat1() {
+            Display.showEnhancedSkillCheck("Stealth", 1, 5, 6, 10, false);
+
+            String output = getOutput();
+            assertTrue(output.contains("Natural 1"), "Should highlight nat 1");
+        }
+    }
+
+    // ========================================================================
+    // UPDATED METHOD TESTS
+    // ========================================================================
+
+    @Nested
+    @DisplayName("Updated Method Tests")
+    class UpdatedMethodTests {
+
+        @Test
+        @DisplayName("showSkillCheck uses [ROLL] prefix format")
+        void showSkillCheckUsesRollPrefix() {
+            Display.showSkillCheck("Investigation", 15, 3, 12, true);
+
+            String output = getOutput();
+            assertTrue(output.contains("[ROLL]"), "Should have [ROLL] prefix");
+            assertTrue(output.contains("Investigation Check"), "Should show skill name");
+        }
+
+        @Test
+        @DisplayName("showNarrative uses blockquote style")
+        void showNarrativeUsesBlockquote() {
+            Display.showNarrative("The fog rolls in across the harbor.");
+
+            String output = getOutput();
+            assertTrue(output.contains("│"), "Should have blockquote border");
+            assertTrue(output.contains("fog rolls"), "Should contain narrative text");
+        }
+
+        @Test
+        @DisplayName("showDialogue uses blockquote style")
+        void showDialogueUsesBlockquote() {
+            Display.showDialogue("Norrin", "Welcome, traveler!");
+
+            String output = getOutput();
+            assertTrue(output.contains("Norrin"), "Should contain speaker name");
+            assertTrue(output.contains("│"), "Should have blockquote border");
+            assertTrue(output.contains("Welcome"), "Should contain dialogue text");
+        }
+
+        @Test
+        @DisplayName("showSuccess uses + prefix")
+        void showSuccessUsesPlus() {
+            Display.showSuccess("Item acquired!");
+
+            String output = getOutput();
+            assertTrue(output.contains("+"), "Should have + prefix");
+            assertTrue(output.contains("Item acquired"), "Should contain message");
         }
     }
 }

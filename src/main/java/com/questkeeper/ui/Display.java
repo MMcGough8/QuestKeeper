@@ -35,6 +35,14 @@ public class Display {
     private static final char DIVIDER_CHAR = '─';
     private static final char DIVIDER_ACCENT = '═';
 
+    /** Character for blockquote left border */
+    private static final char BLOCKQUOTE_BORDER = '│';
+
+    /** Message prefix constants */
+    private static final String PREFIX_GAME = "[GAME]";
+    private static final String PREFIX_NARRATION = "[NARRATION]";
+    private static final String PREFIX_ROLL = "[ROLL]";
+
      /** Whether Jansi has been installed */
     private static boolean jansiInstalled = false;
     
@@ -159,10 +167,8 @@ public class Display {
     public static void showDialogue(String speaker, String text) {
         println();
         print(colorize(speaker, CYAN));
-        println(colorize(": ", WHITE));
-        print(colorize("\"", YELLOW));
-        print(colorize(text, WHITE));
-        println(colorize("\"", YELLOW));
+        println(colorize(":", WHITE));
+        showBlockquote("\"" + text + "\"");
         println();
     }
 
@@ -170,10 +176,8 @@ public class Display {
         println();
         print(colorize(speaker, CYAN));
         print(colorize(" (" + voiceTag + ")", DEFAULT));
-        println(colorize(": ", WHITE));
-        print(colorize("\"", YELLOW));
-        print(colorize(text, WHITE));
-        println(colorize("\"", YELLOW));
+        println(colorize(":", WHITE));
+        showBlockquote("\"" + text + "\"");
         println();
     }
 
@@ -197,10 +201,13 @@ public class Display {
         int total = roll + modifier;
         String modStr = modifier >= 0 ? "+" + modifier : String.valueOf(modifier);
 
-        print(colorize("[" + skillName.toUpperCase() + " CHECK] ", CYAN));
-        print(colorize("d20: " + roll + " " + modStr + " = ", WHITE));
+        print(colorize(PREFIX_ROLL + " ", CYAN));
+        print(colorize(skillName + " Check: ", WHITE));
+        print(colorize("d20: ", WHITE));
+        print(colorize(String.valueOf(roll), YELLOW));
+        print(colorize(" " + modStr + " = ", WHITE));
         print(colorize(String.valueOf(total), YELLOW));
-        print(colorize(" vs DC " + dc + " - ", WHITE));
+        print(" ");
 
         if (success) {
             println(colorize("SUCCESS!", GREEN));
@@ -209,9 +216,9 @@ public class Display {
         }
 
         if (roll == 20) {
-            print(colorize(" NATURAL 20! ", YELLOW));
+            println(colorize("  ★ NATURAL 20! ★", YELLOW));
         } else if (roll == 1) {
-            println(colorize(" X Natural 1...", RED));
+            println(colorize("  ✗ Natural 1...", RED));
         }
     }
 
@@ -243,7 +250,7 @@ public class Display {
     }
 
     public static void showSuccess(String message) {
-        println(colorize("✦ " + message, GREEN));
+        println(colorize("+ " + message, GREEN));
     }
 
     public static void showHelp() {
@@ -277,7 +284,7 @@ public class Display {
 
     public static void showNarrative(String text) {
         println();
-        printWrapped(colorize(text, WHITE), DEFAULT_WIDTH);
+        showBlockquote(text);
         println();
     }
 
@@ -426,6 +433,13 @@ public class Display {
         return ansi().bold().a(text).reset().toString();
     }
 
+    public static String italic(String text) {
+        if (!colorsEnabled) {
+            return text;
+        }
+        return ansi().a(Ansi.Attribute.ITALIC).a(text).reset().toString();
+    }
+
     public static void clearScreen() {
         if (colorsEnabled) {
             System.out.print(ansi().eraseScreen().cursor(1, 1));
@@ -458,5 +472,243 @@ public class Display {
 
     public static void showPrompt(String prompt) {
         print(colorize(prompt + " ", GREEN));
+    }
+
+    // ========================================================================
+    // ENHANCED UI METHODS
+    // ========================================================================
+
+    /**
+     * Displays the game header bar with session status.
+     */
+    public static void showHeader() {
+        println();
+        print(colorize("⚔ QUESTKEEPER ⚔", YELLOW));
+        print("  ");
+        println(colorize("● ONLINE SESSION: ACTIVE", GREEN));
+        printDivider(DIVIDER_ACCENT, DEFAULT_WIDTH);
+        println();
+    }
+
+    /**
+     * Displays a compact status panel showing HP, Level, and Trials progress.
+     */
+    public static void showStatusPanel(int hp, int maxHp, int level, int completedTrials, int totalTrials) {
+        int columnWidth = 18;
+
+        // Top border
+        print(colorize("┌", CYAN));
+        print(colorize("─".repeat(columnWidth), CYAN));
+        print(colorize("┬", CYAN));
+        print(colorize("─".repeat(columnWidth), CYAN));
+        print(colorize("┬", CYAN));
+        print(colorize("─".repeat(columnWidth), CYAN));
+        println(colorize("┐", CYAN));
+
+        // Content row
+        print(colorize("│", CYAN));
+        String hpText = String.format(" HP: %d/%d", hp, maxHp);
+        print(colorize(padRight(hpText, columnWidth), getHpColor(hp, maxHp)));
+        print(colorize("│", CYAN));
+        String levelText = String.format(" LEVEL: %d", level);
+        print(colorize(padRight(levelText, columnWidth), YELLOW));
+        print(colorize("│", CYAN));
+        String trialsText = String.format(" TRIALS: %d/%d", completedTrials, totalTrials);
+        print(colorize(padRight(trialsText, columnWidth), MAGENTA));
+        println(colorize("│", CYAN));
+
+        // Bottom border
+        print(colorize("└", CYAN));
+        print(colorize("─".repeat(columnWidth), CYAN));
+        print(colorize("┴", CYAN));
+        print(colorize("─".repeat(columnWidth), CYAN));
+        print(colorize("┴", CYAN));
+        print(colorize("─".repeat(columnWidth), CYAN));
+        println(colorize("┘", CYAN));
+    }
+
+    private static Ansi.Color getHpColor(int hp, int maxHp) {
+        double percentage = (double) hp / maxHp;
+        if (percentage > 0.5) return GREEN;
+        if (percentage > 0.25) return YELLOW;
+        return RED;
+    }
+
+    private static String padRight(String text, int width) {
+        if (text.length() >= width) {
+            return text.substring(0, width);
+        }
+        return text + " ".repeat(width - text.length());
+    }
+
+    /**
+     * Displays a system message with [GAME] prefix.
+     */
+    public static void showGameMessage(String message) {
+        print(colorize(PREFIX_GAME + " ", CYAN));
+        println(colorize(message, WHITE));
+    }
+
+    /**
+     * Displays a narration label with [NARRATION] prefix.
+     */
+    public static void showNarrationLabel(String text) {
+        print(colorize(PREFIX_NARRATION + " ", CYAN));
+        println(colorize(text, WHITE));
+    }
+
+    /**
+     * Displays text in a blockquote style with cyan left border and yellow italic text.
+     */
+    public static void showBlockquote(String text) {
+        if (text == null || text.isEmpty()) return;
+
+        String[] lines = wrapText(text, DEFAULT_WIDTH - 4);
+        for (String line : lines) {
+            print(colorize("  " + BLOCKQUOTE_BORDER + " ", CYAN));
+            println(colorize(italic(line), YELLOW));
+        }
+    }
+
+    /**
+     * Displays multiple lines in blockquote style.
+     */
+    public static void showBlockquote(String[] lines) {
+        if (lines == null) return;
+
+        for (String line : lines) {
+            if (line == null) continue;
+            // Wrap each line if it's too long
+            String[] wrapped = wrapText(line, DEFAULT_WIDTH - 4);
+            for (String wrappedLine : wrapped) {
+                print(colorize("  " + BLOCKQUOTE_BORDER + " ", CYAN));
+                println(colorize(italic(wrappedLine), YELLOW));
+            }
+        }
+    }
+
+    /**
+     * Wraps text to specified width, returning array of lines.
+     */
+    private static String[] wrapText(String text, int width) {
+        if (text == null || text.isEmpty()) return new String[0];
+
+        java.util.List<String> lines = new java.util.ArrayList<>();
+        String[] words = text.split("\\s+");
+        StringBuilder line = new StringBuilder();
+
+        for (String word : words) {
+            if (line.length() + word.length() + 1 > width) {
+                if (!line.isEmpty()) {
+                    lines.add(line.toString());
+                    line = new StringBuilder();
+                }
+            }
+            if (!line.isEmpty()) {
+                line.append(" ");
+            }
+            line.append(word);
+        }
+
+        if (!line.isEmpty()) {
+            lines.add(line.toString());
+        }
+
+        return lines.toArray(new String[0]);
+    }
+
+    /**
+     * Displays a quest started notification.
+     */
+    public static void showQuestStarted(String questName) {
+        println();
+        println(colorize("+ QUEST STARTED: " + questName, GREEN));
+        println();
+    }
+
+    /**
+     * Displays a clue gained notification.
+     */
+    public static void showClueGained(String description) {
+        println();
+        println(colorize("+ CLUE GAINED: " + description, GREEN));
+        println();
+    }
+
+    /**
+     * Displays a tutorial tip in a bordered box.
+     */
+    public static void showTutorialTip(String tipText) {
+        println();
+        int contentWidth = DEFAULT_WIDTH - 4;
+
+        // Top border with header
+        print(colorize("┌─", YELLOW));
+        print(colorize(" 💡 TUTORIAL TIP ", YELLOW));
+        print(colorize("─".repeat(contentWidth - 17), YELLOW));
+        println(colorize("─┐", YELLOW));
+
+        // Content
+        String[] lines = wrapText(tipText, contentWidth - 2);
+        for (String line : lines) {
+            print(colorize("│ ", YELLOW));
+            print(colorize(line, WHITE));
+            print(" ".repeat(contentWidth - line.length()));
+            println(colorize(" │", YELLOW));
+        }
+
+        // Bottom border
+        print(colorize("└", YELLOW));
+        print(colorize("─".repeat(contentWidth + 2), YELLOW));
+        println(colorize("┘", YELLOW));
+        println();
+    }
+
+    /**
+     * Displays the action prompt with optional suggestions.
+     */
+    public static void showActionPrompt(String[] suggestions) {
+        println();
+        println(colorize("What do you do?", WHITE));
+        if (suggestions != null && suggestions.length > 0) {
+            print(colorize("Suggestions: ", DEFAULT));
+            println(colorize(String.join(", ", suggestions), CYAN));
+        }
+        println();
+    }
+
+    /**
+     * Echoes user input back for visual feedback.
+     */
+    public static void echoUserInput(String input) {
+        println(colorize("> " + input, GREEN));
+    }
+
+    /**
+     * Displays an enhanced skill check with highlighted components.
+     */
+    public static void showEnhancedSkillCheck(String skillName, int roll, int modifier, int total, int dc, boolean success) {
+        String modStr = modifier >= 0 ? "+" + modifier : String.valueOf(modifier);
+
+        print(colorize(PREFIX_ROLL + " ", CYAN));
+        print(colorize(skillName + " Check: ", WHITE));
+        print(colorize("d20: ", WHITE));
+        print(colorize(String.valueOf(roll), YELLOW));
+        print(colorize(" " + modStr + " = ", WHITE));
+        print(colorize(String.valueOf(total), YELLOW));
+        print(" ");
+
+        if (success) {
+            println(colorize("SUCCESS!", GREEN));
+        } else {
+            println(colorize("FAILURE", RED));
+        }
+
+        // Natural 20 or 1 callouts
+        if (roll == 20) {
+            println(colorize("  ★ NATURAL 20! ★", YELLOW));
+        } else if (roll == 1) {
+            println(colorize("  ✗ Natural 1...", RED));
+        }
     }
 }

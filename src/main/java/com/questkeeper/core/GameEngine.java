@@ -100,11 +100,10 @@ public class GameEngine implements AutoCloseable {
 
     private void showTitleScreen() {
         Display.clearScreen();
-        Display.println();
-        Display.printBox("QUESTKEEPER", 60, YELLOW);
+        Display.showHeader();
         Display.printBox("A D&D 5e Auto DM Adventure", 60, WHITE);
         Display.println();
-        Display.println(Display.colorize("Welcome, adventurer!", CYAN));
+        Display.showGameMessage("Welcome, adventurer!");
         Display.println();
         Display.println("Press Enter to begin your journey...");
         scanner.nextLine();
@@ -240,7 +239,12 @@ public class GameEngine implements AutoCloseable {
         // Show initial location
         displayCurrentLocation();
 
+        // Show tutorial tip on first play
+        Display.showTutorialTip("Use 'look' to examine your surroundings, 'go <direction>' to move, and 'talk <name>' to speak with characters.");
+
         while (running) {
+            // Show action prompt with suggestions
+            Display.showActionPrompt(generateSuggestions());
             Display.showPrompt();
             String input = scanner.nextLine().trim();
 
@@ -248,10 +252,14 @@ public class GameEngine implements AutoCloseable {
                 continue;
             }
 
+            // Echo user input
+            Display.echoUserInput(input);
+
             processCommand(input);
         }
 
         Display.println();
+        Display.showHeader();
         Display.println(Display.colorize("Thanks for playing QuestKeeper!", YELLOW));
         Display.println("Your adventure lasted " + gameState.getFormattedPlayTime() + ".");
     }
@@ -1132,6 +1140,16 @@ public class GameEngine implements AutoCloseable {
     // Trial Handlers
     // ==========================================
 
+    private int countCompletedTrials() {
+        int count = 0;
+        for (String trialId : campaign.getTrials().keySet()) {
+            if (gameState.hasCompletedTrial(trialId)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     private void checkForTrialAtLocation() {
         String locationId = gameState.getCurrentLocation().getId();
         Trial trial = campaign.getTrialAtLocation(locationId);
@@ -1222,6 +1240,9 @@ public class GameEngine implements AutoCloseable {
 
         // Mark the trial as started in GameState
         gameState.startTrial(trial.getId());
+
+        // Show quest started notification
+        Display.showQuestStarted(trial.getName());
 
         // Show entry narrative
         String narrative = trial.getEntryNarrative();
@@ -1538,6 +1559,9 @@ public class GameEngine implements AutoCloseable {
         // Mark trial as completed in GameState
         gameState.completeTrial(trial.getId());
 
+        // Show clue gained notification
+        Display.showClueGained("You've learned more about the mystery!");
+
         // Grant reward
         String rewardId = trial.getCompletionReward();
         if (rewardId != null && !rewardId.isEmpty()) {
@@ -1615,16 +1639,19 @@ public class GameEngine implements AutoCloseable {
         }
 
         Display.clearScreen();
-        Display.println();
+        Display.showHeader();
         Display.printBox("~ " + campaign.getName() + " ~", 60, MAGENTA);
         Display.println();
 
-        // Display the intro text with dramatic pacing
+        // Display the intro text with blockquote style
+        Display.showNarrationLabel("The adventure begins...");
+        Display.println();
+
         String intro = campaign.getIntro();
         String[] paragraphs = intro.split("\n\n");
 
         for (String paragraph : paragraphs) {
-            Display.printWrapped(paragraph.trim(), 60);
+            Display.showBlockquote(paragraph.trim());
             Display.println();
         }
 
@@ -1641,23 +1668,36 @@ public class GameEngine implements AutoCloseable {
             return;
         }
 
+        // Show status panel at the top
+        Character player = gameState.getCharacter();
+        int completedTrials = countCompletedTrials();
+        int totalTrials = campaign.getTrials().size();
+        Display.showStatusPanel(
+            player.getCurrentHitPoints(),
+            player.getMaxHitPoints(),
+            player.getLevel(),
+            completedTrials,
+            totalTrials
+        );
+
         Display.println();
         Display.printBox(location.getName(), 60, CYAN);
         Display.println();
 
         // Show description (read-aloud for first visit, regular description otherwise)
         // Check visited status in GameState, not on Location object
-        String description;
         boolean hasReadAloud = location.getReadAloudText() != null && !location.getReadAloudText().isEmpty();
-        if (!gameState.hasVisited(location.getId()) && hasReadAloud) {
-            description = location.getReadAloudText();
+        boolean firstVisit = !gameState.hasVisited(location.getId());
+
+        if (firstVisit && hasReadAloud) {
+            // Show read-aloud in blockquote style
+            Display.showNarrationLabel("As you enter...");
+            Display.println();
+            Display.showBlockquote(location.getReadAloudText());
         } else {
-            description = location.getDescription();
+            Display.showBlockquote(location.getDescription());
         }
 
-        // GameState.moveToLocation already marked the location as visited
-
-        Display.printWrapped(description, 60);
         Display.println();
 
         // Show NPCs with descriptors
@@ -1738,5 +1778,45 @@ public class GameEngine implements AutoCloseable {
         return actualLower.equals(searchLower) ||
                actualLower.contains(searchLower) ||
                searchLower.contains(actualLower);
+    }
+
+    /**
+     * Generates contextual command suggestions based on current game state.
+     */
+    private String[] generateSuggestions() {
+        List<String> suggestions = new ArrayList<>();
+        Location location = gameState.getCurrentLocation();
+
+        // Always suggest look
+        suggestions.add("look");
+
+        // Suggest talking to NPCs if present
+        if (location != null && !location.getNpcs().isEmpty()) {
+            String firstNpc = location.getNpcs().get(0);
+            NPC npc = campaign.getNPC(firstNpc);
+            if (npc != null) {
+                suggestions.add("talk " + npc.getName().toLowerCase());
+            }
+        }
+
+        // Suggest trial if at trial location
+        if (location != null) {
+            Trial trial = campaign.getTrialAtLocation(location.getId());
+            if (trial != null && !gameState.hasCompletedTrial(trial.getId())) {
+                suggestions.add("trial");
+            }
+        }
+
+        // Suggest go if there are exits
+        if (location != null && !location.getExits().isEmpty()) {
+            String firstExit = location.getExits().iterator().next();
+            suggestions.add("go " + firstExit);
+        }
+
+        // Suggest inventory and help
+        suggestions.add("inventory");
+        suggestions.add("help");
+
+        return suggestions.toArray(new String[0]);
     }
 }
