@@ -18,6 +18,7 @@ import com.questkeeper.inventory.Inventory;
 import com.questkeeper.inventory.Inventory.EquipmentSlot;
 import com.questkeeper.inventory.Item;
 import com.questkeeper.inventory.Inventory.ItemStack;
+import com.questkeeper.inventory.items.MagicItem;
 import com.questkeeper.save.SaveState;
 import com.questkeeper.state.GameState;
 import com.questkeeper.ui.CharacterCreator;
@@ -364,6 +365,7 @@ public class GameEngine implements AutoCloseable {
             case "drop" -> handleDrop(noun);
             case "equip", "wear", "wield" -> handleEquip(noun);
             case "unequip", "remove" -> handleUnequip(noun);
+            case "use", "activate" -> handleUse(noun);
             case "help" -> handleHelp();
             case "save" -> handleSave();
             case "load" -> handleLoad();
@@ -946,6 +948,86 @@ public class GameEngine implements AutoCloseable {
         }
 
         Display.showError("'" + target + "' is not equipped. Use 'unequip' to see equipped items.");
+    }
+
+    private void handleUse(String target) {
+        if (target == null || target.isEmpty()) {
+            Display.showError("Use what? Try 'use <item name>'.");
+            return;
+        }
+
+        var inventory = gameState.getCharacter().getInventory();
+        var items = inventory.findItemsByName(target);
+
+        if (items.isEmpty()) {
+            // Also check equipped items
+            var equipped = inventory.getEquippedItems();
+            for (Item item : equipped.values()) {
+                if (item.getName().toLowerCase().contains(target.toLowerCase())) {
+                    items.add(item);
+                    break;
+                }
+            }
+        }
+
+        if (items.isEmpty()) {
+            Display.showError("You don't have anything called '" + target + "'.");
+            return;
+        }
+
+        Item item = items.get(0);
+
+        // Check if it's a MagicItem with usable effects
+        if (item instanceof MagicItem magicItem) {
+            Character player = gameState.getCharacter();
+
+            if (!magicItem.canUse(player)) {
+                Display.showError(magicItem.getCannotUseReason(player));
+                return;
+            }
+
+            var usableEffects = magicItem.getUsableEffects();
+            if (usableEffects.isEmpty()) {
+                Display.println();
+                Display.println(Display.colorize(magicItem.getName(), CYAN));
+                Display.println(magicItem.getDescription());
+                Display.println();
+                Display.println(Display.colorize("This item has no activatable effects right now.", YELLOW));
+                Display.println();
+                return;
+            }
+
+            Display.println();
+            String result = magicItem.use(player);
+            Display.println(Display.colorize("You use the " + magicItem.getName() + "!", GREEN));
+            Display.println();
+            Display.println(result);
+            Display.println();
+
+            // Check if consumable and fully used
+            if (magicItem.isFullyConsumed()) {
+                inventory.removeItem(magicItem);
+                Display.println(Display.colorize("The " + magicItem.getName() + " is consumed.", YELLOW));
+                Display.println();
+            }
+            return;
+        }
+
+        // For regular items, show the description (flavor text for non-magic items)
+        Display.println();
+        Display.println(Display.colorize(item.getName(), CYAN));
+        if (!item.getDescription().isEmpty()) {
+            Display.println(item.getDescription());
+        } else {
+            Display.println("You examine the " + item.getName() + ".");
+        }
+        Display.println();
+
+        // Check if item type suggests it might be usable
+        if (item.getType() == Item.ItemType.CONSUMABLE) {
+            Display.println(Display.colorize("This looks like it could be consumed, but you're not sure how.", YELLOW));
+            Display.println();
+        }
     }
 
     private EquipmentSlot parseSlotName(String name) {

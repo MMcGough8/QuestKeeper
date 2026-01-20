@@ -7,6 +7,7 @@ import com.questkeeper.inventory.Armor;
 import com.questkeeper.inventory.Item;
 import com.questkeeper.inventory.Weapon;
 import com.questkeeper.inventory.items.MagicItem;
+import com.questkeeper.inventory.items.effects.DescriptionEffect;
 import com.questkeeper.world.Location;
 
 import org.yaml.snakeyaml.Yaml;
@@ -723,6 +724,7 @@ class CampaignLoader {
     }
 
     private Item parseItem(Map<String, Object> data) {
+        String id = getString(data, "id", "unknown");
         String name = getString(data, "name", "Unknown Item");
 
         String typeStr = getString(data, "type", "MISCELLANEOUS");
@@ -732,15 +734,37 @@ class CampaignLoader {
         double weight = getDouble(data, "weight", 0);
         int value = getInt(data, "value", 0);
 
-        Item item = new Item(name, type, description, weight, value);
-
         String rarityStr = getString(data, "rarity", "COMMON");
+        Item.Rarity rarity;
         try {
-            item.setRarity(Item.Rarity.valueOf(rarityStr.toUpperCase()));
+            rarity = Item.Rarity.valueOf(rarityStr.toUpperCase());
         } catch (IllegalArgumentException e) {
             loadErrors.add("Invalid rarity: " + rarityStr);
+            rarity = Item.Rarity.COMMON;
         }
 
+        // Check if this item has effect fields - if so, create a MagicItem
+        String effectDescription = getString(data, "effect_description", null);
+        if (effectDescription != null && !effectDescription.isEmpty()) {
+            MagicItem magicItem = new MagicItem(name, description, weight, value, rarity);
+
+            // Create an effect from the YAML fields
+            String usageType = getString(data, "usage_type", "DAILY");
+            int charges = getInt(data, "charges", 1);
+            DescriptionEffect effect = DescriptionEffect.fromYaml(id, name, effectDescription, usageType, charges);
+            magicItem.addEffect(effect);
+
+            // Handle attunement
+            if (getBoolean(data, "requires_attunement", false)) {
+                magicItem.setRequiresAttunement(true);
+            }
+
+            return magicItem;
+        }
+
+        // Regular item without effects
+        Item item = new Item(name, type, description, weight, value);
+        item.setRarity(rarity);
         item.setStackable(getBoolean(data, "stackable", false));
         item.setQuestItem(getBoolean(data, "quest_item", false));
 
