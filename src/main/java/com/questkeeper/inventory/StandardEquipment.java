@@ -59,8 +59,9 @@ public class StandardEquipment {
 
         for (Map<String, Object> weaponData : weaponList) {
             try {
+                String yamlId = getString(weaponData, "id");
                 Weapon weapon = parseWeapon(weaponData);
-                weapons.put(weapon.getId().toLowerCase(), weapon);
+                weapons.put(yamlId.toLowerCase(), weapon);
             } catch (Exception e) {
                 System.err.println("Error parsing weapon: " + e.getMessage());
             }
@@ -74,8 +75,9 @@ public class StandardEquipment {
 
         for (Map<String, Object> armorData : armorList) {
             try {
+                String yamlId = getString(armorData, "id");
                 Armor armor = parseArmor(armorData);
-                armors.put(armor.getId().toLowerCase(), armor);
+                armors.put(yamlId.toLowerCase(), armor);
             } catch (Exception e) {
                 System.err.println("Error parsing armor: " + e.getMessage());
             }

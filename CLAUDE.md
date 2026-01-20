@@ -31,14 +31,21 @@ mvn exec:java -Dexec.mainClass="com.questkeeper.Main"
 ## Playing the Game
 
 ```bash
+# Run the game (interactive mode)
 mvn exec:java -Dexec.mainClass="com.questkeeper.Main" -q
+
+# Run automated demo (for Demo Day presentations)
+mvn exec:java -Dexec.mainClass="com.questkeeper.demo.AutoDemo" -q
 ```
 
 **Basic Commands:**
 - `look` - Examine current location
 - `go <direction>` - Move (north, south, east, door, upstairs, etc.)
+- `n`, `s`, `e`, `w`, `ne`, `nw`, `se`, `sw`, `u`, `d` - Shorthand directions
+- `leave` / `exit` - Leave current location (finds best exit automatically)
 - `talk <npc>` - Start conversation
 - `ask about <topic>` - Ask NPC about something
+- `buy <item>` - Purchase item from merchant NPC (must be in conversation)
 - `bye` - End conversation
 - `inventory` / `i` - View items
 - `equip <item>` - Equip weapon/armor
@@ -56,7 +63,7 @@ mvn exec:java -Dexec.mainClass="com.questkeeper.Main" -q
 | `character` | Player characters (`Character`) and NPCs (`NPC`) |
 | `combat` | Combat system (`CombatSystem`), monster definitions, `Combatant` interface, `CombatResult` |
 | `combat.status` | Status effects system: conditions, durations, effect management |
-| `inventory` | Item hierarchy (`Item` → `Weapon`, `Armor`, `MagicItem`), `Inventory` with equipment slots and weight limits |
+| `inventory` | Item hierarchy (`Item` → `Weapon`, `Armor`, `MagicItem`), `Inventory` with equipment slots and weight limits, `StandardEquipment` singleton for D&D 5e items |
 | `inventory.items.effects` | Item effect system using Template Method pattern |
 | `campaign` | Campaign facade (`Campaign`), YAML loader (`CampaignLoader` - internal), trials (`Trial`), mini-games (`MiniGame`) |
 | `dialogue` | NPC conversation system (`DialogueSystem`, `DialogueResult`) |
@@ -95,6 +102,7 @@ The `Inventory` class manages item storage with D&D 5e mechanics:
 - **Weight Limits**: Carrying capacity = STR × 15 lbs
 - **Item Stacking**: Stackable items (consumables) use `ItemStack` with max stack sizes
 - **Two-Handed Weapons**: Auto-unequips off-hand when equipping
+- **Standard Equipment**: `StandardEquipment` singleton loads D&D 5e weapons/armor from `src/main/resources/items/standard_equipment.yaml`
 
 ### Combat System
 
@@ -114,8 +122,10 @@ The `GameEngine` class orchestrates the main game loop:
 - **Campaign Intro**: Displays dramatic opening scene from `campaign.yaml` intro field
 - **Location Display**: Shows read-aloud text on first visit, short description on subsequent visits
 - **NPC Display**: Shows NPCs with role descriptors (e.g., "Norrin (a bard)")
-- **Commands**: look, go, talk, ask, bye, attack, trial, attempt, inventory, equip, unequip, save, load, quit
-- **Dialogue System**: `talk <npc>` starts conversation, `ask about <topic>` queries, `bye` ends conversation
+- **Exit Display**: Shows exits with destinations (e.g., "Exits: north (Town Square), south (Inn)")
+- **Navigation**: Shorthand directions (n/s/e/w/ne/nw/se/sw/u/d), `leave`/`exit` finds best exit automatically
+- **Commands**: look, go, leave, talk, ask, buy, bye, attack, trial, attempt, inventory, equip, unequip, save, load, quit
+- **Dialogue System**: `talk <npc>` starts conversation, `ask about <topic>` queries, `buy <item>` purchases from merchants, `bye` ends conversation
 - **Location Unlocking**: Completing trials unlocks new locations (e.g., trial_01 → clocktower_hill)
 
 ### Status Effects System (`combat.status` package)
@@ -184,7 +194,7 @@ Mini-games use D&D 5e skill checks:
 
 Tests use JUnit 5 with `@Nested` classes for organization and `@TempDir` for file-based tests. Run `mvn test` for all tests.
 
-**Key test classes:** `CampaignTest`, `CombatSystemTest`, `CombatResultTest`, `InventoryTest`, `StatusEffectManagerTest`, `DialogueSystemTest`, `CharacterTest`, `MonsterTest`, `GameStateTest`
+**Core test classes:** `CampaignTest`, `CampaignLoaderTest`, `CombatSystemTest`, `CombatResultTest`, `InventoryTest`, `StatusEffectManagerTest`, `DialogueSystemTest`, `CharacterTest`, `MonsterTest`, `GameStateTest`, `GameEngineTest`, `CommandParserTest`, `TrialTest`, `TrialIntegrationTest`
 
 ## Key Implementation Details
 

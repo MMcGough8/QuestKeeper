@@ -115,10 +115,12 @@ public class CharacterCreator {
             
             // Random skills
             randomSkillProficiencies(character);
-            
+
             // Random equipment (option A)
+            addEquipmentOptionA(character, characterClass);
+            character.getInventory().addGold(10);
             println(colorize("\n✓ You receive standard equipment (Option A)!", GREEN));
-            
+
             printBox("Character creation complete!", 70, GREEN);
             pressEnterToContinue();
             showFinalCharacterSheet(character);
