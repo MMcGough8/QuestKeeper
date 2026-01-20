@@ -73,7 +73,7 @@ public class Armor extends Item {
      * Protected copy constructor that preserves the original ID.
      */
     protected Armor(Armor original) {
-        super(original.getId(), original.getName(), 
+        super(original.getId(), original.getName(),
               original.getCategory() == ArmorCategory.SHIELD ? ItemType.SHIELD : ItemType.ARMOR,
               original.getDescription(), original.getWeight(), original.getGoldValue());
         this.category = original.category;
@@ -82,6 +82,28 @@ public class Armor extends Item {
         this.stealthDisadvantage = original.stealthDisadvantage;
         this.acBonus = original.acBonus;
         setRarity(original.getRarity());
+    }
+
+    /**
+     * Private constructor for creating armor with an explicit ID.
+     */
+    private Armor(String id, String name, ArmorCategory category, int baseAC,
+                  double weight, int goldValue) {
+        super(id, name, category == ArmorCategory.SHIELD ? ItemType.SHIELD : ItemType.ARMOR,
+              "", weight, goldValue);
+        this.category = category;
+        this.baseAC = Math.max(0, baseAC);
+        this.strengthRequirement = 0;
+        this.stealthDisadvantage = false;
+        this.acBonus = 0;
+    }
+
+    /**
+     * Creates armor with an explicit ID (for YAML-loaded items).
+     */
+    public static Armor createWithId(String id, String name, ArmorCategory category, int baseAC,
+                                      double weight, int goldValue) {
+        return new Armor(id, name, category, baseAC, weight, goldValue);
     }
 
     /**

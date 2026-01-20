@@ -154,7 +154,7 @@ public class Weapon extends Item {
      * Protected copy constructor that preserves the original ID.
      */
     protected Weapon(Weapon original) {
-        super(original.getId(), original.getName(), ItemType.WEAPON, 
+        super(original.getId(), original.getName(), ItemType.WEAPON,
               original.getDescription(), original.getWeight(), original.getGoldValue());
         this.damageDiceCount = original.damageDiceCount;
         this.damageDieSize = original.damageDieSize;
@@ -167,6 +167,34 @@ public class Weapon extends Item {
         this.attackBonus = original.attackBonus;
         this.damageBonus = original.damageBonus;
         setRarity(original.getRarity());
+    }
+
+    /**
+     * Private constructor for creating a weapon with an explicit ID.
+     */
+    private Weapon(String id, String name, int damageDiceCount, int damageDieSize,
+                   DamageType damageType, WeaponCategory category,
+                   double weight, int goldValue) {
+        super(id, name, ItemType.WEAPON, "", weight, goldValue);
+        this.damageDiceCount = Math.max(1, damageDiceCount);
+        this.damageDieSize = Math.max(1, damageDieSize);
+        this.damageType = damageType;
+        this.category = category;
+        this.properties = EnumSet.noneOf(WeaponProperty.class);
+        this.normalRange = 0;
+        this.longRange = 0;
+        this.versatileDieSize = 0;
+        this.attackBonus = 0;
+        this.damageBonus = 0;
+    }
+
+    /**
+     * Creates a weapon with an explicit ID (for YAML-loaded items).
+     */
+    public static Weapon createWithId(String id, String name, int damageDiceCount, int damageDieSize,
+                                       DamageType damageType, WeaponCategory category,
+                                       double weight, int goldValue) {
+        return new Weapon(id, name, damageDiceCount, damageDieSize, damageType, category, weight, goldValue);
     }
 
     public void addProperty(WeaponProperty property) {

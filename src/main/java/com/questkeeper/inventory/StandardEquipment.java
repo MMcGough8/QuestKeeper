@@ -98,7 +98,8 @@ public class StandardEquipment {
         Weapon.DamageType damageType = Weapon.DamageType.valueOf(damageTypeStr);
         Weapon.WeaponCategory category = Weapon.WeaponCategory.valueOf(categoryStr);
 
-        Weapon weapon = new Weapon(name, diceCount, dieSize, damageType, category, weight, value);
+        // Use YAML ID so items can be saved/loaded correctly
+        Weapon weapon = Weapon.createWithId(id, name, diceCount, dieSize, damageType, category, weight, value);
 
         // Set ranges if present
         if (data.containsKey("normal_range")) {
@@ -126,6 +127,7 @@ public class StandardEquipment {
     }
 
     private Armor parseArmor(Map<String, Object> data) {
+        String id = getString(data, "id");
         String name = getString(data, "name");
         int armorClass = getInt(data, "armor_class", 10);
         String armorTypeStr = getString(data, "armor_type", "LIGHT");
@@ -136,7 +138,11 @@ public class StandardEquipment {
 
         Armor.ArmorCategory category = Armor.ArmorCategory.valueOf(armorTypeStr);
 
-        return new Armor(name, category, armorClass, strengthReq, stealthDisadv, weight, value);
+        // Use YAML ID so items can be saved/loaded correctly
+        Armor armor = Armor.createWithId(id, name, category, armorClass, weight, value);
+        armor.setStrengthRequirement(strengthReq);
+        armor.setStealthDisadvantage(stealthDisadv);
+        return armor;
     }
 
     // ==========================================

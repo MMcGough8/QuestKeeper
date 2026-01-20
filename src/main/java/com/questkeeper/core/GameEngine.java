@@ -1797,9 +1797,14 @@ public class GameEngine implements AutoCloseable {
             MiniGame.EvaluationResult result = game.evaluate(gameState.getCharacter(), skill.name());
             displayMiniGameResult(result);
 
-            // Handle rewards
-            if (result.success() && result.hasReward()) {
-                grantMiniGameReward(game);
+            // Handle rewards and save progress
+            if (result.success()) {
+                // Save mini-game completion to flags for persistence
+                gameState.setFlag("completed_minigame_" + game.getId());
+
+                if (result.hasReward()) {
+                    grantMiniGameReward(game);
+                }
             }
 
             // Handle consequences

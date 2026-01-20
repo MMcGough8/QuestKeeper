@@ -40,6 +40,28 @@ public class MagicItem extends Item {
         this.attunementRequirement = null;
     }
 
+    /**
+     * Private constructor for creating a MagicItem with an explicit ID.
+     */
+    private MagicItem(String id, String name, String description, double weight, int goldValue, Rarity rarity) {
+        super(id, name, ItemType.MAGIC_ITEM, description, weight, goldValue);
+        setRarity(rarity);
+        this.effects = new ArrayList<>();
+        this.requiresAttunement = false;
+        this.attuned = false;
+        this.attunedToId = null;
+        this.attunedToName = null;
+        this.attunementRequirement = null;
+    }
+
+    /**
+     * Creates a MagicItem with an explicit ID (for YAML-loaded items).
+     */
+    public static MagicItem createWithId(String id, String name, String description,
+                                          double weight, int goldValue, Rarity rarity) {
+        return new MagicItem(id, name, description, weight, goldValue, rarity);
+    }
+
     public MagicItem(String name, String description, double weight, int goldValue, Rarity rarity, ItemEffect effect) {
         this(name, description, weight, goldValue, rarity);
         if (effect != null) {

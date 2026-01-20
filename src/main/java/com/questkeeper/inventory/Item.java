@@ -114,7 +114,7 @@ public class Item {
     /**
      * Protected constructor for subclasses that need to set their own ID.
      */
-    protected Item(String id, String name, ItemType type, String description, 
+    protected Item(String id, String name, ItemType type, String description,
                    double weight, int goldValue) {
         this.id = id;
         this.name = name;
@@ -126,6 +126,14 @@ public class Item {
         this.stackable = false;
         this.maxStackSize = DEFAULT_MAX_STACK;
         this.questItem = false;
+    }
+
+    /**
+     * Creates an item with an explicit ID (for YAML-loaded items).
+     */
+    public static Item createWithId(String id, String name, ItemType type, String description,
+                                    double weight, int goldValue) {
+        return new Item(id, name, type, description, weight, goldValue);
     }
 
     /**

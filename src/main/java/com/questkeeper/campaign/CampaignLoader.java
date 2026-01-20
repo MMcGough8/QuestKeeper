@@ -746,7 +746,7 @@ class CampaignLoader {
         // Check if this item has effect fields - if so, create a MagicItem
         String effectDescription = getString(data, "effect_description", null);
         if (effectDescription != null && !effectDescription.isEmpty()) {
-            MagicItem magicItem = new MagicItem(name, description, weight, value, rarity);
+            MagicItem magicItem = MagicItem.createWithId(id, name, description, weight, value, rarity);
 
             // Create an effect from the YAML fields
             String usageType = getString(data, "usage_type", "DAILY");
@@ -762,8 +762,8 @@ class CampaignLoader {
             return magicItem;
         }
 
-        // Regular item without effects
-        Item item = new Item(name, type, description, weight, value);
+        // Regular item without effects - use YAML ID
+        Item item = Item.createWithId(id, name, type, description, weight, value);
         item.setRarity(rarity);
         item.setStackable(getBoolean(data, "stackable", false));
         item.setQuestItem(getBoolean(data, "quest_item", false));

@@ -2,6 +2,9 @@ package com.questkeeper.state;
 
 import com.questkeeper.campaign.Campaign;
 import com.questkeeper.character.Character;
+import com.questkeeper.inventory.Item;
+import com.questkeeper.inventory.Inventory.EquipmentSlot;
+import com.questkeeper.inventory.StandardEquipment;
 import com.questkeeper.save.SaveState;
 import com.questkeeper.world.Location;
 
@@ -115,6 +118,13 @@ public class GameState {
             if (flag.startsWith("started_")) {
                 String trialId = flag.substring("started_".length());
                 state.startedTrials.add(trialId);
+            } else if (flag.startsWith("completed_minigame_")) {
+                // Restore mini-game completion state
+                String miniGameId = flag.substring("completed_minigame_".length());
+                var miniGame = campaign.getMiniGame(miniGameId);
+                if (miniGame != null) {
+                    miniGame.complete();
+                }
             } else if (flag.startsWith("completed_")) {
                 String trialId = flag.substring("completed_".length());
                 state.completedTrials.add(trialId);
@@ -127,11 +137,25 @@ public class GameState {
         // Restore variables
         state.variables.putAll(saveState.getStateStrings());
 
-        // Restore inventory items from campaign
+        // Restore inventory items from campaign or StandardEquipment
+        StandardEquipment stdEquip = StandardEquipment.getInstance();
         for (String itemId : saveState.getInventoryItems()) {
-            var item = campaign.getItem(itemId);
+            Item item = findItem(itemId, campaign, stdEquip);
             if (item != null) {
                 character.getInventory().addItem(item);
+            }
+        }
+
+        // Restore equipped items
+        for (String itemId : saveState.getEquippedItems()) {
+            Item item = findItem(itemId, campaign, stdEquip);
+            if (item != null) {
+                // Add item first, then equip it
+                character.getInventory().addItem(item);
+                EquipmentSlot slot = determineSlotForItem(item);
+                if (slot != null) {
+                    character.getInventory().equipToSlot(item, slot);
+                }
             }
         }
 
@@ -176,12 +200,18 @@ public class GameState {
             save.setString(entry.getKey(), entry.getValue());
         }
 
-        // Inventory items
+        // Inventory items (backpack)
         for (var stack : character.getInventory().getAllItems()) {
             String itemId = stack.getItem().getId();
             for (int i = 0; i < stack.getQuantity(); i++) {
                 save.addItem(itemId);
             }
+        }
+
+        // Equipped items
+        for (var entry : character.getInventory().getEquippedItems().entrySet()) {
+            String itemId = entry.getValue().getId();
+            save.equipItem(itemId);
         }
 
         // Gold
@@ -579,6 +609,43 @@ public class GameState {
                 }
             }
         }
+    }
+
+    /**
+     * Finds an item by ID, checking campaign items first, then StandardEquipment.
+     */
+    private static Item findItem(String itemId, Campaign campaign, StandardEquipment stdEquip) {
+        // Try campaign first
+        Item item = campaign.getItem(itemId);
+        if (item != null) {
+            return item;
+        }
+
+        // Try StandardEquipment weapons
+        var weapon = stdEquip.getWeapon(itemId);
+        if (weapon != null) {
+            return weapon;
+        }
+
+        // Try StandardEquipment armor
+        var armor = stdEquip.getArmor(itemId);
+        if (armor != null) {
+            return armor;
+        }
+
+        return null;
+    }
+
+    /**
+     * Determines the appropriate equipment slot for an item.
+     */
+    private static EquipmentSlot determineSlotForItem(Item item) {
+        return switch (item.getType()) {
+            case WEAPON -> EquipmentSlot.MAIN_HAND;
+            case ARMOR -> EquipmentSlot.ARMOR;
+            case SHIELD -> EquipmentSlot.OFF_HAND;
+            default -> null;
+        };
     }
 
     @Override
