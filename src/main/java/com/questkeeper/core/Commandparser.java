@@ -41,6 +41,7 @@ public class CommandParser {
     private static final String VERB_TRIAL = "trial";
     private static final String VERB_ATTEMPT = "attempt";
     private static final String VERB_EQUIPMENT = "equipment";
+    private static final String VERB_LEAVE = "leave";
 
     private static final Map<String, String> SYNONYM_MAP = new HashMap<>();
 
@@ -48,7 +49,8 @@ public class CommandParser {
         VERB_GO, VERB_LOOK, VERB_TAKE, VERB_DROP, VERB_USE, VERB_TALK, VERB_ASK,
         VERB_ATTACK, VERB_CAST, VERB_INVENTORY, VERB_STATS, VERB_HELP, VERB_SAVE,
         VERB_LOAD, VERB_QUIT, VERB_REST, VERB_OPEN, VERB_CLOSE, VERB_READ,
-        VERB_EQUIP, VERB_UNEQUIP, VERB_BYE, VERB_TRIAL, VERB_ATTEMPT, VERB_EQUIPMENT
+        VERB_EQUIP, VERB_UNEQUIP, VERB_BYE, VERB_TRIAL, VERB_ATTEMPT, VERB_EQUIPMENT,
+        VERB_LEAVE, "exit"
     );
 
     private static final Map<String, String> DIRECTION_ALIASES = Map.of(
@@ -147,17 +149,20 @@ public class CommandParser {
         
         // Quit synonyms → "quit"
         SYNONYM_MAP.put("quit", VERB_QUIT);
-        SYNONYM_MAP.put("exit", VERB_QUIT);
         SYNONYM_MAP.put("q", VERB_QUIT);
         // Note: "bye" and "farewell" are handled as dialogue-ending commands
+        // Note: "leave" and "exit" are now separate commands for leaving locations
 
         // Dialogue ending → "bye"
         SYNONYM_MAP.put("bye", VERB_BYE);
         SYNONYM_MAP.put("farewell", VERB_BYE);
         SYNONYM_MAP.put("goodbye", VERB_BYE);
         SYNONYM_MAP.put("later", VERB_BYE);
-        SYNONYM_MAP.put("leave", VERB_BYE);
-        
+
+        // Leave/exit location → "leave"
+        SYNONYM_MAP.put("leave", VERB_LEAVE);
+        SYNONYM_MAP.put("exit", VERB_LEAVE);
+
         // Rest synonyms → "rest"
         SYNONYM_MAP.put("rest", VERB_REST);
         SYNONYM_MAP.put("sleep", VERB_REST);

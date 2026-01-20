@@ -67,7 +67,12 @@ npcs:
       and she polishes the same glass whether it needs it or not.
     location_id: drunken_dragon_inn
     shopkeeper: true
-    
+    shop_items:
+      ale: 1
+      wine: 3
+      stew: 2
+      bread: 1
+
     greeting: |
       If you're not buying, make it quick. If you are buying,
       take a seat and I'll be with you.

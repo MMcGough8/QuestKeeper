@@ -304,6 +304,16 @@ class CampaignLoader {
         npc.setGreeting(getString(data, "greeting", ""));
         npc.setReturnGreeting(getString(data, "return_greeting", ""));
 
+        // Parse shop items if present
+        Map<String, Object> shopItemsData = getMap(data, "shop_items");
+        if (shopItemsData != null) {
+            for (Map.Entry<String, Object> entry : shopItemsData.entrySet()) {
+                String itemName = entry.getKey();
+                int price = entry.getValue() instanceof Number ? ((Number) entry.getValue()).intValue() : 0;
+                npc.addShopItem(itemName.toLowerCase(), price);
+            }
+        }
+
         Map<String, String> dialogueMap = getStringMap(data, "dialogues");
         for (Map.Entry<String, String> entry : dialogueMap.entrySet()) {
             npc.addDialogue(entry.getKey(), entry.getValue());

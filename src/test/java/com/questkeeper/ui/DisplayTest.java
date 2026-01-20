@@ -700,22 +700,18 @@ class DisplayTest {
             Display.showTutorialTip("Use 'look' to examine your surroundings.");
 
             String output = getOutput();
-            assertTrue(output.contains("TUTORIAL TIP"), "Should contain tutorial tip header");
+            assertTrue(output.contains("TIP"), "Should contain tip header");
             assertTrue(output.contains("look"), "Should contain tip text");
-            assertTrue(output.contains("┌"), "Should have top border");
-            assertTrue(output.contains("└"), "Should have bottom border");
+            assertTrue(output.contains("+"), "Should have border");
         }
 
         @Test
-        @DisplayName("showActionPrompt displays prompt with suggestions")
+        @DisplayName("showActionPrompt displays prompt with help hint")
         void showActionPromptDisplays() {
             Display.showActionPrompt(new String[]{"look", "go north", "help"});
 
             String output = getOutput();
-            assertTrue(output.contains("What do you do?"), "Should contain prompt question");
-            assertTrue(output.contains("Suggestions:"), "Should contain suggestions label");
-            assertTrue(output.contains("look"), "Should list suggestions");
-            assertTrue(output.contains("go north"), "Should list all suggestions");
+            assertTrue(output.contains("help"), "Should contain help hint");
         }
 
         @Test
@@ -726,8 +722,7 @@ class DisplayTest {
             });
 
             String output = getOutput();
-            assertTrue(output.contains("What do you do?"), "Should still show prompt");
-            assertFalse(output.contains("Suggestions:"), "Should not show suggestions label when null");
+            assertTrue(output.contains("help"), "Should still show help hint");
         }
 
         @Test
@@ -736,8 +731,7 @@ class DisplayTest {
             Display.showActionPrompt(new String[]{});
 
             String output = getOutput();
-            assertTrue(output.contains("What do you do?"), "Should still show prompt");
-            assertFalse(output.contains("Suggestions:"), "Should not show suggestions label when empty");
+            assertTrue(output.contains("help"), "Should still show help hint");
         }
 
         @Test

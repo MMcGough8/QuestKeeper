@@ -28,10 +28,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Set;
 
 import static org.fusesource.jansi.Ansi.Color.*;
 
@@ -100,8 +102,7 @@ public class GameEngine implements AutoCloseable {
 
     private void showTitleScreen() {
         Display.clearScreen();
-        Display.showHeader();
-        Display.printBox("A D&D 5e Auto DM Adventure", 60, WHITE);
+        Display.showTitleScreen();
         Display.println();
         Display.showGameMessage("Welcome, adventurer!");
         Display.println();
@@ -150,31 +151,73 @@ public class GameEngine implements AutoCloseable {
     }
 
     private CampaignInfo showCampaignSelection(List<CampaignInfo> campaigns) {
-        Display.printBox("SELECT A CAMPAIGN", 60, MAGENTA);
+        Display.println();
+        Display.println(Display.colorize("SELECT YOUR CAMPAIGN", YELLOW));
         Display.println();
 
-        for (int i = 0; i < campaigns.size(); i++) {
-            CampaignInfo info = campaigns.get(i);
-            Display.println(Display.colorize((i + 1) + ") " + info.getDisplayString(), YELLOW));
-            Display.println("   " + info.getSummary());
+        // Sort campaigns by difficulty: Beginner, Intermediate, Advanced
+        List<CampaignInfo> sortedCampaigns = sortCampaignsByDifficulty(campaigns);
+
+        for (int i = 0; i < sortedCampaigns.size(); i++) {
+            CampaignInfo info = sortedCampaigns.get(i);
+            String difficulty = getCampaignDifficulty(info.id());
+            String description = getCampaignDescription(info.id());
+
+            Display.println("  " + (i + 1) + ". " + Display.colorize(info.name(), CYAN) + " (" + difficulty + ")");
+            Display.println("     " + description);
             Display.println();
         }
 
         while (true) {
-            Display.showPrompt("Choose campaign (1-" + campaigns.size() + "): ");
+            Display.showPrompt("> ");
             String input = scanner.nextLine().trim();
 
             try {
                 int choice = Integer.parseInt(input);
-                if (choice >= 1 && choice <= campaigns.size()) {
-                    return campaigns.get(choice - 1);
+                if (choice >= 1 && choice <= sortedCampaigns.size()) {
+                    return sortedCampaigns.get(choice - 1);
                 }
             } catch (NumberFormatException e) {
                 // Invalid input, try again
             }
 
-            Display.showError("Please enter a number between 1 and " + campaigns.size());
+            Display.showError("Please enter a number between 1 and " + sortedCampaigns.size());
         }
+    }
+
+    private List<CampaignInfo> sortCampaignsByDifficulty(List<CampaignInfo> campaigns) {
+        // Define difficulty order
+        Map<String, Integer> difficultyOrder = Map.of(
+            "muddlebrook", 1,
+            "eberron", 2,
+            "drownedgod", 3
+        );
+
+        List<CampaignInfo> sorted = new ArrayList<>(campaigns);
+        sorted.sort((a, b) -> {
+            int orderA = difficultyOrder.getOrDefault(a.id().toLowerCase(), 99);
+            int orderB = difficultyOrder.getOrDefault(b.id().toLowerCase(), 99);
+            return Integer.compare(orderA, orderB);
+        });
+        return sorted;
+    }
+
+    private String getCampaignDifficulty(String campaignId) {
+        return switch (campaignId.toLowerCase()) {
+            case "muddlebrook" -> "Beginner";
+            case "eberron" -> "Intermediate";
+            case "drownedgod" -> "Advanced";
+            default -> "Unknown";
+        };
+    }
+
+    private String getCampaignDescription(String campaignId) {
+        return switch (campaignId.toLowerCase()) {
+            case "muddlebrook" -> "Comedic mystery with theatrical puzzles";
+            case "eberron" -> "Olympic competition with cosmic stakes";
+            case "drownedgod" -> "Gothic horror with multiple endings";
+            default -> "A mysterious adventure awaits";
+        };
     }
 
     private Character createOrLoadCharacter() {
@@ -217,6 +260,20 @@ public class GameEngine implements AutoCloseable {
         character.addSkillProficiency(Character.Skill.ATHLETICS);
         character.addSkillProficiency(Character.Skill.PERCEPTION);
 
+        // Add starting equipment (Fighter Option A equivalent)
+        Inventory inventory = character.getInventory();
+        com.questkeeper.inventory.StandardEquipment equip =
+            com.questkeeper.inventory.StandardEquipment.getInstance();
+        inventory.addItem(equip.getWeapon("longsword"));
+        inventory.addItem(equip.getArmor("chain_mail"));
+        inventory.addItem(equip.getArmor("shield"));
+        inventory.equipToSlot(equip.getWeapon("longsword"), Inventory.EquipmentSlot.MAIN_HAND);
+        inventory.equipToSlot(equip.getArmor("chain_mail"), Inventory.EquipmentSlot.ARMOR);
+        inventory.equipToSlot(equip.getArmor("shield"), Inventory.EquipmentSlot.OFF_HAND);
+
+        // Add starting gold (10 cp pocket change)
+        inventory.addGold(10);
+
         Display.println(Display.colorize("Created: " + character.getName() + " the " +
             character.getRace().getDisplayName() + " " +
             character.getCharacterClass().getDisplayName(), GREEN));
@@ -229,14 +286,18 @@ public class GameEngine implements AutoCloseable {
 
     private void initializeGameState(Character character) {
         gameState = new GameState(character, campaign);
-        Display.println(Display.colorize("Game state initialized.", GREEN));
     }
 
     private void runGameLoop() {
+        // Clear screen from character creation
+        Display.clearScreen();
+
         // Show campaign intro if available
         displayCampaignIntro();
 
-        // Show initial location
+        // Clear and show initial location
+        Display.clearScreen();
+        Display.showHeader();
         displayCurrentLocation();
 
         // Show tutorial tip on first play
@@ -252,9 +313,6 @@ public class GameEngine implements AutoCloseable {
                 continue;
             }
 
-            // Echo user input
-            Display.echoUserInput(input);
-
             processCommand(input);
         }
 
@@ -267,6 +325,13 @@ public class GameEngine implements AutoCloseable {
     private void processCommand(String input) {
         Command command = CommandParser.parse(input);
 
+        // If in conversation, allow typing just the topic name
+        if (!command.isValid() && dialogueSystem.isInConversation()) {
+            // Try to interpret as a topic
+            handleAsk("ask about " + input);
+            return;
+        }
+
         if (!command.isValid()) {
             Display.showError("I don't understand '" + input + "'. Type 'help' for commands.");
             return;
@@ -277,9 +342,17 @@ public class GameEngine implements AutoCloseable {
 
         switch (verb) {
             case "look" -> handleLook(noun);
-            case "go" -> handleGo(noun);
+            case "go", "north", "south", "east", "west", "n", "s", "e", "w",
+                 "northeast", "northwest", "southeast", "southwest", "ne", "nw", "se", "sw",
+                 "up", "down", "u", "d" -> {
+                // If verb is a direction, use it; otherwise use noun
+                String direction = isDirection(verb) ? verb : noun;
+                handleGo(direction);
+            }
+            case "leave", "exit" -> handleLeave();
             case "talk" -> handleTalk(noun);
             case "ask" -> handleAsk(input);
+            case "buy" -> handleBuy(noun);
             case "bye" -> handleBye();
             case "attack" -> handleAttack(noun);
             case "trial" -> handleTrial();
@@ -291,7 +364,7 @@ public class GameEngine implements AutoCloseable {
             case "drop" -> handleDrop(noun);
             case "equip", "wear", "wield" -> handleEquip(noun);
             case "unequip", "remove" -> handleUnequip(noun);
-            case "help" -> Display.showHelp();
+            case "help" -> handleHelp();
             case "save" -> handleSave();
             case "load" -> handleLoad();
             case "quit" -> handleQuit();
@@ -347,10 +420,13 @@ public class GameEngine implements AutoCloseable {
             return;
         }
 
+        // Expand shorthand directions
+        direction = expandDirection(direction);
+
         Location currentLocation = gameState.getCurrentLocation();
         if (!currentLocation.hasExit(direction)) {
             Display.showError("You can't go " + direction + " from here.");
-            Display.println(currentLocation.getExitsDisplay());
+            Display.println(buildExitsDisplay(currentLocation));
             return;
         }
 
@@ -388,6 +464,62 @@ public class GameEngine implements AutoCloseable {
             return location.getLockedMessage();
         }
         return "That way is currently blocked or locked.";
+    }
+
+    private void handleLeave() {
+        Location currentLocation = gameState.getCurrentLocation();
+        Set<String> exits = currentLocation.getExits();
+
+        if (exits.isEmpty()) {
+            Display.showError("There's no way out of here!");
+            return;
+        }
+
+        // Priority order for exit directions
+        String[] exitPriority = {"out", "outside", "exit", "door", "south", "north", "east", "west"};
+
+        String chosenExit = null;
+        for (String preferred : exitPriority) {
+            if (exits.contains(preferred)) {
+                chosenExit = preferred;
+                break;
+            }
+        }
+
+        // If no preferred exit found, use the first available
+        if (chosenExit == null) {
+            chosenExit = exits.iterator().next();
+        }
+
+        // Use handleGo to do the actual movement
+        handleGo(chosenExit);
+    }
+
+    private String expandDirection(String dir) {
+        if (dir == null) return dir;
+        return switch (dir.toLowerCase()) {
+            case "n" -> "north";
+            case "s" -> "south";
+            case "e" -> "east";
+            case "w" -> "west";
+            case "ne" -> "northeast";
+            case "nw" -> "northwest";
+            case "se" -> "southeast";
+            case "sw" -> "southwest";
+            case "u" -> "up";
+            case "d" -> "down";
+            default -> dir;
+        };
+    }
+
+    private boolean isDirection(String word) {
+        if (word == null) return false;
+        return switch (word.toLowerCase()) {
+            case "north", "south", "east", "west", "n", "s", "e", "w",
+                 "northeast", "northwest", "southeast", "southwest", "ne", "nw", "se", "sw",
+                 "up", "down", "u", "d" -> true;
+            default -> false;
+        };
     }
 
     private void handleTalk(String target) {
@@ -442,6 +574,143 @@ public class GameEngine implements AutoCloseable {
         Display.println();
         Display.println(Display.colorize("You end your conversation with " + npc.getName() + ".", CYAN));
         Display.println();
+    }
+
+    private void handleBuy(String itemName) {
+        // Must be in conversation with a shopkeeper
+        if (!dialogueSystem.isInConversation()) {
+            Display.showError("You need to talk to a shopkeeper first.");
+            return;
+        }
+
+        NPC npc = dialogueSystem.getCurrentNpc();
+        if (!npc.isShopkeeper()) {
+            Display.showError(npc.getName() + " doesn't have anything for sale.");
+            return;
+        }
+
+        // Show shop menu if no item specified
+        if (itemName == null || itemName.trim().isEmpty()) {
+            showShopMenu(npc);
+            return;
+        }
+
+        // Try to find the item
+        String searchTerm = itemName.toLowerCase().trim();
+        Map<String, Integer> shopItems = npc.getShopItems();
+
+        String foundItem = null;
+        int price = 0;
+
+        // Try exact match first, then partial match
+        for (Map.Entry<String, Integer> entry : shopItems.entrySet()) {
+            if (entry.getKey().equals(searchTerm)) {
+                foundItem = entry.getKey();
+                price = entry.getValue();
+                break;
+            }
+        }
+
+        if (foundItem == null) {
+            for (Map.Entry<String, Integer> entry : shopItems.entrySet()) {
+                if (entry.getKey().contains(searchTerm) || searchTerm.contains(entry.getKey())) {
+                    foundItem = entry.getKey();
+                    price = entry.getValue();
+                    break;
+                }
+            }
+        }
+
+        if (foundItem == null) {
+            Display.showError(npc.getName() + " doesn't sell '" + itemName + "'.");
+            showShopMenu(npc);
+            return;
+        }
+
+        // Check if player has enough gold
+        Character character = gameState.getCharacter();
+        Inventory inventory = character.getInventory();
+
+        if (!inventory.hasGold(price)) {
+            Display.println();
+            Display.println(Display.colorize(npc.getName() + " shakes their head.", CYAN));
+            Display.println("\"That'll be " + formatPrice(price) + ", and you only have " +
+                formatPrice(inventory.getGold()) + ".\"");
+            Display.println();
+            return;
+        }
+
+        // Make the purchase
+        inventory.removeGold(price);
+
+        // Add item to inventory (as a consumable for drinks/food)
+        Item purchasedItem = campaign.getItem(foundItem);
+        if (purchasedItem != null) {
+            inventory.addItem(purchasedItem);
+        }
+
+        // Display purchase
+        Display.println();
+        Display.println(Display.colorize(npc.getName() + " takes your coin and hands you the " + foundItem + ".", CYAN));
+        Display.println(Display.colorize("(-" + formatPrice(price) + ")", YELLOW));
+        Display.println();
+    }
+
+    private void showShopMenu(NPC npc) {
+        Map<String, Integer> shopItems = npc.getShopItems();
+
+        Display.println();
+        Display.println(Display.colorize(npc.getName() + "'s Wares:", YELLOW));
+        Display.println();
+
+        for (Map.Entry<String, Integer> entry : shopItems.entrySet()) {
+            String itemName = entry.getKey();
+            int price = entry.getValue();
+            // Capitalize first letter of each word
+            String displayName = capitalizeWords(itemName);
+            Display.println("  " + Display.colorize(displayName, WHITE) +
+                " - " + Display.colorize(formatPrice(price), YELLOW));
+        }
+
+        Display.println();
+        Display.println(Display.colorize("Your gold: " + formatPrice(gameState.getCharacter().getInventory().getGold()), CYAN));
+        Display.println(Display.colorize("Type 'buy <item>' to purchase.", DEFAULT));
+        Display.println();
+    }
+
+    private String formatPrice(int copper) {
+        if (copper >= 100) {
+            int gold = copper / 100;
+            int remaining = copper % 100;
+            if (remaining > 0) {
+                return gold + " gp " + remaining + " cp";
+            }
+            return gold + " gp";
+        } else if (copper >= 10) {
+            int silver = copper / 10;
+            int remaining = copper % 10;
+            if (remaining > 0) {
+                return silver + " sp " + remaining + " cp";
+            }
+            return silver + " sp";
+        }
+        return copper + " cp";
+    }
+
+    private String capitalizeWords(String str) {
+        if (str == null || str.isEmpty()) return str;
+        String[] words = str.split(" ");
+        StringBuilder result = new StringBuilder();
+        for (String word : words) {
+            if (!word.isEmpty()) {
+                if (result.length() > 0) result.append(" ");
+                result.append(java.lang.Character.toUpperCase(word.charAt(0)));
+                if (word.length() > 1) {
+                    result.append(word.substring(1));
+                }
+            }
+        }
+        return result.toString();
     }
 
     private void handleInventory() {
@@ -854,6 +1123,30 @@ public class GameEngine implements AutoCloseable {
 
         if (confirm.equals("y") || confirm.equals("yes")) {
             running = false;
+        }
+    }
+
+    private void handleHelp() {
+        // If in conversation, show dialogue-specific help with topics
+        if (dialogueSystem.isInConversation()) {
+            Display.println();
+            NPC currentNpc = dialogueSystem.getCurrentNpc();
+            List<String> topics = dialogueSystem.getAvailableTopics();
+
+            Display.println(Display.colorize("Talking to " + currentNpc.getName(), CYAN));
+            if (topics != null && !topics.isEmpty()) {
+                Display.println(Display.colorize("Topics: ", WHITE) + String.join(", ", topics));
+            }
+
+            // Show buy command if NPC is a shopkeeper
+            if (currentNpc.isShopkeeper()) {
+                Display.println(Display.colorize("Commands: ", WHITE) + "ask about <topic>, buy <item>, bye");
+            } else {
+                Display.println(Display.colorize("Commands: ", WHITE) + "ask about <topic>, bye");
+            }
+            Display.println();
+        } else {
+            Display.showHelp();
         }
     }
 
@@ -1732,9 +2025,37 @@ public class GameEngine implements AutoCloseable {
             Display.println();
         }
 
-        // Show exits
-        Display.println(Display.colorize(location.getExitsDisplay(), WHITE));
+        // Show exits with destinations
+        Display.println(Display.colorize(buildExitsDisplay(location), WHITE));
         Display.println();
+    }
+
+    private String buildExitsDisplay(Location location) {
+        Set<String> exitDirections = location.getExits();
+        if (exitDirections.isEmpty()) {
+            return "There are no obvious exits.";
+        }
+
+        StringBuilder sb = new StringBuilder("Exits: ");
+        List<String> exitList = new ArrayList<>(exitDirections);
+        Collections.sort(exitList);
+
+        for (int i = 0; i < exitList.size(); i++) {
+            if (i > 0) {
+                sb.append(", ");
+            }
+            String direction = exitList.get(i);
+            String destId = location.getExit(direction);
+            Location dest = campaign.getLocation(destId);
+
+            // Show direction with destination name
+            sb.append(Display.colorize(direction, CYAN));
+            if (dest != null) {
+                sb.append(" (").append(dest.getName()).append(")");
+            }
+        }
+
+        return sb.toString();
     }
 
     private void displayDialogueResult(DialogueResult result) {
@@ -1744,13 +2065,6 @@ public class GameEngine implements AutoCloseable {
             case SUCCESS -> {
                 NPC npc = result.getNpc();
                 Display.showDialogue(npc.getName(), result.getMessage());
-
-                List<String> topics = result.getAvailableTopics();
-                if (topics != null && !topics.isEmpty()) {
-                    Display.println(Display.colorize("Topics: ", WHITE) +
-                        String.join(", ", topics));
-                    Display.println(Display.colorize("(Use 'ask about <topic>' or 'bye' to end conversation)", WHITE));
-                }
             }
             case NO_TOPIC -> {
                 Display.println(result.getNpc().getName() + " doesn't know about that.");

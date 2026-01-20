@@ -218,6 +218,45 @@ items:
     rarity: COMMON
 
   # ==========================================
+  # Tavern Food & Drinks
+  # ==========================================
+  - id: ale
+    name: Ale
+    type: CONSUMABLE
+    description: A mug of hearty tavern ale. Refreshing after a long day.
+    weight: 0.5
+    value: 1
+    stackable: true
+    rarity: COMMON
+
+  - id: wine
+    name: Wine
+    type: CONSUMABLE
+    description: A glass of decent red wine from the local vineyard.
+    weight: 0.5
+    value: 3
+    stackable: true
+    rarity: COMMON
+
+  - id: stew
+    name: Stew
+    type: CONSUMABLE
+    description: A bowl of thick, hearty stew. Warms the belly and the soul.
+    weight: 0.5
+    value: 2
+    stackable: true
+    rarity: COMMON
+
+  - id: bread
+    name: Bread
+    type: CONSUMABLE
+    description: A fresh loaf of crusty bread. Simple but filling.
+    weight: 0.5
+    value: 1
+    stackable: true
+    rarity: COMMON
+
+  # ==========================================
   # Tools & Miscellaneous
   # ==========================================
   - id: clockwork_lockpick

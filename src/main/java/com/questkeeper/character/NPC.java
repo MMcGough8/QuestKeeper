@@ -39,6 +39,7 @@ public class NPC {
     private final Set<String> flags;              // Relationship state
 
     private boolean shopkeeper;                   // Can sell items
+    private final Map<String, Integer> shopItems; // Item name -> price in copper
 
     public NPC(String id, String name) {
         this(id, name, "", "", "");
@@ -71,6 +72,7 @@ public class NPC {
         this.flags = new HashSet<>();
 
         this.shopkeeper = false;
+        this.shopItems = new HashMap<>();
     }
 
     public String getId() {
@@ -133,6 +135,22 @@ public class NPC {
 
     public void setShopkeeper(boolean shopkeeper) {
         this.shopkeeper = shopkeeper;
+    }
+
+    public Map<String, Integer> getShopItems() {
+        return shopItems;
+    }
+
+    public void addShopItem(String itemName, int price) {
+        shopItems.put(itemName, price);
+    }
+
+    public boolean hasItemForSale(String itemName) {
+        return shopItems.containsKey(itemName.toLowerCase());
+    }
+
+    public int getItemPrice(String itemName) {
+        return shopItems.getOrDefault(itemName.toLowerCase(), 0);
     }
 
     public String getGreeting() {

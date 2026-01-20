@@ -154,6 +154,17 @@ public class DialogueSystem {
     }
 
     /**
+     * Gets available dialogue topics for the current conversation.
+     */
+    public List<String> getAvailableTopics() {
+        if (currentNpc == null || currentState == null) {
+            return List.of();
+        }
+        Set<String> flags = currentState.getFlags();
+        return currentNpc.getAvailableTopics(flags);
+    }
+
+    /**
      * Lists NPCs available to talk to at the current location.
      */
     public List<NPC> getNpcsAtCurrentLocation(GameState state) {

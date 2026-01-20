@@ -528,6 +528,31 @@ public class Weapon extends Item {
         return w;
     }
 
+    public static Weapon createGreataxe() {
+        Weapon w = new Weapon("Greataxe", 1, 12, DamageType.SLASHING,
+                WeaponCategory.MARTIAL_MELEE, 7.0, 30);
+        w.addProperty(WeaponProperty.HEAVY);
+        w.addProperty(WeaponProperty.TWO_HANDED);
+        return w;
+    }
+
+    public static Weapon createMaul() {
+        Weapon w = new Weapon("Maul", 2, 6, DamageType.BLUDGEONING,
+                WeaponCategory.MARTIAL_MELEE, 10.0, 10);
+        w.addProperty(WeaponProperty.HEAVY);
+        w.addProperty(WeaponProperty.TWO_HANDED);
+        return w;
+    }
+
+    public static Weapon createGlaive() {
+        Weapon w = new Weapon("Glaive", 1, 10, DamageType.SLASHING,
+                WeaponCategory.MARTIAL_MELEE, 6.0, 20);
+        w.addProperty(WeaponProperty.HEAVY);
+        w.addProperty(WeaponProperty.TWO_HANDED);
+        w.addProperty(WeaponProperty.REACH);
+        return w;
+    }
+
     public static Weapon createLongsword() {
         Weapon w = new Weapon("Longsword", 1, 8, DamageType.SLASHING,
                 WeaponCategory.MARTIAL_MELEE, 3.0, 15);

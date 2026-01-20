@@ -123,25 +123,26 @@ public class Display {
         int barWidth = 20;
         int filled = (int) ((double) current / max * barWidth);
         filled = Math.max(0, Math.min(barWidth, filled));
-        
+
         print(colorize("HP: ", WHITE));
-        print("[");
-        
+        print(colorize("[", WHITE));
+
         double percentage = (double) current / max;
 
         Ansi.Color barColor;
         if (percentage > 0.5) {
-            barColor = GREEN;
+            barColor = CYAN;  // More visible than green on dark backgrounds
         } else if (percentage > 0.25) {
             barColor = YELLOW;
         } else {
             barColor = RED;
         }
-        
-        print(colorize("█".repeat(filled), barColor));
-        print(colorize("░".repeat(barWidth - filled), DEFAULT));
-        print("] ");
-        
+
+        // Use = for filled and - for empty (more visible than block characters)
+        print(colorize("=".repeat(filled), barColor));
+        print(colorize("-".repeat(barWidth - filled), DEFAULT));
+        print(colorize("] ", WHITE));
+
         print(colorize(current + "/" + max, barColor));
         println();
     }
@@ -261,6 +262,7 @@ public class Display {
         showHelpCommand("look / examine", "Examine your surroundings or an object");
         showHelpCommand("go <direction>", "Move in a direction (north, south, east, west)");
         showHelpCommand("talk <npc>", "Talk to a character");
+        showHelpCommand("buy <item>", "Buy from a shopkeeper (while talking)");
         showHelpCommand("take <item>", "Pick up an item");
         showHelpCommand("use <item>", "Use an item from your inventory");
         showHelpCommand("inventory / i", "View your inventory");
@@ -441,8 +443,10 @@ public class Display {
     }
 
     public static void clearScreen() {
+        System.out.flush();
         if (colorsEnabled) {
             System.out.print(ansi().eraseScreen().cursor(1, 1));
+            System.out.flush();
         } else {
             for (int i = 0; i < 50; i++) {
                 println();
@@ -479,6 +483,33 @@ public class Display {
     // ========================================================================
 
     /**
+     * Displays the ASCII art title screen.
+     */
+    public static void showTitleScreen() {
+        println();
+        println(colorize("    ╔═══════════════════════════════════════════════════════╗", YELLOW));
+        println(colorize("    ║                                                       ║", YELLOW));
+        println(colorize("    ║     ██████╗ ██╗   ██╗███████╗███████╗████████╗        ║", YELLOW));
+        println(colorize("    ║    ██╔═══██╗██║   ██║██╔════╝██╔════╝╚══██╔══╝        ║", YELLOW));
+        println(colorize("    ║    ██║   ██║██║   ██║█████╗  ███████╗   ██║           ║", YELLOW));
+        println(colorize("    ║    ██║▄▄ ██║██║   ██║██╔══╝  ╚════██║   ██║           ║", YELLOW));
+        println(colorize("    ║    ╚██████╔╝╚██████╔╝███████╗███████║   ██║           ║", YELLOW));
+        println(colorize("    ║     ╚══▀▀═╝  ╚═════╝ ╚══════╝╚══════╝   ╚═╝           ║", YELLOW));
+        println(colorize("    ║                                                       ║", YELLOW));
+        println(colorize("    ║    ██╗  ██╗███████╗███████╗██████╗ ███████╗██████╗    ║", YELLOW));
+        println(colorize("    ║    ██║ ██╔╝██╔════╝██╔════╝██╔══██╗██╔════╝██╔══██╗   ║", YELLOW));
+        println(colorize("    ║    █████╔╝ █████╗  █████╗  ██████╔╝█████╗  ██████╔╝   ║", YELLOW));
+        println(colorize("    ║    ██╔═██╗ ██╔══╝  ██╔══╝  ██╔═══╝ ██╔══╝  ██╔══██╗   ║", YELLOW));
+        println(colorize("    ║    ██║  ██╗███████╗███████╗██║     ███████╗██║  ██║   ║", YELLOW));
+        println(colorize("    ║    ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝     ╚══════╝╚═╝  ╚═╝   ║", YELLOW));
+        println(colorize("    ║                                                       ║", YELLOW));
+        println(colorize("    ║           ⚔  A Terminal Fantasy Adventure  ⚔          ║", YELLOW));
+        println(colorize("    ║                                                       ║", YELLOW));
+        println(colorize("    ╚═══════════════════════════════════════════════════════╝", YELLOW));
+        println();
+    }
+
+    /**
      * Displays the game header bar with session status.
      */
     public static void showHeader() {
@@ -496,35 +527,35 @@ public class Display {
     public static void showStatusPanel(int hp, int maxHp, int level, int completedTrials, int totalTrials) {
         int columnWidth = 18;
 
-        // Top border
-        print(colorize("┌", CYAN));
-        print(colorize("─".repeat(columnWidth), CYAN));
-        print(colorize("┬", CYAN));
-        print(colorize("─".repeat(columnWidth), CYAN));
-        print(colorize("┬", CYAN));
-        print(colorize("─".repeat(columnWidth), CYAN));
-        println(colorize("┐", CYAN));
+        // Top border - using ASCII for terminal compatibility
+        print(colorize("+", CYAN));
+        print(colorize("-".repeat(columnWidth), CYAN));
+        print(colorize("+", CYAN));
+        print(colorize("-".repeat(columnWidth), CYAN));
+        print(colorize("+", CYAN));
+        print(colorize("-".repeat(columnWidth), CYAN));
+        println(colorize("+", CYAN));
 
         // Content row
-        print(colorize("│", CYAN));
+        print(colorize("|", CYAN));
         String hpText = String.format(" HP: %d/%d", hp, maxHp);
         print(colorize(padRight(hpText, columnWidth), getHpColor(hp, maxHp)));
-        print(colorize("│", CYAN));
+        print(colorize("|", CYAN));
         String levelText = String.format(" LEVEL: %d", level);
         print(colorize(padRight(levelText, columnWidth), YELLOW));
-        print(colorize("│", CYAN));
+        print(colorize("|", CYAN));
         String trialsText = String.format(" TRIALS: %d/%d", completedTrials, totalTrials);
         print(colorize(padRight(trialsText, columnWidth), MAGENTA));
-        println(colorize("│", CYAN));
+        println(colorize("|", CYAN));
 
         // Bottom border
-        print(colorize("└", CYAN));
-        print(colorize("─".repeat(columnWidth), CYAN));
-        print(colorize("┴", CYAN));
-        print(colorize("─".repeat(columnWidth), CYAN));
-        print(colorize("┴", CYAN));
-        print(colorize("─".repeat(columnWidth), CYAN));
-        println(colorize("┘", CYAN));
+        print(colorize("+", CYAN));
+        print(colorize("-".repeat(columnWidth), CYAN));
+        print(colorize("+", CYAN));
+        print(colorize("-".repeat(columnWidth), CYAN));
+        print(colorize("+", CYAN));
+        print(colorize("-".repeat(columnWidth), CYAN));
+        println(colorize("+", CYAN));
     }
 
     private static Ansi.Color getHpColor(int hp, int maxHp) {
@@ -642,39 +673,34 @@ public class Display {
         println();
         int contentWidth = DEFAULT_WIDTH - 4;
 
-        // Top border with header
-        print(colorize("┌─", YELLOW));
-        print(colorize(" 💡 TUTORIAL TIP ", YELLOW));
-        print(colorize("─".repeat(contentWidth - 17), YELLOW));
-        println(colorize("─┐", YELLOW));
+        // Top border with header - using ASCII for terminal compatibility
+        print(colorize("+-", YELLOW));
+        print(colorize(" TIP ", YELLOW));
+        print(colorize("-".repeat(contentWidth - 5), YELLOW));
+        println(colorize("-+", YELLOW));
 
         // Content
         String[] lines = wrapText(tipText, contentWidth - 2);
         for (String line : lines) {
-            print(colorize("│ ", YELLOW));
+            print(colorize("| ", YELLOW));
             print(colorize(line, WHITE));
             print(" ".repeat(contentWidth - line.length()));
-            println(colorize(" │", YELLOW));
+            println(colorize(" |", YELLOW));
         }
 
         // Bottom border
-        print(colorize("└", YELLOW));
-        print(colorize("─".repeat(contentWidth + 2), YELLOW));
-        println(colorize("┘", YELLOW));
+        print(colorize("+", YELLOW));
+        print(colorize("-".repeat(contentWidth + 2), YELLOW));
+        println(colorize("+", YELLOW));
         println();
     }
 
     /**
-     * Displays the action prompt with optional suggestions.
+     * Displays the action prompt with a help hint.
      */
     public static void showActionPrompt(String[] suggestions) {
         println();
-        println(colorize("What do you do?", WHITE));
-        if (suggestions != null && suggestions.length > 0) {
-            print(colorize("Suggestions: ", DEFAULT));
-            println(colorize(String.join(", ", suggestions), CYAN));
-        }
-        println();
+        println(colorize("(type 'help' for commands)", DEFAULT));
     }
 
     /**

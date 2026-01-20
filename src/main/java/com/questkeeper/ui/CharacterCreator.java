@@ -5,6 +5,9 @@ import com.questkeeper.character.Character.Ability;
 import com.questkeeper.character.Character.CharacterClass;
 import com.questkeeper.character.Character.Race;
 import com.questkeeper.character.Character.Skill;
+import com.questkeeper.inventory.Inventory;
+import com.questkeeper.inventory.Inventory.EquipmentSlot;
+import com.questkeeper.inventory.StandardEquipment;
 
 import java.util.*;
 
@@ -30,7 +33,6 @@ public class CharacterCreator {
     private static final int[] POINT_BUY_COSTS = {0, 1, 2, 3, 4, 5, 7, 9}; // Cost to reach score 8 through 15
 
     public static Character createCharacter() {
-        Display.init();
         clearScreen();
 
         printBox("QUESTKEEPER", 70, YELLOW);
@@ -120,7 +122,6 @@ public class CharacterCreator {
             printBox("Character creation complete!", 70, GREEN);
             pressEnterToContinue();
             showFinalCharacterSheet(character);
-            Display.shutdown();
             return character;
         }
 
@@ -157,7 +158,6 @@ public class CharacterCreator {
         // Final Character Sheet
         showFinalCharacterSheet(character);
 
-        Display.shutdown();
         return character;
     }
 
@@ -454,6 +454,7 @@ public class CharacterCreator {
         printDivider('─', 80, WHITE);
         printBox("Press Enter to begin your adventure as " + character.getName() + "...", 80, YELLOW);
         scanner.nextLine();
+        clearScreen();  // Clear before returning to game
     }
 
     private static List<Skill> getClassSkillOptions(CharacterClass cc) {
@@ -582,10 +583,10 @@ public class CharacterCreator {
 
     private static void selectStartingEquipment(Character character) {
         CharacterClass cc = character.getCharacterClass();
-        
+
         println(bold("As a " + cc.getDisplayName() + ", you receive starting equipment.\n"));
         println("Choose your equipment package:\n");
-        
+
         // Get equipment options for the class
         List<String> optionA = getEquipmentOptionA(cc);
         List<String> optionB = getEquipmentOptionB(cc);
@@ -609,9 +610,12 @@ public class CharacterCreator {
 
         int choice = promptForInt("Choose option (1=A, 2=B, 3=Gold): ", 1, 3);
 
+        Inventory inventory = character.getInventory();
+
         switch (choice) {
             case 1 -> {
                 println(colorize("\n✓ You receive Option A equipment!", GREEN));
+                addEquipmentOptionA(character, cc);
                 println("Equipment added to your inventory:");
                 for (String item : optionA) {
                     println("  • " + item);
@@ -619,6 +623,7 @@ public class CharacterCreator {
             }
             case 2 -> {
                 println(colorize("\n✓ You receive Option B equipment!", GREEN));
+                addEquipmentOptionB(character, cc);
                 println("Equipment added to your inventory:");
                 for (String item : optionB) {
                     println("  • " + item);
@@ -627,11 +632,181 @@ public class CharacterCreator {
             case 3 -> {
                 println(colorize("\n✓ You receive " + goldOption + " gold pieces!", GREEN));
                 println("Visit a shop to purchase your equipment.");
+                // Gold is stored in copper: 1 gp = 100 cp
+                inventory.addGold(goldOption * 100);
             }
         }
 
-        // Note: Actual inventory integration would happen here
-        // character.getInventory().addItem(...) etc.
+        // Give everyone a small amount of pocket change (10 cp = 1 sp)
+        inventory.addGold(10);
+    }
+
+    private static void addEquipmentOptionA(Character character, CharacterClass cc) {
+        Inventory inv = character.getInventory();
+        StandardEquipment equip = StandardEquipment.getInstance();
+
+        switch (cc) {
+            case BARBARIAN -> {
+                inv.addItem(equip.getWeapon("greataxe"));
+                inv.addItem(equip.getWeapon("handaxe"));
+                inv.addItem(equip.getWeapon("handaxe"));
+                inv.addItem(equip.getWeapon("javelin"));
+                inv.addItem(equip.getWeapon("javelin"));
+                inv.equipToSlot(equip.getWeapon("greataxe"), EquipmentSlot.MAIN_HAND);
+            }
+            case BARD -> {
+                inv.addItem(equip.getWeapon("rapier"));
+                inv.addItem(equip.getArmor("leather_armor"));
+                inv.addItem(equip.getWeapon("dagger"));
+                inv.equipToSlot(equip.getWeapon("rapier"), EquipmentSlot.MAIN_HAND);
+                inv.equipToSlot(equip.getArmor("leather_armor"), EquipmentSlot.ARMOR);
+            }
+            case CLERIC -> {
+                inv.addItem(equip.getWeapon("mace"));
+                inv.addItem(equip.getArmor("scale_mail"));
+                inv.addItem(equip.getArmor("shield"));
+                inv.equipToSlot(equip.getWeapon("mace"), EquipmentSlot.MAIN_HAND);
+                inv.equipToSlot(equip.getArmor("scale_mail"), EquipmentSlot.ARMOR);
+                inv.equipToSlot(equip.getArmor("shield"), EquipmentSlot.OFF_HAND);
+            }
+            case DRUID -> {
+                inv.addItem(equip.getArmor("shield"));
+                inv.addItem(equip.getWeapon("scimitar"));
+                inv.addItem(equip.getArmor("leather_armor"));
+                inv.equipToSlot(equip.getWeapon("scimitar"), EquipmentSlot.MAIN_HAND);
+                inv.equipToSlot(equip.getArmor("leather_armor"), EquipmentSlot.ARMOR);
+                inv.equipToSlot(equip.getArmor("shield"), EquipmentSlot.OFF_HAND);
+            }
+            case FIGHTER -> {
+                inv.addItem(equip.getWeapon("longsword"));
+                inv.addItem(equip.getArmor("chain_mail"));
+                inv.addItem(equip.getArmor("shield"));
+                inv.equipToSlot(equip.getWeapon("longsword"), EquipmentSlot.MAIN_HAND);
+                inv.equipToSlot(equip.getArmor("chain_mail"), EquipmentSlot.ARMOR);
+                inv.equipToSlot(equip.getArmor("shield"), EquipmentSlot.OFF_HAND);
+            }
+            case MONK -> {
+                inv.addItem(equip.getWeapon("shortsword"));
+                inv.addItem(equip.getWeapon("dagger"));
+                inv.addItem(equip.getWeapon("dagger"));
+                inv.equipToSlot(equip.getWeapon("shortsword"), EquipmentSlot.MAIN_HAND);
+            }
+            case PALADIN -> {
+                inv.addItem(equip.getWeapon("longsword"));
+                inv.addItem(equip.getArmor("chain_mail"));
+                inv.addItem(equip.getArmor("shield"));
+                inv.addItem(equip.getWeapon("javelin"));
+                inv.addItem(equip.getWeapon("javelin"));
+                inv.equipToSlot(equip.getWeapon("longsword"), EquipmentSlot.MAIN_HAND);
+                inv.equipToSlot(equip.getArmor("chain_mail"), EquipmentSlot.ARMOR);
+                inv.equipToSlot(equip.getArmor("shield"), EquipmentSlot.OFF_HAND);
+            }
+            case RANGER -> {
+                inv.addItem(equip.getWeapon("longbow"));
+                inv.addItem(equip.getWeapon("shortsword"));
+                inv.addItem(equip.getWeapon("shortsword"));
+                inv.addItem(equip.getArmor("leather_armor"));
+                inv.equipToSlot(equip.getWeapon("longbow"), EquipmentSlot.MAIN_HAND);
+                inv.equipToSlot(equip.getArmor("leather_armor"), EquipmentSlot.ARMOR);
+            }
+            case ROGUE -> {
+                inv.addItem(equip.getWeapon("rapier"));
+                inv.addItem(equip.getWeapon("shortbow"));
+                inv.addItem(equip.getArmor("leather_armor"));
+                inv.addItem(equip.getWeapon("dagger"));
+                inv.addItem(equip.getWeapon("dagger"));
+                inv.equipToSlot(equip.getWeapon("rapier"), EquipmentSlot.MAIN_HAND);
+                inv.equipToSlot(equip.getArmor("leather_armor"), EquipmentSlot.ARMOR);
+            }
+            case SORCERER, WARLOCK, WIZARD -> {
+                inv.addItem(equip.getWeapon("dagger"));
+                inv.addItem(equip.getWeapon("dagger"));
+                inv.addItem(equip.getWeapon("quarterstaff"));
+                inv.equipToSlot(equip.getWeapon("quarterstaff"), EquipmentSlot.MAIN_HAND);
+            }
+        }
+    }
+
+    private static void addEquipmentOptionB(Character character, CharacterClass cc) {
+        Inventory inv = character.getInventory();
+        StandardEquipment equip = StandardEquipment.getInstance();
+
+        switch (cc) {
+            case BARBARIAN -> {
+                inv.addItem(equip.getWeapon("handaxe"));
+                inv.addItem(equip.getWeapon("handaxe"));
+                inv.addItem(equip.getWeapon("javelin"));
+                inv.addItem(equip.getWeapon("javelin"));
+                inv.addItem(equip.getWeapon("javelin"));
+                inv.addItem(equip.getWeapon("javelin"));
+                inv.equipToSlot(equip.getWeapon("handaxe"), EquipmentSlot.MAIN_HAND);
+            }
+            case BARD -> {
+                inv.addItem(equip.getWeapon("longsword"));
+                inv.addItem(equip.getArmor("leather_armor"));
+                inv.addItem(equip.getWeapon("dagger"));
+                inv.equipToSlot(equip.getWeapon("longsword"), EquipmentSlot.MAIN_HAND);
+                inv.equipToSlot(equip.getArmor("leather_armor"), EquipmentSlot.ARMOR);
+            }
+            case CLERIC -> {
+                inv.addItem(equip.getWeapon("warhammer"));
+                inv.addItem(equip.getArmor("chain_mail"));
+                inv.addItem(equip.getArmor("shield"));
+                inv.equipToSlot(equip.getWeapon("warhammer"), EquipmentSlot.MAIN_HAND);
+                inv.equipToSlot(equip.getArmor("chain_mail"), EquipmentSlot.ARMOR);
+                inv.equipToSlot(equip.getArmor("shield"), EquipmentSlot.OFF_HAND);
+            }
+            case DRUID -> {
+                inv.addItem(equip.getWeapon("quarterstaff"));
+                inv.addItem(equip.getArmor("leather_armor"));
+                inv.equipToSlot(equip.getWeapon("quarterstaff"), EquipmentSlot.MAIN_HAND);
+                inv.equipToSlot(equip.getArmor("leather_armor"), EquipmentSlot.ARMOR);
+            }
+            case FIGHTER -> {
+                inv.addItem(equip.getWeapon("longbow"));
+                inv.addItem(equip.getArmor("leather_armor"));
+                inv.addItem(equip.getWeapon("handaxe"));
+                inv.addItem(equip.getWeapon("handaxe"));
+                inv.equipToSlot(equip.getWeapon("longbow"), EquipmentSlot.MAIN_HAND);
+                inv.equipToSlot(equip.getArmor("leather_armor"), EquipmentSlot.ARMOR);
+            }
+            case MONK -> {
+                inv.addItem(equip.getWeapon("quarterstaff"));
+                inv.addItem(equip.getWeapon("dagger"));
+                inv.addItem(equip.getWeapon("dagger"));
+                inv.equipToSlot(equip.getWeapon("quarterstaff"), EquipmentSlot.MAIN_HAND);
+            }
+            case PALADIN -> {
+                inv.addItem(equip.getWeapon("greatsword"));
+                inv.addItem(equip.getArmor("chain_mail"));
+                inv.addItem(equip.getWeapon("javelin"));
+                inv.addItem(equip.getWeapon("javelin"));
+                inv.equipToSlot(equip.getWeapon("greatsword"), EquipmentSlot.MAIN_HAND);
+                inv.equipToSlot(equip.getArmor("chain_mail"), EquipmentSlot.ARMOR);
+            }
+            case RANGER -> {
+                inv.addItem(equip.getWeapon("shortsword"));
+                inv.addItem(equip.getWeapon("shortsword"));
+                inv.addItem(equip.getArmor("scale_mail"));
+                inv.equipToSlot(equip.getWeapon("shortsword"), EquipmentSlot.MAIN_HAND);
+                inv.equipToSlot(equip.getArmor("scale_mail"), EquipmentSlot.ARMOR);
+            }
+            case ROGUE -> {
+                inv.addItem(equip.getWeapon("shortsword"));
+                inv.addItem(equip.getWeapon("shortbow"));
+                inv.addItem(equip.getArmor("leather_armor"));
+                inv.addItem(equip.getWeapon("dagger"));
+                inv.addItem(equip.getWeapon("dagger"));
+                inv.equipToSlot(equip.getWeapon("shortsword"), EquipmentSlot.MAIN_HAND);
+                inv.equipToSlot(equip.getArmor("leather_armor"), EquipmentSlot.ARMOR);
+            }
+            case SORCERER, WARLOCK, WIZARD -> {
+                inv.addItem(equip.getWeapon("light_crossbow"));
+                inv.addItem(equip.getWeapon("dagger"));
+                inv.addItem(equip.getWeapon("dagger"));
+                inv.equipToSlot(equip.getWeapon("light_crossbow"), EquipmentSlot.MAIN_HAND);
+            }
+        }
     }
 
     private static List<String> getEquipmentOptionA(CharacterClass cc) {

@@ -1,0 +1,408 @@
+# Standard D&D 5e Equipment
+# This file contains core weapons and armor available in all campaigns
+
+weapons:
+  # ==========================================
+  # Simple Melee Weapons
+  # ==========================================
+  - id: club
+    name: Club
+    damage_dice_count: 1
+    damage_die_size: 4
+    damage_type: BLUDGEONING
+    category: SIMPLE_MELEE
+    weight: 2.0
+    value: 1
+    properties: [LIGHT]
+
+  - id: dagger
+    name: Dagger
+    damage_dice_count: 1
+    damage_die_size: 4
+    damage_type: PIERCING
+    category: SIMPLE_MELEE
+    weight: 1.0
+    value: 2
+    normal_range: 20
+    long_range: 60
+    properties: [FINESSE, LIGHT, THROWN]
+
+  - id: greatclub
+    name: Greatclub
+    damage_dice_count: 1
+    damage_die_size: 8
+    damage_type: BLUDGEONING
+    category: SIMPLE_MELEE
+    weight: 10.0
+    value: 2
+    properties: [TWO_HANDED]
+
+  - id: handaxe
+    name: Handaxe
+    damage_dice_count: 1
+    damage_die_size: 6
+    damage_type: SLASHING
+    category: SIMPLE_MELEE
+    weight: 2.0
+    value: 5
+    normal_range: 20
+    long_range: 60
+    properties: [LIGHT, THROWN]
+
+  - id: javelin
+    name: Javelin
+    damage_dice_count: 1
+    damage_die_size: 6
+    damage_type: PIERCING
+    category: SIMPLE_MELEE
+    weight: 2.0
+    value: 5
+    normal_range: 30
+    long_range: 120
+    properties: [THROWN]
+
+  - id: light_hammer
+    name: Light Hammer
+    damage_dice_count: 1
+    damage_die_size: 4
+    damage_type: BLUDGEONING
+    category: SIMPLE_MELEE
+    weight: 2.0
+    value: 2
+    normal_range: 20
+    long_range: 60
+    properties: [LIGHT, THROWN]
+
+  - id: mace
+    name: Mace
+    damage_dice_count: 1
+    damage_die_size: 6
+    damage_type: BLUDGEONING
+    category: SIMPLE_MELEE
+    weight: 4.0
+    value: 5
+
+  - id: quarterstaff
+    name: Quarterstaff
+    damage_dice_count: 1
+    damage_die_size: 6
+    damage_type: BLUDGEONING
+    category: SIMPLE_MELEE
+    weight: 4.0
+    value: 2
+    properties: [VERSATILE]
+    versatile_die_size: 8
+
+  - id: sickle
+    name: Sickle
+    damage_dice_count: 1
+    damage_die_size: 4
+    damage_type: SLASHING
+    category: SIMPLE_MELEE
+    weight: 2.0
+    value: 1
+    properties: [LIGHT]
+
+  - id: spear
+    name: Spear
+    damage_dice_count: 1
+    damage_die_size: 6
+    damage_type: PIERCING
+    category: SIMPLE_MELEE
+    weight: 3.0
+    value: 1
+    normal_range: 20
+    long_range: 60
+    properties: [THROWN, VERSATILE]
+    versatile_die_size: 8
+
+  # ==========================================
+  # Simple Ranged Weapons
+  # ==========================================
+  - id: light_crossbow
+    name: Light Crossbow
+    damage_dice_count: 1
+    damage_die_size: 8
+    damage_type: PIERCING
+    category: SIMPLE_RANGED
+    weight: 5.0
+    value: 25
+    normal_range: 80
+    long_range: 320
+    properties: [AMMUNITION, LOADING, TWO_HANDED]
+
+  - id: shortbow
+    name: Shortbow
+    damage_dice_count: 1
+    damage_die_size: 6
+    damage_type: PIERCING
+    category: SIMPLE_RANGED
+    weight: 2.0
+    value: 25
+    normal_range: 80
+    long_range: 320
+    properties: [AMMUNITION, TWO_HANDED]
+
+  # ==========================================
+  # Martial Melee Weapons
+  # ==========================================
+  - id: battleaxe
+    name: Battleaxe
+    damage_dice_count: 1
+    damage_die_size: 8
+    damage_type: SLASHING
+    category: MARTIAL_MELEE
+    weight: 4.0
+    value: 10
+    properties: [VERSATILE]
+    versatile_die_size: 10
+
+  - id: greataxe
+    name: Greataxe
+    damage_dice_count: 1
+    damage_die_size: 12
+    damage_type: SLASHING
+    category: MARTIAL_MELEE
+    weight: 7.0
+    value: 30
+    properties: [HEAVY, TWO_HANDED]
+
+  - id: greatsword
+    name: Greatsword
+    damage_dice_count: 2
+    damage_die_size: 6
+    damage_type: SLASHING
+    category: MARTIAL_MELEE
+    weight: 6.0
+    value: 50
+    properties: [HEAVY, TWO_HANDED]
+
+  - id: longsword
+    name: Longsword
+    damage_dice_count: 1
+    damage_die_size: 8
+    damage_type: SLASHING
+    category: MARTIAL_MELEE
+    weight: 3.0
+    value: 15
+    properties: [VERSATILE]
+    versatile_die_size: 10
+
+  - id: maul
+    name: Maul
+    damage_dice_count: 2
+    damage_die_size: 6
+    damage_type: BLUDGEONING
+    category: MARTIAL_MELEE
+    weight: 10.0
+    value: 10
+    properties: [HEAVY, TWO_HANDED]
+
+  - id: rapier
+    name: Rapier
+    damage_dice_count: 1
+    damage_die_size: 8
+    damage_type: PIERCING
+    category: MARTIAL_MELEE
+    weight: 2.0
+    value: 25
+    properties: [FINESSE]
+
+  - id: scimitar
+    name: Scimitar
+    damage_dice_count: 1
+    damage_die_size: 6
+    damage_type: SLASHING
+    category: MARTIAL_MELEE
+    weight: 3.0
+    value: 25
+    properties: [FINESSE, LIGHT]
+
+  - id: shortsword
+    name: Shortsword
+    damage_dice_count: 1
+    damage_die_size: 6
+    damage_type: PIERCING
+    category: MARTIAL_MELEE
+    weight: 2.0
+    value: 10
+    properties: [FINESSE, LIGHT]
+
+  - id: warhammer
+    name: Warhammer
+    damage_dice_count: 1
+    damage_die_size: 8
+    damage_type: BLUDGEONING
+    category: MARTIAL_MELEE
+    weight: 2.0
+    value: 15
+    properties: [VERSATILE]
+    versatile_die_size: 10
+
+  - id: glaive
+    name: Glaive
+    damage_dice_count: 1
+    damage_die_size: 10
+    damage_type: SLASHING
+    category: MARTIAL_MELEE
+    weight: 6.0
+    value: 20
+    properties: [HEAVY, REACH, TWO_HANDED]
+
+  # ==========================================
+  # Martial Ranged Weapons
+  # ==========================================
+  - id: longbow
+    name: Longbow
+    damage_dice_count: 1
+    damage_die_size: 8
+    damage_type: PIERCING
+    category: MARTIAL_RANGED
+    weight: 2.0
+    value: 50
+    normal_range: 150
+    long_range: 600
+    properties: [AMMUNITION, HEAVY, TWO_HANDED]
+
+  - id: hand_crossbow
+    name: Hand Crossbow
+    damage_dice_count: 1
+    damage_die_size: 6
+    damage_type: PIERCING
+    category: MARTIAL_RANGED
+    weight: 3.0
+    value: 75
+    normal_range: 30
+    long_range: 120
+    properties: [AMMUNITION, LIGHT, LOADING]
+
+  - id: heavy_crossbow
+    name: Heavy Crossbow
+    damage_dice_count: 1
+    damage_die_size: 10
+    damage_type: PIERCING
+    category: MARTIAL_RANGED
+    weight: 18.0
+    value: 50
+    normal_range: 100
+    long_range: 400
+    properties: [AMMUNITION, HEAVY, LOADING, TWO_HANDED]
+
+armor:
+  # ==========================================
+  # Light Armor
+  # ==========================================
+  - id: padded_armor
+    name: Padded Armor
+    armor_class: 11
+    armor_type: LIGHT
+    weight: 8.0
+    value: 5
+    stealth_disadvantage: true
+
+  - id: leather_armor
+    name: Leather Armor
+    armor_class: 11
+    armor_type: LIGHT
+    weight: 10.0
+    value: 10
+
+  - id: studded_leather
+    name: Studded Leather
+    armor_class: 12
+    armor_type: LIGHT
+    weight: 13.0
+    value: 45
+
+  # ==========================================
+  # Medium Armor
+  # ==========================================
+  - id: hide_armor
+    name: Hide Armor
+    armor_class: 12
+    armor_type: MEDIUM
+    weight: 12.0
+    value: 10
+    max_dex_bonus: 2
+
+  - id: chain_shirt
+    name: Chain Shirt
+    armor_class: 13
+    armor_type: MEDIUM
+    weight: 20.0
+    value: 50
+    max_dex_bonus: 2
+
+  - id: scale_mail
+    name: Scale Mail
+    armor_class: 14
+    armor_type: MEDIUM
+    weight: 45.0
+    value: 50
+    max_dex_bonus: 2
+    stealth_disadvantage: true
+
+  - id: breastplate
+    name: Breastplate
+    armor_class: 14
+    armor_type: MEDIUM
+    weight: 20.0
+    value: 400
+    max_dex_bonus: 2
+
+  - id: half_plate
+    name: Half Plate
+    armor_class: 15
+    armor_type: MEDIUM
+    weight: 40.0
+    value: 750
+    max_dex_bonus: 2
+    stealth_disadvantage: true
+
+  # ==========================================
+  # Heavy Armor
+  # ==========================================
+  - id: ring_mail
+    name: Ring Mail
+    armor_class: 14
+    armor_type: HEAVY
+    weight: 40.0
+    value: 30
+    stealth_disadvantage: true
+
+  - id: chain_mail
+    name: Chain Mail
+    armor_class: 16
+    armor_type: HEAVY
+    weight: 55.0
+    value: 75
+    strength_requirement: 13
+    stealth_disadvantage: true
+
+  - id: splint_armor
+    name: Splint Armor
+    armor_class: 17
+    armor_type: HEAVY
+    weight: 60.0
+    value: 200
+    strength_requirement: 15
+    stealth_disadvantage: true
+
+  - id: plate_armor
+    name: Plate Armor
+    armor_class: 18
+    armor_type: HEAVY
+    weight: 65.0
+    value: 1500
+    strength_requirement: 15
+    stealth_disadvantage: true
+
+  # ==========================================
+  # Shields
+  # ==========================================
+  - id: shield
+    name: Shield
+    armor_class: 2
+    armor_type: SHIELD
+    weight: 6.0
+    value: 10
