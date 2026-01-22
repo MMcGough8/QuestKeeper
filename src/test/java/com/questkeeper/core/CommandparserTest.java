@@ -5,7 +5,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import com.questkeeper.core.CommandParser.Command;
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,13 +34,18 @@ class CommandParserTest {
             assertNull(cmd.getNoun());
         }
         
+        @Test
+        @DisplayName("parse returns empty command for empty string")
+        void parseEmptyStringReturnsEmpty() {
+            Command cmd = CommandParser.parse("");
+            assertTrue(cmd.isEmpty());
+        }
+
         @ParameterizedTest
-        @NullAndEmptySource
         @ValueSource(strings = {"   ", "\t", "\n"})
-        @DisplayName("parse returns empty command for blank input")
-        void parseBlankReturnsEmpty(String input) {
+        @DisplayName("parse returns empty command for whitespace input")
+        void parseWhitespaceReturnsEmpty(String input) {
             Command cmd = CommandParser.parse(input);
-            
             assertTrue(cmd.isEmpty());
         }
         
