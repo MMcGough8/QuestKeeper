@@ -74,7 +74,7 @@ mvn exec:java -Dexec.mainClass="com.questkeeper.demo.AutoDemo" -q
 
 ### Key Design Patterns
 
-- **Template Method**: `AbstractItemEffect` defines effect application flow; concrete effects implement specifics
+- **Template Method**: `AbstractItemEffect` defines effect application flow; concrete effects (`StatBonusEffect`, `ResistanceEffect`, `SpellEffect`, `MovementEffect`, `ExtraDamageEffect`, `SkillBonusEffect`, `BonusRollEffect`, `AbilitySetEffect`, `DamageReductionEffect`, `TeleportEffect`, `UtilityEffect`, `DescriptionEffect`) implement specifics
 - **Strategy**: `ItemEffect` interface allows swappable effect implementations
 - **Facade**: `Campaign` provides clean public API; `CampaignLoader` is package-private implementation
 - **Factory**: `Campaign.loadFromYaml()` creates campaigns from YAML directories
@@ -194,7 +194,7 @@ Mini-games use D&D 5e skill checks:
 
 Tests use JUnit 5 with `@Nested` classes for organization and `@TempDir` for file-based tests. Run `mvn test` for all tests.
 
-**Core test classes:** `CampaignTest`, `CampaignLoaderTest`, `CombatSystemTest`, `CombatResultTest`, `InventoryTest`, `StatusEffectManagerTest`, `DialogueSystemTest`, `CharacterTest`, `MonsterTest`, `GameStateTest`, `GameEngineTest`, `CommandParserTest`, `TrialTest`, `TrialIntegrationTest`
+**Core test classes:** `CampaignTest`, `CampaignLoaderTest`, `CombatSystemTest`, `CombatResultTest`, `InventoryTest`, `StatusEffectManagerTest`, `DialogueSystemTest`, `CharacterTest`, `MonsterTest`, `GameStateTest`, `GameEngineTest`, `CommandParserTest`, `TrialTest`, `TrialIntegrationTest`, `DiceTest`, `DisplayTest`, `EdgeCaseTest`
 
 ## Key Implementation Details
 

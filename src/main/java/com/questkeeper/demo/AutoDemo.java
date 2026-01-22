@@ -278,7 +278,6 @@ public class AutoDemo {
         Display.println("  - Character creation with D&D stats");
         Display.println("  - Narrative presentation with blockquotes");
         Display.println("  - Status panel (HP, Level, Trials)");
-        Display.println("  - Mini-maps for each campaign");
         Display.println("  - NPC dialogue system");
         Display.println("  - Skill checks with dice rolls");
         Display.println("  - Quest and clue notifications");

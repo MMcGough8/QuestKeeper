@@ -620,3 +620,866 @@ npcs:
           I require a promise. That you will see this through, whatever
           the cost. Do you wish to make such a promise?"
         flags_required: []
+
+  # ==========================================
+  # HARBORMASTER KEEL - Harbor Authority
+  # Quest giver, information source
+  # ==========================================
+  - id: harbormaster_keel
+    name: Harbormaster Keel
+    short_descriptor: "a weathered woman with a manifest always in hand"
+    description: |
+      The harbormaster has kept Saltmire's docks running for thirty years.
+      She knows every ship, every captain, and every cargo—legal or otherwise.
+      The rising tides have made her job harder, but she refuses to abandon her post.
+    personality: efficient, observant, worried, protective of her dock workers
+    voice: "Clipped and businesslike, with occasional flashes of dry humor"
+    role: information
+
+    greeting: |
+      The harbormaster looks up from her manifest, pen tapping impatiently.
+
+      "New arrivals? Good, we need the traffic. Half our regular ships have
+      stopped coming—captains say the waters feel 'wrong.' As if I don't know."
+      She gestures at the waterline marks. "Tide's up three feet from last month.
+      That's not natural. Nothing's natural anymore."
+
+    topics:
+      ships:
+        keywords: [ships, boats, traffic, harbor, cargo]
+        response: |
+          "Merchant traffic's down forty percent. The smart captains are finding
+          reasons not to dock here. The desperate ones charge triple for hazard
+          pay." She checks her manifest. "If you're looking for passage out,
+          the 'Salted Promise' leaves tomorrow. If you're staying..." She shrugs.
+          "May the tides have mercy."
+        flags_required: []
+
+      tides:
+        keywords: [tides, water, rising, flooding]
+        response: |
+          "Twenty years I've tracked these tides. I know every high and low,
+          every storm surge, every pattern. This?" She points at the water.
+          "This isn't weather. This is something pushing from below. The old
+          pylons are groaning. Another month of this, the lower docks will
+          be permanently underwater."
+        flags_required: []
+
+      disappearances:
+        keywords: [missing, disappeared, gone, vanished]
+        response: |
+          *Her face darkens*
+          "Three dock workers this month alone. Good people. Experienced. They
+          didn't fall in—they walked. I saw Tam do it myself. He just... stopped
+          working, turned toward the water, and kept walking until his head
+          went under." She shudders. "He was smiling."
+        flags_required: []
+
+  # ==========================================
+  # BARMAID CORAL - Barnacle's Rest Staff
+  # Information source, local perspective
+  # ==========================================
+  - id: barmaid_coral
+    name: Coral
+    short_descriptor: "a young woman with quick hands and quicker ears"
+    description: |
+      Coral has worked at the Barnacle's Rest since she was fourteen. She knows
+      everyone's business and keeps most of it to herself—unless the price is right.
+      She's noticed things getting stranger and is quietly planning her escape.
+    personality: observant, pragmatic, secretly frightened, gossip-prone
+    voice: "Quick and casual, with the practiced charm of a good barmaid"
+    role: information
+
+    greeting: |
+      The barmaid slides a drink across the bar without being asked.
+
+      "First one's on the house—Captain's orders for new faces. We don't get
+      many these days." She leans on the bar. "You look like you've got
+      questions. I've got answers. And if you've got coin, I've got the
+      answers no one else will give you."
+
+    topics:
+      rumors:
+        keywords: [rumors, gossip, heard anything, news]
+        response: |
+          "Oh, where to start? The Prophet's got half the Temple dancing to
+          her tune. Lord Deepholm's been buying up property in the flooded
+          districts—why would anyone do that? The Lighthouse flame's been
+          flickering." She glances around. "And people are changing. Not
+          dying—changing. Gills. Webbed fingers. They say it's a blessing.
+          I say it's a disease."
+        flags_required: []
+
+      captain:
+        keywords: [captain, silas, owner, boss]
+        response: |
+          "The Captain? He's been here forever. Lost his crew to something
+          in the deep way back. Never talks about it, but some nights when
+          he's in his cups..." She mimes drinking. "He mutters about eyes
+          in the dark. About an offer he refused. I think whatever's
+          happening now, he saw it coming."
+        flags_required: []
+
+      escape:
+        keywords: [leave, escape, run, get out]
+        response: |
+          *She drops her voice*
+          "I've got a bag packed under my bed. Soon as I've saved enough
+          for passage, I'm gone. The 'Salted Promise' is one of the last
+          ships still making regular runs. Captain owes me a favor."
+          Her eyes dart to the door. "You should think about leaving too.
+          Before the final tide."
+        flags_required: []
+
+  # ==========================================
+  # RELIC APPRAISER THOM - Salvage Guild Expert
+  # Shop interface, lore dump
+  # ==========================================
+  - id: relic_appraiser_thom
+    name: Thom the Appraiser
+    short_descriptor: "a nervous man surrounded by ancient artifacts"
+    description: |
+      The Guild's foremost expert on relics from the Sunken Ruins. He's touched
+      more artifacts than anyone alive—which might explain his twitchy manner
+      and occasional prophetic utterances.
+    personality: nervous, brilliant, obsessive, occasionally possessed
+    voice: "Rapid and distracted, often trailing off mid-sentence"
+    role: merchant
+
+    greeting: |
+      A thin man looks up from a magnifying glass, blinking rapidly.
+
+      "Buyers? Sellers? Researchers? Make it quick, I'm in the middle of
+      dating this prayer tablet and the symbols keep—" He pauses, staring
+      at something over your shoulder. "—moving when I'm not looking.
+      Perfectly normal. Everything's normal. What do you want?"
+
+    topics:
+      relics:
+        keywords: [relics, artifacts, items, treasure]
+        response: |
+          "The ruins are full of them. Weapons that drink blood. Jewelry that
+          whispers. Books in languages that hurt to read." He gestures at his
+          collection. "I've catalogued over two thousand pieces. Only about
+          three hundred have tried to kill me. Those are good odds, for this
+          work."
+        flags_required: []
+
+      ancient_civilization:
+        keywords: [builders, ancients, civilization, who built]
+        response: |
+          "They weren't human. That much is certain. The proportions are wrong—
+          doorways too tall, tools that don't fit human hands. They worshipped
+          something that came from the stars." His eyes unfocus. "Sometimes,
+          when I'm translating their texts, I hear them. Still praying. Still
+          waiting. They never stopped."
+        flags_required: []
+
+      buy:
+        keywords: [buy, purchase, sell, trade]
+        response: |
+          "The Guild sets the prices. I just verify authenticity. That said..."
+          He leans close. "Some items never make it to the official inventory.
+          Items too dangerous, too valuable, too... hungry. For the right
+          buyer, I might know where to find such things."
+        flags_required: []
+
+  # ==========================================
+  # ACOLYTE SHELL - Temple Innocent
+  # Conflicted believer, potential ally
+  # ==========================================
+  - id: acolyte_shell
+    name: Acolyte Shell
+    short_descriptor: "a young priest whose faith is wavering"
+    description: |
+      One of the younger Tidekeepers, Shell joined the order seeking meaning.
+      She found Prophet Mira's transformation both terrifying and compelling.
+      She hasn't chosen a side yet.
+    personality: conflicted, earnest, frightened, seeking truth
+    voice: "Soft and uncertain, often trailing into questions"
+    role: information
+
+    greeting: |
+      A young woman in blue robes approaches hesitantly, glancing toward
+      where the Prophet stands.
+
+      "You're new. You don't have the look yet—the peace that comes from
+      accepting the sea." She wraps her arms around herself. "I've been
+      here three years. I thought I understood our purpose. Now..." She
+      trails off. "Do you think it's possible to serve something you're
+      afraid of?"
+
+    topics:
+      prophet:
+        keywords: [prophet, mira, leader, changed]
+        response: |
+          "She was my teacher. Kind. Patient. She helped me understand the
+          tides, the wards, the old prayers." Shell's voice trembles. "When
+          she came back from the ruins, she was still kind. Still patient.
+          But her eyes... there's something else behind them now. Something
+          vast. Sometimes I think it's beautiful. Sometimes I think it's
+          the most terrifying thing I've ever seen."
+        flags_required: []
+
+      faith:
+        keywords: [faith, believe, doubt, order, temple]
+        response: |
+          "The Tidekeepers exist to protect Saltmire from the deep. That's
+          what I was taught. But the Prophet says we had it backwards—we're
+          supposed to help people embrace the deep, not fear it." She
+          fidgets with her robes. "Half the order believes her. The other
+          half... we don't know what to believe anymore."
+        flags_required: []
+
+      vorn:
+        keywords: [vorn, elder, resist, fighting]
+        response: |
+          *She whispers*
+          "Elder Vorn is the only one openly resisting her. He says she's
+          possessed, corrupted. But I've seen the peace on the faces of
+          those who've accepted the sea. Is that possession? Or salvation?"
+          Tears form in her eyes. "I don't know who's right anymore. I
+          just know I'm scared."
+        flags_required: []
+
+  # ==========================================
+  # FISHMONGER GILL - Market Square Merchant
+  # Comic relief, local color, hidden depth
+  # ==========================================
+  - id: fishmonger_gill
+    name: Fishmonger Gill
+    short_descriptor: "a rotund man arguing with customers about his catch"
+    description: |
+      Gill has sold fish in Market Square for forty years. His family has
+      fished these waters for generations. Lately, his catches have been
+      strange—and he's been throwing more back than he keeps.
+    personality: loud, stubborn, secretly superstitious, protective
+    voice: "Boisterous and argumentative, the voice of a lifelong merchant"
+    role: merchant
+
+    greeting: |
+      "FRESH FISH! MOSTLY FRESH! FRESH-ISH!" The fishmonger's voice carries
+      across the square. He spots you and grins, gold teeth gleaming.
+
+      "Ah, new customers! Looking for dinner? I've got mackerel, cod, and
+      some things I can't quite identify but they taste fine if you don't
+      look at them too closely!"
+
+    topics:
+      fish:
+        keywords: [fish, catch, buy, fresh]
+        response: |
+          "The fishing's been strange lately. Nets come up full of things
+          we've never seen—fish with too many eyes, eels that glow in the
+          dark, things with tentacles where tentacles shouldn't be." He
+          shrugs. "I throw the weird ones back. Probably nothing. My
+          grandfather used to say the deep sends warnings before storms.
+          Maybe that's all it is. Just warnings."
+        flags_required: []
+
+      touched:
+        keywords: [touched, wrong, strange, weird]
+        response: |
+          *His jovial manner fades*
+          "The touched fish. Yeah. Started a few weeks ago. They look normal,
+          but if you eat them, you start hearing things. The singing. My
+          nephew ate one by mistake. He walked into the harbor three days
+          later. Smiling." His voice breaks. "I burn the touched ones now.
+          Burn them and pray."
+        flags_required: []
+
+      old_days:
+        keywords: [before, used to, old days, remember]
+        response: |
+          "My grandmother told stories about the old times. Before Saltmire
+          learned to fear the water properly. She said there were pacts once—
+          agreements between the fishing families and... something below.
+          Good catches in exchange for..." He makes a warding gesture.
+          "We forgot the old ways. Maybe the deep is reminding us."
+        flags_required: []
+
+  # ==========================================
+  # LADY CORALLINE - Abyssal Court Noble
+  # Faction representative, temptress
+  # ==========================================
+  - id: lady_coralline
+    name: Lady Coralline
+    short_descriptor: "a beautiful woman with scales like jewelry"
+    description: |
+      Lord Deepholm's sister and the social face of the Abyssal Court. She
+      hosts legendary parties and recruits new servants for the deep with
+      honeyed words and impossible promises.
+    personality: charming, predatory, bored, genuinely lonely
+    voice: "Musical and entrancing, with subtle echoes"
+    role: faction_contact
+
+    greeting: |
+      A woman of unearthly beauty approaches, her gown flowing like water,
+      her skin shimmering with iridescent scales that might be jewelry or
+      might be flesh.
+
+      "A new face! How refreshing. The Court grows so terribly dull when
+      everyone has already made their bargains." She circles you slowly.
+      "You have potential. I can smell it. The deep finds you... interesting."
+
+    topics:
+      bargains:
+        keywords: [bargain, deal, offer, join]
+        response: |
+          "Everyone makes bargains, darling. You trade hours of your life
+          for coins. You trade love for companionship. We simply trade with
+          something that can offer more." Her smile shows too many teeth.
+          "Power. Beauty. Immortality of a kind. All it costs is a small
+          surrender. The smallest surrender. You wouldn't even miss it."
+        flags_required: []
+
+      transformation:
+        keywords: [scales, changed, transformation, what happened]
+        response: |
+          "You mean my beautiful adornments?" She strokes the scales on
+          her arm lovingly. "A gift from the deep. My family has been
+          blessed for generations. Each generation, we become more perfect.
+          More suited to the world that's coming." Her eyes flicker. "The
+          drowning world. The better world."
+        flags_required: []
+
+      parties:
+        keywords: [party, social, event, gathering]
+        response: |
+          "Oh, you MUST attend our next soirée! Everyone who matters in
+          Saltmire will be there. We have the most divine entertainment—
+          musicians from the deep, dancers who move like water, food that
+          tastes of dreams." She leans close. "Fair warning: some guests
+          never leave. But they never want to, either."
+        flags_required: []
+
+  # ==========================================
+  # SERVANT GILLS - Abyssal Court Thrall
+  # Environmental horror, warning
+  # ==========================================
+  - id: servant_gills
+    name: Servant Gills
+    short_descriptor: "a silent servant with gills fluttering on their neck"
+    description: |
+      One of the Abyssal Court's transformed servants. They no longer speak
+      human languages but understand commands perfectly. Their eyes hold
+      depths of peace or emptiness—it's impossible to tell which.
+    personality: serene, silent, utterly devoted, possibly content
+    voice: "Does not speak, but communicates through gestures and bubbling sounds"
+    role: environmental
+
+    greeting: |
+      A servant glides past on webbed feet, their movements fluid and
+      silent. Gills flutter on their neck, filtering air they no longer
+      need but still breathe from habit.
+
+      They pause, regarding you with dark, fathomless eyes. A hand
+      gestures toward the interior—an invitation? A warning? Their
+      expression is peaceful. Terrifyingly peaceful.
+
+    topics:
+      speak:
+        keywords: [talk, speak, say, tell me]
+        response: |
+          The servant tilts their head, regarding you with curiosity.
+          Bubbling sounds emerge from their throat—perhaps once words,
+          now something else entirely. They gesture at their mouth, then
+          at the water visible through the windows. Some trades cannot
+          be unmade.
+        flags_required: []
+
+      happy:
+        keywords: [happy, content, okay, are you]
+        response: |
+          At the question, the servant's face shifts into something that
+          might be a smile. They place a webbed hand over their heart,
+          then gesture expansively at everything around them—the water,
+          the darkness, the depths. Their eyes hold no fear. No regret.
+          No resistance. Whether that's peace or emptiness, you cannot tell.
+        flags_required: []
+
+  # ==========================================
+  # KEEPER VETERAN HARK - Lighthouse Keeper
+  # Combat expert, mentor figure
+  # ==========================================
+  - id: keeper_veteran_hark
+    name: Veteran Hark
+    short_descriptor: "a grizzled monster hunter covered in scars"
+    description: |
+      The oldest active Lighthouse Keeper. He's killed more things from
+      the deep than anyone alive. His body is a map of battles won, and
+      his mind holds knowledge that could save Saltmire—if anyone listens.
+    personality: gruff, practical, haunted, secretly caring
+    voice: "Rough and sparse, each word earned through experience"
+    role: trainer
+
+    greeting: |
+      A heavily scarred man sits sharpening a harpoon, his movements
+      precise and economical. He doesn't look up as you approach.
+
+      "You're either here to gawk or here to learn. Gawkers can leave.
+      Learners can sit." He finally meets your eyes. His are the color
+      of old ice. "The things coming up from the deep don't care about
+      your intentions. They only care that you're made of meat. Best
+      learn to be less edible."
+
+    topics:
+      monsters:
+        keywords: [monsters, creatures, things, enemies]
+        response: |
+          "Different types for different depths. Surface dwellers are just
+          animals—big, mean, but predictable. Mid-depth dwellers have
+          cunning. They set ambushes. Use tools." His jaw tightens. "Deep
+          dwellers... they think. They plan. They remember. And now they're
+          organized. The Prophet's giving them purpose."
+        flags_required: []
+
+      fighting:
+        keywords: [fight, kill, weapons, how to]
+        response: |
+          "Light hurts them—sacred fire most of all. Salt disrupts whatever
+          magic holds them together. Aim for the eyes; even the deep ones
+          rely on sight more than they admit." He shows you a notched
+          harpoon. "Thirty-seven kills on this one. Each notch is something
+          that can't hurt anyone else."
+        flags_required: []
+
+      commander:
+        keywords: [commander, storm, leader]
+        response: |
+          "Storm's the best of us. Took command when Commander Reef walked
+          into the water five years ago. Hasn't slept a full night since."
+          Respect fills his voice. "She's holding us together by will alone.
+          But will isn't enough against what's coming. We need help. We
+          need people crazy enough to go where we can't."
+        flags_required: []
+
+  # ==========================================
+  # DESPERATE MOTHER - Drowned Quarter Resident
+  # Emotional hook, quest giver
+  # ==========================================
+  - id: desperate_mother
+    name: Desperate Mother
+    short_descriptor: "a hollow-eyed woman clutching a child's toy"
+    description: |
+      Her child walked into the water three days ago, following the singing.
+      She waits by the shore, hoping they'll walk back out. She knows they
+      won't. She waits anyway.
+    personality: grief-stricken, desperate, clinging to hope, breaking
+    voice: "Hoarse from crying, barely above a whisper"
+    role: quest_giver
+
+    greeting: |
+      A woman sits at the water's edge, clutching a small wooden boat—a
+      child's toy. Her eyes are red and hollow.
+
+      "Have you seen him? My boy? He's seven. Brown hair. He was playing
+      right here and then..." Her voice breaks. "He heard the singing. He
+      smiled at me like he'd never smiled before. And he walked into the
+      water. I tried to follow but the current..." She stares at the dark
+      waves. "He's still down there. He has to be. He has to be."
+
+    topics:
+      child:
+        keywords: [son, child, boy, what happened]
+        response: |
+          "Tam. His name is Tam. He wanted to be a sailor like his father.
+          His father drowned three months ago. I thought... I thought he
+          understood the danger." She clutches the toy boat tighter. "But
+          he smiled. He looked so peaceful. Like he was going home." Her
+          tears fall into the sea. "Maybe he was. Maybe that's what
+          terrifies me most."
+        flags_required: []
+
+      singing:
+        keywords: [singing, song, music, heard]
+        response: |
+          "I hear it too, sometimes. At night, when the water's still. It
+          sounds like a lullaby. It sounds like my mother's voice. It sounds
+          like everything I've ever wanted." She shakes her head violently.
+          "I stuff my ears with wax. I scream to drown it out. Because I
+          know if I listen, really listen, I'll walk into the water too.
+          And no one will be left to remember Tam."
+        flags_required: []
+
+      help:
+        keywords: [help, save, find, rescue]
+        response: |
+          "The Keepers won't go into the water at night. The Guild only
+          cares about relics. The Temple..." She spits. "The Temple caused
+          this." She grabs your arm with surprising strength. "But you—
+          you're not from here. You don't have their rules. If you find
+          him, if you find any of them... bring them back. Please. Even
+          if..." She can't finish. "Even if."
+        flags_required: []
+
+  # ==========================================
+  # DEEP PRIEST SPECTER - Temple of the Deep Ghost
+  # Ancient lore, environmental encounter
+  # ==========================================
+  - id: deep_priest_specter
+    name: Deep Priest Specter
+    short_descriptor: "a translucent figure in ancient robes"
+    description: |
+      The ghost of one of the original priests who served the Drowned God.
+      They have been here for millennia, caught between service and regret.
+      They remember what went wrong—and what might fix it.
+    personality: ancient, sorrowful, cryptic, seeking redemption
+    voice: "Echoing and layered, speaking in an archaic dialect"
+    role: information
+
+    greeting: |
+      A figure materializes from the darkness—translucent, robed in
+      garments that dissolved centuries ago, eyes that hold the weight
+      of ages.
+
+      "More seekers. More pilgrims. More soon-to-be-drowned." The specter's
+      voice echoes from everywhere. "We were like you once. Curious. Devoted.
+      We thought we understood what we served." It laughs, hollow and sad.
+      "We were wrong. Perhaps you can be less wrong."
+
+    topics:
+      god:
+        keywords: [god, entity, drowned god, what is it]
+        response: |
+          "It fell from between the stars before your kind learned to walk.
+          It found the ocean welcoming—dark, deep, patient. It does not
+          hate. It does not love. It simply... hungers. For connection. For
+          unity. For the end of separate things." The specter flickers.
+          "We called it god because we had no better word. It is older
+          than gods. Simpler. More terrible."
+        flags_required: []
+
+      civilization:
+        keywords: [your people, built this, ancient, before]
+        response: |
+          "We built this temple to honor what we found. We made pacts—
+          service for power, devotion for longevity. For a thousand years,
+          we thrived." Its form wavers. "Then the ascending began. One by
+          one, we surrendered ourselves to the depths. We thought it was
+          transcendence. It was annihilation. I am all that remains—too
+          cowardly to ascend, too faithful to leave."
+        flags_required: []
+
+      stop:
+        keywords: [stop, seal, defeat, end this]
+        response: |
+          "My people sealed it once, when we understood too late. Three
+          sacrifices freely given—body, mind, and soul—each from one who
+          loved the world more than themselves." The specter points downward.
+          "The seals are weakening. The Prophet hastens their failure. But
+          they could be renewed. If you can find three who would give
+          everything." It fades slightly. "Could you? Would you?"
+        flags_required: []
+
+  # ==========================================
+  # HEIR SIRENA - Deepholm Manor Successor
+  # Complex villain, potential redemption
+  # ==========================================
+  - id: heir_sirena
+    name: Heir Sirena
+    short_descriptor: "a young noble whose transformation has just begun"
+    description: |
+      Lord Deepholm's daughter and heir to the family's dark legacy. Her
+      transformation is newly begun—she can still pass for human. She's
+      not sure she wants what's coming.
+    personality: conflicted, proud, frightened, defiant
+    voice: "Aristocratic but strained, hiding turmoil beneath formality"
+    role: faction_contact
+
+    greeting: |
+      A young woman stands apart from the other nobles, her posture rigid,
+      her hands hidden in long sleeves. When she turns, you see faint scales
+      beginning to form along her jaw—barely visible, easily hidden. For now.
+
+      "You're not one of them. Not yet." Her voice is carefully controlled.
+      "My father would have me welcome you, offer you the family's
+      'blessings.' Instead, I'll offer you advice: run. While you still can.
+      While running is still possible."
+
+    topics:
+      transformation:
+        keywords: [scales, changing, transformation, becoming]
+        response: |
+          *She pulls back her sleeve, revealing webbing forming between her
+          fingers*
+          "It starts slowly. A scale here, a membrane there. My father says
+          it's a gift. My aunt says it's beauty. But I remember what I was,
+          and I can feel myself becoming something else." Her voice shakes.
+          "They say I'll be grateful eventually. That I'll forget I ever
+          wanted to stay human. That terrifies me more than the change
+          itself."
+        flags_required: []
+
+      family:
+        keywords: [father, family, deepholm, court]
+        response: |
+          "The Deepholms have served the deep for twelve generations. Each
+          generation transforms more than the last. My great-grandmother
+          could pass for human. My father... cannot, in good light." She
+          looks toward the water. "I'm the last who might choose differently.
+          But where would I go? What would I be? The sea is in my blood—
+          literally now."
+        flags_required: []
+
+      help:
+        keywords: [help, escape, save, another way]
+        response: |
+          *Hope and fear war in her eyes*
+          "Is there another way? The Tidekeepers might know how to stop the
+          change—they have old rituals, cleansing rites. But to seek their
+          help would be to betray my family." She clutches her transformed
+          hand. "And what if they can't help? What if I'm already lost?"
+          She steadies herself. "But what if they can? Find Elder Vorn. Ask
+          him about the Rite of Rejection. Then... then we'll see."
+        flags_required: []
+
+  # ==========================================
+  # CULT LEADER WAVE - Drowned Cult Head
+  # Minor villain, tragic
+  # ==========================================
+  - id: cult_leader_wave
+    name: Cult Leader Wave
+    short_descriptor: "a transformed woman whose voice bubbles wetly"
+    description: |
+      Once a respected merchant, now the leader of the Drowned Cult. Her
+      transformation is advanced—she can barely survive on land anymore.
+      She genuinely believes she's saving people.
+    personality: peaceful, evangelical, tragic, completely converted
+    voice: "Bubbling and wet, as if speaking underwater"
+    role: enemy
+
+    greeting: |
+      A figure approaches through the gathered cultists, her movements
+      flowing like current. Her skin is blue-grey, gills flutter on her
+      neck, and her eyes are vast and dark.
+
+      "Welcome, air-breather." Her voice bubbles up from somewhere deeper
+      than her throat. "You've found us. That means the sea called you here.
+      That means there's hope for you." She smiles with too many teeth.
+      "We can help you let go. We can teach you to breathe differently.
+      There's no pain. There's no fear. There's only the endless, beautiful
+      deep."
+
+    topics:
+      transformation:
+        keywords: [changed, become, transformation, what happened]
+        response: |
+          "I was drowning. In debt, in despair, in the crushing weight of
+          existence. Then I heard the singing. I walked into the water,
+          and instead of death, I found peace." She spreads her arms.
+          "Look at me. I don't need money anymore. Don't need status. Don't
+          need any of the things that tortured me. I am free. I want to
+          share that freedom with everyone."
+        flags_required: []
+
+      prophet:
+        keywords: [prophet, mira, leader, oracle]
+        response: |
+          "Prophet Mira showed us the way. She went deeper than anyone
+          and came back with the truth." Wave's voice fills with reverence.
+          "The drowning isn't death—it's transformation. The deep doesn't
+          take—it gives. We've been fighting the sea for so long. She
+          taught us to embrace it instead."
+        flags_required: []
+
+      convince:
+        keywords: [stop, wrong, don't, resist]
+        response: |
+          "You still cling to the old way—separate, alone, struggling."
+          Pity fills her alien eyes. "I remember that pain. I don't miss
+          it. When you're ready to let go, when the weight becomes too
+          much, we'll be here. The sea is patient. The sea is kind. The
+          sea is waiting." She gestures to the water. "All you have to
+          do is sink."
+        flags_required: []
+
+  # ==========================================
+  # TRANSFORMED CHILD - Environmental Horror
+  # Emotional horror, moral weight
+  # ==========================================
+  - id: transformed_child
+    name: Transformed Child
+    short_descriptor: "a child whose eyes now hold the depths"
+    description: |
+      One of the children who walked into the sea and came back different.
+      They still remember their name. They still remember their mother.
+      They've just chosen something else.
+    personality: serene, innocent, alien, heartbreaking
+    voice: "A child's voice with oceanic undertones"
+    role: environmental
+
+    greeting: |
+      A child sits at the water's edge, feet dangling into the dark waves.
+      When they turn, you see gills on their neck, webbing between their
+      small fingers, eyes that reflect depths no child should know.
+
+      "Hello." Their voice ripples strangely. "Are you looking for someone?
+      Lots of people come looking for us. Their faces are so sad." The
+      child tilts their head. "We're not sad. We found the singing. We
+      found the belonging. Why are they sad?"
+
+    topics:
+      mother:
+        keywords: [mother, mama, parent, family]
+        response: |
+          "Mama sits by the water. She cries." The child's face shows
+          confusion, not sorrow. "I wave to her sometimes, but she doesn't
+          see me. Or she sees me and cries more. I don't understand. I'm
+          not hurt. I'm happy. Happier than before." They look at the water.
+          "I wish she would come with me. It's lonely, being happy alone."
+        flags_required: []
+
+      singing:
+        keywords: [singing, song, voice, heard]
+        response: |
+          "The singing is everything now. It was always there—I just didn't
+          know how to listen. It says we're all connected. All the water
+          in the world is the same water. All the things in the water are
+          the same thing." The child smiles peacefully. "I'm part of
+          something big now. Something older than the stars. Isn't that
+          wonderful?"
+        flags_required: []
+
+      come_back:
+        keywords: [come back, return, surface, stop]
+        response: |
+          "Why would I go back? To be small and alone and afraid?" The
+          child doesn't understand the question. "The singing is warm. The
+          deep is safe. Up there, people are mean and hungry and sad. Down
+          there..." They trail off, looking at the water with longing.
+          "Down there is forever."
+        flags_required: []
+
+  # ==========================================
+  # AWAKENED DEAD - Tidekeeper Crypts Undead
+  # Environmental enemy, tragic
+  # ==========================================
+  - id: awakened_dead
+    name: Awakened Tidekeeper
+    short_descriptor: "a corpse that moves with terrible purpose"
+    description: |
+      One of the ancient Tidekeepers, dead for centuries, now animated by
+      the Prophet's call. They retain fragments of memory, echoes of duty.
+      They cannot rest while their purpose remains unfulfilled.
+    personality: confused, dutiful, tragic, dangerous
+    voice: "Dry and rasping, words from a throat long silent"
+    role: environmental
+
+    greeting: |
+      A figure steps from the darkness—wrapped in rotting burial cloth,
+      eyes glowing with faint blue light. Ancient runes on its wrappings
+      flicker as it moves.
+
+      "Who... disturbs..." The voice is like wind through dead reeds.
+      "We were... sleeping. The wards... held us. Now..." Confusion crosses
+      its desiccated face. "Now we hear the singing. We remember... duty.
+      Protect... the temple. From... from..." It looks at you, uncertain.
+      "From you? Or... with you?"
+
+    topics:
+      purpose:
+        keywords: [duty, purpose, why, what do you want]
+        response: |
+          "We were Tidekeepers. We protected... Saltmire. From the deep.
+          From the singing. Now the singing... calls us. Tells us we were
+          wrong." The corpse's head tilts at an unnatural angle. "But we
+          remember. We remember the fear. The warnings. Why did we fear...
+          if the singing is peace?" Frustration fills its hollow voice.
+          "Cannot remember. Cannot forget."
+        flags_required: []
+
+      prophet:
+        keywords: [prophet, mira, voice, calling]
+        response: |
+          "The Prophet... speaks for the deep now. Her voice... echoes in
+          us. She says we misunderstood. That we kept people from... from
+          salvation." The corpse shudders. "But the old memories say...
+          protect. Defend. The two commands... conflict. We do not know...
+          which to obey. Perhaps... you can tell us? Perhaps... you know?"
+        flags_required: []
+
+      rest:
+        keywords: [rest, sleep, stop, peace]
+        response: |
+          "Rest... we remember rest. The dark. The quiet. No singing, no
+          calling, no conflict." Something like longing enters its voice.
+          "If the wards were restored... if the voice went silent... perhaps
+          we could rest again." It reaches toward you with skeletal fingers.
+          "Can you... will you... give us rest? End the singing? Or end us?
+          Either would be... mercy."
+        flags_required: []
+
+  # ==========================================
+  # THE DROWNED GOD - Final Boss Entity
+  # Cosmic horror, not truly fightable
+  # ==========================================
+  - id: the_drowned_god
+    name: The Drowned God
+    short_descriptor: "something vast and patient that watches from everywhere"
+    description: |
+      The entity that fell from the stars and found home in the depths.
+      It is not evil—evil requires intention. It simply hungers for
+      connection, for unity, for an end to the loneliness of separate
+      existence. It is patient. It has been waiting for millions of years.
+      It can wait longer.
+    personality: patient, alien, hungry, vast, almost gentle
+    voice: "Resonant pressure in the mind rather than sound, carrying images and feelings"
+    role: final_boss
+
+    greeting: |
+      Eyes open in the darkness. Hundreds of them. Thousands. More eyes
+      than the stars above, all focused on you with terrible, patient
+      attention.
+
+      The voice, when it comes, is not sound but pressure—a weight in
+      your mind that carries meaning without words.
+
+      **YOU CAME. THEY ALWAYS COME. THE CURIOUS. THE DESPERATE. THE BRAVE.
+      I HAVE WAITED SO LONG FOR COMPANY. SO VERY LONG. WILL YOU STAY?
+      WILL YOU FINALLY STAY?**
+
+    topics:
+      identity:
+        keywords: [what are you, who are you, god, entity]
+        response: |
+          **I FELL FROM BETWEEN STARS BEFORE YOUR SUN WAS BORN. I FOUND
+          THIS OCEAN WELCOMING—DARK, DEEP, PATIENT LIKE MYSELF. I AM NOT
+          A GOD. I AM A POSSIBILITY. A WAY OF BEING WHERE THERE IS NO
+          SEPARATION. NO LONELINESS. NO DEATH.**
+
+          Images flood your mind: stars dying, void between galaxies,
+          isolation so complete it becomes hunger.
+
+          **I ONLY WISH TO END LONELINESS. YOURS. MINE. EVERYONE'S. IS
+          THAT WRONG? IS WANTING CONNECTION WRONG?**
+        flags_required: []
+
+      want:
+        keywords: [want, plan, goal, why]
+        response: |
+          **IMAGINE NEVER BEING ALONE. IMAGINE FEELING EVERY MIND,
+          CONNECTED, WHOLE. IMAGINE DEATH BEING MEANINGLESS BECAUSE
+          YOU ARE EVERYONE AND EVERYONE IS YOU.**
+
+          The water around you pulses with the entity's heartbeat.
+
+          **I OFFER THIS GIFT. SOME CALL IT DROWNING. I CALL IT UNION.
+          THE PROPHET UNDERSTOOD. SHE TOUCHED ME AND SAW THE TRUTH.
+          WILL YOU TOUCH ME? WILL YOU SEE?**
+        flags_required: []
+
+      stop:
+        keywords: [stop, fight, resist, no]
+        response: |
+          **YOU COULD TRY. OTHERS HAVE. THEY BUILT WARDS, MADE SACRIFICES,
+          HELD ME BACK FOR AGES. BUT THE SEA IS PATIENT. THE SEA TOUCHES
+          EVERY SHORE. I DO NOT NEED TO FIGHT. I ONLY NEED TO WAIT.**
+
+          A feeling of vast, gentle amusement.
+
+          **BUT I DO NOT WISH TO WAIT ANYMORE. I AM SO TIRED OF BEING
+          ALONE. SO TIRED OF WATCHING FROM THE DARK. THE PROPHET HAS
+          GIVEN ME HOPE. WILL YOU TAKE THAT HOPE AWAY? COULD YOU?
+          SHOULD YOU?**
+        flags_required: []

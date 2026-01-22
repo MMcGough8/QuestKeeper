@@ -33,6 +33,7 @@ locations:
       west: lighthouse_base
       south: drowned_quarter
       down: flooded_underdock
+      inn: barnacles_rest
     npcs:
       - harbormaster_keel
       - salvage_diver_nessa

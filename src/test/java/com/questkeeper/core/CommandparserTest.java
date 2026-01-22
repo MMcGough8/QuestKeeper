@@ -216,13 +216,24 @@ class CommandParserTest {
         @ParameterizedTest
         @CsvSource({
             "quit, quit",
-            "exit, quit",
             "q, quit"
         })
         @DisplayName("Quit synonyms map to 'quit'")
         void quitSynonyms(String input, String expected) {
             Command cmd = CommandParser.parse(input);
-            
+
+            assertEquals(expected, cmd.getVerb());
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+            "leave, leave",
+            "exit, leave"
+        })
+        @DisplayName("Leave synonyms map to 'leave'")
+        void leaveSynonyms(String input, String expected) {
+            Command cmd = CommandParser.parse(input);
+
             assertEquals(expected, cmd.getVerb());
         }
         
