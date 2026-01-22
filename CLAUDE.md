@@ -195,11 +195,11 @@ Mini-games use D&D 5e skill checks:
 Tests use JUnit 5 with `@Nested` classes for organization and `@TempDir` for file-based tests. Run `mvn test` for all tests.
 
 **Test organization by package:**
-- `campaign/` - `CampaignTest`, `CampaignLoaderTest`, `TrialTest`, `TrialIntegrationTest`
+- `campaign/` - `CampaignTest`, `CampaignLoaderTest`, `TrialTest`, `TrialIntegrationTest`, `MiniGameTest`
 - `character/` - `CharacterTest`, `NPCTest`
 - `combat/` - `CombatSystemTest`, `CombatResultTest`, `MonsterTest`
 - `combat/status/` - `ConditionTest`, `ConditionEffectTest`, `StatusEffectManagerTest`, `DurationTypeTest`, `AbstractStatusEffectTest`
-- `core/` - `GameEngineTest`, `CommandParserTest`, `DiceTest`
+- `core/` - `GameEngineTest`, `CommandParserTest`, `DiceTest`, `RestSystemTest`
 - `dialogue/` - `DialogueSystemTest`
 - `inventory/` - `InventoryTest`, `WeaponTest`, `ArmorTest`, `ItemTest`, `MagicItemTest`
 - `inventory/items/effects/` - Tests for each effect type (`StatBonusEffectTest`, `ResistanceEffectTest`, etc.)
@@ -208,6 +208,18 @@ Tests use JUnit 5 with `@Nested` classes for organization and `@TempDir` for fil
 - `ui/` - `DisplayTest`, `CharacterCreatorTest`
 - `world/` - `LocationTest`
 - Root - `EdgeCaseTest`
+
+### Tests Needing Creation
+
+The following test files have been identified as coverage gaps and should be created:
+
+| Test File | Package | Priority | Description |
+|-----------|---------|----------|-------------|
+| `CharacterDataTest` | `save/` | High | Tests for save/load conversion including equipment slots, hit dice, and all character fields |
+| `AbstractItemEffectTest` | `inventory/items/effects/` | High | Tests for base effect class (Template Method pattern, apply/remove lifecycle) |
+| `StandardEquipmentTest` | `inventory/` | Medium | Tests for YAML equipment loader singleton, D&D 5e weapon/armor loading |
+| `DialogueResultTest` | `dialogue/` | Medium | Tests for dialogue result records and factory methods |
+| `DescriptionEffectTest` | `inventory/items/effects/` | Low | Tests for description-only effects (flavor text, no mechanical impact) |
 
 ## Key Implementation Details
 
