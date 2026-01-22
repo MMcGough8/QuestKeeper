@@ -50,7 +50,8 @@ public class SaveState {
     private Map<String, String> stateStrings;
 
     private List<String> inventoryItems;
-    private List<String> equippedItems;
+    private List<String> equippedItems;  // Legacy format for backwards compatibility
+    private Map<String, String> equippedSlots;  // New format: slot name -> item ID
     private int gold;
 
     private long totalPlayTimeSeconds;
@@ -74,6 +75,7 @@ public class SaveState {
         this.stateStrings = new HashMap<>();
         this.inventoryItems = new ArrayList<>();
         this.equippedItems = new ArrayList<>();
+        this.equippedSlots = new HashMap<>();
         this.gold = 0;
         
         this.totalPlayTimeSeconds = 0;
@@ -214,7 +216,8 @@ public class SaveState {
         map.put("strings", stateStrings);
         
         map.put("inventory", inventoryItems);
-        map.put("equipped", equippedItems);
+        map.put("equipped", equippedItems);  // Legacy format
+        map.put("equipped_slots", equippedSlots);  // New format with slot info
         map.put("gold", gold);
         
         map.put("play_time_seconds", totalPlayTimeSeconds);
@@ -261,7 +264,8 @@ public class SaveState {
 
         // Inventory
         state.inventoryItems = getStringList(data, "inventory");
-        state.equippedItems = getStringList(data, "equipped");
+        state.equippedItems = getStringList(data, "equipped");  // Legacy format
+        state.equippedSlots = getStringMap(data, "equipped_slots");  // New format
         state.gold = getInt(data, "gold", 0);
 
         // Stats
@@ -420,8 +424,30 @@ public class SaveState {
         }
     }
 
+    /**
+     * Equips an item to a specific slot (new format with slot preservation).
+     */
+    public void equipItemToSlot(String slotName, String itemId) {
+        equippedSlots.put(slotName, itemId);
+        // Also add to legacy list for backwards compatibility
+        if (!equippedItems.contains(itemId)) {
+            equippedItems.add(itemId);
+        }
+    }
+
     public void unequipItem(String itemId) {
         equippedItems.remove(itemId);
+    }
+
+    /**
+     * Checks if we have slot-based equipment info (new format).
+     */
+    public boolean hasEquippedSlots() {
+        return equippedSlots != null && !equippedSlots.isEmpty();
+    }
+
+    public Map<String, String> getEquippedSlots() {
+        return Collections.unmodifiableMap(equippedSlots);
     }
 
     public void addGold(int amount) {

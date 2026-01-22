@@ -654,6 +654,8 @@ public class CharacterCreator {
                 inv.addItem(equip.getWeapon("handaxe"));
                 inv.addItem(equip.getWeapon("javelin"));
                 inv.addItem(equip.getWeapon("javelin"));
+                inv.addItem(equip.getWeapon("javelin"));
+                inv.addItem(equip.getWeapon("javelin"));
                 inv.equipToSlot(equip.getWeapon("greataxe"), EquipmentSlot.MAIN_HAND);
             }
             case BARD -> {
@@ -667,6 +669,7 @@ public class CharacterCreator {
                 inv.addItem(equip.getWeapon("mace"));
                 inv.addItem(equip.getArmor("scale_mail"));
                 inv.addItem(equip.getArmor("shield"));
+                inv.addItem(equip.getWeapon("light_crossbow"));
                 inv.equipToSlot(equip.getWeapon("mace"), EquipmentSlot.MAIN_HAND);
                 inv.equipToSlot(equip.getArmor("scale_mail"), EquipmentSlot.ARMOR);
                 inv.equipToSlot(equip.getArmor("shield"), EquipmentSlot.OFF_HAND);
@@ -683,22 +686,25 @@ public class CharacterCreator {
                 inv.addItem(equip.getWeapon("longsword"));
                 inv.addItem(equip.getArmor("chain_mail"));
                 inv.addItem(equip.getArmor("shield"));
+                inv.addItem(equip.getWeapon("light_crossbow"));
                 inv.equipToSlot(equip.getWeapon("longsword"), EquipmentSlot.MAIN_HAND);
                 inv.equipToSlot(equip.getArmor("chain_mail"), EquipmentSlot.ARMOR);
                 inv.equipToSlot(equip.getArmor("shield"), EquipmentSlot.OFF_HAND);
             }
             case MONK -> {
                 inv.addItem(equip.getWeapon("shortsword"));
-                inv.addItem(equip.getWeapon("dagger"));
-                inv.addItem(equip.getWeapon("dagger"));
+                for (int i = 0; i < 10; i++) {
+                    inv.addItem(equip.getWeapon("dart"));
+                }
                 inv.equipToSlot(equip.getWeapon("shortsword"), EquipmentSlot.MAIN_HAND);
             }
             case PALADIN -> {
                 inv.addItem(equip.getWeapon("longsword"));
                 inv.addItem(equip.getArmor("chain_mail"));
                 inv.addItem(equip.getArmor("shield"));
-                inv.addItem(equip.getWeapon("javelin"));
-                inv.addItem(equip.getWeapon("javelin"));
+                for (int i = 0; i < 5; i++) {
+                    inv.addItem(equip.getWeapon("javelin"));
+                }
                 inv.equipToSlot(equip.getWeapon("longsword"), EquipmentSlot.MAIN_HAND);
                 inv.equipToSlot(equip.getArmor("chain_mail"), EquipmentSlot.ARMOR);
                 inv.equipToSlot(equip.getArmor("shield"), EquipmentSlot.OFF_HAND);
@@ -707,9 +713,9 @@ public class CharacterCreator {
                 inv.addItem(equip.getWeapon("longbow"));
                 inv.addItem(equip.getWeapon("shortsword"));
                 inv.addItem(equip.getWeapon("shortsword"));
-                inv.addItem(equip.getArmor("leather_armor"));
+                inv.addItem(equip.getArmor("scale_mail"));
                 inv.equipToSlot(equip.getWeapon("longbow"), EquipmentSlot.MAIN_HAND);
-                inv.equipToSlot(equip.getArmor("leather_armor"), EquipmentSlot.ARMOR);
+                inv.equipToSlot(equip.getArmor("scale_mail"), EquipmentSlot.ARMOR);
             }
             case ROGUE -> {
                 inv.addItem(equip.getWeapon("rapier"));
@@ -720,9 +726,24 @@ public class CharacterCreator {
                 inv.equipToSlot(equip.getWeapon("rapier"), EquipmentSlot.MAIN_HAND);
                 inv.equipToSlot(equip.getArmor("leather_armor"), EquipmentSlot.ARMOR);
             }
-            case SORCERER, WARLOCK, WIZARD -> {
+            case SORCERER -> {
+                inv.addItem(equip.getWeapon("light_crossbow"));
                 inv.addItem(equip.getWeapon("dagger"));
                 inv.addItem(equip.getWeapon("dagger"));
+                inv.equipToSlot(equip.getWeapon("light_crossbow"), EquipmentSlot.MAIN_HAND);
+            }
+            case WARLOCK -> {
+                // PHB: (a) light crossbow (choice) + leather armor + any simple weapon (fixed) + 2 daggers
+                inv.addItem(equip.getWeapon("light_crossbow"));  // choice weapon
+                inv.addItem(equip.getArmor("leather_armor"));
+                inv.addItem(equip.getWeapon("dagger"));  // fixed simple weapon
+                inv.addItem(equip.getWeapon("dagger"));  // fixed dagger 1
+                inv.addItem(equip.getWeapon("dagger"));  // fixed dagger 2
+                inv.equipToSlot(equip.getWeapon("light_crossbow"), EquipmentSlot.MAIN_HAND);
+                inv.equipToSlot(equip.getArmor("leather_armor"), EquipmentSlot.ARMOR);
+            }
+            case WIZARD -> {
+                // PHB: (a) a quarterstaff only
                 inv.addItem(equip.getWeapon("quarterstaff"));
                 inv.equipToSlot(equip.getWeapon("quarterstaff"), EquipmentSlot.MAIN_HAND);
             }
@@ -754,11 +775,13 @@ public class CharacterCreator {
                 inv.addItem(equip.getWeapon("warhammer"));
                 inv.addItem(equip.getArmor("chain_mail"));
                 inv.addItem(equip.getArmor("shield"));
+                inv.addItem(equip.getWeapon("light_crossbow"));
                 inv.equipToSlot(equip.getWeapon("warhammer"), EquipmentSlot.MAIN_HAND);
                 inv.equipToSlot(equip.getArmor("chain_mail"), EquipmentSlot.ARMOR);
                 inv.equipToSlot(equip.getArmor("shield"), EquipmentSlot.OFF_HAND);
             }
             case DRUID -> {
+                inv.addItem(equip.getArmor("shield"));
                 inv.addItem(equip.getWeapon("quarterstaff"));
                 inv.addItem(equip.getArmor("leather_armor"));
                 inv.equipToSlot(equip.getWeapon("quarterstaff"), EquipmentSlot.MAIN_HAND);
@@ -774,24 +797,28 @@ public class CharacterCreator {
             }
             case MONK -> {
                 inv.addItem(equip.getWeapon("quarterstaff"));
-                inv.addItem(equip.getWeapon("dagger"));
-                inv.addItem(equip.getWeapon("dagger"));
+                for (int i = 0; i < 10; i++) {
+                    inv.addItem(equip.getWeapon("dart"));
+                }
                 inv.equipToSlot(equip.getWeapon("quarterstaff"), EquipmentSlot.MAIN_HAND);
             }
             case PALADIN -> {
-                inv.addItem(equip.getWeapon("greatsword"));
+                inv.addItem(equip.getWeapon("longsword"));
+                inv.addItem(equip.getWeapon("longsword"));
                 inv.addItem(equip.getArmor("chain_mail"));
-                inv.addItem(equip.getWeapon("javelin"));
-                inv.addItem(equip.getWeapon("javelin"));
-                inv.equipToSlot(equip.getWeapon("greatsword"), EquipmentSlot.MAIN_HAND);
+                for (int i = 0; i < 5; i++) {
+                    inv.addItem(equip.getWeapon("javelin"));
+                }
+                inv.equipToSlot(equip.getWeapon("longsword"), EquipmentSlot.MAIN_HAND);
                 inv.equipToSlot(equip.getArmor("chain_mail"), EquipmentSlot.ARMOR);
             }
             case RANGER -> {
                 inv.addItem(equip.getWeapon("shortsword"));
                 inv.addItem(equip.getWeapon("shortsword"));
-                inv.addItem(equip.getArmor("scale_mail"));
+                inv.addItem(equip.getArmor("leather_armor"));
+                inv.addItem(equip.getWeapon("longbow"));
                 inv.equipToSlot(equip.getWeapon("shortsword"), EquipmentSlot.MAIN_HAND);
-                inv.equipToSlot(equip.getArmor("scale_mail"), EquipmentSlot.ARMOR);
+                inv.equipToSlot(equip.getArmor("leather_armor"), EquipmentSlot.ARMOR);
             }
             case ROGUE -> {
                 inv.addItem(equip.getWeapon("shortsword"));
@@ -802,11 +829,27 @@ public class CharacterCreator {
                 inv.equipToSlot(equip.getWeapon("shortsword"), EquipmentSlot.MAIN_HAND);
                 inv.equipToSlot(equip.getArmor("leather_armor"), EquipmentSlot.ARMOR);
             }
-            case SORCERER, WARLOCK, WIZARD -> {
-                inv.addItem(equip.getWeapon("light_crossbow"));
+            case SORCERER -> {
+                // PHB: (b) any simple weapon + 2 daggers
+                inv.addItem(equip.getWeapon("quarterstaff"));
                 inv.addItem(equip.getWeapon("dagger"));
                 inv.addItem(equip.getWeapon("dagger"));
-                inv.equipToSlot(equip.getWeapon("light_crossbow"), EquipmentSlot.MAIN_HAND);
+                inv.equipToSlot(equip.getWeapon("quarterstaff"), EquipmentSlot.MAIN_HAND);
+            }
+            case WARLOCK -> {
+                // PHB: (b) any simple weapon (choice) + leather armor + any simple weapon (fixed) + 2 daggers
+                inv.addItem(equip.getWeapon("quarterstaff"));  // choice weapon
+                inv.addItem(equip.getArmor("leather_armor"));
+                inv.addItem(equip.getWeapon("dagger"));  // fixed simple weapon
+                inv.addItem(equip.getWeapon("dagger"));  // fixed dagger 1
+                inv.addItem(equip.getWeapon("dagger"));  // fixed dagger 2
+                inv.equipToSlot(equip.getWeapon("quarterstaff"), EquipmentSlot.MAIN_HAND);
+                inv.equipToSlot(equip.getArmor("leather_armor"), EquipmentSlot.ARMOR);
+            }
+            case WIZARD -> {
+                // PHB: (b) a dagger only
+                inv.addItem(equip.getWeapon("dagger"));
+                inv.equipToSlot(equip.getWeapon("dagger"), EquipmentSlot.MAIN_HAND);
             }
         }
     }
@@ -822,9 +865,9 @@ public class CharacterCreator {
             case PALADIN -> List.of("Longsword", "Shield", "5 Javelins", "Priest's Pack", "Chain Mail", "Holy Symbol");
             case RANGER -> List.of("Scale Mail", "2 Shortswords", "Dungeoneer's Pack", "Longbow + 20 arrows");
             case ROGUE -> List.of("Rapier", "Shortbow + 20 arrows", "Burglar's Pack", "Leather Armor", "2 Daggers", "Thieves' Tools");
-            case SORCERER -> List.of("Light Crossbow + 20 bolts", "Component Pouch", "Dungeoneer's Pack", "2 Daggers");
-            case WARLOCK -> List.of("Light Crossbow + 20 bolts", "Component Pouch", "Scholar's Pack", "Leather Armor", "Simple Weapon", "2 Daggers");
-            case WIZARD -> List.of("Quarterstaff", "Component Pouch", "Scholar's Pack", "Spellbook");
+            case SORCERER -> List.of("Light Crossbow + 20 bolts", "2 Daggers");
+            case WARLOCK -> List.of("Light Crossbow + 20 bolts", "Leather Armor", "3 Daggers");
+            case WIZARD -> List.of("Quarterstaff");
         };
     }
 
@@ -839,9 +882,9 @@ public class CharacterCreator {
             case PALADIN -> List.of("2 Longswords", "5 Javelins", "Explorer's Pack", "Chain Mail", "Holy Symbol");
             case RANGER -> List.of("Leather Armor", "2 Shortswords", "Explorer's Pack", "Longbow + 20 arrows");
             case ROGUE -> List.of("Shortsword", "Shortbow + 20 arrows", "Dungeoneer's Pack", "Leather Armor", "2 Daggers", "Thieves' Tools");
-            case SORCERER -> List.of("Any Simple Weapon", "Arcane Focus", "Explorer's Pack", "2 Daggers");
-            case WARLOCK -> List.of("Any Simple Weapon", "Arcane Focus", "Dungeoneer's Pack", "Leather Armor", "Simple Weapon", "2 Daggers");
-            case WIZARD -> List.of("Dagger", "Arcane Focus", "Explorer's Pack", "Spellbook");
+            case SORCERER -> List.of("Quarterstaff", "2 Daggers");
+            case WARLOCK -> List.of("Quarterstaff", "Leather Armor", "3 Daggers");
+            case WIZARD -> List.of("Dagger");
         };
     }
 

@@ -42,6 +42,9 @@ public class CharacterData {
     private int armorBonus;
     private int shieldBonus;
 
+    // Rest state
+    private int availableHitDice;
+
 
     //creates empty CharacterData
     public CharacterData() {
@@ -86,7 +89,10 @@ public class CharacterData {
         data.temporaryHitPoints = character.getTemporaryHitPoints();
         data.armorBonus = character.getArmorBonus();
         data.shieldBonus = character.getShieldBonus();
-        
+
+        // Rest state
+        data.availableHitDice = character.getAvailableHitDice();
+
         return data;
     }
 
@@ -125,10 +131,13 @@ public class CharacterData {
     character.setArmorBonus(armorBonus);
     character.setShieldBonus(shieldBonus);
     character.setTemporaryHitPoints(temporaryHitPoints);
-        
+
     // Restore HP by healing to full, then damaging to reach saved HP
     character.setCurrentHitPoints(currentHitPoints);
-    
+
+    // Restore rest state
+    character.setAvailableHitDice(availableHitDice);
+
     return character;
 }
     /**
@@ -152,6 +161,7 @@ public class CharacterData {
         map.put("temp_hp", temporaryHitPoints);
         map.put("armor_bonus", armorBonus);
         map.put("shield_bonus", shieldBonus);
+        map.put("available_hit_dice", availableHitDice);
 
         return map;
 
@@ -196,7 +206,10 @@ public class CharacterData {
         cd.temporaryHitPoints = getInt(data, "temp_hp", 0);
         cd.armorBonus = getInt(data, "armor_bonus", 0);
         cd.shieldBonus = getInt(data, "shield_bonus", 0);
-        
+
+        // Rest state (default to level for old saves without hit dice tracking)
+        cd.availableHitDice = getInt(data, "available_hit_dice", cd.level);
+
         return cd;
     }
 

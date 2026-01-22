@@ -194,7 +194,20 @@ Mini-games use D&D 5e skill checks:
 
 Tests use JUnit 5 with `@Nested` classes for organization and `@TempDir` for file-based tests. Run `mvn test` for all tests.
 
-**Core test classes:** `CampaignTest`, `CampaignLoaderTest`, `CombatSystemTest`, `CombatResultTest`, `InventoryTest`, `StatusEffectManagerTest`, `DialogueSystemTest`, `CharacterTest`, `MonsterTest`, `GameStateTest`, `GameEngineTest`, `CommandParserTest`, `TrialTest`, `TrialIntegrationTest`, `DiceTest`, `DisplayTest`, `EdgeCaseTest`
+**Test organization by package:**
+- `campaign/` - `CampaignTest`, `CampaignLoaderTest`, `TrialTest`, `TrialIntegrationTest`
+- `character/` - `CharacterTest`, `NPCTest`
+- `combat/` - `CombatSystemTest`, `CombatResultTest`, `MonsterTest`
+- `combat/status/` - `ConditionTest`, `ConditionEffectTest`, `StatusEffectManagerTest`, `DurationTypeTest`, `AbstractStatusEffectTest`
+- `core/` - `GameEngineTest`, `CommandParserTest`, `DiceTest`
+- `dialogue/` - `DialogueSystemTest`
+- `inventory/` - `InventoryTest`, `WeaponTest`, `ArmorTest`, `ItemTest`, `MagicItemTest`
+- `inventory/items/effects/` - Tests for each effect type (`StatBonusEffectTest`, `ResistanceEffectTest`, etc.)
+- `save/` - `SaveStateTest`
+- `state/` - `GameStateTest`
+- `ui/` - `DisplayTest`, `CharacterCreatorTest`
+- `world/` - `LocationTest`
+- Root - `EdgeCaseTest`
 
 ## Key Implementation Details
 
@@ -239,7 +252,7 @@ Gothic horror nautical campaign with Lovecraftian elements and multiple endings.
 ## Adding a New Campaign
 
 Create a new directory under `src/main/resources/campaigns/` with these YAML files:
-- `campaign.yaml` (required): id, name, starting_location, intro
+- `campaign.yaml` (required): id, name, starting_location, intro, description, author, version
 - `locations.yaml`: locations with exits, NPCs, items, flags (`locked` flag for initially locked locations, `locked_message` for custom messages)
 - `npcs.yaml`: NPC definitions with dialogue trees
 - `monsters.yaml`: monster templates with D&D 5e stats
@@ -248,3 +261,9 @@ Create a new directory under `src/main/resources/campaigns/` with these YAML fil
 - `minigames.yaml`: mini-game definitions with skill checks
 
 The campaign selection menu appears automatically when multiple campaigns exist.
+
+## Dependencies
+
+- **SnakeYAML 2.2** - YAML parsing for campaign data
+- **Jansi 2.4.1** - Terminal colors for CLI output
+- **JUnit 5.10.1** - Testing framework

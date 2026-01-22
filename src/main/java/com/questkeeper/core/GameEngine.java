@@ -12,6 +12,7 @@ import com.questkeeper.combat.CombatSystem;
 import com.questkeeper.combat.Combatant;
 import com.questkeeper.combat.Monster;
 import com.questkeeper.core.CommandParser.Command;
+import com.questkeeper.core.RestSystem.RestResult;
 import com.questkeeper.dialogue.DialogueResult;
 import com.questkeeper.dialogue.DialogueSystem;
 import com.questkeeper.inventory.Inventory;
@@ -57,6 +58,7 @@ public class GameEngine implements AutoCloseable {
     private GameState gameState;
     private DialogueSystem dialogueSystem;
     private CombatSystem combatSystem;
+    private RestSystem restSystem;
     private Trial activeTrial;
     private boolean running;
 
@@ -65,6 +67,7 @@ public class GameEngine implements AutoCloseable {
         this.random = new Random();
         this.dialogueSystem = new DialogueSystem();
         this.combatSystem = new CombatSystem();
+        this.restSystem = new RestSystem();
         this.running = false;
     }
 
@@ -366,6 +369,7 @@ public class GameEngine implements AutoCloseable {
             case "equip", "wear", "wield" -> handleEquip(noun);
             case "unequip", "remove" -> handleUnequip(noun);
             case "use", "activate" -> handleUse(noun);
+            case "rest" -> handleRest(noun);
             case "help" -> handleHelp();
             case "save" -> handleSave();
             case "load" -> handleLoad();
@@ -833,12 +837,24 @@ public class GameEngine implements AutoCloseable {
 
     private void handleEquip(String target) {
         if (target == null || target.isEmpty()) {
-            Display.showError("Equip what? Try 'equip <item name>'");
+            Display.showError("Equip what? Try 'equip <item name>' or 'equip <item> to offhand'");
             return;
         }
 
+        // Parse "equip X to Y" syntax for explicit slot targeting
+        String itemName = target;
+        EquipmentSlot targetSlot = null;
+
+        if (target.toLowerCase().contains(" to ")) {
+            String[] parts = target.split("(?i) to ");
+            itemName = parts[0].trim();
+            if (parts.length > 1) {
+                targetSlot = parseSlotName(parts[1].trim().toLowerCase());
+            }
+        }
+
         var inventory = gameState.getCharacter().getInventory();
-        List<Item> matches = inventory.findItemsByName(target);
+        List<Item> matches = inventory.findItemsByName(itemName);
 
         if (matches.isEmpty()) {
             Display.showError("You don't have anything called '" + target + "' in your inventory.");
@@ -880,11 +896,17 @@ public class GameEngine implements AutoCloseable {
             }
         }
 
-        // Equip the item
-        Item previousItem = inventory.equip(toEquip);
+        // Equip the item (use explicit slot if provided)
+        Item previousItem;
+        String slotName;
 
-        // Determine what slot it went to for display
-        String slotName = getSlotNameForItem(toEquip);
+        if (targetSlot != null) {
+            previousItem = inventory.equipToSlot(toEquip, targetSlot);
+            slotName = targetSlot.getDisplayName();
+        } else {
+            previousItem = inventory.equip(toEquip);
+            slotName = getSlotNameForItem(toEquip);
+        }
 
         Display.println();
         Display.println(Display.colorize("Equipped: ", GREEN) + toEquip.getName() +
@@ -1206,6 +1228,180 @@ public class GameEngine implements AutoCloseable {
         if (confirm.equals("y") || confirm.equals("yes")) {
             running = false;
         }
+    }
+
+    // ==========================================
+    // Rest System
+    // ==========================================
+
+    private void handleRest(String type) {
+        Character character = gameState.getCharacter();
+
+        // Can't rest during combat
+        if (combatSystem.isInCombat()) {
+            Display.showError("You cannot rest during combat!");
+            return;
+        }
+
+        // Can't rest during dialogue
+        if (dialogueSystem.isInConversation()) {
+            Display.showError("You should end your conversation first.");
+            return;
+        }
+
+        // Determine rest type
+        if (type == null || type.isEmpty()) {
+            // Show rest options
+            showRestMenu(character);
+            return;
+        }
+
+        String restType = type.toLowerCase();
+        if (restType.equals("short") || restType.equals("s")) {
+            performShortRest(character);
+        } else if (restType.equals("long") || restType.equals("l")) {
+            performLongRest(character);
+        } else {
+            Display.showError("Unknown rest type. Use 'rest short' or 'rest long'.");
+        }
+    }
+
+    private void showRestMenu(Character character) {
+        Display.println();
+        Display.println(Display.colorize("=== Rest Options ===", CYAN));
+        Display.println();
+
+        // Show current status
+        Display.println(String.format("HP: %d/%d  |  Hit Dice: %dd%d available",
+                character.getCurrentHitPoints(),
+                character.getMaxHitPoints(),
+                character.getAvailableHitDice(),
+                character.getHitDieSize()));
+        Display.println();
+
+        Display.println(Display.colorize("Short Rest", YELLOW) + " (1 hour)");
+        Display.println("  Spend hit dice to heal. Roll 1d" + character.getHitDieSize() +
+                " + " + character.getAbilityModifier(Character.Ability.CONSTITUTION) + " (CON) per die.");
+        Display.println();
+
+        Display.println(Display.colorize("Long Rest", YELLOW) + " (8 hours)");
+        Display.println("  Fully restore HP. Regain half your hit dice.");
+        Display.println();
+
+        Display.showPrompt("Rest type (short/long/cancel)> ");
+        String choice = scanner.nextLine().trim().toLowerCase();
+
+        if (choice.equals("short") || choice.equals("s")) {
+            performShortRest(character);
+        } else if (choice.equals("long") || choice.equals("l")) {
+            performLongRest(character);
+        } else {
+            Display.println("Rest cancelled.");
+        }
+    }
+
+    private void performShortRest(Character character) {
+        Display.println();
+        Display.println(Display.colorize("=== Short Rest ===", CYAN));
+
+        if (character.getCurrentHitPoints() >= character.getMaxHitPoints()) {
+            Display.println("You are already at full health.");
+            Display.println();
+            return;
+        }
+
+        if (character.getAvailableHitDice() <= 0) {
+            Display.println("You have no hit dice remaining. Take a long rest to recover them.");
+            Display.println();
+            return;
+        }
+
+        Display.println();
+        Display.println(String.format("You have %d hit dice (d%d) available.",
+                character.getAvailableHitDice(), character.getHitDieSize()));
+        Display.println("You settle down for a short rest...");
+        Display.println();
+
+        int totalHealed = 0;
+        int diceUsed = 0;
+
+        while (character.getAvailableHitDice() > 0 &&
+                character.getCurrentHitPoints() < character.getMaxHitPoints()) {
+
+            Display.showPrompt("Spend a hit die? (y/n)> ");
+            String choice = scanner.nextLine().trim().toLowerCase();
+
+            if (!choice.equals("y") && !choice.equals("yes")) {
+                break;
+            }
+
+            // Roll hit die
+            int roll = Dice.roll(character.getHitDieSize());
+            int conMod = character.getAbilityModifier(Character.Ability.CONSTITUTION);
+            int healing = Math.max(1, roll + conMod);
+            int actualHealing = character.useHitDie();
+
+            if (actualHealing < 0) {
+                break;  // No more dice
+            }
+
+            diceUsed++;
+            totalHealed += actualHealing;
+
+            String modStr = conMod >= 0 ? "+" + conMod : String.valueOf(conMod);
+            Display.println(String.format("  Rolled d%d: %d %s = %d HP restored (now %d/%d)",
+                    character.getHitDieSize(), roll, modStr, actualHealing,
+                    character.getCurrentHitPoints(), character.getMaxHitPoints()));
+
+            if (character.getCurrentHitPoints() >= character.getMaxHitPoints()) {
+                Display.println(Display.colorize("  You are now at full health!", GREEN));
+                break;
+            }
+
+            Display.println(String.format("  %d hit dice remaining.", character.getAvailableHitDice()));
+        }
+
+        Display.println();
+        if (diceUsed > 0) {
+            Display.println(Display.colorize("Short rest complete.", GREEN) +
+                    String.format(" Restored %d HP using %d hit dice.", totalHealed, diceUsed));
+        } else {
+            Display.println("You finish your rest without using any hit dice.");
+        }
+        Display.println();
+    }
+
+    private void performLongRest(Character character) {
+        Display.println();
+        Display.println(Display.colorize("=== Long Rest ===", CYAN));
+        Display.println();
+        Display.println("You settle down for a long rest...");
+        Display.println();
+
+        RestResult result = restSystem.longRest(character);
+
+        Display.println(Display.colorize("After 8 hours of rest:", WHITE));
+        Display.println();
+
+        if (result.hpRestored() > 0) {
+            Display.println(Display.colorize("  HP fully restored: ", GREEN) +
+                    result.currentHp() + "/" + result.maxHp());
+        } else {
+            Display.println("  HP: " + result.currentHp() + "/" + result.maxHp() + " (already full)");
+        }
+
+        if (result.hitDiceRestored() > 0) {
+            Display.println(Display.colorize("  Hit dice recovered: ", GREEN) +
+                    "+" + result.hitDiceRestored() +
+                    " (now " + result.availableHitDice() + "/" + result.maxHitDice() + ")");
+        } else {
+            Display.println("  Hit dice: " + result.availableHitDice() + "/" + result.maxHitDice() +
+                    " (already full)");
+        }
+
+        Display.println();
+        Display.println(Display.colorize("You feel refreshed and ready to continue your adventure.", CYAN));
+        Display.println();
     }
 
     private void handleHelp() {

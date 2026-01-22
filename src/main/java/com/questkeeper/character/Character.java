@@ -204,7 +204,9 @@ public class Character implements Combatant {
     private int currentHitPoints;
     private int maxHitPoints;
     private int temporaryHitPoints;
-    
+
+    private int availableHitDice;  // Hit dice available for short rest healing
+
     private int armorBonus;
     private int shieldBonus;
 
@@ -231,7 +233,8 @@ public class Character implements Combatant {
         this.maxHitPoints = calculateMaxHitPoints();
         this.currentHitPoints = maxHitPoints;
         this.temporaryHitPoints = 0;
-        
+        this.availableHitDice = level;  // Start with all hit dice available
+
         this.armorBonus = 0;
         this.shieldBonus = 0;
 
@@ -291,12 +294,79 @@ public class Character implements Combatant {
     @Override
     public int heal(int amount) {
         if (amount <= 0) return 0;
-        
+
         int oldHp = currentHitPoints;
         currentHitPoints = Math.min(currentHitPoints + amount, maxHitPoints);
         return currentHitPoints - oldHp;
     }
-    
+
+    // ==========================================
+    // Hit Dice Methods (for resting)
+    // ==========================================
+
+    /**
+     * Gets the number of hit dice currently available for short rest healing.
+     */
+    public int getAvailableHitDice() {
+        return availableHitDice;
+    }
+
+    /**
+     * Gets the maximum number of hit dice (equals character level).
+     */
+    public int getMaxHitDice() {
+        return level;
+    }
+
+    /**
+     * Gets the size of this character's hit die (e.g., 8 for d8).
+     */
+    public int getHitDieSize() {
+        return characterClass.getHitDie();
+    }
+
+    /**
+     * Sets the available hit dice (used when loading saved games).
+     */
+    public void setAvailableHitDice(int dice) {
+        this.availableHitDice = Math.max(0, Math.min(dice, level));
+    }
+
+    /**
+     * Uses one hit die to heal during a short rest.
+     * Rolls the hit die and adds CON modifier.
+     *
+     * @return the amount healed, or -1 if no hit dice available
+     */
+    public int useHitDie() {
+        if (availableHitDice <= 0) {
+            return -1;
+        }
+        if (currentHitPoints >= maxHitPoints) {
+            return 0;  // Already at full health
+        }
+
+        availableHitDice--;
+        int roll = Dice.roll(characterClass.getHitDie());
+        int conMod = getAbilityModifier(Ability.CONSTITUTION);
+        int healing = Math.max(1, roll + conMod);  // Minimum 1 HP healed
+
+        return heal(healing);
+    }
+
+    /**
+     * Restores hit dice after a long rest.
+     * Regains half of max hit dice (minimum 1).
+     *
+     * @return the number of hit dice restored
+     */
+    public int restoreHitDice() {
+        int toRestore = Math.max(1, level / 2);
+        int oldDice = availableHitDice;
+        availableHitDice = Math.min(level, availableHitDice + toRestore);
+        return availableHitDice - oldDice;
+    }
+
     @Override
     public boolean isAlive() {
         return currentHitPoints > 0;
@@ -485,6 +555,13 @@ public class Character implements Combatant {
         temporaryHitPoints = Math.max(temporaryHitPoints, amount);
     }
 
+    /**
+     * Clears all temporary hit points (used on long rest).
+     */
+    public void clearTemporaryHitPoints() {
+        temporaryHitPoints = 0;
+    }
+
     public void fullHeal() {
         currentHitPoints = maxHitPoints;
     }
@@ -520,20 +597,22 @@ public class Character implements Combatant {
 
     private void levelUp() {
         level++;
-        
+
         int oldMax = maxHitPoints;
         maxHitPoints = calculateMaxHitPoints();
-        
+
         currentHitPoints += (maxHitPoints - oldMax);
+        availableHitDice++;  // Gain one hit die per level
     }
     
     public void setLevel(int newLevel) {
         if (newLevel < 1) newLevel = 1;
         if (newLevel > 20) newLevel = 20;
-        
+
         this.level = newLevel;
         this.maxHitPoints = calculateMaxHitPoints();
         this.currentHitPoints = Math.min(currentHitPoints, maxHitPoints);
+        this.availableHitDice = Math.min(availableHitDice, level);  // Cap at new level
     }
 
     public void setArmorBonus(int bonus) {

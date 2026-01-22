@@ -116,6 +116,18 @@ weapons:
     properties: [THROWN, VERSATILE]
     versatile_die_size: 8
 
+  - id: dart
+    name: Dart
+    damage_dice_count: 1
+    damage_die_size: 4
+    damage_type: PIERCING
+    category: SIMPLE_RANGED
+    weight: 0.25
+    value: 1
+    normal_range: 20
+    long_range: 60
+    properties: [FINESSE, THROWN]
+
   # ==========================================
   # Simple Ranged Weapons
   # ==========================================

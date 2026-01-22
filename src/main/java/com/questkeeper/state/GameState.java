@@ -146,15 +146,37 @@ public class GameState {
             }
         }
 
-        // Restore equipped items
-        for (String itemId : saveState.getEquippedItems()) {
-            Item item = findItem(itemId, campaign, stdEquip);
-            if (item != null) {
-                // Add item first, then equip it
-                character.getInventory().addItem(item);
-                EquipmentSlot slot = determineSlotForItem(item);
-                if (slot != null) {
-                    character.getInventory().equipToSlot(item, slot);
+        // Restore equipped items (use slot info if available, fallback to legacy)
+        if (saveState.hasEquippedSlots()) {
+            // New format: restore to exact slots
+            for (var entry : saveState.getEquippedSlots().entrySet()) {
+                String slotName = entry.getKey();
+                String itemId = entry.getValue();
+                Item item = findItem(itemId, campaign, stdEquip);
+                if (item != null) {
+                    character.getInventory().addItem(item);
+                    try {
+                        EquipmentSlot slot = EquipmentSlot.valueOf(slotName);
+                        character.getInventory().equipToSlot(item, slot);
+                    } catch (IllegalArgumentException e) {
+                        // Invalid slot name, use default
+                        EquipmentSlot slot = determineSlotForItem(item);
+                        if (slot != null) {
+                            character.getInventory().equipToSlot(item, slot);
+                        }
+                    }
+                }
+            }
+        } else {
+            // Legacy format: use default slots
+            for (String itemId : saveState.getEquippedItems()) {
+                Item item = findItem(itemId, campaign, stdEquip);
+                if (item != null) {
+                    character.getInventory().addItem(item);
+                    EquipmentSlot slot = determineSlotForItem(item);
+                    if (slot != null) {
+                        character.getInventory().equipToSlot(item, slot);
+                    }
                 }
             }
         }
@@ -208,10 +230,11 @@ public class GameState {
             }
         }
 
-        // Equipped items
+        // Equipped items (save with slot information)
         for (var entry : character.getInventory().getEquippedItems().entrySet()) {
+            EquipmentSlot slot = entry.getKey();
             String itemId = entry.getValue().getId();
-            save.equipItem(itemId);
+            save.equipItemToSlot(slot.name(), itemId);
         }
 
         // Gold
