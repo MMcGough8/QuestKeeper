@@ -71,6 +71,7 @@ mvn exec:java -Dexec.mainClass="com.questkeeper.demo.AutoDemo" -q
 | `world` | Location system |
 | `ui` | Display and character creation UI |
 | `save` | Game state persistence (`SaveState`, `CharacterData`) |
+| `demo` | Automated demo for presentations (`AutoDemo`) |
 
 ### Key Design Patterns
 
@@ -209,18 +210,6 @@ Tests use JUnit 5 with `@Nested` classes for organization and `@TempDir` for fil
 - `world/` - `LocationTest`
 - Root - `EdgeCaseTest`
 
-### Tests Needing Creation
-
-The following test files have been identified as coverage gaps and should be created:
-
-| Test File | Package | Priority | Description |
-|-----------|---------|----------|-------------|
-| `CharacterDataTest` | `save/` | High | Tests for save/load conversion including equipment slots, hit dice, and all character fields |
-| `AbstractItemEffectTest` | `inventory/items/effects/` | High | Tests for base effect class (Template Method pattern, apply/remove lifecycle) |
-| `StandardEquipmentTest` | `inventory/` | Medium | Tests for YAML equipment loader singleton, D&D 5e weapon/armor loading |
-| `DialogueResultTest` | `dialogue/` | Medium | Tests for dialogue result records and factory methods |
-| `DescriptionEffectTest` | `inventory/items/effects/` | Low | Tests for description-only effects (flavor text, no mechanical impact) |
-
 ## Key Implementation Details
 
 - Character ability scores use 1-20 scale with racial bonuses
@@ -243,23 +232,12 @@ The following test files have been identified as coverage gaps and should be cre
 
 ## Available Campaigns
 
-### Muddlebrook: Harlequin Trials (Beginner)
-Comedic mystery campaign with theatrical villain and puzzle rooms.
-- **18 locations**, 3 trials, 14 mini-games, 6 NPCs, 34 items
-- **Tone**: Scooby-Doo meets Monty Python
-- **DCs**: 10-14 (beginner-friendly)
+Three campaigns exist at varying difficulty levels:
+- **muddlebrook** - Beginner comedic mystery (DCs 10-14)
+- **eberron** - Intermediate Olympic competition (DCs 12-16)
+- **drownedgod** - Advanced nautical horror (DCs 15-19)
 
-### Eberron: Shards of the Fallen Sky (Intermediate)
-Olympic Games competition with cosmic mythology and dragonshard rewards.
-- **11 locations**, 5 trials, 17 mini-games, 10 NPCs, 41 items
-- **Tone**: Heroic competition with hidden cosmic stakes
-- **DCs**: 12-16 (intermediate)
-
-### Whispers of the Drowned God (Advanced)
-Gothic horror nautical campaign with Lovecraftian elements and multiple endings.
-- **17 locations**, 5 trials, 20 mini-games, 12 NPCs, 42 items
-- **Tone**: Cosmic horror, player agency in faction choices
-- **DCs**: 15-19 (experienced players)
+Campaign details are in each campaign's `campaign.yaml` file.
 
 ## Adding a New Campaign
 

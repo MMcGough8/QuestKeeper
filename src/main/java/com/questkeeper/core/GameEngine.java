@@ -841,15 +841,28 @@ public class GameEngine implements AutoCloseable {
             return;
         }
 
-        // Parse "equip X to Y" syntax for explicit slot targeting
+        // Parse "equip X to Y" or "equip X Y" syntax for explicit slot targeting
         String itemName = target;
         EquipmentSlot targetSlot = null;
 
         if (target.toLowerCase().contains(" to ")) {
+            // "equip shortsword to offhand" syntax
             String[] parts = target.split("(?i) to ");
             itemName = parts[0].trim();
             if (parts.length > 1) {
                 targetSlot = parseSlotName(parts[1].trim().toLowerCase());
+            }
+        } else {
+            // Try "equip shortsword offhand" syntax (no "to")
+            String[] words = target.split("\\s+");
+            if (words.length >= 2) {
+                String lastWord = words[words.length - 1].toLowerCase();
+                EquipmentSlot possibleSlot = parseSlotName(lastWord);
+                if (possibleSlot != null) {
+                    targetSlot = possibleSlot;
+                    // Remove the slot name from the item name
+                    itemName = target.substring(0, target.toLowerCase().lastIndexOf(lastWord)).trim();
+                }
             }
         }
 
@@ -899,13 +912,22 @@ public class GameEngine implements AutoCloseable {
         // Equip the item (use explicit slot if provided)
         Item previousItem;
         String slotName;
+        EquipmentSlot actualSlot;
 
         if (targetSlot != null) {
             previousItem = inventory.equipToSlot(toEquip, targetSlot);
             slotName = targetSlot.getDisplayName();
+            actualSlot = targetSlot;
         } else {
             previousItem = inventory.equip(toEquip);
             slotName = getSlotNameForItem(toEquip);
+            actualSlot = getSlotForItem(toEquip);
+        }
+
+        // Verify the equip actually succeeded by checking if the item is in the slot
+        if (actualSlot == null || inventory.getEquipped(actualSlot) != toEquip) {
+            Display.showError("Failed to equip " + toEquip.getName() + " to " + slotName + ".");
+            return;
         }
 
         Display.println();
@@ -917,6 +939,15 @@ public class GameEngine implements AutoCloseable {
                     " (returned to inventory)");
         }
         Display.println();
+    }
+
+    private EquipmentSlot getSlotForItem(Item item) {
+        if (item instanceof Weapon) {
+            return EquipmentSlot.MAIN_HAND;
+        } else if (item instanceof Armor armor) {
+            return armor.isShield() ? EquipmentSlot.OFF_HAND : EquipmentSlot.ARMOR;
+        }
+        return null;
     }
 
     private String getSlotNameForItem(Item item) {

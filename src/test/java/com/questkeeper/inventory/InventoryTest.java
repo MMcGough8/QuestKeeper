@@ -925,10 +925,33 @@ class InventoryTest {
         @DisplayName("Can equip to specific slot")
         void canEquipToSpecificSlot() {
             inventory.addItem(dagger);
-            
+
             inventory.equipToSlot(dagger, EquipmentSlot.OFF_HAND);
-            
+
             assertEquals(dagger, inventory.getEquipped(EquipmentSlot.OFF_HAND));
+        }
+
+        @Test
+        @DisplayName("Can dual wield light weapons")
+        void canDualWieldLightWeapons() {
+            // Shortswords are light weapons suitable for dual wielding
+            Weapon mainSword = Weapon.createShortsword();
+            Weapon offSword = Weapon.createShortsword();
+
+            inventory.addItem(mainSword);
+            inventory.addItem(offSword);
+
+            // Equip main hand normally
+            inventory.equip(mainSword);
+            assertEquals(mainSword, inventory.getEquipped(EquipmentSlot.MAIN_HAND));
+
+            // Equip off hand explicitly
+            inventory.equipToSlot(offSword, EquipmentSlot.OFF_HAND);
+            assertEquals(offSword, inventory.getEquipped(EquipmentSlot.OFF_HAND));
+
+            // Both should remain equipped
+            assertEquals(mainSword, inventory.getEquipped(EquipmentSlot.MAIN_HAND));
+            assertEquals(offSword, inventory.getEquipped(EquipmentSlot.OFF_HAND));
         }
 
         @Test
