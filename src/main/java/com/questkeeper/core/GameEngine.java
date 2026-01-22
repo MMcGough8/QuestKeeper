@@ -15,10 +15,12 @@ import com.questkeeper.core.CommandParser.Command;
 import com.questkeeper.core.RestSystem.RestResult;
 import com.questkeeper.dialogue.DialogueResult;
 import com.questkeeper.dialogue.DialogueSystem;
+import com.questkeeper.inventory.Armor;
 import com.questkeeper.inventory.Inventory;
 import com.questkeeper.inventory.Inventory.EquipmentSlot;
 import com.questkeeper.inventory.Item;
 import com.questkeeper.inventory.Inventory.ItemStack;
+import com.questkeeper.inventory.Weapon;
 import com.questkeeper.inventory.items.MagicItem;
 import com.questkeeper.save.SaveState;
 import com.questkeeper.state.GameState;
@@ -268,14 +270,21 @@ public class GameEngine implements AutoCloseable {
         Inventory inventory = character.getInventory();
         com.questkeeper.inventory.StandardEquipment equip =
             com.questkeeper.inventory.StandardEquipment.getInstance();
+
+        // Add items to inventory then equip them
         inventory.addItem(equip.getWeapon("longsword"));
         inventory.addItem(equip.getArmor("chain_mail"));
         inventory.addItem(equip.getArmor("shield"));
+
+        // equipToSlot now properly retrieves items from inventory by ID
         inventory.equipToSlot(equip.getWeapon("longsword"), Inventory.EquipmentSlot.MAIN_HAND);
         inventory.equipToSlot(equip.getArmor("chain_mail"), Inventory.EquipmentSlot.ARMOR);
         inventory.equipToSlot(equip.getArmor("shield"), Inventory.EquipmentSlot.OFF_HAND);
 
-        // Add starting gold (10 cp pocket change)
+        // Add ranged option (stays in backpack)
+        inventory.addItem(equip.getWeapon("light_crossbow"));
+
+        // Add starting gold
         inventory.addGold(10);
 
         Display.println(Display.colorize("Created: " + character.getName() + " the " +

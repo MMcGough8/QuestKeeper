@@ -278,11 +278,11 @@ public class Inventory {
         if (item == null || slot == null) {
             return null;
         }
-        
+
         if (!hasItem(item)) {
             return null;
         }
-        
+
         // Handle two-handed weapons
         if (item instanceof Weapon weapon && weapon.isTwoHanded()) {
             Item offHand = unequip(EquipmentSlot.OFF_HAND);
@@ -290,15 +290,20 @@ public class Inventory {
                 addItem(offHand);
             }
         }
-        
+
         Item previous = equipped.get(slot);
         if (previous != null) {
             addItem(previous);
         }
-        
-        removeItem(item);
-        equipped.put(slot, item);
-        
+
+        // Remove and get the actual item from inventory (not the passed reference)
+        // This handles the case where addItem created a copy
+        Item toEquip = removeItemById(item.getId());
+        if (toEquip == null) {
+            return null; // Shouldn't happen since hasItem passed
+        }
+        equipped.put(slot, toEquip);
+
         return previous;
     }
 
