@@ -4,256 +4,487 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-QuestKeeper is a CLI-based D&D 5e adventure game written in Java 17. It features YAML-driven campaign data, a modular item/effect system, D&D skill check mechanics, and support for multiple campaigns. All campaign-specific content (monsters, NPCs, locations, items, trials, mini-games) is loaded from YAML files.
+QuestKeeper is a CLI-based D&D 5e adventure game written in Java 17. It features a data-driven architecture where all campaign content (locations, NPCs, monsters, items, trials, mini-games) is defined in YAML files. The game supports multiple campaigns, implements core D&D 5e mechanics (ability scores, skills, combat, conditions), and uses a modular effect system for magic items.
 
 ## Build Commands
 
 ```bash
-# Build and run all tests
-mvn clean install
-
-# Quick build (skip tests)
-mvn clean install -P quick
-
-# Run tests only
-mvn test
-
-# Run a specific test class
-mvn test -Dtest=CampaignTest
-
-# Run a specific test method
-mvn test -Dtest=CampaignTest#testMethodName
-
-# Run the application
-mvn exec:java -Dexec.mainClass="com.questkeeper.Main"
+mvn clean install              # Build and run all tests
+mvn clean install -P quick     # Quick build (skip tests)
+mvn test                       # Run tests only
+mvn test -Dtest=CampaignTest   # Run specific test class
+mvn test -Dtest=CampaignTest#testMethodName  # Run specific test method
 ```
 
-## Playing the Game
+## Running the Game
 
 ```bash
-# Run the game (interactive mode)
-mvn exec:java -Dexec.mainClass="com.questkeeper.Main" -q
-
-# Run automated demo (for Demo Day presentations)
-mvn exec:java -Dexec.mainClass="com.questkeeper.demo.AutoDemo" -q
+mvn exec:java -Dexec.mainClass="com.questkeeper.Main" -q           # Interactive mode
+mvn exec:java -Dexec.mainClass="com.questkeeper.demo.AutoDemo" -q  # Demo mode
 ```
 
-**Basic Commands:**
-- `look` - Examine current location
-- `go <direction>` - Move (north, south, east, door, upstairs, etc.)
-- `n`, `s`, `e`, `w`, `ne`, `nw`, `se`, `sw`, `u`, `d` - Shorthand directions
-- `leave` / `exit` - Leave current location (finds best exit automatically)
-- `talk <npc>` - Start conversation
-- `ask about <topic>` - Ask NPC about something
-- `buy <item>` - Purchase item from merchant NPC (must be in conversation)
-- `bye` - End conversation
-- `inventory` / `i` - View items
-- `equip <item>` - Equip weapon/armor
-- `trial` - Start trial at current location
-- `save` / `load` - Save/load game
-- `help` - Show all commands
+## Architecture Overview
 
-## Architecture
+### Core Data Flow
+
+```
+YAML Files (campaigns/)
+    ↓
+Campaign.loadFromYaml() → CampaignLoader (package-private)
+    ↓
+Campaign (immutable facade) ← validates cross-references
+    ↓
+GameEngine creates GameState (mutable runtime)
+    ↓
+Game Loop: input → CommandParser → handler → GameState update → Display
+```
+
+**Key Separation**: `Campaign` holds immutable game content (locations, NPCs, items). `GameState` tracks mutable runtime state (current location, flags, visited locations, trial progress).
 
 ### Package Structure
 
-| Package | Purpose |
-|---------|---------|
-| `core` | Game engine (`GameEngine`), dice rolling (`Dice`), command parsing (`CommandParser`) |
-| `character` | Player characters (`Character`) and NPCs (`NPC`) |
-| `combat` | Combat system (`CombatSystem`), monster definitions, `Combatant` interface, `CombatResult` |
-| `combat.status` | Status effects system: conditions, durations, effect management |
-| `inventory` | Item hierarchy (`Item` → `Weapon`, `Armor`, `MagicItem`), `Inventory` with equipment slots and weight limits, `StandardEquipment` singleton for D&D 5e items |
-| `inventory.items.effects` | Item effect system using Template Method pattern |
-| `campaign` | Campaign facade (`Campaign`), YAML loader (`CampaignLoader` - internal), trials (`Trial`), mini-games (`MiniGame`) |
-| `dialogue` | NPC conversation system (`DialogueSystem`, `DialogueResult`) |
-| `state` | Runtime game state tracking (`GameState`) |
-| `world` | Location system |
-| `ui` | Display and character creation UI |
-| `save` | Game state persistence (`SaveState`, `CharacterData`) |
-| `demo` | Automated demo for presentations (`AutoDemo`) |
+| Package | Key Classes | Purpose |
+|---------|-------------|---------|
+| `core` | `GameEngine` (2,460 lines), `CommandParser`, `Dice`, `RestSystem` | Main orchestration, input parsing, dice mechanics |
+| `campaign` | `Campaign`, `CampaignLoader`, `Trial`, `MiniGame` | YAML loading, trial/puzzle system |
+| `character` | `Character`, `NPC` | Player (D&D 5e stats) and NPCs (dialogue trees) |
+| `combat` | `CombatSystem`, `Monster`, `Combatant`, `CombatResult` | Turn-based combat with initiative |
+| `combat.status` | `Condition`, `StatusEffect`, `StatusEffectManager` | 14 D&D 5e conditions, duration tracking |
+| `inventory` | `Item`, `Weapon`, `Armor`, `MagicItem`, `Inventory` | Item hierarchy, equipment slots, weight |
+| `inventory.items.effects` | `AbstractItemEffect`, 12 concrete effects | Template Method pattern for item effects |
+| `dialogue` | `DialogueSystem`, `DialogueResult` | NPC conversations with flag-gated topics |
+| `state` | `GameState` | Runtime tracking: flags, counters, variables |
+| `world` | `Location` | Location graph with exits, NPCs, items |
+| `save` | `SaveState`, `CharacterData` | YAML persistence with atomic writes |
+| `ui` | `Display`, `CharacterCreator` | Terminal output (Jansi), character creation |
 
-### Key Design Patterns
+## GameEngine - The Orchestrator
 
-- **Template Method**: `AbstractItemEffect` defines effect application flow; concrete effects (`StatBonusEffect`, `ResistanceEffect`, `SpellEffect`, `MovementEffect`, `ExtraDamageEffect`, `SkillBonusEffect`, `BonusRollEffect`, `AbilitySetEffect`, `DamageReductionEffect`, `TeleportEffect`, `UtilityEffect`, `DescriptionEffect`) implement specifics
-- **Strategy**: `ItemEffect` interface allows swappable effect implementations
-- **Facade**: `Campaign` provides clean public API; `CampaignLoader` is package-private implementation
-- **Factory**: `Campaign.loadFromYaml()` creates campaigns from YAML directories
-- **Combatant Interface**: Both `Character` and `Monster` implement `Combatant` for polymorphic combat
+`GameEngine.java` (~2,460 lines) is the central coordinator managing all game systems.
 
-### Data Flow
+### Game Flow
 
-Campaign data flows from YAML files (`src/main/resources/campaigns/`) through `Campaign.loadFromYaml()`, which internally uses `CampaignLoader` and returns unmodifiable collections. Cross-references between entities (location exits, NPC locations, trial mini-games) are validated on load. Monsters are loaded as templates and instantiated via `Campaign.createMonster()`. Trials reference mini-games by ID.
-
-### Multi-Campaign Support
-
-The system supports multiple campaigns through data-driven design:
-
-- **Campaign Discovery**: `Campaign.listAvailable()` scans `campaigns/` directory for subdirectories with `campaign.yaml`
-- **Campaign Selection**: When multiple campaigns exist, GameEngine displays a selection menu
-- **State Isolation**: Each `GameState` instance tracks its own location/trial state independently
-- **Data-Driven Unlocks**: Location unlocks use `*_unlocked` flag convention (e.g., `clocktower_hill_unlocked` unlocks `clocktower_hill`)
-- **State Tracking**: `GameState` tracks visited locations, unlocked locations, started/completed trials (not on Campaign objects)
-
-### Inventory System
-
-The `Inventory` class manages item storage with D&D 5e mechanics:
-
-- **Equipment Slots**: MAIN_HAND, OFF_HAND, ARMOR, HEAD, NECK, RING_LEFT, RING_RIGHT
-- **Weight Limits**: Carrying capacity = STR × 15 lbs
-- **Item Stacking**: Stackable items (consumables) use `ItemStack` with max stack sizes
-- **Two-Handed Weapons**: Auto-unequips off-hand when equipping
-- **Standard Equipment**: `StandardEquipment` singleton loads D&D 5e weapons/armor from `src/main/resources/items/standard_equipment.yaml`
-
-### Combat System
-
-The `CombatSystem` class manages turn-based D&D 5e combat:
-
-- **Turn Order**: Initiative-based with d20 + DEX modifier rolls
-- **Actions**: Attack, defend, use item, flee, special abilities
-- **Attack Resolution**: d20 + attack bonus vs AC, with advantage/disadvantage support
-- **Opportunity Attacks**: Triggered when fleeing combat
-- **CombatResult**: Immutable result objects with factory methods (`attackHit`, `attackMiss`, `enemyDefeated`, `victory`, `fled`, etc.)
-
-### Game Engine (`GameEngine`)
-
-The `GameEngine` class orchestrates the main game loop:
-
-- **Game Flow**: Title screen → Campaign loading → Character creation → Intro scene → Game loop
-- **Campaign Intro**: Displays dramatic opening scene from `campaign.yaml` intro field
-- **Location Display**: Shows read-aloud text on first visit, short description on subsequent visits
-- **NPC Display**: Shows NPCs with role descriptors (e.g., "Norrin (a bard)")
-- **Exit Display**: Shows exits with destinations (e.g., "Exits: north (Town Square), south (Inn)")
-- **Navigation**: Shorthand directions (n/s/e/w/ne/nw/se/sw/u/d), `leave`/`exit` finds best exit automatically
-- **Commands**: look, go, leave, talk, ask, buy, bye, attack, trial, attempt, inventory, equip, unequip, save, load, quit
-- **Dialogue System**: `talk <npc>` starts conversation, `ask about <topic>` queries, `buy <item>` purchases from merchants, `bye` ends conversation
-- **Location Unlocking**: Completing trials unlocks new locations (e.g., trial_01 → clocktower_hill)
-
-### Status Effects System (`combat.status` package)
-
-D&D 5e-compliant status effects using composition (not modifying Combatant interface):
-
-| Class | Purpose |
-|-------|---------|
-| `Condition` | Enum of 14 D&D 5e conditions with mechanical queries |
-| `DurationType` | Enum for duration tracking (ROUNDS, UNTIL_SAVE, PERMANENT, etc.) |
-| `StatusEffect` | Interface defining status effect contract |
-| `AbstractStatusEffect` | Base class with duration/save handling |
-| `ConditionEffect` | Concrete implementation with factory methods |
-| `StatusEffectManager` | Tracks effects on combatants, processes turns |
-
-**Condition Mechanics:**
-- `grantsAdvantageOnAttacksAgainst()` - Restrained, Paralyzed, Stunned, Prone, Unconscious
-- `causesDisadvantageOnAttacks()` - Blinded, Frightened, Poisoned, Prone, Restrained
-- `preventsMovement()` - Grappled, Paralyzed, Petrified, Restrained, Stunned, Unconscious
-- `autoFailsStrDexSaves()` - Paralyzed, Petrified, Stunned, Unconscious
-- `meleeCritsOnHit()` - Paralyzed, Unconscious
-
-**Factory Methods:**
-```java
-ConditionEffect.poisoned(int rounds)
-ConditionEffect.restrained(Ability saveAbility, int dc)
-ConditionEffect.paralyzed(Ability saveAbility, int dc)
-ConditionEffect.stunned(int rounds)
-ConditionEffect.blinded(int rounds)
-ConditionEffect.grappled()
-ConditionEffect.prone()
-ConditionEffect.invisible(int rounds)
+```
+Main.main() → new GameEngine().start()
+    ├── Display.init()
+    ├── showTitleScreen()
+    ├── loadCampaign()         // Campaign.listAvailable() → selection → load
+    ├── createOrLoadCharacter() // CharacterCreator or quick-start
+    ├── initializeGameState()
+    └── runGameLoop()
+        ├── displayCampaignIntro()
+        └── while (running):
+            ├── generateSuggestions()
+            ├── scanner.nextLine()      // blocking input
+            └── processCommand()        // dispatch to 25+ handlers
 ```
 
-## Campaign YAML Structure
+### Command Processing
 
-Campaign files live in `src/main/resources/campaigns/{campaign-name}/`:
+Input flows through `CommandParser` which normalizes 100+ synonyms to 25 canonical verbs:
 
-| File | Purpose |
-|------|---------|
-| `campaign.yaml` | Metadata (id, name, intro scene, starting location, DM notes) |
-| `npcs.yaml` | NPC definitions with dialogue trees, voice, personality |
-| `monsters.yaml` | Monster templates with D&D 5e stats (AC, HP, abilities, attacks) |
-| `items.yaml` | Weapons, armor, consumables, quest items, and magic items |
-| `locations.yaml` | Location definitions with exits, NPCs, items, and flags |
-| `trials.yaml` | Trial (puzzle room) definitions with mini-game references |
-| `minigames.yaml` | Mini-game definitions with D&D skill checks, DCs, rewards |
+```
+User Input: "grab the sword"
+    ↓
+CommandParser.parse()
+    ├── cleanInput()           // normalize whitespace
+    ├── extractVerb("grab")    // first word
+    ├── SYNONYM_MAP lookup     // grab → "take"
+    └── extractNoun("sword")   // remove articles (the, a, an)
+    ↓
+Command(verb="take", noun="sword")
+    ↓
+GameEngine.processCommand() → handleTake("sword")
+```
 
-### Trial System
+**Synonym Categories:**
+- Movement: walk, move, travel, head, run → `go`
+- Look: examine, inspect, check, view, observe, search → `look`
+- Take: get, grab, pick, pickup, collect → `take`
+- Attack: hit, strike, fight, kill, slay → `attack`
+- Directions: n/s/e/w/ne/nw/se/sw/u/d → expanded forms
 
-Trials are theatrical puzzle rooms containing mini-games. Each trial has:
-- Entry narrative (read-aloud text)
-- List of mini-games (referenced by ID)
-- Completion reward and stinger message
-- Prerequisites (flags from previous trials)
+### Game Modes
 
-### Mini-Game System
+The engine operates in different modes affecting command availability:
 
-Mini-games use D&D 5e skill checks:
-- `required_skill` and `alternate_skill` options
-- Difficulty Class (DC) for the check
-- Success/failure text and consequences
-- Reward items on success
+| Mode | Context | Available Commands |
+|------|---------|-------------------|
+| **Exploration** | Normal gameplay | All commands |
+| **Dialogue** | `talk <npc>` active | ask, buy, bye, look |
+| **Combat** | `CombatSystem.isInCombat()` | attack, flee, use, inventory |
+| **Trial** | `activeTrial != null` | attempt, look, inventory |
+
+## Character System
+
+### D&D 5e Implementation
+
+`Character.java` implements full D&D 5e mechanics:
+
+- **6 Ability Scores**: STR, DEX, CON, INT, WIS, CHA (1-20 scale, modifier = (score-10)/2)
+- **18 Skills**: Each maps to an ability (e.g., Athletics→STR, Stealth→DEX, Arcana→INT)
+- **9 Races**: Human (+1 all), Elf (+2 DEX), Dwarf (+2 CON), Halfling (+2 DEX), etc.
+- **12 Classes**: Fighter (d10), Wizard (d6), Rogue (d8), Cleric (d8), etc.
+- **Proficiency Bonus**: `(level - 1) / 4 + 2`
+
+### Hit Points
+
+```
+Max HP = hit_die + CON_mod + (level-1) * (hit_die/2 + 1 + CON_mod)
+```
+
+- **Hit Dice**: Class-based (d6-d12), spent on short rests for `d[die] + CON_mod` healing
+- **Long Rest**: Restores all HP, recovers half of max hit dice
+- **Temporary HP**: Absorbed before regular damage
+
+### Combatant Interface
+
+Both `Character` and `Monster` implement `Combatant` for polymorphic combat:
+
+```java
+interface Combatant {
+    String getName();
+    int getCurrentHitPoints(), getMaxHitPoints(), getArmorClass();
+    int takeDamage(int amount), heal(int amount);
+    int rollInitiative();  // d20 + DEX modifier
+    boolean isAlive(), isUnconscious(), isBloodied();  // HP <= 50%
+}
+```
+
+## Combat System
+
+### Turn-Based Flow
+
+1. **Initiative**: All combatants roll d20 + DEX mod, sorted descending
+2. **Turn Processing**: `StatusEffectManager.processTurnStart()` → action → `processTurnEnd()`
+3. **Attack Resolution**: `d20 + attack_bonus` vs AC; hit → roll damage
+4. **End Conditions**: All enemies dead (victory), player dead (defeat), or fled
+
+### Monster AI Behaviors
+
+```java
+enum Behavior {
+    AGGRESSIVE,  // Never flees
+    COWARDLY,    // Flees when bloodied (50% HP)
+    TACTICAL,    // Uses abilities, targets weakest
+    DEFENSIVE    // Flees at 25% HP
+}
+```
+
+### Flee Mechanics
+
+1. All living enemies get opportunity attacks (full attack resolution)
+2. Player makes DEX check vs DC 10
+3. Success: escape combat (may have taken opportunity attack damage)
+4. Failure: remain in combat, enemy turn begins
+
+### Status Effects
+
+`StatusEffectManager` tracks effects separately from combatants (composition pattern):
+
+```java
+// Application
+statusEffectManager.applyEffect(target, ConditionEffect.poisoned(3));
+
+// Combat queries
+statusEffectManager.hasAdvantageOnAttacks(attacker);
+statusEffectManager.attacksHaveAdvantageAgainst(target);
+statusEffectManager.canTakeActions(combatant);
+statusEffectManager.meleeCritsOnHit(target);  // Paralyzed, Unconscious
+```
+
+**14 D&D 5e Conditions**: Blinded, Charmed, Deafened, Frightened, Grappled, Incapacitated, Invisible, Paralyzed, Petrified, Poisoned, Prone, Restrained, Stunned, Unconscious
+
+## Inventory & Items
+
+### Item Hierarchy
+
+```
+Item (base)
+ ├── Weapon (damage dice, properties, range)
+ ├── Armor (AC, category, STR requirement)
+ └── MagicItem (effects[], attunement)
+```
+
+### Equipment Slots
+
+`Inventory` manages 7 slots: MAIN_HAND, OFF_HAND, ARMOR, HEAD, NECK, RING_LEFT, RING_RIGHT
+
+- **Weight Limit**: STR × 15 lbs
+- **Two-Handed**: Auto-unequips off-hand
+- **Stacking**: Consumables stack via `ItemStack` (max 99)
+
+### Item Effects (Template Method Pattern)
+
+`AbstractItemEffect` defines the flow; 12 concrete implementations:
+
+| Effect | Purpose | Example |
+|--------|---------|---------|
+| `StatBonusEffect` | +X to AC, attacks, saves | Ring of Protection |
+| `ResistanceEffect` | Damage resistance/immunity | Ring of Fire Resistance |
+| `SpellEffect` | Cast spells with charges | Wand of Fireballs |
+| `MovementEffect` | Speed bonuses, flying | Boots of Speed |
+| `ExtraDamageEffect` | Bonus damage on attacks | Flame Tongue |
+| `SkillBonusEffect` | Skill check bonuses | Eyes of the Eagle |
+| `BonusRollEffect` | Rerolls, luck effects | Stone of Good Luck |
+| `AbilitySetEffect` | Set ability to value | Gauntlets of Ogre Power (STR 19) |
+| `DamageReductionEffect` | Reduce incoming damage | Adamantine Armor |
+| `TeleportEffect` | Teleportation | Blinkstep Spark |
+| `UtilityEffect` | Darkvision, storage, etc. | Goggles of Night |
+| `DescriptionEffect` | YAML-defined text effects | Custom campaign items |
+
+### Usage Types
+
+```java
+enum UsageType {
+    PASSIVE,     // Always active when equipped
+    UNLIMITED,   // No restrictions
+    DAILY,       // Resets at dawn
+    LONG_REST,   // Resets after long rest
+    CHARGES,     // Limited charges (may recharge)
+    CONSUMABLE   // Single use, then destroyed
+}
+```
+
+## Campaign System
+
+### YAML Structure
+
+Campaigns live in `src/main/resources/campaigns/{campaign-id}/`:
+
+| File | Required | Content |
+|------|----------|---------|
+| `campaign.yaml` | Yes | id, name, starting_location, intro, author, version |
+| `locations.yaml` | No | Locations with exits, NPCs, items, flags |
+| `npcs.yaml` | No | NPCs with dialogue trees, shop items |
+| `monsters.yaml` | No | Monster templates (instantiated via `Campaign.createMonster()`) |
+| `items.yaml` | No | Weapons, armor, items, magic_items sections |
+| `trials.yaml` | No | Trials with mini-game lists, prerequisites |
+| `minigames.yaml` | No | Skill checks with DC, rewards, consequences |
+
+### Cross-Reference Validation
+
+`Campaign.validateCrossReferences()` checks 8 reference types on load:
+
+1. Starting location exists
+2. Location exits point to valid locations
+3. Location NPCs exist
+4. Location items exist
+5. NPC location references valid
+6. Trial location references valid
+7. Trial mini-games exist
+8. Mini-game reward items exist
+
+Errors accessible via `campaign.getValidationErrors()`.
+
+### Trial & Mini-Game Flow
+
+```
+trial command → check prerequisites → show entry narrative → mark started
+    ↓
+attempt <skill> → MiniGame.evaluate(character, skill)
+    ↓
+Roll: d20 + skill_modifier vs DC
+    ↓
+Success: grant reward, show success_text
+Failure: apply consequence, show fail_text
+    ↓
+All mini-games complete → trial.complete() → set completion_flags
+```
+
+## GameState - Runtime Tracking
+
+`GameState` maintains all mutable game progress:
+
+### State Categories
+
+```java
+// Flags (boolean markers)
+gameState.setFlag("met_norrin", true);
+gameState.hasFlag("clocktower_hill_unlocked");
+
+// Counters (numeric tracking)
+gameState.incrementCounter("enemies_defeated");
+gameState.getCounter("clues_found");
+
+// Variables (string storage)
+gameState.setVariable("villain_name", "The Machinist");
+```
+
+### Flag Conventions
+
+| Pattern | Purpose | Example |
+|---------|---------|---------|
+| `met_[npc_id]` | NPC first meeting tracked | `met_norrin` |
+| `[location_id]_unlocked` | Location accessibility | `clocktower_hill_unlocked` |
+| `started_[trial_id]` | Trial begun | `started_trial_01` |
+| `completed_[trial_id]` | Trial finished | `completed_trial_01` |
+| `campaign_complete` | Campaign finished | Ends game |
+
+### Location Unlocking
+
+Locations with `locked: true` flag require matching unlock flag:
+
+```yaml
+# In locations.yaml
+- id: clocktower_hill
+  flags: [locked]
+  locked_message: "The path is blocked by rubble."
+
+# In trials.yaml - completion_flags
+completion_flags:
+  - completed_trial_01
+  - clocktower_hill_unlocked  # Unlocks the location
+```
+
+## Dialogue System
+
+### Conversation Flow
+
+```
+talk <npc> → DialogueSystem.startDialogue()
+    ├── Find NPC (case-insensitive, partial match)
+    ├── Set flag: met_[npc_id]
+    ├── Return greeting (initial or return based on met flag)
+    └── Return available topics (filtered by flags)
+        ↓
+ask about <topic> → DialogueSystem.askAbout()
+    ├── Validate topic available (flag-gated)
+    └── Return NPC response + updated topics
+        ↓
+bye → DialogueSystem.endDialogue()
+```
+
+### Flag-Gated Dialogue
+
+NPCs can have topics that only appear when certain flags are set:
+
+```yaml
+# In npcs.yaml
+dialogues:
+  rumors:
+    text: "I heard strange noises from the clocktower..."
+  secret:
+    text: "Now that you've proven yourself..."
+    required_flags: [completed_trial_01]
+```
+
+## Save System
+
+### Atomic Persistence
+
+`SaveState` uses atomic writes to prevent corruption:
+
+1. Write to temporary file
+2. Atomic rename to target path
+3. YAML format (human-readable, version-controlled)
+
+### Save Contents
+
+```yaml
+save_version: "1.0"
+timestamp: "2026-01-27T14:30:00Z"
+campaign_id: "muddlebrook"
+character:
+  name: "Aelar"
+  race: "HUMAN"
+  class: "FIGHTER"
+  level: 1
+  ability_scores: {STRENGTH: 16, DEXTERITY: 14, ...}
+  current_hp: 11
+  max_hp: 11
+current_location: "drunken_dragon_inn"
+visited_locations: [drunken_dragon_inn, town_square]
+flags: {met_norrin: true, completed_trial_01: true}
+counters: {enemies_defeated: 3}
+inventory: [longsword, scale_mail]
+equipped_slots: {MAIN_HAND: longsword, ARMOR: scale_mail}
+gold: 150
+play_time_seconds: 1425
+```
+
+## Dice System
+
+`Dice.java` provides thread-safe D&D dice mechanics:
+
+```java
+// Basic rolls
+Dice.roll(20);                    // 1d20
+Dice.rollMultiple(2, 6);          // 2d6, returns sum
+
+// D&D mechanics
+Dice.rollWithAdvantage();         // Roll 2d20, take highest
+Dice.rollWithDisadvantage();      // Roll 2d20, take lowest
+Dice.checkAgainstDC(modifier, dc); // d20 + mod >= DC
+
+// Notation parsing
+Dice.parse("2d6+3");              // Returns rolled total
+Dice.parseDetailed("1d20+5");     // Returns RollResult with breakdown
+
+// History (synchronized, max 1000 entries)
+Dice.getLastRoll();               // "d20: 15 + 3 = 18"
+Dice.wasNatural20();              // Check for crit
+Dice.wasNatural1();               // Check for fumble
+```
 
 ## Testing
 
-Tests use JUnit 5 with `@Nested` classes for organization and `@TempDir` for file-based tests. Run `mvn test` for all tests.
+### Organization
 
-**Test organization by package:**
-- `campaign/` - `CampaignTest`, `CampaignLoaderTest`, `TrialTest`, `TrialIntegrationTest`, `MiniGameTest`
-- `character/` - `CharacterTest`, `NPCTest`
-- `combat/` - `CombatSystemTest`, `CombatResultTest`, `MonsterTest`
-- `combat/status/` - `ConditionTest`, `ConditionEffectTest`, `StatusEffectManagerTest`, `DurationTypeTest`, `AbstractStatusEffectTest`
-- `core/` - `GameEngineTest`, `CommandParserTest`, `DiceTest`, `RestSystemTest`
-- `dialogue/` - `DialogueSystemTest`
-- `inventory/` - `InventoryTest`, `WeaponTest`, `ArmorTest`, `ItemTest`, `MagicItemTest`
-- `inventory/items/effects/` - Tests for each effect type (`StatBonusEffectTest`, `ResistanceEffectTest`, etc.)
-- `save/` - `SaveStateTest`
-- `state/` - `GameStateTest`
-- `ui/` - `DisplayTest`, `CharacterCreatorTest`
-- `world/` - `LocationTest`
-- Root - `EdgeCaseTest`
+43 test classes with 314 `@Nested` classes for hierarchical organization:
 
-## Key Implementation Details
+```
+@DisplayName("Campaign")
+class CampaignTest {
+    @Nested @DisplayName("loadFromYaml")
+    class LoadFromYamlTests { }
 
-- Character ability scores use 1-20 scale with racial bonuses
-- 18 skills map to 6 abilities via `Character.Skill` enum
-- Item effects are composable - magic items can have multiple effects
-- `Optional<T>` is used throughout for null safety
-- `Campaign` validates cross-references on load and exposes validation errors via `getValidationErrors()`
-- Mini-game `evaluate()` method rolls d20 + skill modifier vs DC
-- Standard D&D equipment (weapons, armor) has factory methods; campaign-specific content is YAML-only
+    @Nested @DisplayName("Cross-Reference Validation")
+    class ValidationTests { }
+}
+```
 
-## Auto-DM Design Principles
+### Patterns
 
-1. Always ask for rolls on uncertain actions
-2. Keep scenes cinematic, not mechanical dumps
-3. Don't reveal hidden structure to players
-4. Use comedic consequences over lethal outcomes early
-5. Reward curiosity and creative problem-solving
-6. Every trial can be won without violence
-7. Every trial can be failed without death (unless reckless)
+- **No mocks**: Uses real objects and fixtures
+- **`@TempDir`**: 8 test classes use temporary directories for YAML tests
+- **Factory fixtures**: `Weapon.createLongsword()`, `Item.createConsumable()`
+- **`EdgeCaseTest.java`**: Root-level boundary condition tests
+
+### Running Tests
+
+```bash
+mvn test                                    # All tests
+mvn test -Dtest=CampaignTest               # Single class
+mvn test -Dtest=InventoryTest#canAddItem   # Single method
+```
 
 ## Available Campaigns
 
-Three campaigns exist at varying difficulty levels:
-- **muddlebrook** - Beginner comedic mystery (DCs 10-14)
-- **eberron** - Intermediate Olympic competition (DCs 12-16)
-- **drownedgod** - Advanced nautical horror (DCs 15-19)
-
-Campaign details are in each campaign's `campaign.yaml` file.
+| Campaign | Difficulty | DC Range | Theme |
+|----------|------------|----------|-------|
+| `muddlebrook` | Beginner | 10-14 | Comedic mystery, theatrical villain |
+| `eberron` | Intermediate | 12-16 | Olympic competition, dragonshards |
+| `drownedgod` | Advanced | 15-19 | Nautical horror |
 
 ## Adding a New Campaign
 
-Create a new directory under `src/main/resources/campaigns/` with these YAML files:
-- `campaign.yaml` (required): id, name, starting_location, intro, description, author, version
-- `locations.yaml`: locations with exits, NPCs, items, flags (`locked` flag for initially locked locations, `locked_message` for custom messages)
-- `npcs.yaml`: NPC definitions with dialogue trees
-- `monsters.yaml`: monster templates with D&D 5e stats
-- `items.yaml`: weapons, armor, consumables, magic items
-- `trials.yaml`: trial definitions with `prerequisites` and `completion_flags` lists
-- `minigames.yaml`: mini-game definitions with skill checks
-
-The campaign selection menu appears automatically when multiple campaigns exist.
+1. Create `src/main/resources/campaigns/{campaign-id}/`
+2. Add `campaign.yaml` (required):
+   ```yaml
+   id: my_campaign
+   name: "My Campaign"
+   starting_location: tavern
+   intro: |
+     Opening narrative shown at game start...
+   author: Your Name
+   version: "1.0"
+   ```
+3. Add optional YAML files: locations, npcs, monsters, items, trials, minigames
+4. Campaign auto-appears in selection menu
 
 ## Dependencies
 
-- **SnakeYAML 2.2** - YAML parsing for campaign data
-- **Jansi 2.4.1** - Terminal colors for CLI output
+- **SnakeYAML 2.2** - YAML parsing
+- **Jansi 2.4.1** - Terminal colors (ANSI)
 - **JUnit 5.10.1** - Testing framework
