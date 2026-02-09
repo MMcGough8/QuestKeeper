@@ -80,7 +80,18 @@ public final class Dice {
             throw new IllegalArgumentException("Die must have at least 1 side, got: " + sides);
         }
         int result = ThreadLocalRandom.current().nextInt(sides) + 1;
-        addToHistory(String.format("d%d: %d", sides, result));
+        // Add NAT 20/NAT 1 annotations for d20 rolls so wasNatural20()/wasNatural1() work
+        if (sides == 20) {
+            String critNote = "";
+            if (result == 20) {
+                critNote = " (NAT 20!)";
+            } else if (result == 1) {
+                critNote = " (NAT 1)";
+            }
+            addToHistory(String.format("d%d: %d%s", sides, result, critNote));
+        } else {
+            addToHistory(String.format("d%d: %d", sides, result));
+        }
         return result;
     }
 
@@ -214,9 +225,10 @@ public final class Dice {
         int roll1 = ThreadLocalRandom.current().nextInt(20) + 1;
         int roll2 = ThreadLocalRandom.current().nextInt(20) + 1;
         int result = Math.max(roll1, roll2);
-        
-        addToHistory(String.format("d20 (Advantage): [%d, %d] = %d", roll1, roll2, result));
-        
+
+        String critNote = result == 20 ? " (NAT 20!)" : (result == 1 ? " (NAT 1)" : "");
+        addToHistory(String.format("d20 (Advantage): [%d, %d] = %d%s", roll1, roll2, result, critNote));
+
         return result;
     }
 
@@ -224,9 +236,10 @@ public final class Dice {
         int roll1 = ThreadLocalRandom.current().nextInt(20) + 1;
         int roll2 = ThreadLocalRandom.current().nextInt(20) + 1;
         int result = Math.min(roll1, roll2);
-        
-        addToHistory(String.format("d20 (Disadvantage): [%d, %d] = %d", roll1, roll2, result));
-        
+
+        String critNote = result == 20 ? " (NAT 20!)" : (result == 1 ? " (NAT 1)" : "");
+        addToHistory(String.format("d20 (Disadvantage): [%d, %d] = %d%s", roll1, roll2, result, critNote));
+
         return result;
     }
 
@@ -235,12 +248,13 @@ public final class Dice {
         int roll2 = ThreadLocalRandom.current().nextInt(20) + 1;
         int baseResult = Math.max(roll1, roll2);
         int total = baseResult + modifier;
-        
-        String modStr = modifier >= 0 ? String.format(" + %d", modifier) 
+
+        String modStr = modifier >= 0 ? String.format(" + %d", modifier)
                                       : String.format(" - %d", Math.abs(modifier));
-        addToHistory(String.format("d20 (Advantage): [%d, %d] = %d%s = %d", 
-                roll1, roll2, baseResult, modStr, total));
-        
+        String critNote = baseResult == 20 ? " (NAT 20!)" : (baseResult == 1 ? " (NAT 1)" : "");
+        addToHistory(String.format("d20 (Advantage): [%d, %d] = %d%s = %d%s",
+                roll1, roll2, baseResult, modStr, total, critNote));
+
         return total;
     }
 
@@ -249,12 +263,13 @@ public final class Dice {
         int roll2 = ThreadLocalRandom.current().nextInt(20) + 1;
         int baseResult = Math.min(roll1, roll2);
         int total = baseResult + modifier;
-        
-        String modStr = modifier >= 0 ? String.format(" + %d", modifier) 
+
+        String modStr = modifier >= 0 ? String.format(" + %d", modifier)
                                       : String.format(" - %d", Math.abs(modifier));
-        addToHistory(String.format("d20 (Disadvantage): [%d, %d] = %d%s = %d", 
-                roll1, roll2, baseResult, modStr, total));
-        
+        String critNote = baseResult == 20 ? " (NAT 20!)" : (baseResult == 1 ? " (NAT 1)" : "");
+        addToHistory(String.format("d20 (Disadvantage): [%d, %d] = %d%s = %d%s",
+                roll1, roll2, baseResult, modStr, total, critNote));
+
         return total;
     }
 

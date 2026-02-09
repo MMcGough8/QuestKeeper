@@ -466,9 +466,15 @@ public class CombatSystem {
 
             if (attackRoll >= targetAC || isNaturalCrit) {
                 // Damage: weapon dice + ability modifier (roll dice twice on crit)
-                damage = Dice.parse(damageDice);
-                if (isCrit) {
-                    damage += Dice.parse(damageDice); // Double the dice, not the modifier
+                // Unarmed attacks deal 1 flat damage (no dice), weapons use dice notation
+                if (weapon != null) {
+                    damage = Dice.parse(damageDice);
+                    if (isCrit) {
+                        damage += Dice.parse(damageDice); // Double the dice, not the modifier
+                    }
+                } else {
+                    // Unarmed: 1 damage (doubled to 2 on crit)
+                    damage = isCrit ? 2 : 1;
                 }
                 damage += abilityMod;
                 damage = Math.max(1, damage); // Minimum 1 damage
