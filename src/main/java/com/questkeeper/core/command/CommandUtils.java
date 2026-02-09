@@ -123,4 +123,28 @@ public final class CommandUtils {
             default -> false;
         };
     }
+
+    /**
+     * Normalizes direction input by stripping common prefixes.
+     * Handles inputs like "to the cemetery", "to cemetery", "the cemetery".
+     *
+     * @param direction the raw direction input
+     * @return the normalized direction
+     */
+    public static String normalizeDirection(String direction) {
+        if (direction == null) return null;
+
+        String normalized = direction.toLowerCase().trim();
+
+        // Strip common prefixes in order of specificity
+        if (normalized.startsWith("to the ")) {
+            normalized = normalized.substring(7);
+        } else if (normalized.startsWith("to ")) {
+            normalized = normalized.substring(3);
+        } else if (normalized.startsWith("the ")) {
+            normalized = normalized.substring(4);
+        }
+
+        return normalized.trim();
+    }
 }

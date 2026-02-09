@@ -300,4 +300,56 @@ class CommandUtilsTest {
             assertTrue(isDirection("N"));
         }
     }
+
+    @Nested
+    @DisplayName("normalizeDirection")
+    class NormalizeDirectionTests {
+
+        @Test
+        @DisplayName("strips 'to the' prefix")
+        void stripsToThePrefix() {
+            assertEquals("cemetery", normalizeDirection("to the cemetery"));
+            assertEquals("north", normalizeDirection("to the north"));
+        }
+
+        @Test
+        @DisplayName("strips 'to' prefix")
+        void stripsToPrefix() {
+            assertEquals("cemetery", normalizeDirection("to cemetery"));
+            assertEquals("north", normalizeDirection("to north"));
+        }
+
+        @Test
+        @DisplayName("strips 'the' prefix")
+        void stripsThePrefix() {
+            assertEquals("cemetery", normalizeDirection("the cemetery"));
+            assertEquals("inn", normalizeDirection("the inn"));
+        }
+
+        @Test
+        @DisplayName("returns direction unchanged if no prefix")
+        void returnsUnchangedIfNoPrefix() {
+            assertEquals("north", normalizeDirection("north"));
+            assertEquals("cemetery", normalizeDirection("cemetery"));
+        }
+
+        @Test
+        @DisplayName("handles null input")
+        void handlesNullInput() {
+            assertNull(normalizeDirection(null));
+        }
+
+        @Test
+        @DisplayName("handles mixed case")
+        void handlesMixedCase() {
+            assertEquals("cemetery", normalizeDirection("To The Cemetery"));
+            assertEquals("north", normalizeDirection("TO NORTH"));
+        }
+
+        @Test
+        @DisplayName("trims whitespace")
+        void trimsWhitespace() {
+            assertEquals("cemetery", normalizeDirection("  to the cemetery  "));
+        }
+    }
 }

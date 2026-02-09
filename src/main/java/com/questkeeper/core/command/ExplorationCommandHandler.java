@@ -92,6 +92,9 @@ public class ExplorationCommandHandler implements CommandHandler {
             return CommandResult.failure("No direction specified");
         }
 
+        // Strip common prefixes like "to the", "to", "the"
+        direction = CommandUtils.normalizeDirection(direction);
+
         // Expand shorthand directions
         direction = expandDirection(direction);
 
