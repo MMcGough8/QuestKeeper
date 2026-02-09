@@ -8,6 +8,7 @@ import java.util.Set;
 
 import com.questkeeper.combat.Combatant;
 import com.questkeeper.core.Dice;
+import com.questkeeper.inventory.Armor;
 import com.questkeeper.inventory.Inventory;
 
 /**
@@ -271,7 +272,29 @@ public class Character implements Combatant {
     
     @Override
     public int getArmorClass() {
-        return BASE_AC + getAbilityModifier(Ability.DEXTERITY) + armorBonus + shieldBonus;
+        int dexMod = getAbilityModifier(Ability.DEXTERITY);
+        int ac;
+
+        // Check for equipped armor
+        Armor equippedArmor = inventory.getEquippedArmor();
+        if (equippedArmor != null) {
+            // Use armor's AC calculation (handles light/medium/heavy DEX limits)
+            ac = equippedArmor.calculateAC(dexMod);
+        } else {
+            // No armor: base AC 10 + full DEX modifier
+            ac = BASE_AC + dexMod;
+        }
+
+        // Add shield bonus if equipped
+        Armor equippedShield = inventory.getEquippedShield();
+        if (equippedShield != null) {
+            ac += equippedShield.getShieldBonus();
+        }
+
+        // Add any additional bonuses (magic items, class features, etc.)
+        ac += armorBonus + shieldBonus;
+
+        return ac;
     }
     
     @Override

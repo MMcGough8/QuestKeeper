@@ -9,6 +9,7 @@ import com.questkeeper.character.Character.Ability;
 import com.questkeeper.character.Character.CharacterClass;
 import com.questkeeper.character.Character.Race;
 import com.questkeeper.character.Character.Skill;
+import com.questkeeper.inventory.Armor;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -846,6 +847,153 @@ class CharacterTest {
             // Actually 11 CON still has +0 modifier, need 12 for +1
             // But we're verifying the recalculation happens
             assertNotNull(halfElf.getMaxHitPoints());
+        }
+    }
+
+    // ========================================================================
+    // Equipped Armor AC Tests
+    // ========================================================================
+
+    @Nested
+    @DisplayName("Equipped Armor AC Calculation")
+    class EquippedArmorACTests {
+
+        private Character highDexCharacter;
+
+        @BeforeEach
+        void setUp() {
+            // Character with DEX 16 (+3 modifier)
+            highDexCharacter = new Character("DexFighter", Race.HUMAN, CharacterClass.FIGHTER,
+                    10, 16, 14, 10, 10, 10);
+        }
+
+        @Test
+        @DisplayName("No armor uses base AC 10 + full DEX")
+        void noArmorUsesBaseACPlusDex() {
+            // DEX 16 = +3 modifier
+            // AC = 10 + 3 = 13
+            assertEquals(13, highDexCharacter.getArmorClass());
+        }
+
+        @Test
+        @DisplayName("Light armor applies full DEX modifier")
+        void lightArmorAppliesFullDex() {
+            // Leather armor: AC 11 + full DEX
+            Armor leather = Armor.createLeatherArmor();
+            highDexCharacter.getInventory().addItem(leather);
+            highDexCharacter.getInventory().equip(leather);
+
+            // AC = 11 + 3 (full DEX) = 14
+            assertEquals(14, highDexCharacter.getArmorClass());
+        }
+
+        @Test
+        @DisplayName("Studded leather applies full DEX modifier")
+        void studdedLeatherAppliesFullDex() {
+            // Studded leather: AC 12 + full DEX
+            Armor studdedLeather = Armor.createStuddedLeather();
+            highDexCharacter.getInventory().addItem(studdedLeather);
+            highDexCharacter.getInventory().equip(studdedLeather);
+
+            // AC = 12 + 3 (full DEX) = 15
+            assertEquals(15, highDexCharacter.getArmorClass());
+        }
+
+        @Test
+        @DisplayName("Medium armor caps DEX at +2")
+        void mediumArmorCapsDexAtTwo() {
+            // Scale mail: AC 14 + DEX (max 2)
+            Armor scaleMail = Armor.createScaleMail();
+            highDexCharacter.getInventory().addItem(scaleMail);
+            highDexCharacter.getInventory().equip(scaleMail);
+
+            // AC = 14 + 2 (capped DEX) = 16, NOT 14 + 3 = 17
+            assertEquals(16, highDexCharacter.getArmorClass());
+        }
+
+        @Test
+        @DisplayName("Heavy armor ignores DEX completely")
+        void heavyArmorIgnoresDex() {
+            // Chain mail: AC 16 + 0 DEX
+            Armor chainMail = Armor.createChainMail();
+            highDexCharacter.getInventory().addItem(chainMail);
+            highDexCharacter.getInventory().equip(chainMail);
+
+            // AC = 16 + 0 = 16, NOT 16 + 3 = 19
+            assertEquals(16, highDexCharacter.getArmorClass());
+        }
+
+        @Test
+        @DisplayName("Plate armor ignores DEX")
+        void plateArmorIgnoresDex() {
+            // Plate: AC 18 + 0 DEX
+            Armor plate = Armor.createPlate();
+            highDexCharacter.getInventory().addItem(plate);
+            highDexCharacter.getInventory().equip(plate);
+
+            // AC = 18 + 0 = 18
+            assertEquals(18, highDexCharacter.getArmorClass());
+        }
+
+        @Test
+        @DisplayName("Shield adds bonus to AC")
+        void shieldAddsBonusToAC() {
+            // Shield: +2 AC
+            Armor shield = Armor.createShield();
+            highDexCharacter.getInventory().addItem(shield);
+            highDexCharacter.getInventory().equip(shield);
+
+            // AC = 10 + 3 (DEX) + 2 (shield) = 15
+            assertEquals(15, highDexCharacter.getArmorClass());
+        }
+
+        @Test
+        @DisplayName("Armor and shield combine correctly")
+        void armorAndShieldCombine() {
+            // Chain mail (AC 16) + shield (+2)
+            Armor chainMail = Armor.createChainMail();
+            Armor shield = Armor.createShield();
+
+            highDexCharacter.getInventory().addItem(chainMail);
+            highDexCharacter.getInventory().addItem(shield);
+            highDexCharacter.getInventory().equip(chainMail);
+            highDexCharacter.getInventory().equip(shield);
+
+            // AC = 16 + 0 (no DEX for heavy) + 2 (shield) = 18
+            assertEquals(18, highDexCharacter.getArmorClass());
+        }
+
+        @Test
+        @DisplayName("Light armor with shield works correctly")
+        void lightArmorWithShield() {
+            // Leather (AC 11 + DEX) + shield (+2)
+            Armor leather = Armor.createLeatherArmor();
+            Armor shield = Armor.createShield();
+
+            highDexCharacter.getInventory().addItem(leather);
+            highDexCharacter.getInventory().addItem(shield);
+            highDexCharacter.getInventory().equip(leather);
+            highDexCharacter.getInventory().equip(shield);
+
+            // AC = 11 + 3 (full DEX) + 2 (shield) = 16
+            assertEquals(16, highDexCharacter.getArmorClass());
+        }
+
+        @Test
+        @DisplayName("Low DEX character benefits from heavy armor")
+        void lowDexBenefitsFromHeavyArmor() {
+            // Character with DEX 8 (-1 modifier)
+            Character lowDexCharacter = new Character("Tank", Race.DWARF, CharacterClass.FIGHTER,
+                    16, 8, 16, 10, 10, 10);
+
+            // Without armor: AC = 10 + (-1) = 9
+            assertEquals(9, lowDexCharacter.getArmorClass());
+
+            // With plate: AC = 18 (ignores negative DEX too)
+            Armor plate = Armor.createPlate();
+            lowDexCharacter.getInventory().addItem(plate);
+            lowDexCharacter.getInventory().equip(plate);
+            assertEquals(18, lowDexCharacter.getArmorClass());
         }
     }
 }
