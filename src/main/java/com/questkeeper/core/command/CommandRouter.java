@@ -97,6 +97,7 @@ public class CommandRouter {
         router.registerHandler(new DialogueCommandHandler());
         router.registerHandler(new ExplorationCommandHandler());
         router.registerHandler(new CombatCommandHandler());
+        router.registerHandler(new TrialCommandHandler());
 
         return router;
     }

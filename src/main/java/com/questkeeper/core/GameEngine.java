@@ -397,8 +397,6 @@ public class GameEngine implements AutoCloseable {
 
         // Fall back to switch statement for commands not yet extracted
         switch (verb) {
-            case "trial" -> handleTrial();
-            case "attempt", "solve", "try" -> handleAttempt(noun);
             case "rest" -> handleRest(noun);
             case "save" -> handleSave();
             case "load" -> handleLoad();
@@ -408,6 +406,7 @@ public class GameEngine implements AutoCloseable {
             // Note: 'talk', 'ask', 'buy', 'bye' are handled by DialogueCommandHandler
             // Note: 'look', 'go', directions, 'leave', 'exit' are handled by ExplorationCommandHandler
             // Note: 'attack' is handled by CombatCommandHandler
+            // Note: 'trial', 'attempt', 'solve', 'try' are handled by TrialCommandHandler
             default -> Display.showError("Command '" + verb + "' is not yet implemented.");
         }
     }
