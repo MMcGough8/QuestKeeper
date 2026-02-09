@@ -46,7 +46,8 @@ Game Loop: input → CommandParser → handler → GameState update → Display
 
 | Package | Key Classes | Purpose |
 |---------|-------------|---------|
-| `core` | `GameEngine` (2,460 lines), `CommandParser`, `Dice`, `RestSystem` | Main orchestration, input parsing, dice mechanics |
+| `core` | `GameEngine` (~1,200 lines), `CommandParser`, `Dice`, `RestSystem` | Main orchestration, input parsing, dice mechanics |
+| `core.command` | `CommandRouter`, `CommandHandler`, `GameContext`, 7 handlers | Command handler pattern for game actions |
 | `campaign` | `Campaign`, `CampaignLoader`, `Trial`, `MiniGame` | YAML loading, trial/puzzle system |
 | `character` | `Character`, `NPC` | Player (D&D 5e stats) and NPCs (dialogue trees) |
 | `combat` | `CombatSystem`, `Monster`, `Combatant`, `CombatResult` | Turn-based combat with initiative |
@@ -61,7 +62,7 @@ Game Loop: input → CommandParser → handler → GameState update → Display
 
 ## GameEngine - The Orchestrator
 
-`GameEngine.java` (~2,460 lines) is the central coordinator managing all game systems.
+`GameEngine.java` (~1,200 lines) is the central coordinator managing all game systems. Command handling has been extracted to dedicated handlers in `core.command` package.
 
 ### Game Flow
 
@@ -82,7 +83,7 @@ Main.main() → new GameEngine().start()
 
 ### Command Processing
 
-Input flows through `CommandParser` which normalizes 100+ synonyms to 25 canonical verbs:
+Input flows through `CommandParser` which normalizes 100+ synonyms to 25 canonical verbs, then routes to dedicated handlers:
 
 ```
 User Input: "grab the sword"
@@ -95,8 +96,29 @@ CommandParser.parse()
     ↓
 Command(verb="take", noun="sword")
     ↓
-GameEngine.processCommand() → handleTake("sword")
+GameEngine.processCommand()
+    ├── CommandRouter.route(context, verb, noun, input)
+    │   └── ItemCommandHandler.handle() → CommandResult
+    └── Handle result (quit, combat started, location refresh, etc.)
 ```
+
+### Command Handlers (`core.command` package)
+
+| Handler | Verbs | Purpose |
+|---------|-------|---------|
+| `SystemCommandHandler` | help, quit | System commands |
+| `InventoryCommandHandler` | inventory, i, stats, equipment, gear | Character/inventory display |
+| `ItemCommandHandler` | take, drop, equip, unequip, use | Item manipulation |
+| `DialogueCommandHandler` | talk, ask, buy, bye | NPC conversations |
+| `ExplorationCommandHandler` | look, go, directions, leave, exit | Movement and observation |
+| `CombatCommandHandler` | attack | Initiates combat |
+| `TrialCommandHandler` | trial, attempt, solve, try | Trial/puzzle system |
+
+**Key Classes:**
+- `CommandRouter` - Routes verbs to handlers, falls back to GameEngine switch for `rest`, `save`, `load`
+- `GameContext` - Shared state passed to handlers (campaign, gameState, systems, scanner)
+- `CommandResult` - Result types: SUCCESS, FAILURE, QUIT_GAME, COMBAT_STARTED, PLAYER_MOVED, etc.
+- `CommandUtils` - Shared utilities for item matching, slot parsing, direction handling
 
 **Synonym Categories:**
 - Movement: walk, move, travel, head, run → `go`
@@ -105,7 +127,9 @@ GameEngine.processCommand() → handleTake("sword")
 - Attack: hit, strike, fight, kill, slay → `attack`
 - Directions: n/s/e/w/ne/nw/se/sw/u/d → expanded forms
 
-**Core Commands:** `go`, `look`, `take`, `drop`, `talk`, `ask`, `buy`, `bye`, `attack`, `flee`, `use`, `inventory`, `equip`, `unequip`, `character`, `trial`, `attempt`, `rest`, `save`, `load`, `help`, `quit`
+**Routed Commands (via handlers):** `go`, `look`, `take`, `drop`, `talk`, `ask`, `buy`, `bye`, `attack`, `use`, `inventory`, `equip`, `unequip`, `trial`, `attempt`, `help`, `quit`
+
+**GameEngine Commands (not yet extracted):** `rest`, `save`, `load` - tightly coupled to game state management
 
 ### Game Modes
 
