@@ -149,7 +149,9 @@ public class TrialCommandHandler implements CommandHandler {
             Display.println(String.format("  %d. %s %s", i++, game.getName(), status));
 
             if (!game.isCompleted()) {
-                Display.println("     " + Display.colorize(game.getDescription().split("\n")[0], WHITE));
+                String desc = game.getDescription();
+                String firstLine = (desc != null && !desc.isEmpty()) ? desc.split("\n")[0] : "";
+                Display.println("     " + Display.colorize(firstLine, WHITE));
                 Display.println("     Skills: " + Display.colorize(getSkillOptions(game), CYAN));
                 Display.println("     DC: " + game.getDc());
             }
@@ -326,7 +328,7 @@ public class TrialCommandHandler implements CommandHandler {
 
         // Show roll
         Display.showSkillCheck(
-            result.rollDescription().split("\\+")[1].split("\\(")[0].trim(), // Extract skill name
+            extractSkillName(result.rollDescription()),
             result.naturalRoll(),
             result.totalRoll() - result.naturalRoll(),
             extractDC(result.rollDescription()),
@@ -367,6 +369,28 @@ public class TrialCommandHandler implements CommandHandler {
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
             return 10;
         }
+    }
+
+    /**
+     * Safely extracts skill name from roll description.
+     * Expected format: "d20(15) + Athletics(+3) = 18 vs DC 15"
+     */
+    private String extractSkillName(String rollDescription) {
+        if (rollDescription == null || rollDescription.isEmpty()) {
+            return "Skill";
+        }
+        try {
+            String[] plusParts = rollDescription.split("\\+");
+            if (plusParts.length > 1) {
+                String[] parenParts = plusParts[1].split("\\(");
+                if (parenParts.length > 0 && !parenParts[0].trim().isEmpty()) {
+                    return parenParts[0].trim();
+                }
+            }
+        } catch (Exception e) {
+            // Fall through to default
+        }
+        return "Skill";
     }
 
     private void grantMiniGameReward(GameContext context, MiniGame game) {
