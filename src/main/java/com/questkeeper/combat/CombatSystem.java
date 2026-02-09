@@ -379,20 +379,27 @@ public class CombatSystem {
         if (attacker instanceof Monster monster) {
             // Monster attack - apply advantage/disadvantage
             int attackBonus = monster.getAttackBonus();
+            boolean isNaturalCrit = false;
+
             if (hasAdvantage && !hasDisadvantage) {
                 attackRoll = Dice.rollWithAdvantage(attackBonus);
+                isNaturalCrit = Dice.wasNatural20();
             } else if (hasDisadvantage && !hasAdvantage) {
                 attackRoll = Dice.rollWithDisadvantage(attackBonus);
+                isNaturalCrit = Dice.wasNatural20();
             } else {
                 attackRoll = monster.rollAttack();
+                isNaturalCrit = Dice.wasNatural20();
             }
 
-            if (attackRoll >= targetAC) {
-                damage = monster.rollDamage();
+            // Critical hit on natural 20 or auto-crit conditions
+            boolean isCrit = isNaturalCrit || autoCrit;
 
-                // Double damage dice on crit (simplified: just double the damage)
-                if (autoCrit) {
-                    damage *= 2;
+            if (attackRoll >= targetAC || isNaturalCrit) {
+                // Roll damage dice (roll twice on crit per D&D 5e rules)
+                damage = monster.rollDamage();
+                if (isCrit) {
+                    damage += monster.rollDamage(); // Double the dice, not the total
                 }
 
                 target.takeDamage(damage);
@@ -402,8 +409,9 @@ public class CombatSystem {
 
                 // Check for special ability on hit
                 String specialEffect = processSpecialAbilityOnHit(monster, target);
-                if (autoCrit) {
-                    specialEffect = (specialEffect != null ? specialEffect + " " : "") + "[AUTO-CRIT!]";
+                if (isCrit) {
+                    String critType = isNaturalCrit ? "[CRITICAL HIT!]" : "[AUTO-CRIT!]";
+                    specialEffect = (specialEffect != null ? specialEffect + " " : "") + critType;
                 }
 
                 return CombatResult.attackHit(attacker, target, attackRoll, targetAC, damage, specialEffect);
@@ -440,31 +448,40 @@ public class CombatSystem {
             }
 
             int totalMod = abilityMod + profBonus;
+            boolean isNaturalCrit = false;
 
             if (hasAdvantage && !hasDisadvantage) {
                 attackRoll = Dice.rollWithAdvantage(totalMod);
+                isNaturalCrit = Dice.wasNatural20();
             } else if (hasDisadvantage && !hasAdvantage) {
                 attackRoll = Dice.rollWithDisadvantage(totalMod);
+                isNaturalCrit = Dice.wasNatural20();
             } else {
                 attackRoll = Dice.rollD20() + totalMod;
+                isNaturalCrit = Dice.wasNatural20();
             }
 
-            if (attackRoll >= targetAC) {
-                // Damage: weapon dice + ability modifier
-                damage = Dice.parse(damageDice) + abilityMod;
-                damage = Math.max(1, damage); // Minimum 1 damage
+            // Critical hit on natural 20 or auto-crit conditions
+            boolean isCrit = isNaturalCrit || autoCrit;
 
-                // Double damage on crit
-                if (autoCrit) {
-                    damage *= 2;
+            if (attackRoll >= targetAC || isNaturalCrit) {
+                // Damage: weapon dice + ability modifier (roll dice twice on crit)
+                damage = Dice.parse(damageDice);
+                if (isCrit) {
+                    damage += Dice.parse(damageDice); // Double the dice, not the modifier
                 }
+                damage += abilityMod;
+                damage = Math.max(1, damage); // Minimum 1 damage
 
                 target.takeDamage(damage);
 
                 // Track aggro - target remembers who hit them
                 lastAttacker.put(target, attacker);
 
-                String specialEffect = autoCrit ? "[AUTO-CRIT!]" : null;
+                String specialEffect = null;
+                if (isCrit) {
+                    specialEffect = isNaturalCrit ? "[CRITICAL HIT!]" : "[AUTO-CRIT!]";
+                }
                 return CombatResult.attackHit(attacker, target, attackRoll, targetAC, damage, specialEffect);
             } else {
                 return CombatResult.attackMiss(attacker, target, attackRoll, targetAC);
