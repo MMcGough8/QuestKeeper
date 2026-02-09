@@ -392,10 +392,6 @@ public class GameEngine implements AutoCloseable {
                 handleGo(direction);
             }
             case "leave", "exit" -> handleLeave();
-            case "talk" -> handleTalk(noun);
-            case "ask" -> handleAsk(input);
-            case "buy" -> handleBuy(noun);
-            case "bye" -> handleBye();
             case "attack" -> handleAttack(noun);
             case "trial" -> handleTrial();
             case "attempt", "solve", "try" -> handleAttempt(noun);
@@ -405,6 +401,7 @@ public class GameEngine implements AutoCloseable {
             // Note: 'help' and 'quit' are now handled by SystemCommandHandler
             // Note: 'inventory', 'i', 'stats', 'equipment', 'equipped', 'gear' are handled by InventoryCommandHandler
             // Note: 'take', 'get', 'pickup', 'drop', 'equip', 'wear', 'wield', 'unequip', 'remove', 'use', 'activate' are handled by ItemCommandHandler
+            // Note: 'talk', 'ask', 'buy', 'bye' are handled by DialogueCommandHandler
             default -> Display.showError("Command '" + verb + "' is not yet implemented.");
         }
     }
