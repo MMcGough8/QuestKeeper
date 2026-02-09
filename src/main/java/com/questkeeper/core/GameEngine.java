@@ -384,13 +384,19 @@ public class GameEngine implements AutoCloseable {
                         checkForRandomEncounter();
                     }
                 }
+                if (result.hasCombatStarted()) {
+                    // Combat was initiated - run the combat loop
+                    runCombatLoop();
+                    if (running) {
+                        displayCurrentLocation();
+                    }
+                }
                 return;
             }
         }
 
         // Fall back to switch statement for commands not yet extracted
         switch (verb) {
-            case "attack" -> handleAttack(noun);
             case "trial" -> handleTrial();
             case "attempt", "solve", "try" -> handleAttempt(noun);
             case "rest" -> handleRest(noun);
@@ -401,6 +407,7 @@ public class GameEngine implements AutoCloseable {
             // Note: 'take', 'get', 'pickup', 'drop', 'equip', 'wear', 'wield', 'unequip', 'remove', 'use', 'activate' are handled by ItemCommandHandler
             // Note: 'talk', 'ask', 'buy', 'bye' are handled by DialogueCommandHandler
             // Note: 'look', 'go', directions, 'leave', 'exit' are handled by ExplorationCommandHandler
+            // Note: 'attack' is handled by CombatCommandHandler
             default -> Display.showError("Command '" + verb + "' is not yet implemented.");
         }
     }

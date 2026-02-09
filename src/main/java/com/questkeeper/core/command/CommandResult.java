@@ -168,4 +168,12 @@ public class CommandResult {
     public boolean hasPlayerMoved() {
         return type == ResultType.PLAYER_MOVED;
     }
+
+    public boolean hasCombatStarted() {
+        return type == ResultType.COMBAT_STARTED;
+    }
+
+    public boolean hasCombatEnded() {
+        return type == ResultType.COMBAT_ENDED;
+    }
 }
