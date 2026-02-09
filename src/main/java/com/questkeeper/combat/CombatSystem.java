@@ -764,10 +764,22 @@ public class CombatSystem {
         if (!targetEnemy.isAlive()) {
             advanceTurn();
 
-            // Check for victory
-            CombatResult endResult = checkEndConditions();
-            if (endResult != null) {
-                return endResult;
+            // Check for victory - include killing blow details
+            if (getLivingEnemies().isEmpty()) {
+                int xp = calculateXpReward();
+                inCombat = false;
+
+                // Award XP to player
+                Combatant player = getPlayer();
+                if (player instanceof Character character) {
+                    character.addExperience(xp);
+                    for (Item item : droppedItems) {
+                        character.getInventory().addItem(item);
+                    }
+                    droppedItems.clear();
+                }
+
+                return CombatResult.victoryWithKillingBlow(xp, attackResult.getMessage());
             }
 
             return CombatResult.enemyDefeated((Monster) targetEnemy);

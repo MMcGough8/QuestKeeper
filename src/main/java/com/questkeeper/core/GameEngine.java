@@ -920,6 +920,15 @@ public class GameEngine implements AutoCloseable {
             case ERROR -> {
                 Display.println(Display.colorize(result.getMessage(), YELLOW));
             }
+            case VICTORY -> {
+                // Show the killing blow, handleCombatEnd() will show the victory box
+                if (result.getMessage() != null && !result.getMessage().startsWith("Victory!")) {
+                    Display.println(Display.colorize(result.getMessage(), GREEN));
+                }
+            }
+            case FLED -> {
+                // Handled by handleCombatEnd() - don't print here to avoid duplicate messages
+            }
             default -> {
                 Display.println(result.getMessage());
             }

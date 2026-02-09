@@ -140,6 +140,15 @@ public class CombatResult {
     }
 
     /**
+     * Creates a victory result that includes the killing blow details.
+     */
+    public static CombatResult victoryWithKillingBlow(int xpGained, String killingBlowMessage) {
+        String message = killingBlowMessage;
+        return new CombatResult(Type.VICTORY, message, null, null,
+            0, 0, 0, xpGained, null);
+    }
+
+    /**
      * Creates a fled result.
      */
     public static CombatResult fled() {
