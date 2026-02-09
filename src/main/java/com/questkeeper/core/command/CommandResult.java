@@ -29,7 +29,9 @@ public class CommandResult {
         /** Command resulted in dialogue ending */
         DIALOGUE_ENDED,
         /** Command triggered game quit */
-        QUIT_GAME
+        QUIT_GAME,
+        /** Player moved to a new location (triggers post-move checks) */
+        PLAYER_MOVED
     }
 
     private final ResultType type;
@@ -123,6 +125,14 @@ public class CommandResult {
         return new CommandResult(ResultType.QUIT_GAME, null, false);
     }
 
+    /**
+     * Creates a result indicating the player moved to a new location.
+     * This triggers post-move checks (trials, random encounters).
+     */
+    public static CommandResult playerMoved() {
+        return new CommandResult(ResultType.PLAYER_MOVED, null, true);
+    }
+
     // ==========================================
     // Accessors
     // ==========================================
@@ -153,5 +163,9 @@ public class CommandResult {
 
     public boolean shouldQuit() {
         return type == ResultType.QUIT_GAME;
+    }
+
+    public boolean hasPlayerMoved() {
+        return type == ResultType.PLAYER_MOVED;
     }
 }

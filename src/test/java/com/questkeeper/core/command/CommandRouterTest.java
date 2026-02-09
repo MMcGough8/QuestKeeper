@@ -139,6 +139,30 @@ class CommandRouterTest {
             assertTrue(defaultRouter.canHandle("unequip"));
             assertTrue(defaultRouter.canHandle("use"));
         }
+
+        @Test
+        @DisplayName("createDefault includes dialogue handler")
+        void createDefaultIncludesDialogueHandler() {
+            CommandRouter defaultRouter = CommandRouter.createDefault();
+
+            assertTrue(defaultRouter.canHandle("talk"));
+            assertTrue(defaultRouter.canHandle("ask"));
+            assertTrue(defaultRouter.canHandle("buy"));
+            assertTrue(defaultRouter.canHandle("bye"));
+        }
+
+        @Test
+        @DisplayName("createDefault includes exploration handler")
+        void createDefaultIncludesExplorationHandler() {
+            CommandRouter defaultRouter = CommandRouter.createDefault();
+
+            assertTrue(defaultRouter.canHandle("look"));
+            assertTrue(defaultRouter.canHandle("go"));
+            assertTrue(defaultRouter.canHandle("north"));
+            assertTrue(defaultRouter.canHandle("n"));
+            assertTrue(defaultRouter.canHandle("leave"));
+            assertTrue(defaultRouter.canHandle("exit"));
+        }
     }
 
     // Test helper class

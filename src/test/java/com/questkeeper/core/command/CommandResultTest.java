@@ -93,7 +93,17 @@ class CommandResultTest {
         @DisplayName("all result types are distinct")
         void allResultTypesDistinct() {
             CommandResult.ResultType[] types = CommandResult.ResultType.values();
-            assertEquals(8, types.length);
+            assertEquals(9, types.length);
+        }
+
+        @Test
+        @DisplayName("playerMoved() creates player moved result")
+        void playerMovedCreatesPlayerMovedResult() {
+            CommandResult result = CommandResult.playerMoved();
+
+            assertTrue(result.hasPlayerMoved());
+            assertTrue(result.shouldDisplayLocation());
+            assertEquals(CommandResult.ResultType.PLAYER_MOVED, result.getType());
         }
     }
 }

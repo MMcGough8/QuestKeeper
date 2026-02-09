@@ -377,21 +377,19 @@ public class GameEngine implements AutoCloseable {
                 if (result.shouldDisplayLocation()) {
                     displayCurrentLocation();
                 }
+                if (result.hasPlayerMoved()) {
+                    // Post-move checks: trials and random encounters
+                    checkForTrialAtLocation();
+                    if (campaign.getTrialAtLocation(gameState.getCurrentLocation().getId()) == null) {
+                        checkForRandomEncounter();
+                    }
+                }
                 return;
             }
         }
 
         // Fall back to switch statement for commands not yet extracted
         switch (verb) {
-            case "look" -> handleLook(noun);
-            case "go", "north", "south", "east", "west", "n", "s", "e", "w",
-                 "northeast", "northwest", "southeast", "southwest", "ne", "nw", "se", "sw",
-                 "up", "down", "u", "d" -> {
-                // If verb is a direction, use it; otherwise use noun
-                String direction = isDirection(verb) ? verb : noun;
-                handleGo(direction);
-            }
-            case "leave", "exit" -> handleLeave();
             case "attack" -> handleAttack(noun);
             case "trial" -> handleTrial();
             case "attempt", "solve", "try" -> handleAttempt(noun);
@@ -402,6 +400,7 @@ public class GameEngine implements AutoCloseable {
             // Note: 'inventory', 'i', 'stats', 'equipment', 'equipped', 'gear' are handled by InventoryCommandHandler
             // Note: 'take', 'get', 'pickup', 'drop', 'equip', 'wear', 'wield', 'unequip', 'remove', 'use', 'activate' are handled by ItemCommandHandler
             // Note: 'talk', 'ask', 'buy', 'bye' are handled by DialogueCommandHandler
+            // Note: 'look', 'go', directions, 'leave', 'exit' are handled by ExplorationCommandHandler
             default -> Display.showError("Command '" + verb + "' is not yet implemented.");
         }
     }
