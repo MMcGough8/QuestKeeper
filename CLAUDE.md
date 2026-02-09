@@ -21,6 +21,7 @@ mvn test -Dtest=CampaignTest#testMethodName  # Run specific test method
 ```bash
 mvn exec:java -Dexec.mainClass="com.questkeeper.Main" -q           # Interactive mode
 mvn exec:java -Dexec.mainClass="com.questkeeper.demo.AutoDemo" -q  # Demo mode
+java -jar target/questkeeper-1.0.0-SNAPSHOT.jar                    # Run fat JAR (after mvn package)
 ```
 
 ## Architecture Overview
@@ -103,6 +104,8 @@ GameEngine.processCommand() → handleTake("sword")
 - Take: get, grab, pick, pickup, collect → `take`
 - Attack: hit, strike, fight, kill, slay → `attack`
 - Directions: n/s/e/w/ne/nw/se/sw/u/d → expanded forms
+
+**Core Commands:** `go`, `look`, `take`, `drop`, `talk`, `ask`, `buy`, `bye`, `attack`, `flee`, `use`, `inventory`, `equip`, `unequip`, `character`, `trial`, `attempt`, `rest`, `save`, `load`, `help`, `quit`
 
 ### Game Modes
 
@@ -467,6 +470,31 @@ mvn test -Dtest=InventoryTest#canAddItem   # Single method
 | `eberron` | Intermediate | 12-16 | Olympic competition, dragonshards |
 | `drownedgod` | Advanced | 15-19 | Nautical horror |
 
+### Campaign Design Philosophy
+
+Trials follow a consistent structure across campaigns:
+1. **Safe Hub Scene** — Tavern/shop/town square for regrouping
+2. **Lead** — Rumor, witness, strange event, or villain taunt
+3. **Trial Location** — Puzzle room with 3-6 mini-games
+4. **Encounter** — Combat or hazard appropriate to theme
+5. **Reward** — Magical item or boon
+6. **Stinger** — Villain message or new location unlocked
+
+Design principles:
+- Every trial can be **won without violence**
+- Every trial can be **failed without death** (unless reckless)
+- Use **comedic consequences** over lethal outcomes early
+- **Reward curiosity** and creative problem-solving
+
+### Difficulty Scaling
+
+| Factor | Adjustment |
+|--------|------------|
+| Boss stats | +2 AC / +15 HP per tier |
+| Minions | +1-2 extra per additional player |
+| DCs | 10-12 (early) → 13-15 (mid) → 16-18 (late) |
+| Failures | Add conditions (slowed, blinded) instead of raw damage |
+
 ## Adding a New Campaign
 
 1. Create `src/main/resources/campaigns/{campaign-id}/`
@@ -488,3 +516,11 @@ mvn test -Dtest=InventoryTest#canAddItem   # Single method
 - **SnakeYAML 2.2** - YAML parsing
 - **Jansi 2.4.1** - Terminal colors (ANSI)
 - **JUnit 5.10.1** - Testing framework
+
+## Key Design Decisions
+
+- **No mocking in tests**: Tests use real objects and YAML fixtures with `@TempDir`
+- **Immutable campaign data**: `Campaign` is read-only; all mutations go through `GameState`
+- **Package-private loaders**: `CampaignLoader` hidden behind `Campaign` facade
+- **Composition over inheritance**: `StatusEffectManager` tracks effects externally from `Combatant`
+- **Factory methods for fixtures**: `Weapon.createLongsword()`, `Item.createConsumable()` for tests

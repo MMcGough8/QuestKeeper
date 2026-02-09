@@ -1,11 +1,14 @@
 package com.questkeeper.inventory;
 
+import com.questkeeper.util.YamlUtils;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.questkeeper.util.YamlUtils.*;
 
 /**
  * Loads and provides access to standard D&D 5e equipment from YAML.
@@ -52,10 +55,8 @@ public class StandardEquipment {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void loadWeapons(Map<String, Object> data) {
-        List<Map<String, Object>> weaponList = (List<Map<String, Object>>) data.get("weapons");
-        if (weaponList == null) return;
+        List<Map<String, Object>> weaponList = getListOfMaps(data, "weapons");
 
         for (Map<String, Object> weaponData : weaponList) {
             try {
@@ -68,10 +69,8 @@ public class StandardEquipment {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void loadArmor(Map<String, Object> data) {
-        List<Map<String, Object>> armorList = (List<Map<String, Object>>) data.get("armor");
-        if (armorList == null) return;
+        List<Map<String, Object>> armorList = getListOfMaps(data, "armor");
 
         for (Map<String, Object> armorData : armorList) {
             try {
@@ -84,7 +83,6 @@ public class StandardEquipment {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private Weapon parseWeapon(Map<String, Object> data) {
         String id = getString(data, "id");
         String name = getString(data, "name");
@@ -102,24 +100,22 @@ public class StandardEquipment {
         Weapon weapon = Weapon.createWithId(id, name, diceCount, dieSize, damageType, category, weight, value);
 
         // Set ranges if present
-        if (data.containsKey("normal_range")) {
+        if (hasKey(data, "normal_range")) {
             weapon.setRange(getInt(data, "normal_range", 0), getInt(data, "long_range", 0));
         }
 
         // Set versatile die size if present
-        if (data.containsKey("versatile_die_size")) {
+        if (hasKey(data, "versatile_die_size")) {
             weapon.setVersatileDieSize(getInt(data, "versatile_die_size", 0));
         }
 
         // Add properties
-        List<String> properties = (List<String>) data.get("properties");
-        if (properties != null) {
-            for (String prop : properties) {
-                try {
-                    weapon.addProperty(Weapon.WeaponProperty.valueOf(prop));
-                } catch (IllegalArgumentException e) {
-                    // Skip unknown properties
-                }
+        List<String> properties = getStringList(data, "properties");
+        for (String prop : properties) {
+            try {
+                weapon.addProperty(Weapon.WeaponProperty.valueOf(prop));
+            } catch (IllegalArgumentException e) {
+                // Skip unknown properties
             }
         }
 
@@ -182,40 +178,4 @@ public class StandardEquipment {
         return armors.containsKey(id.toLowerCase());
     }
 
-    // ==========================================
-    // Helper Methods
-    // ==========================================
-
-    private String getString(Map<String, Object> data, String key) {
-        return getString(data, key, "");
-    }
-
-    private String getString(Map<String, Object> data, String key, String defaultValue) {
-        Object value = data.get(key);
-        return value != null ? value.toString() : defaultValue;
-    }
-
-    private int getInt(Map<String, Object> data, String key, int defaultValue) {
-        Object value = data.get(key);
-        if (value instanceof Number) {
-            return ((Number) value).intValue();
-        }
-        return defaultValue;
-    }
-
-    private double getDouble(Map<String, Object> data, String key, double defaultValue) {
-        Object value = data.get(key);
-        if (value instanceof Number) {
-            return ((Number) value).doubleValue();
-        }
-        return defaultValue;
-    }
-
-    private boolean getBoolean(Map<String, Object> data, String key, boolean defaultValue) {
-        Object value = data.get(key);
-        if (value instanceof Boolean) {
-            return (Boolean) value;
-        }
-        return defaultValue;
-    }
 }
