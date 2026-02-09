@@ -411,10 +411,35 @@ public class CombatSystem {
                 return CombatResult.attackMiss(attacker, target, attackRoll, targetAC);
             }
         } else if (attacker instanceof Character character) {
-            // Player attack: d20 + STR mod + proficiency
+            // Get equipped weapon and determine ability modifier to use
+            Weapon weapon = character.getInventory().getEquippedWeapon();
+            String damageDice = DEFAULT_PLAYER_WEAPON;
+
             int strMod = character.getAbilityModifier(Ability.STRENGTH);
+            int dexMod = character.getAbilityModifier(Ability.DEXTERITY);
             int profBonus = character.getProficiencyBonus();
-            int totalMod = strMod + profBonus;
+
+            // Determine which ability modifier to use for attack and damage
+            int abilityMod;
+            if (weapon != null) {
+                damageDice = weapon.getDamageDice();
+                if (weapon.isRanged()) {
+                    // Ranged weapons always use DEX
+                    abilityMod = dexMod;
+                } else if (weapon.isFinesse()) {
+                    // Finesse weapons use the higher of STR or DEX
+                    abilityMod = Math.max(strMod, dexMod);
+                } else {
+                    // Melee weapons use STR
+                    abilityMod = strMod;
+                }
+            } else {
+                // Unarmed: use STR, damage is 1 + STR mod
+                abilityMod = strMod;
+                damageDice = "1";
+            }
+
+            int totalMod = abilityMod + profBonus;
 
             if (hasAdvantage && !hasDisadvantage) {
                 attackRoll = Dice.rollWithAdvantage(totalMod);
@@ -425,8 +450,8 @@ public class CombatSystem {
             }
 
             if (attackRoll >= targetAC) {
-                // Damage: 1d8 + STR mod (simulating longsword)
-                damage = Dice.parse(DEFAULT_PLAYER_WEAPON) + strMod;
+                // Damage: weapon dice + ability modifier
+                damage = Dice.parse(damageDice) + abilityMod;
                 damage = Math.max(1, damage); // Minimum 1 damage
 
                 // Double damage on crit
