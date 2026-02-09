@@ -13,6 +13,9 @@ import com.questkeeper.combat.Combatant;
 import com.questkeeper.combat.Monster;
 import com.questkeeper.core.CommandParser.Command;
 import com.questkeeper.core.RestSystem.RestResult;
+import com.questkeeper.core.command.CommandResult;
+import com.questkeeper.core.command.CommandRouter;
+import com.questkeeper.core.command.GameContext;
 import com.questkeeper.dialogue.DialogueResult;
 import com.questkeeper.dialogue.DialogueSystem;
 import com.questkeeper.inventory.Armor;
@@ -64,12 +67,17 @@ public class GameEngine implements AutoCloseable {
     private Trial activeTrial;
     private boolean running;
 
+    // Command handler infrastructure
+    private CommandRouter commandRouter;
+    private GameContext gameContext;
+
     public GameEngine() {
         this.scanner = new Scanner(System.in);
         this.random = new Random();
         this.dialogueSystem = new DialogueSystem();
         this.combatSystem = new CombatSystem();
         this.restSystem = new RestSystem();
+        this.commandRouter = CommandRouter.createDefault();
         this.running = false;
     }
 
@@ -299,6 +307,11 @@ public class GameEngine implements AutoCloseable {
 
     private void initializeGameState(Character character) {
         gameState = new GameState(character, campaign);
+        // Create game context for command handlers
+        gameContext = new GameContext(
+            campaign, gameState, dialogueSystem, combatSystem,
+            restSystem, scanner, random
+        );
     }
 
     private void runGameLoop() {
@@ -353,6 +366,22 @@ public class GameEngine implements AutoCloseable {
         String verb = command.getVerb();
         String noun = command.getNoun();
 
+        // Try routing through command handlers first
+        if (commandRouter.canHandle(verb)) {
+            CommandResult result = commandRouter.route(gameContext, verb, noun, input);
+            if (result != null) {
+                // Handle special result types
+                if (result.shouldQuit()) {
+                    running = false;
+                }
+                if (result.shouldDisplayLocation()) {
+                    displayCurrentLocation();
+                }
+                return;
+            }
+        }
+
+        // Fall back to switch statement for commands not yet extracted
         switch (verb) {
             case "look" -> handleLook(noun);
             case "go", "north", "south", "east", "west", "n", "s", "e", "w",
@@ -370,19 +399,12 @@ public class GameEngine implements AutoCloseable {
             case "attack" -> handleAttack(noun);
             case "trial" -> handleTrial();
             case "attempt", "solve", "try" -> handleAttempt(noun);
-            case "inventory", "i" -> handleInventory();
-            case "equipment", "equipped", "gear" -> showEquippedItems();
-            case "stats" -> handleStats();
-            case "take", "get", "pickup" -> handleTake(noun);
-            case "drop" -> handleDrop(noun);
-            case "equip", "wear", "wield" -> handleEquip(noun);
-            case "unequip", "remove" -> handleUnequip(noun);
-            case "use", "activate" -> handleUse(noun);
             case "rest" -> handleRest(noun);
-            case "help" -> handleHelp();
             case "save" -> handleSave();
             case "load" -> handleLoad();
-            case "quit" -> handleQuit();
+            // Note: 'help' and 'quit' are now handled by SystemCommandHandler
+            // Note: 'inventory', 'i', 'stats', 'equipment', 'equipped', 'gear' are handled by InventoryCommandHandler
+            // Note: 'take', 'get', 'pickup', 'drop', 'equip', 'wear', 'wield', 'unequip', 'remove', 'use', 'activate' are handled by ItemCommandHandler
             default -> Display.showError("Command '" + verb + "' is not yet implemented.");
         }
     }

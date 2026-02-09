@@ -93,6 +93,7 @@ public class CommandRouter {
         // Register handlers
         router.registerHandler(new SystemCommandHandler());
         router.registerHandler(new InventoryCommandHandler());
+        router.registerHandler(new ItemCommandHandler());
 
         return router;
     }

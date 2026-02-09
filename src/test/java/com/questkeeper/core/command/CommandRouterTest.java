@@ -126,6 +126,19 @@ class CommandRouterTest {
             assertTrue(defaultRouter.canHandle("stats"));
             assertTrue(defaultRouter.canHandle("equipment"));
         }
+
+        @Test
+        @DisplayName("createDefault includes item handler")
+        void createDefaultIncludesItemHandler() {
+            CommandRouter defaultRouter = CommandRouter.createDefault();
+
+            assertTrue(defaultRouter.canHandle("take"));
+            assertTrue(defaultRouter.canHandle("get"));
+            assertTrue(defaultRouter.canHandle("drop"));
+            assertTrue(defaultRouter.canHandle("equip"));
+            assertTrue(defaultRouter.canHandle("unequip"));
+            assertTrue(defaultRouter.canHandle("use"));
+        }
     }
 
     // Test helper class
