@@ -1,5 +1,6 @@
 package com.questkeeper.character;
 
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
@@ -210,6 +211,9 @@ public class Character implements Combatant {
     private int armorBonus;
     private int shieldBonus;
 
+    // Half-Elf bonus abilities (+1 to two abilities of player's choice, excluding CHA)
+    private Set<Ability> halfElfBonusAbilities = EnumSet.noneOf(Ability.class);
+
     private final Inventory inventory;
 
     public Character(String name, Race race, CharacterClass characterClass) {
@@ -399,11 +403,16 @@ public class Character implements Combatant {
     public int getAbilityScore(Ability ability) {
         int base = baseAbilityScores.get(ability);
         int racialBonus = race.getAbilityBonus(ability);
-        
+
         if (race == Race.HUMAN) {
             racialBonus = 1;
         }
-        
+
+        // Half-Elf gets +1 to two abilities of player's choice (in addition to +2 CHA)
+        if (race == Race.HALF_ELF && halfElfBonusAbilities.contains(ability)) {
+            racialBonus += 1;
+        }
+
         return Math.min(base + racialBonus, MAX_ABILITY_SCORE);
     }
 
@@ -638,7 +647,55 @@ public class Character implements Combatant {
     public Race getRace() {
         return race;
     }
-    
+
+    /**
+     * Sets the two bonus abilities for Half-Elf characters.
+     * Per D&D 5e PHB, Half-Elves get +2 CHA and +1 to two other abilities of choice.
+     *
+     * @param ability1 first ability to receive +1 bonus (cannot be CHARISMA)
+     * @param ability2 second ability to receive +1 bonus (cannot be CHARISMA)
+     * @throws IllegalArgumentException if either ability is CHARISMA or if abilities are the same
+     * @throws IllegalStateException if character is not a Half-Elf
+     */
+    public void setHalfElfBonusAbilities(Ability ability1, Ability ability2) {
+        if (race != Race.HALF_ELF) {
+            throw new IllegalStateException("Only Half-Elf characters can set bonus abilities");
+        }
+        if (ability1 == Ability.CHARISMA || ability2 == Ability.CHARISMA) {
+            throw new IllegalArgumentException("Half-Elf bonus abilities cannot include Charisma (already +2)");
+        }
+        if (ability1 == ability2) {
+            throw new IllegalArgumentException("Half-Elf bonus abilities must be different");
+        }
+
+        halfElfBonusAbilities.clear();
+        halfElfBonusAbilities.add(ability1);
+        halfElfBonusAbilities.add(ability2);
+
+        // Recalculate HP if CON was affected
+        if (ability1 == Ability.CONSTITUTION || ability2 == Ability.CONSTITUTION) {
+            int oldMax = maxHitPoints;
+            maxHitPoints = calculateMaxHitPoints();
+            if (oldMax > 0) {
+                currentHitPoints = (int) ((double) currentHitPoints / oldMax * maxHitPoints);
+            }
+        }
+
+        // Update carrying capacity if STR was affected
+        if (ability1 == Ability.STRENGTH || ability2 == Ability.STRENGTH) {
+            inventory.setCarryingCapacityFromStrength(getAbilityScore(Ability.STRENGTH));
+        }
+    }
+
+    /**
+     * Gets the Half-Elf bonus abilities.
+     *
+     * @return unmodifiable set of abilities receiving +1 bonus, empty if not set or not Half-Elf
+     */
+    public Set<Ability> getHalfElfBonusAbilities() {
+        return Collections.unmodifiableSet(halfElfBonusAbilities);
+    }
+
     public CharacterClass getCharacterClass() {
         return characterClass;
     }
