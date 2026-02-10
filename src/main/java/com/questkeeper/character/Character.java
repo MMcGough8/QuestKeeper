@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.questkeeper.character.features.ActivatedFeature;
+import com.questkeeper.character.features.BarbarianFeatures;
 import com.questkeeper.character.features.ClassFeature;
 import com.questkeeper.character.features.FighterFeatures;
 import com.questkeeper.character.features.FightingStyle;
@@ -297,8 +298,15 @@ public class Character implements Combatant {
             // Use armor's AC calculation (handles light/medium/heavy DEX limits)
             ac = equippedArmor.calculateAC(dexMod);
         } else {
-            // No armor: base AC 10 + full DEX modifier
-            ac = BASE_AC + dexMod;
+            // No armor: check for Unarmored Defense (Barbarian)
+            if (characterClass == CharacterClass.BARBARIAN) {
+                // Barbarian Unarmored Defense: 10 + DEX + CON
+                int conMod = getAbilityModifier(Ability.CONSTITUTION);
+                ac = BASE_AC + dexMod + conMod;
+            } else {
+                // Standard unarmored: 10 + DEX
+                ac = BASE_AC + dexMod;
+            }
         }
 
         // Add shield bonus if equipped
@@ -573,6 +581,21 @@ public class Character implements Combatant {
                         .ifPresent(sa -> sa.setRogueLevel(level));
                 }
             }
+        } else if (characterClass == CharacterClass.BARBARIAN) {
+            List<ClassFeature> barbarianFeatures = BarbarianFeatures.createFeaturesForLevel(level);
+
+            // Add any features we don't already have
+            for (ClassFeature feature : barbarianFeatures) {
+                if (getFeature(feature.getId()).isEmpty()) {
+                    classFeatures.add(feature);
+                } else if (feature.getId().equals(BarbarianFeatures.RAGE_ID)) {
+                    // Update Rage uses and damage when leveling up
+                    getFeature(BarbarianFeatures.RAGE_ID)
+                        .filter(f -> f instanceof BarbarianFeatures.Rage)
+                        .map(f -> (BarbarianFeatures.Rage) f)
+                        .ifPresent(rage -> rage.setBarbarianLevel(level));
+                }
+            }
         }
         // Other classes will be added here as features are implemented
     }
@@ -685,6 +708,58 @@ public class Character implements Combatant {
      */
     public int getCriticalThreshold() {
         return hasImprovedCritical() ? 19 : 20;
+    }
+
+    /**
+     * Checks if the Barbarian is currently raging.
+     */
+    public boolean isRaging() {
+        return getFeature(BarbarianFeatures.RAGE_ID)
+            .filter(f -> f instanceof BarbarianFeatures.Rage)
+            .map(f -> ((BarbarianFeatures.Rage) f).isActive())
+            .orElse(false);
+    }
+
+    /**
+     * Gets the rage damage bonus if raging, 0 otherwise.
+     */
+    public int getRageDamageBonus() {
+        if (!isRaging()) return 0;
+
+        return getFeature(BarbarianFeatures.RAGE_ID)
+            .filter(f -> f instanceof BarbarianFeatures.Rage)
+            .map(f -> ((BarbarianFeatures.Rage) f).getDamageBonus())
+            .orElse(0);
+    }
+
+    /**
+     * Ends the current rage (Barbarian only).
+     */
+    public void endRage() {
+        getFeature(BarbarianFeatures.RAGE_ID)
+            .filter(f -> f instanceof BarbarianFeatures.Rage)
+            .map(f -> (BarbarianFeatures.Rage) f)
+            .ifPresent(BarbarianFeatures.Rage::endRage);
+    }
+
+    /**
+     * Checks if Reckless Attack is active this turn (Barbarian only).
+     */
+    public boolean isRecklessAttackActive() {
+        return getFeature(BarbarianFeatures.RECKLESS_ATTACK_ID)
+            .filter(f -> f instanceof BarbarianFeatures.RecklessAttack)
+            .map(f -> ((BarbarianFeatures.RecklessAttack) f).isActiveThisTurn())
+            .orElse(false);
+    }
+
+    /**
+     * Resets Reckless Attack at start of turn (Barbarian only).
+     */
+    public void resetRecklessAttack() {
+        getFeature(BarbarianFeatures.RECKLESS_ATTACK_ID)
+            .filter(f -> f instanceof BarbarianFeatures.RecklessAttack)
+            .map(f -> (BarbarianFeatures.RecklessAttack) f)
+            .ifPresent(BarbarianFeatures.RecklessAttack::resetTurn);
     }
 
     /**

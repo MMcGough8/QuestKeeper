@@ -6,6 +6,7 @@ import com.questkeeper.character.features.ActivatedFeature;
 import com.questkeeper.character.features.FighterFeatures;
 import com.questkeeper.character.features.FightingStyle;
 import com.questkeeper.character.features.RogueFeatures;
+import com.questkeeper.character.features.BarbarianFeatures;
 import com.questkeeper.combat.status.Condition;
 import com.questkeeper.combat.status.ConditionEffect;
 import com.questkeeper.combat.status.StatusEffectManager;
@@ -224,9 +225,18 @@ public class CombatSystem {
             case "hide":
                 return handleCunningHide();
 
+            // Barbarian actions
+            case "rage":
+                return handleRage();
+
+            case "reckless":
+            case "reckless attack":
+            case "recklessattack":
+                return handleRecklessAttack();
+
             default:
                 return CombatResult.error(
-                    String.format("Unknown action: %s. Try: attack, flee, secondwind, surge, dash, disengage, hide", action));
+                    String.format("Unknown action: %s. Try: attack, flee, rage, reckless", action));
         }
     }
 
@@ -406,6 +416,11 @@ public class CombatSystem {
                                statusEffectManager.attacksHaveAdvantageAgainst(target);
         boolean hasDisadvantage = statusEffectManager.hasDisadvantageOnAttacks(attacker);
 
+        // Reckless Attack: enemies have advantage on attacks against a reckless barbarian
+        if (target instanceof Character targetChar && targetChar.isRecklessAttackActive()) {
+            hasAdvantage = true;
+        }
+
         // Check if melee attacks auto-crit (paralyzed/unconscious targets)
         boolean autoCrit = statusEffectManager.meleeCritsOnHit(target);
 
@@ -439,6 +454,15 @@ public class CombatSystem {
                     damage += monster.rollDamage(); // Double the dice, not the total
                 }
 
+                // Rage resistance: halve physical damage while raging
+                boolean rageResisted = false;
+                if (target instanceof Character targetChar && targetChar.isRaging()) {
+                    // Rage grants resistance to bludgeoning, piercing, slashing
+                    // For simplicity, assume all monster attacks are physical
+                    damage = damage / 2;
+                    rageResisted = true;
+                }
+
                 target.takeDamage(damage);
 
                 // Track aggro - target remembers who hit them
@@ -446,6 +470,9 @@ public class CombatSystem {
 
                 // Check for special ability on hit
                 String specialEffect = processSpecialAbilityOnHit(monster, target);
+                if (rageResisted) {
+                    specialEffect = (specialEffect != null ? specialEffect + " " : "") + "[RAGE RESISTED!]";
+                }
                 if (isCrit) {
                     String critType = isNaturalCrit ? "[CRITICAL HIT!]" : "[AUTO-CRIT!]";
                     specialEffect = (specialEffect != null ? specialEffect + " " : "") + critType;
@@ -497,6 +524,13 @@ public class CombatSystem {
                 totalMod += 2;
             }
 
+            // Reckless Attack (Barbarian): grants advantage on melee STR attacks
+            boolean isReckless = character.isRecklessAttackActive();
+            boolean isMeleeStrAttack = !isRangedAttack && abilityMod == strMod;
+            if (isReckless && isMeleeStrAttack) {
+                hasAdvantage = true;
+            }
+
             boolean isNaturalCrit = false;
             int naturalRoll;
 
@@ -539,6 +573,13 @@ public class CombatSystem {
                     damage += 2;
                 }
 
+                // Rage (Barbarian): bonus damage on melee STR attacks while raging
+                int rageDamage = 0;
+                if (character.isRaging() && isMeleeStrAttack) {
+                    rageDamage = character.getRageDamageBonus();
+                    damage += rageDamage;
+                }
+
                 // Sneak Attack (Rogue): extra damage with finesse/ranged when having advantage
                 // or when an ally is adjacent to the target
                 int sneakAttackDamage = 0;
@@ -575,8 +616,16 @@ public class CombatSystem {
                 lastAttacker.put(target, attacker);
 
                 StringBuilder specialEffects = new StringBuilder();
+                if (rageDamage > 0) {
+                    specialEffects.append(String.format("[RAGE +%d!]", rageDamage));
+                }
                 if (sneakAttackDamage > 0) {
+                    if (specialEffects.length() > 0) specialEffects.append(" ");
                     specialEffects.append(String.format("[SNEAK ATTACK +%d!]", sneakAttackDamage));
+                }
+                if (isReckless) {
+                    if (specialEffects.length() > 0) specialEffects.append(" ");
+                    specialEffects.append("[RECKLESS]");
                 }
                 if (isCrit) {
                     if (specialEffects.length() > 0) specialEffects.append(" ");
@@ -770,11 +819,12 @@ public class CombatSystem {
         }
 
         // Reset per-turn flags for player
-        if (current instanceof Character) {
+        if (current instanceof Character character) {
             bonusActionUsed = false;
             actionSurgeActive = false;
             sneakAttackUsed = false;
             disengageActive = false;
+            character.resetRecklessAttack();
         }
 
         currentTurn = (currentTurn + 1) % initiative.size();
@@ -1105,6 +1155,69 @@ public class CombatSystem {
             "If successful, you have advantage on your next attack.\n" +
             "(You can still take your action this turn.)",
             player.getName(), stealthRoll, stealthMod));
+    }
+
+    /**
+     * Handles Rage action (Barbarian feature).
+     * Uses bonus action to enter rage.
+     */
+    private CombatResult handleRage() {
+        Character player = (Character) getPlayer();
+        if (player == null) {
+            return CombatResult.error("No player character found.");
+        }
+
+        // Check if bonus action already used
+        if (bonusActionUsed) {
+            return CombatResult.error("You've already used your bonus action this turn.");
+        }
+
+        // Check if already raging
+        if (player.isRaging()) {
+            return CombatResult.error("You are already raging!");
+        }
+
+        // Check if player has Rage and can use it
+        if (!player.canUseFeature(BarbarianFeatures.RAGE_ID)) {
+            var feature = player.getFeature(BarbarianFeatures.RAGE_ID);
+            if (feature.isEmpty()) {
+                return CombatResult.error("You don't have the Rage ability.");
+            }
+            return CombatResult.error("You have no uses of Rage remaining. Take a long rest to recover.");
+        }
+
+        // Use the feature
+        String result = player.useFeature(BarbarianFeatures.RAGE_ID);
+        bonusActionUsed = true;
+
+        return CombatResult.info(result + "\n(You can still take your action this turn.)");
+    }
+
+    /**
+     * Handles Reckless Attack action (Barbarian feature).
+     * Gives advantage on attacks but enemies have advantage on you.
+     */
+    private CombatResult handleRecklessAttack() {
+        Character player = (Character) getPlayer();
+        if (player == null) {
+            return CombatResult.error("No player character found.");
+        }
+
+        // Check if player has Reckless Attack
+        var feature = player.getFeature(BarbarianFeatures.RECKLESS_ATTACK_ID);
+        if (feature.isEmpty()) {
+            return CombatResult.error("You don't have the Reckless Attack ability.");
+        }
+
+        // Check if already used this turn
+        if (player.isRecklessAttackActive()) {
+            return CombatResult.error("You are already attacking recklessly this turn.");
+        }
+
+        // Activate Reckless Attack
+        String result = player.useFeature(BarbarianFeatures.RECKLESS_ATTACK_ID);
+
+        return CombatResult.info(result + "\n(Now make your attack!)");
     }
 
     /**
