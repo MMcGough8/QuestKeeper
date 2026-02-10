@@ -105,6 +105,28 @@ public abstract class ActivatedFeature implements ClassFeature {
     }
 
     /**
+     * Directly sets current uses (for features like Ki that manage uses differently).
+     */
+    protected void setCurrentUses(int uses) {
+        this.currentUses = Math.max(0, Math.min(uses, maxUses));
+    }
+
+    /**
+     * Spends a number of uses without triggering activate().
+     * Useful for resource pools like Ki.
+     *
+     * @param amount the number of uses to spend
+     * @return true if successfully spent, false if not enough uses
+     */
+    protected boolean spendUses(int amount) {
+        if (currentUses < amount) {
+            return false;
+        }
+        currentUses -= amount;
+        return true;
+    }
+
+    /**
      * Checks if this feature can be used (has uses remaining).
      */
     public boolean canUse() {

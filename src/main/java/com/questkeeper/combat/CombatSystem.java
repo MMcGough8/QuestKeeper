@@ -7,6 +7,7 @@ import com.questkeeper.character.features.FighterFeatures;
 import com.questkeeper.character.features.FightingStyle;
 import com.questkeeper.character.features.RogueFeatures;
 import com.questkeeper.character.features.BarbarianFeatures;
+import com.questkeeper.character.features.MonkFeatures;
 import com.questkeeper.combat.status.Condition;
 import com.questkeeper.combat.status.ConditionEffect;
 import com.questkeeper.combat.status.StatusEffectManager;
@@ -51,6 +52,8 @@ public class CombatSystem {
     private boolean actionSurgeActive;    // Track if Action Surge grants an extra action
     private boolean sneakAttackUsed;      // Track if Sneak Attack was used this turn
     private boolean disengageActive;      // Track if Disengage is active (no opportunity attacks)
+    private boolean patientDefenseActive; // Track if Patient Defense is active (attacks have disadvantage)
+    private int flurryAttacksRemaining;   // Track remaining Flurry of Blows attacks
 
     public CombatSystem() {
         this.participants = new ArrayList<>();
@@ -67,6 +70,8 @@ public class CombatSystem {
         this.actionSurgeActive = false;
         this.sneakAttackUsed = false;
         this.disengageActive = false;
+        this.patientDefenseActive = false;
+        this.flurryAttacksRemaining = 0;
     }
 
     // ==========================================
@@ -98,6 +103,8 @@ public class CombatSystem {
         this.actionSurgeActive = false;
         this.sneakAttackUsed = false;
         this.disengageActive = false;
+        this.patientDefenseActive = false;
+        this.flurryAttacksRemaining = 0;
 
         // Add player
         participants.add(state.getCharacter());
@@ -234,9 +241,25 @@ public class CombatSystem {
             case "recklessattack":
                 return handleRecklessAttack();
 
+            // Monk actions
+            case "flurry":
+            case "flurryofblows":
+            case "flurry of blows":
+                return handleFlurryOfBlows();
+
+            case "patient":
+            case "patientdefense":
+            case "patient defense":
+                return handlePatientDefense();
+
+            case "step":
+            case "stepofthewind":
+            case "step of the wind":
+                return handleStepOfTheWind();
+
             default:
                 return CombatResult.error(
-                    String.format("Unknown action: %s. Try: attack, flee, rage, reckless", action));
+                    String.format("Unknown action: %s. Try: attack, flee, or class abilities", action));
         }
     }
 
@@ -824,6 +847,8 @@ public class CombatSystem {
             actionSurgeActive = false;
             sneakAttackUsed = false;
             disengageActive = false;
+            patientDefenseActive = false;
+            flurryAttacksRemaining = 0;
             character.resetRecklessAttack();
         }
 
@@ -1218,6 +1243,153 @@ public class CombatSystem {
         String result = player.useFeature(BarbarianFeatures.RECKLESS_ATTACK_ID);
 
         return CombatResult.info(result + "\n(Now make your attack!)");
+    }
+
+    // ==========================================
+    // Monk Combat Actions
+    // ==========================================
+
+    private CombatResult handleFlurryOfBlows() {
+        Character player = (Character) getPlayer();
+        if (player == null) {
+            return CombatResult.error("No player character found.");
+        }
+
+        // Check if player has Flurry of Blows
+        var feature = player.getFeature(MonkFeatures.FLURRY_OF_BLOWS_ID);
+        if (feature.isEmpty()) {
+            return CombatResult.error("You don't have the Flurry of Blows ability.");
+        }
+
+        // Check if bonus action already used
+        if (bonusActionUsed) {
+            return CombatResult.error("You've already used your bonus action this turn.");
+        }
+
+        // Get Ki feature and check for points
+        var kiFeature = player.getFeature(MonkFeatures.KI_ID);
+        if (kiFeature.isEmpty()) {
+            return CombatResult.error("You don't have Ki points yet.");
+        }
+
+        MonkFeatures.Ki ki = (MonkFeatures.Ki) kiFeature.get();
+        if (ki.getKiPoints() < 1) {
+            return CombatResult.error("You don't have enough ki points. (0/" + ki.getMaxKiPoints() + ")");
+        }
+
+        // Spend 1 ki point
+        ki.spendKi(1);
+        bonusActionUsed = true;
+        flurryAttacksRemaining = 2;
+
+        return CombatResult.info(String.format(
+            "%s spends 1 ki point for Flurry of Blows!\n" +
+            "Ki: %d/%d remaining\n" +
+            "(Make 2 unarmed strikes with 'attack')",
+            player.getName(), ki.getKiPoints(), ki.getMaxKiPoints()));
+    }
+
+    private CombatResult handlePatientDefense() {
+        Character player = (Character) getPlayer();
+        if (player == null) {
+            return CombatResult.error("No player character found.");
+        }
+
+        // Check if player has Patient Defense
+        var feature = player.getFeature(MonkFeatures.PATIENT_DEFENSE_ID);
+        if (feature.isEmpty()) {
+            return CombatResult.error("You don't have the Patient Defense ability.");
+        }
+
+        // Check if bonus action already used
+        if (bonusActionUsed) {
+            return CombatResult.error("You've already used your bonus action this turn.");
+        }
+
+        // Get Ki feature and check for points
+        var kiFeature = player.getFeature(MonkFeatures.KI_ID);
+        if (kiFeature.isEmpty()) {
+            return CombatResult.error("You don't have Ki points yet.");
+        }
+
+        MonkFeatures.Ki ki = (MonkFeatures.Ki) kiFeature.get();
+        if (ki.getKiPoints() < 1) {
+            return CombatResult.error("You don't have enough ki points. (0/" + ki.getMaxKiPoints() + ")");
+        }
+
+        // Spend 1 ki point
+        ki.spendKi(1);
+        bonusActionUsed = true;
+        patientDefenseActive = true;
+
+        return CombatResult.info(String.format(
+            "%s spends 1 ki point for Patient Defense!\n" +
+            "Ki: %d/%d remaining\n" +
+            "All attacks against you have disadvantage until your next turn.",
+            player.getName(), ki.getKiPoints(), ki.getMaxKiPoints()));
+    }
+
+    private CombatResult handleStepOfTheWind() {
+        Character player = (Character) getPlayer();
+        if (player == null) {
+            return CombatResult.error("No player character found.");
+        }
+
+        // Check if player has Step of the Wind
+        var feature = player.getFeature(MonkFeatures.STEP_OF_THE_WIND_ID);
+        if (feature.isEmpty()) {
+            return CombatResult.error("You don't have the Step of the Wind ability.");
+        }
+
+        // Check if bonus action already used
+        if (bonusActionUsed) {
+            return CombatResult.error("You've already used your bonus action this turn.");
+        }
+
+        // Get Ki feature and check for points
+        var kiFeature = player.getFeature(MonkFeatures.KI_ID);
+        if (kiFeature.isEmpty()) {
+            return CombatResult.error("You don't have Ki points yet.");
+        }
+
+        MonkFeatures.Ki ki = (MonkFeatures.Ki) kiFeature.get();
+        if (ki.getKiPoints() < 1) {
+            return CombatResult.error("You don't have enough ki points. (0/" + ki.getMaxKiPoints() + ")");
+        }
+
+        // Spend 1 ki point
+        ki.spendKi(1);
+        bonusActionUsed = true;
+        disengageActive = true;  // Can disengage as part of Step of the Wind
+
+        return CombatResult.info(String.format(
+            "%s spends 1 ki point for Step of the Wind!\n" +
+            "Ki: %d/%d remaining\n" +
+            "You can Dash or Disengage. Movement doesn't provoke opportunity attacks.",
+            player.getName(), ki.getKiPoints(), ki.getMaxKiPoints()));
+    }
+
+    /**
+     * Gets remaining Flurry of Blows attacks this turn.
+     */
+    public int getFlurryAttacksRemaining() {
+        return flurryAttacksRemaining;
+    }
+
+    /**
+     * Uses one Flurry of Blows attack.
+     */
+    public void useFlurryAttack() {
+        if (flurryAttacksRemaining > 0) {
+            flurryAttacksRemaining--;
+        }
+    }
+
+    /**
+     * Checks if Patient Defense is active (attacks have disadvantage).
+     */
+    public boolean isPatientDefenseActive() {
+        return patientDefenseActive;
     }
 
     /**

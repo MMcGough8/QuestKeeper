@@ -14,6 +14,7 @@ import com.questkeeper.character.features.BarbarianFeatures;
 import com.questkeeper.character.features.ClassFeature;
 import com.questkeeper.character.features.FighterFeatures;
 import com.questkeeper.character.features.FightingStyle;
+import com.questkeeper.character.features.MonkFeatures;
 import com.questkeeper.character.features.RogueFeatures;
 import com.questkeeper.combat.Combatant;
 import com.questkeeper.core.Dice;
@@ -298,18 +299,28 @@ public class Character implements Combatant {
             // Use armor's AC calculation (handles light/medium/heavy DEX limits)
             ac = equippedArmor.calculateAC(dexMod);
         } else {
-            // No armor: check for Unarmored Defense (Barbarian)
+            // No armor: check for Unarmored Defense
             if (characterClass == CharacterClass.BARBARIAN) {
                 // Barbarian Unarmored Defense: 10 + DEX + CON
                 int conMod = getAbilityModifier(Ability.CONSTITUTION);
                 ac = BASE_AC + dexMod + conMod;
+            } else if (characterClass == CharacterClass.MONK) {
+                // Monk Unarmored Defense: 10 + DEX + WIS (no shield allowed)
+                Armor equippedShield = inventory.getEquippedShield();
+                if (equippedShield == null) {
+                    int wisMod = getAbilityModifier(Ability.WISDOM);
+                    ac = BASE_AC + dexMod + wisMod;
+                } else {
+                    // Monk with shield loses Unarmored Defense, uses standard 10 + DEX
+                    ac = BASE_AC + dexMod;
+                }
             } else {
                 // Standard unarmored: 10 + DEX
                 ac = BASE_AC + dexMod;
             }
         }
 
-        // Add shield bonus if equipped
+        // Add shield bonus if equipped (Monk already handled above)
         Armor equippedShield = inventory.getEquippedShield();
         if (equippedShield != null) {
             ac += equippedShield.getShieldBonus();
@@ -594,6 +605,33 @@ public class Character implements Combatant {
                         .filter(f -> f instanceof BarbarianFeatures.Rage)
                         .map(f -> (BarbarianFeatures.Rage) f)
                         .ifPresent(rage -> rage.setBarbarianLevel(level));
+                }
+            }
+        } else if (characterClass == CharacterClass.MONK) {
+            List<ClassFeature> monkFeatures = MonkFeatures.createFeaturesForLevel(level);
+
+            // Add any features we don't already have
+            for (ClassFeature feature : monkFeatures) {
+                if (getFeature(feature.getId()).isEmpty()) {
+                    classFeatures.add(feature);
+                } else if (feature.getId().equals(MonkFeatures.MARTIAL_ARTS_ID)) {
+                    // Update Martial Arts die when leveling up
+                    getFeature(MonkFeatures.MARTIAL_ARTS_ID)
+                        .filter(f -> f instanceof MonkFeatures.MartialArts)
+                        .map(f -> (MonkFeatures.MartialArts) f)
+                        .ifPresent(ma -> ma.setMonkLevel(level));
+                } else if (feature.getId().equals(MonkFeatures.KI_ID)) {
+                    // Update Ki points when leveling up
+                    getFeature(MonkFeatures.KI_ID)
+                        .filter(f -> f instanceof MonkFeatures.Ki)
+                        .map(f -> (MonkFeatures.Ki) f)
+                        .ifPresent(ki -> ki.setMonkLevel(level));
+                } else if (feature.getId().equals(MonkFeatures.DEFLECT_MISSILES_ID)) {
+                    // Update Deflect Missiles when leveling up
+                    getFeature(MonkFeatures.DEFLECT_MISSILES_ID)
+                        .filter(f -> f instanceof MonkFeatures.DeflectMissiles)
+                        .map(f -> (MonkFeatures.DeflectMissiles) f)
+                        .ifPresent(dm -> dm.setMonkLevel(level));
                 }
             }
         }
