@@ -801,35 +801,6 @@ public class GameEngine implements AutoCloseable {
         }
     }
 
-    private void processEnemyTurns() {
-        while (combatSystem.isInCombat()) {
-            Combatant current = combatSystem.getCurrentCombatant();
-            if (current == null || current instanceof Character) {
-                // Back to player's turn
-                if (combatSystem.isInCombat()) {
-                    displayCombatStatus();
-                }
-                return;
-            }
-
-            // Enemy turn
-            CombatResult result = combatSystem.executeTurn();
-            displayCombatResult(result);
-
-            if (result.isCombatOver()) {
-                handleCombatEnd(result);
-                return;
-            }
-
-            // Small pause for readability
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
-    }
-
     private void handleCombatEnd(CombatResult result) {
         Display.println();
         Display.printDivider('=', 60, result.getType() == CombatResult.Type.VICTORY ? GREEN : RED);
