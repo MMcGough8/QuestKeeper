@@ -1,11 +1,19 @@
 package com.questkeeper.character;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
+import com.questkeeper.character.features.ActivatedFeature;
+import com.questkeeper.character.features.ClassFeature;
+import com.questkeeper.character.features.FighterFeatures;
+import com.questkeeper.character.features.FightingStyle;
+import com.questkeeper.character.features.RogueFeatures;
 import com.questkeeper.combat.Combatant;
 import com.questkeeper.core.Dice;
 import com.questkeeper.inventory.Armor;
@@ -217,6 +225,11 @@ public class Character implements Combatant {
 
     private final Inventory inventory;
 
+    // Class features
+    private final List<ClassFeature> classFeatures = new ArrayList<>();
+    private FightingStyle fightingStyle;  // Fighter-specific; null for other classes
+    private Set<Skill> expertiseSkills = EnumSet.noneOf(Skill.class);  // Rogue-specific
+
     public Character(String name, Race race, CharacterClass characterClass) {
         this.name = name;
         this.race = race;
@@ -245,6 +258,9 @@ public class Character implements Combatant {
 
         // Initialize inventory with strength-based carrying capacity
         this.inventory = new Inventory(getAbilityScore(Ability.STRENGTH));
+
+        // Initialize class features for starting level
+        initializeClassFeatures();
     }
 
     public Character(String name, Race race, CharacterClass characterClass,
@@ -293,6 +309,11 @@ public class Character implements Combatant {
 
         // Add any additional bonuses (magic items, class features, etc.)
         ac += armorBonus + shieldBonus;
+
+        // Defense Fighting Style: +1 AC while wearing armor
+        if (fightingStyle == FightingStyle.DEFENSE && equippedArmor != null) {
+            ac += 1;
+        }
 
         return ac;
     }
@@ -519,6 +540,169 @@ public class Character implements Combatant {
         return inventory;
     }
 
+    // ==========================================
+    // Class Feature Methods
+    // ==========================================
+
+    /**
+     * Initializes class features based on current level.
+     * Called from constructor and levelUp().
+     */
+    private void initializeClassFeatures() {
+        if (characterClass == CharacterClass.FIGHTER) {
+            List<ClassFeature> fighterFeatures = FighterFeatures.createFeaturesForLevel(level, fightingStyle);
+
+            // Add any features we don't already have
+            for (ClassFeature feature : fighterFeatures) {
+                if (getFeature(feature.getId()).isEmpty()) {
+                    classFeatures.add(feature);
+                }
+            }
+        } else if (characterClass == CharacterClass.ROGUE) {
+            List<ClassFeature> rogueFeatures = RogueFeatures.createFeaturesForLevel(level, expertiseSkills);
+
+            // Add any features we don't already have
+            for (ClassFeature feature : rogueFeatures) {
+                if (getFeature(feature.getId()).isEmpty()) {
+                    classFeatures.add(feature);
+                } else if (feature.getId().equals(RogueFeatures.SNEAK_ATTACK_ID)) {
+                    // Update Sneak Attack dice when leveling up
+                    getFeature(RogueFeatures.SNEAK_ATTACK_ID)
+                        .filter(f -> f instanceof RogueFeatures.SneakAttack)
+                        .map(f -> (RogueFeatures.SneakAttack) f)
+                        .ifPresent(sa -> sa.setRogueLevel(level));
+                }
+            }
+        }
+        // Other classes will be added here as features are implemented
+    }
+
+    /**
+     * Gets all class features this character has.
+     */
+    public List<ClassFeature> getClassFeatures() {
+        return Collections.unmodifiableList(classFeatures);
+    }
+
+    /**
+     * Gets a class feature by its ID.
+     */
+    public Optional<ClassFeature> getFeature(String id) {
+        return classFeatures.stream()
+            .filter(f -> f.getId().equals(id))
+            .findFirst();
+    }
+
+    /**
+     * Checks if a feature can be used (exists, is activated type, and has uses remaining).
+     */
+    public boolean canUseFeature(String id) {
+        return getFeature(id)
+            .filter(f -> f instanceof ActivatedFeature)
+            .map(f -> ((ActivatedFeature) f).canUse())
+            .orElse(false);
+    }
+
+    /**
+     * Uses an activated feature by ID.
+     *
+     * @param id the feature ID
+     * @return result message, or error message if feature not found or can't be used
+     */
+    public String useFeature(String id) {
+        Optional<ClassFeature> feature = getFeature(id);
+        if (feature.isEmpty()) {
+            return "You don't have that ability.";
+        }
+
+        ClassFeature f = feature.get();
+        if (!(f instanceof ActivatedFeature activated)) {
+            return f.getName() + " is a passive ability that is always active.";
+        }
+
+        return activated.use(this);
+    }
+
+    /**
+     * Resets all feature uses that reset on a short rest.
+     */
+    public void resetFeaturesOnShortRest() {
+        for (ClassFeature feature : classFeatures) {
+            if (feature instanceof ActivatedFeature activated) {
+                activated.resetOnShortRest();
+            }
+        }
+    }
+
+    /**
+     * Resets all feature uses that reset on a long rest.
+     */
+    public void resetFeaturesOnLongRest() {
+        for (ClassFeature feature : classFeatures) {
+            if (feature instanceof ActivatedFeature activated) {
+                activated.resetOnLongRest();
+            }
+        }
+    }
+
+    /**
+     * Gets the character's fighting style (Fighter only).
+     */
+    public FightingStyle getFightingStyle() {
+        return fightingStyle;
+    }
+
+    /**
+     * Sets the character's fighting style (Fighter only).
+     * This will update the class features list.
+     */
+    public void setFightingStyle(FightingStyle style) {
+        if (characterClass != CharacterClass.FIGHTER) {
+            throw new IllegalStateException("Only Fighters can have a Fighting Style");
+        }
+
+        this.fightingStyle = style;
+
+        // Remove any existing fighting style feature
+        classFeatures.removeIf(f -> f.getId().equals(FighterFeatures.FIGHTING_STYLE_ID));
+
+        // Add the new fighting style feature
+        if (style != null) {
+            classFeatures.add(FighterFeatures.createFightingStyleFeature(style));
+        }
+    }
+
+    /**
+     * Checks if this character has the Improved Critical feature (Champion Fighter).
+     */
+    public boolean hasImprovedCritical() {
+        return getFeature(FighterFeatures.IMPROVED_CRITICAL_ID).isPresent();
+    }
+
+    /**
+     * Gets the critical hit threshold for this character.
+     * Returns 19 for Champions with Improved Critical, 20 otherwise.
+     */
+    public int getCriticalThreshold() {
+        return hasImprovedCritical() ? 19 : 20;
+    }
+
+    /**
+     * Gets a list of available activated features (for display in combat).
+     */
+    public List<ActivatedFeature> getAvailableActivatedFeatures(boolean inCombat) {
+        List<ActivatedFeature> available = new ArrayList<>();
+        for (ClassFeature feature : classFeatures) {
+            if (feature instanceof ActivatedFeature activated) {
+                boolean canUse = inCombat ? feature.isAvailableInCombat() : feature.isAvailableOutOfCombat();
+                if (canUse && activated.canUse()) {
+                    available.add(activated);
+                }
+            }
+        }
+        return available;
+    }
+
     public void addSkillProficiency(Skill skill) {
         proficientSkills.add(skill);
     }
@@ -534,13 +718,79 @@ public class Character implements Combatant {
     public int getSkillModifier(Skill skill) {
         int modifier = getAbilityModifier(skill.getAbility());
         if (proficientSkills.contains(skill)) {
-            modifier += getProficiencyBonus();
+            // Expertise doubles proficiency bonus
+            if (expertiseSkills.contains(skill)) {
+                modifier += getProficiencyBonus() * 2;
+            } else {
+                modifier += getProficiencyBonus();
+            }
         }
         return modifier;
     }
 
     public Set<Skill> getProficientSkills() {
         return EnumSet.copyOf(proficientSkills);
+    }
+
+    /**
+     * Checks if a skill has expertise (Rogue feature).
+     */
+    public boolean hasExpertise(Skill skill) {
+        return expertiseSkills.contains(skill);
+    }
+
+    /**
+     * Gets all skills with expertise.
+     */
+    public Set<Skill> getExpertiseSkills() {
+        return EnumSet.copyOf(expertiseSkills);
+    }
+
+    /**
+     * Sets the expertise skills (Rogue only).
+     * Skills must already be proficient skills.
+     *
+     * @param skills the skills to grant expertise in (typically 2 at level 1, 2 more at level 6)
+     * @throws IllegalStateException if character is not a Rogue
+     * @throws IllegalArgumentException if any skill is not a proficient skill
+     */
+    public void setExpertiseSkills(Set<Skill> skills) {
+        if (characterClass != CharacterClass.ROGUE) {
+            throw new IllegalStateException("Only Rogues can have Expertise");
+        }
+        for (Skill skill : skills) {
+            if (!proficientSkills.contains(skill)) {
+                throw new IllegalArgumentException(
+                    "Cannot have expertise in " + skill.getDisplayName() + " - not proficient");
+            }
+        }
+
+        this.expertiseSkills = EnumSet.copyOf(skills);
+
+        // Remove any existing expertise feature and re-add with new skills
+        classFeatures.removeIf(f -> f.getId().equals(RogueFeatures.EXPERTISE_ID));
+        if (!expertiseSkills.isEmpty()) {
+            classFeatures.add(RogueFeatures.createExpertise(expertiseSkills));
+        }
+    }
+
+    /**
+     * Adds expertise to a skill (Rogue only).
+     */
+    public void addExpertise(Skill skill) {
+        if (characterClass != CharacterClass.ROGUE) {
+            throw new IllegalStateException("Only Rogues can have Expertise");
+        }
+        if (!proficientSkills.contains(skill)) {
+            throw new IllegalArgumentException(
+                "Cannot have expertise in " + skill.getDisplayName() + " - not proficient");
+        }
+
+        expertiseSkills.add(skill);
+
+        // Update the expertise feature
+        classFeatures.removeIf(f -> f.getId().equals(RogueFeatures.EXPERTISE_ID));
+        classFeatures.add(RogueFeatures.createExpertise(expertiseSkills));
     }
     
     public boolean hasSavingThrowProficiency(Ability ability) {
@@ -635,6 +885,9 @@ public class Character implements Combatant {
 
         currentHitPoints += (maxHitPoints - oldMax);
         availableHitDice++;  // Gain one hit die per level
+
+        // Update class features for new level
+        initializeClassFeatures();
     }
     
     public void setLevel(int newLevel) {
@@ -645,6 +898,9 @@ public class Character implements Combatant {
         this.maxHitPoints = calculateMaxHitPoints();
         this.currentHitPoints = Math.min(currentHitPoints, maxHitPoints);
         this.availableHitDice = Math.min(availableHitDice, level);  // Cap at new level
+
+        // Update class features for new level
+        initializeClassFeatures();
     }
 
     public void setArmorBonus(int bonus) {

@@ -2,6 +2,10 @@ package com.questkeeper.combat;
 
 import com.questkeeper.character.Character;
 import com.questkeeper.character.Character.Ability;
+import com.questkeeper.character.features.ActivatedFeature;
+import com.questkeeper.character.features.FighterFeatures;
+import com.questkeeper.character.features.FightingStyle;
+import com.questkeeper.character.features.RogueFeatures;
 import com.questkeeper.combat.status.Condition;
 import com.questkeeper.combat.status.ConditionEffect;
 import com.questkeeper.combat.status.StatusEffectManager;
@@ -42,6 +46,10 @@ public class CombatSystem {
     private GameState currentState;
     private boolean inCombat;
     private boolean playerFled;
+    private boolean bonusActionUsed;      // Track if bonus action was used this turn
+    private boolean actionSurgeActive;    // Track if Action Surge grants an extra action
+    private boolean sneakAttackUsed;      // Track if Sneak Attack was used this turn
+    private boolean disengageActive;      // Track if Disengage is active (no opportunity attacks)
 
     public CombatSystem() {
         this.participants = new ArrayList<>();
@@ -54,6 +62,10 @@ public class CombatSystem {
         this.currentState = null;
         this.inCombat = false;
         this.playerFled = false;
+        this.bonusActionUsed = false;
+        this.actionSurgeActive = false;
+        this.sneakAttackUsed = false;
+        this.disengageActive = false;
     }
 
     // ==========================================
@@ -81,6 +93,10 @@ public class CombatSystem {
         this.statusEffectManager = new StatusEffectManager();
         this.currentTurn = 0;
         this.playerFled = false;
+        this.bonusActionUsed = false;
+        this.actionSurgeActive = false;
+        this.sneakAttackUsed = false;
+        this.disengageActive = false;
 
         // Add player
         participants.add(state.getCharacter());
@@ -171,7 +187,7 @@ public class CombatSystem {
         }
 
         if (action == null || action.trim().isEmpty()) {
-            return CombatResult.error("What do you want to do? (attack, flee)");
+            return CombatResult.error("What do you want to do? (attack, flee, secondwind, surge)");
         }
 
         String normalizedAction = action.trim().toLowerCase();
@@ -187,9 +203,30 @@ public class CombatSystem {
             case "escape":
                 return handleFlee();
 
+            case "secondwind":
+            case "second wind":
+            case "second_wind":
+                return handleSecondWind();
+
+            case "surge":
+            case "action surge":
+            case "action_surge":
+            case "actionsurge":
+                return handleActionSurge();
+
+            // Cunning Action options (Rogue)
+            case "dash":
+                return handleCunningDash();
+
+            case "disengage":
+                return handleCunningDisengage();
+
+            case "hide":
+                return handleCunningHide();
+
             default:
                 return CombatResult.error(
-                    String.format("Unknown action: %s. Try: attack, flee", action));
+                    String.format("Unknown action: %s. Try: attack, flee, secondwind, surge, dash, disengage, hide", action));
         }
     }
 
@@ -427,6 +464,12 @@ public class CombatSystem {
             int dexMod = character.getAbilityModifier(Ability.DEXTERITY);
             int profBonus = character.getProficiencyBonus();
 
+            // Get Fighting Style for bonuses
+            FightingStyle fightingStyle = character.getFightingStyle();
+            boolean isRangedAttack = weapon != null && weapon.isRanged();
+            boolean hasOffHand = character.getInventory().getEquipped(Inventory.EquipmentSlot.OFF_HAND) != null;
+            boolean isTwoHanded = weapon != null && weapon.isTwoHanded();
+
             // Determine which ability modifier to use for attack and damage
             int abilityMod;
             if (weapon != null) {
@@ -448,23 +491,35 @@ public class CombatSystem {
             }
 
             int totalMod = abilityMod + profBonus;
+
+            // Archery Fighting Style: +2 to ranged attack rolls
+            if (fightingStyle == FightingStyle.ARCHERY && isRangedAttack) {
+                totalMod += 2;
+            }
+
             boolean isNaturalCrit = false;
+            int naturalRoll;
 
             if (hasAdvantage && !hasDisadvantage) {
                 attackRoll = Dice.rollWithAdvantage(totalMod);
                 isNaturalCrit = Dice.wasNatural20();
+                naturalRoll = attackRoll - totalMod;  // Approximate the natural roll
             } else if (hasDisadvantage && !hasAdvantage) {
                 attackRoll = Dice.rollWithDisadvantage(totalMod);
                 isNaturalCrit = Dice.wasNatural20();
+                naturalRoll = attackRoll - totalMod;
             } else {
-                attackRoll = Dice.rollD20() + totalMod;
-                isNaturalCrit = Dice.wasNatural20();
+                naturalRoll = Dice.rollD20();
+                attackRoll = naturalRoll + totalMod;
+                isNaturalCrit = naturalRoll == 20;
             }
 
-            // Critical hit on natural 20 or auto-crit conditions
-            boolean isCrit = isNaturalCrit || autoCrit;
+            // Check for Improved Critical (Champion Fighter) - crit on 19-20
+            int critThreshold = character.getCriticalThreshold();
+            boolean isImprovedCrit = naturalRoll >= critThreshold && naturalRoll < 20;
+            boolean isCrit = isNaturalCrit || isImprovedCrit || autoCrit;
 
-            if (attackRoll >= targetAC || isNaturalCrit) {
+            if (attackRoll >= targetAC || isNaturalCrit || isImprovedCrit) {
                 // Damage: weapon dice + ability modifier (roll dice twice on crit)
                 // Unarmed attacks deal 1 flat damage (no dice), weapons use dice notation
                 if (weapon != null) {
@@ -477,6 +532,41 @@ public class CombatSystem {
                     damage = isCrit ? 2 : 1;
                 }
                 damage += abilityMod;
+
+                // Dueling Fighting Style: +2 damage with one-handed melee weapon and no off-hand
+                if (fightingStyle == FightingStyle.DUELING && weapon != null &&
+                    !isRangedAttack && !isTwoHanded && !hasOffHand) {
+                    damage += 2;
+                }
+
+                // Sneak Attack (Rogue): extra damage with finesse/ranged when having advantage
+                // or when an ally is adjacent to the target
+                int sneakAttackDamage = 0;
+                boolean canSneakAttack = !sneakAttackUsed &&
+                    weapon != null &&
+                    (weapon.isFinesse() || weapon.isRanged());
+
+                if (canSneakAttack) {
+                    // Check for Sneak Attack conditions:
+                    // 1. Have advantage on the attack, OR
+                    // 2. Another enemy of the target is within 5 feet (simplified: always true in combat)
+                    boolean hasSneakCondition = hasAdvantage || hasAllyAdjacentToTarget(target);
+
+                    if (hasSneakCondition) {
+                        var sneakAttackFeature = character.getFeature(RogueFeatures.SNEAK_ATTACK_ID);
+                        if (sneakAttackFeature.isPresent() &&
+                            sneakAttackFeature.get() instanceof RogueFeatures.SneakAttack sneakAttack) {
+                            int sneakDice = sneakAttack.getSneakAttackDice();
+                            sneakAttackDamage = Dice.rollMultiple(sneakDice, 6);
+                            if (isCrit) {
+                                sneakAttackDamage += Dice.rollMultiple(sneakDice, 6); // Double on crit
+                            }
+                            damage += sneakAttackDamage;
+                            sneakAttackUsed = true;
+                        }
+                    }
+                }
+
                 damage = Math.max(1, damage); // Minimum 1 damage
 
                 target.takeDamage(damage);
@@ -484,10 +574,21 @@ public class CombatSystem {
                 // Track aggro - target remembers who hit them
                 lastAttacker.put(target, attacker);
 
-                String specialEffect = null;
-                if (isCrit) {
-                    specialEffect = isNaturalCrit ? "[CRITICAL HIT!]" : "[AUTO-CRIT!]";
+                StringBuilder specialEffects = new StringBuilder();
+                if (sneakAttackDamage > 0) {
+                    specialEffects.append(String.format("[SNEAK ATTACK +%d!]", sneakAttackDamage));
                 }
+                if (isCrit) {
+                    if (specialEffects.length() > 0) specialEffects.append(" ");
+                    if (isImprovedCrit && !isNaturalCrit) {
+                        specialEffects.append("[IMPROVED CRITICAL!]");
+                    } else if (isNaturalCrit) {
+                        specialEffects.append("[CRITICAL HIT!]");
+                    } else {
+                        specialEffects.append("[AUTO-CRIT!]");
+                    }
+                }
+                String specialEffect = specialEffects.length() > 0 ? specialEffects.toString() : null;
                 return CombatResult.attackHit(attacker, target, attackRoll, targetAC, damage, specialEffect);
             } else {
                 return CombatResult.attackMiss(attacker, target, attackRoll, targetAC);
@@ -668,6 +769,14 @@ public class CombatSystem {
             statusEffectManager.processTurnEnd(current);
         }
 
+        // Reset per-turn flags for player
+        if (current instanceof Character) {
+            bonusActionUsed = false;
+            actionSurgeActive = false;
+            sneakAttackUsed = false;
+            disengageActive = false;
+        }
+
         currentTurn = (currentTurn + 1) % initiative.size();
     }
 
@@ -762,8 +871,6 @@ public class CombatSystem {
 
         // Check if enemy was defeated
         if (!targetEnemy.isAlive()) {
-            advanceTurn();
-
             // Check for victory - include killing blow details
             if (getLivingEnemies().isEmpty()) {
                 int xp = calculateXpReward();
@@ -779,10 +886,28 @@ public class CombatSystem {
                     droppedItems.clear();
                 }
 
+                advanceTurn();
                 return CombatResult.victoryWithKillingBlow(xp, attackResult.getMessage());
             }
 
+            // Check if Action Surge is active - allow another attack
+            if (actionSurgeActive) {
+                actionSurgeActive = false;  // Consume the surge
+                String message = attackResult.getMessage() + "\n" +
+                    targetEnemy.getName() + " is defeated!\n" +
+                    "[Action Surge: You can take another action!]";
+                return CombatResult.info(message);
+            }
+
+            advanceTurn();
             return CombatResult.enemyDefeated((Monster) targetEnemy);
+        }
+
+        // Check if Action Surge is active - allow another attack
+        if (actionSurgeActive) {
+            actionSurgeActive = false;  // Consume the surge
+            String message = attackResult.getMessage() + "\n[Action Surge: You can take another action!]";
+            return CombatResult.info(message);
         }
 
         advanceTurn();
@@ -834,6 +959,155 @@ public class CombatSystem {
     }
 
     /**
+     * Handles Second Wind action (Fighter feature).
+     * Uses bonus action to heal 1d10 + Fighter level.
+     */
+    private CombatResult handleSecondWind() {
+        Character player = (Character) getPlayer();
+        if (player == null) {
+            return CombatResult.error("No player character found.");
+        }
+
+        // Check if bonus action already used this turn
+        if (bonusActionUsed) {
+            return CombatResult.error("You've already used your bonus action this turn.");
+        }
+
+        // Check if player has Second Wind and can use it
+        if (!player.canUseFeature(FighterFeatures.SECOND_WIND_ID)) {
+            var feature = player.getFeature(FighterFeatures.SECOND_WIND_ID);
+            if (feature.isEmpty()) {
+                return CombatResult.error("You don't have the Second Wind ability.");
+            }
+            return CombatResult.error("You have no uses of Second Wind remaining. Take a short rest to recover it.");
+        }
+
+        // Use the feature
+        String result = player.useFeature(FighterFeatures.SECOND_WIND_ID);
+        bonusActionUsed = true;
+
+        // Return info result (doesn't end turn - player can still attack)
+        return CombatResult.info(result + "\n(You can still take your action this turn.)");
+    }
+
+    /**
+     * Handles Action Surge action (Fighter feature).
+     * Grants an additional action this turn.
+     */
+    private CombatResult handleActionSurge() {
+        Character player = (Character) getPlayer();
+        if (player == null) {
+            return CombatResult.error("No player character found.");
+        }
+
+        // Check if Action Surge is already active
+        if (actionSurgeActive) {
+            return CombatResult.error("Action Surge is already active this turn.");
+        }
+
+        // Check if player has Action Surge and can use it
+        if (!player.canUseFeature(FighterFeatures.ACTION_SURGE_ID)) {
+            var feature = player.getFeature(FighterFeatures.ACTION_SURGE_ID);
+            if (feature.isEmpty()) {
+                return CombatResult.error("You don't have the Action Surge ability.");
+            }
+            return CombatResult.error("You have no uses of Action Surge remaining. Take a short rest to recover it.");
+        }
+
+        // Use the feature
+        String result = player.useFeature(FighterFeatures.ACTION_SURGE_ID);
+        actionSurgeActive = true;
+
+        return CombatResult.info(result);
+    }
+
+    /**
+     * Handles Cunning Action: Dash (Rogue feature).
+     * Uses bonus action to double movement speed this turn.
+     */
+    private CombatResult handleCunningDash() {
+        Character player = (Character) getPlayer();
+        if (player == null) {
+            return CombatResult.error("No player character found.");
+        }
+
+        // Check if bonus action already used
+        if (bonusActionUsed) {
+            return CombatResult.error("You've already used your bonus action this turn.");
+        }
+
+        // Check if player has Cunning Action
+        if (player.getFeature(RogueFeatures.CUNNING_ACTION_ID).isEmpty()) {
+            return CombatResult.error("You don't have the Cunning Action ability.");
+        }
+
+        bonusActionUsed = true;
+        return CombatResult.info(String.format(
+            "%s uses Cunning Action to Dash! Movement speed doubled this turn.\n" +
+            "(You can still take your action this turn.)", player.getName()));
+    }
+
+    /**
+     * Handles Cunning Action: Disengage (Rogue feature).
+     * Uses bonus action to avoid opportunity attacks this turn.
+     */
+    private CombatResult handleCunningDisengage() {
+        Character player = (Character) getPlayer();
+        if (player == null) {
+            return CombatResult.error("No player character found.");
+        }
+
+        // Check if bonus action already used
+        if (bonusActionUsed) {
+            return CombatResult.error("You've already used your bonus action this turn.");
+        }
+
+        // Check if player has Cunning Action
+        if (player.getFeature(RogueFeatures.CUNNING_ACTION_ID).isEmpty()) {
+            return CombatResult.error("You don't have the Cunning Action ability.");
+        }
+
+        bonusActionUsed = true;
+        disengageActive = true;
+        return CombatResult.info(String.format(
+            "%s uses Cunning Action to Disengage! Movement won't provoke opportunity attacks.\n" +
+            "(You can still take your action this turn.)", player.getName()));
+    }
+
+    /**
+     * Handles Cunning Action: Hide (Rogue feature).
+     * Uses bonus action to attempt to hide.
+     */
+    private CombatResult handleCunningHide() {
+        Character player = (Character) getPlayer();
+        if (player == null) {
+            return CombatResult.error("No player character found.");
+        }
+
+        // Check if bonus action already used
+        if (bonusActionUsed) {
+            return CombatResult.error("You've already used your bonus action this turn.");
+        }
+
+        // Check if player has Cunning Action
+        if (player.getFeature(RogueFeatures.CUNNING_ACTION_ID).isEmpty()) {
+            return CombatResult.error("You don't have the Cunning Action ability.");
+        }
+
+        bonusActionUsed = true;
+
+        // Roll stealth check
+        int stealthMod = player.getSkillModifier(Character.Skill.STEALTH);
+        int stealthRoll = Dice.rollWithModifier(20, stealthMod);
+
+        return CombatResult.info(String.format(
+            "%s uses Cunning Action to Hide! Stealth check: %d (d20 + %d)\n" +
+            "If successful, you have advantage on your next attack.\n" +
+            "(You can still take your action this turn.)",
+            player.getName(), stealthRoll, stealthMod));
+    }
+
+    /**
      * Processes an opportunity attack (triggered by fleeing).
      */
     private CombatResult processOpportunityAttack(Monster monster, Combatant target) {
@@ -847,6 +1121,22 @@ public class CombatSystem {
         } else {
             return CombatResult.opportunityAttackMiss(monster, target, attackRoll, targetAC);
         }
+    }
+
+    /**
+     * Checks if an ally (non-enemy combatant) is adjacent to the target.
+     * For Sneak Attack purposes, this means another hostile creature is within 5 feet.
+     * In this simplified implementation, returns true if there are multiple enemies
+     * engaged in combat (allowing Sneak Attack when fighting alongside monsters).
+     * Since this is typically a solo player game, this usually returns false,
+     * making Rogues rely on advantage for Sneak Attack.
+     */
+    private boolean hasAllyAdjacentToTarget(Combatant target) {
+        // In a solo player game, we consider there's an "ally" (another threat to the enemy)
+        // if there are multiple living enemies - this represents chaotic combat where
+        // the Rogue can exploit openings. This is a simplification.
+        // In practice, Rogues should try to gain advantage (e.g., via Hide) for Sneak Attack.
+        return getLivingEnemies().size() > 1;
     }
 
     /**

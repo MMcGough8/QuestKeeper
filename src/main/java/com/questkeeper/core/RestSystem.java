@@ -90,6 +90,9 @@ public class RestSystem {
 
         int totalHealed = character.getCurrentHitPoints() - startHp;
 
+        // Reset class features that recharge on short rest
+        character.resetFeaturesOnShortRest();
+
         return new RestResult(
                 RestType.SHORT,
                 totalHealed,
@@ -159,6 +162,9 @@ public class RestSystem {
 
         // Restore hit dice (half of max, minimum 1)
         int diceRestored = character.restoreHitDice();
+
+        // Reset class features that recharge on long rest
+        character.resetFeaturesOnLongRest();
 
         return new RestResult(
                 RestType.LONG,
