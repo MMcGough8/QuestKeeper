@@ -15,6 +15,7 @@ import com.questkeeper.character.features.ClassFeature;
 import com.questkeeper.character.features.FighterFeatures;
 import com.questkeeper.character.features.FightingStyle;
 import com.questkeeper.character.features.MonkFeatures;
+import com.questkeeper.character.features.PaladinFeatures;
 import com.questkeeper.character.features.RogueFeatures;
 import com.questkeeper.combat.Combatant;
 import com.questkeeper.core.Dice;
@@ -634,6 +635,33 @@ public class Character implements Combatant {
                         .ifPresent(dm -> dm.setMonkLevel(level));
                 }
             }
+        } else if (characterClass == CharacterClass.PALADIN) {
+            List<ClassFeature> paladinFeatures = PaladinFeatures.createFeaturesForLevel(level, fightingStyle);
+
+            // Add any features we don't already have
+            for (ClassFeature feature : paladinFeatures) {
+                if (getFeature(feature.getId()).isEmpty()) {
+                    classFeatures.add(feature);
+                } else if (feature.getId().equals(PaladinFeatures.LAY_ON_HANDS_ID)) {
+                    // Update Lay on Hands pool when leveling up
+                    getFeature(PaladinFeatures.LAY_ON_HANDS_ID)
+                        .filter(f -> f instanceof PaladinFeatures.LayOnHands)
+                        .map(f -> (PaladinFeatures.LayOnHands) f)
+                        .ifPresent(loh -> loh.setPaladinLevel(level));
+                } else if (feature.getId().equals(PaladinFeatures.DIVINE_SMITE_ID)) {
+                    // Update Divine Smite spell slots when leveling up
+                    getFeature(PaladinFeatures.DIVINE_SMITE_ID)
+                        .filter(f -> f instanceof PaladinFeatures.DivineSmite)
+                        .map(f -> (PaladinFeatures.DivineSmite) f)
+                        .ifPresent(ds -> ds.setPaladinLevel(level));
+                }
+            }
+
+            // Update Divine Sense uses based on CHA
+            getFeature(PaladinFeatures.DIVINE_SENSE_ID)
+                .filter(f -> f instanceof PaladinFeatures.DivineSense)
+                .map(f -> (PaladinFeatures.DivineSense) f)
+                .ifPresent(ds -> ds.updateMaxUses(this));
         }
         // Other classes will be added here as features are implemented
     }

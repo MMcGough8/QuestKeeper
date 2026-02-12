@@ -8,6 +8,7 @@ import com.questkeeper.character.features.FightingStyle;
 import com.questkeeper.character.features.RogueFeatures;
 import com.questkeeper.character.features.BarbarianFeatures;
 import com.questkeeper.character.features.MonkFeatures;
+import com.questkeeper.character.features.PaladinFeatures;
 import com.questkeeper.combat.status.Condition;
 import com.questkeeper.combat.status.ConditionEffect;
 import com.questkeeper.combat.status.StatusEffectManager;
@@ -54,6 +55,8 @@ public class CombatSystem {
     private boolean disengageActive;      // Track if Disengage is active (no opportunity attacks)
     private boolean patientDefenseActive; // Track if Patient Defense is active (attacks have disadvantage)
     private int flurryAttacksRemaining;   // Track remaining Flurry of Blows attacks
+    private boolean sacredWeaponActive;   // Track if Sacred Weapon is active (+CHA to attacks)
+    private boolean smiteReady;           // Track if Divine Smite will be used on next hit
 
     public CombatSystem() {
         this.participants = new ArrayList<>();
@@ -72,6 +75,8 @@ public class CombatSystem {
         this.disengageActive = false;
         this.patientDefenseActive = false;
         this.flurryAttacksRemaining = 0;
+        this.sacredWeaponActive = false;
+        this.smiteReady = false;
     }
 
     // ==========================================
@@ -105,6 +110,8 @@ public class CombatSystem {
         this.disengageActive = false;
         this.patientDefenseActive = false;
         this.flurryAttacksRemaining = 0;
+        this.sacredWeaponActive = false;
+        this.smiteReady = false;
 
         // Add player
         participants.add(state.getCharacter());
@@ -256,6 +263,21 @@ public class CombatSystem {
             case "stepofthewind":
             case "step of the wind":
                 return handleStepOfTheWind();
+
+            // Paladin actions
+            case "smite":
+            case "divinesmite":
+            case "divine smite":
+                return handleDivineSmite();
+
+            case "layonhands":
+            case "lay on hands":
+            case "loh":
+                return handleLayOnHands(target);
+
+            case "sacredweapon":
+            case "sacred weapon":
+                return handleSacredWeapon();
 
             default:
                 return CombatResult.error(
@@ -849,7 +871,18 @@ public class CombatSystem {
             disengageActive = false;
             patientDefenseActive = false;
             flurryAttacksRemaining = 0;
+            smiteReady = false;  // Smite expires if not used
             character.resetRecklessAttack();
+
+            // Process Sacred Weapon duration
+            character.getFeature(PaladinFeatures.SACRED_WEAPON_ID)
+                .filter(f -> f instanceof PaladinFeatures.SacredWeapon)
+                .map(f -> (PaladinFeatures.SacredWeapon) f)
+                .ifPresent(sw -> {
+                    if (!sw.processTurnEnd()) {
+                        sacredWeaponActive = false;
+                    }
+                });
         }
 
         currentTurn = (currentTurn + 1) % initiative.size();
@@ -1390,6 +1423,143 @@ public class CombatSystem {
      */
     public boolean isPatientDefenseActive() {
         return patientDefenseActive;
+    }
+
+    // ==========================================
+    // Paladin Combat Actions
+    // ==========================================
+
+    private CombatResult handleDivineSmite() {
+        Character player = (Character) getPlayer();
+        if (player == null) {
+            return CombatResult.error("No player character found.");
+        }
+
+        // Check if player has Divine Smite
+        var feature = player.getFeature(PaladinFeatures.DIVINE_SMITE_ID);
+        if (feature.isEmpty()) {
+            return CombatResult.error("You don't have the Divine Smite ability.");
+        }
+
+        PaladinFeatures.DivineSmite smite = (PaladinFeatures.DivineSmite) feature.get();
+
+        // Check for available spell slots
+        int lowestSlot = smite.getLowestAvailableSlot();
+        if (lowestSlot == 0) {
+            return CombatResult.error("You have no spell slots remaining.\n" + smite.getSlotsStatus());
+        }
+
+        // Ready smite for next attack
+        smiteReady = true;
+
+        return CombatResult.info(String.format(
+            "Divine Smite ready! Your next melee attack will deal extra radiant damage.\n" +
+            "%s\n" +
+            "(Lowest slot: Level %d = %s extra damage)",
+            smite.getSlotsStatus(),
+            lowestSlot,
+            smite.getSmiteDamageNotation(lowestSlot, false)));
+    }
+
+    private CombatResult handleLayOnHands(String target) {
+        Character player = (Character) getPlayer();
+        if (player == null) {
+            return CombatResult.error("No player character found.");
+        }
+
+        // Check if player has Lay on Hands
+        var feature = player.getFeature(PaladinFeatures.LAY_ON_HANDS_ID);
+        if (feature.isEmpty()) {
+            return CombatResult.error("You don't have the Lay on Hands ability.");
+        }
+
+        PaladinFeatures.LayOnHands loh = (PaladinFeatures.LayOnHands) feature.get();
+
+        if (loh.getPoolRemaining() <= 0) {
+            return CombatResult.error("Your Lay on Hands pool is empty. Take a long rest to restore it.");
+        }
+
+        // For now, heal self for max available or amount needed
+        int missingHp = player.getMaxHitPoints() - player.getCurrentHitPoints();
+        if (missingHp <= 0) {
+            return CombatResult.error("You are already at full health.");
+        }
+
+        int healAmount = Math.min(missingHp, loh.getPoolRemaining());
+        int actualHeal = loh.heal(player, healAmount);
+
+        return CombatResult.info(String.format(
+            "%s uses Lay on Hands!\n" +
+            "Healed %d HP. (Now %d/%d HP)\n" +
+            "Pool remaining: %d/%d",
+            player.getName(),
+            actualHeal,
+            player.getCurrentHitPoints(),
+            player.getMaxHitPoints(),
+            loh.getPoolRemaining(),
+            loh.getMaxPool()));
+    }
+
+    private CombatResult handleSacredWeapon() {
+        Character player = (Character) getPlayer();
+        if (player == null) {
+            return CombatResult.error("No player character found.");
+        }
+
+        // Check if player has Channel Divinity
+        var channelFeature = player.getFeature(PaladinFeatures.CHANNEL_DIVINITY_ID);
+        if (channelFeature.isEmpty()) {
+            return CombatResult.error("You don't have Channel Divinity yet (requires level 3).");
+        }
+
+        // Check if Channel Divinity can be used
+        PaladinFeatures.ChannelDivinity channel = (PaladinFeatures.ChannelDivinity) channelFeature.get();
+        if (!channel.canUse()) {
+            return CombatResult.error("You've already used Channel Divinity. Take a short rest to restore it.");
+        }
+
+        // Check for Sacred Weapon feature
+        var swFeature = player.getFeature(PaladinFeatures.SACRED_WEAPON_ID);
+        if (swFeature.isEmpty()) {
+            return CombatResult.error("You don't have Sacred Weapon.");
+        }
+
+        PaladinFeatures.SacredWeapon sw = (PaladinFeatures.SacredWeapon) swFeature.get();
+
+        if (sw.isActive()) {
+            return CombatResult.error("Sacred Weapon is already active.");
+        }
+
+        // Use Channel Divinity
+        channel.use(player);
+
+        // Activate Sacred Weapon
+        int chaMod = player.getAbilityModifier(Character.Ability.CHARISMA);
+        String result = sw.activate(chaMod);
+        sacredWeaponActive = true;
+
+        return CombatResult.info(result);
+    }
+
+    /**
+     * Checks if Divine Smite is ready for the next attack.
+     */
+    public boolean isSmiteReady() {
+        return smiteReady;
+    }
+
+    /**
+     * Clears smite ready status (after attack resolves).
+     */
+    public void clearSmiteReady() {
+        smiteReady = false;
+    }
+
+    /**
+     * Checks if Sacred Weapon is active.
+     */
+    public boolean isSacredWeaponActive() {
+        return sacredWeaponActive;
     }
 
     /**
