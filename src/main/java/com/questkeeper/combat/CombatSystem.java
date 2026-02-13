@@ -9,6 +9,7 @@ import com.questkeeper.character.features.RogueFeatures;
 import com.questkeeper.character.features.BarbarianFeatures;
 import com.questkeeper.character.features.MonkFeatures;
 import com.questkeeper.character.features.PaladinFeatures;
+import com.questkeeper.character.features.RangerFeatures;
 import com.questkeeper.combat.status.Condition;
 import com.questkeeper.combat.status.ConditionEffect;
 import com.questkeeper.combat.status.StatusEffectManager;
@@ -883,6 +884,18 @@ public class CombatSystem {
                         sacredWeaponActive = false;
                     }
                 });
+
+            // Reset Colossus Slayer for Ranger
+            character.getFeature(RangerFeatures.COLOSSUS_SLAYER_ID)
+                .filter(f -> f instanceof RangerFeatures.ColossusSlayer)
+                .map(f -> (RangerFeatures.ColossusSlayer) f)
+                .ifPresent(RangerFeatures.ColossusSlayer::resetTurn);
+
+            // Reset Horde Breaker for Ranger
+            character.getFeature(RangerFeatures.HORDE_BREAKER_ID)
+                .filter(f -> f instanceof RangerFeatures.HordeBreaker)
+                .map(f -> (RangerFeatures.HordeBreaker) f)
+                .ifPresent(RangerFeatures.HordeBreaker::resetTurn);
         }
 
         currentTurn = (currentTurn + 1) % initiative.size();

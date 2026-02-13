@@ -16,6 +16,7 @@ import com.questkeeper.character.features.FighterFeatures;
 import com.questkeeper.character.features.FightingStyle;
 import com.questkeeper.character.features.MonkFeatures;
 import com.questkeeper.character.features.PaladinFeatures;
+import com.questkeeper.character.features.RangerFeatures;
 import com.questkeeper.character.features.RogueFeatures;
 import com.questkeeper.combat.Combatant;
 import com.questkeeper.core.Dice;
@@ -662,6 +663,23 @@ public class Character implements Combatant {
                 .filter(f -> f instanceof PaladinFeatures.DivineSense)
                 .map(f -> (PaladinFeatures.DivineSense) f)
                 .ifPresent(ds -> ds.updateMaxUses(this));
+        } else if (characterClass == CharacterClass.RANGER) {
+            // Ranger features - choices default to null until set
+            List<ClassFeature> rangerFeatures = RangerFeatures.createFeaturesForLevel(
+                level, null, null, fightingStyle, null);
+
+            // Add any features we don't already have
+            for (ClassFeature feature : rangerFeatures) {
+                if (getFeature(feature.getId()).isEmpty()) {
+                    classFeatures.add(feature);
+                } else if (feature.getId().equals(RangerFeatures.RANGER_SPELLCASTING_ID)) {
+                    // Update spell slots when leveling up
+                    getFeature(RangerFeatures.RANGER_SPELLCASTING_ID)
+                        .filter(f -> f instanceof RangerFeatures.RangerSpellcasting)
+                        .map(f -> (RangerFeatures.RangerSpellcasting) f)
+                        .ifPresent(rs -> rs.setRangerLevel(level));
+                }
+            }
         }
         // Other classes will be added here as features are implemented
     }
