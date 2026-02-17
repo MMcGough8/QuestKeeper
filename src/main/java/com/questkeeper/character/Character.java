@@ -22,6 +22,7 @@ import com.questkeeper.combat.Combatant;
 import com.questkeeper.core.Dice;
 import com.questkeeper.inventory.Armor;
 import com.questkeeper.inventory.Inventory;
+import com.questkeeper.magic.Spellbook;
 
 /**
  * Represents a player character in the game.
@@ -234,6 +235,9 @@ public class Character implements Combatant {
     private FightingStyle fightingStyle;  // Fighter-specific; null for other classes
     private Set<Skill> expertiseSkills = EnumSet.noneOf(Skill.class);  // Rogue-specific
 
+    // Spellcasting
+    private final Spellbook spellbook = new Spellbook();
+
     public Character(String name, Race race, CharacterClass characterClass) {
         this.name = name;
         this.race = race;
@@ -265,6 +269,9 @@ public class Character implements Combatant {
 
         // Initialize class features for starting level
         initializeClassFeatures();
+
+        // Initialize spellcasting for casting classes
+        spellbook.initializeForClass(characterClass, level);
     }
 
     public Character(String name, Race race, CharacterClass characterClass,
@@ -739,6 +746,7 @@ public class Character implements Combatant {
                 activated.resetOnShortRest();
             }
         }
+        spellbook.onShortRest();
     }
 
     /**
@@ -750,6 +758,14 @@ public class Character implements Combatant {
                 activated.resetOnLongRest();
             }
         }
+        spellbook.onLongRest();
+    }
+
+    /**
+     * Gets the character's spellbook.
+     */
+    public Spellbook getSpellbook() {
+        return spellbook;
     }
 
     /**
@@ -1047,6 +1063,9 @@ public class Character implements Combatant {
 
         // Update class features for new level
         initializeClassFeatures();
+
+        // Update spellcasting for new level
+        spellbook.onLevelUp(level);
     }
     
     public void setLevel(int newLevel) {
@@ -1060,6 +1079,9 @@ public class Character implements Combatant {
 
         // Update class features for new level
         initializeClassFeatures();
+
+        // Update spellcasting for new level
+        spellbook.onLevelUp(level);
     }
 
     public void setArmorBonus(int bonus) {

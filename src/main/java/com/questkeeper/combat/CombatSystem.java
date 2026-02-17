@@ -17,6 +17,10 @@ import com.questkeeper.core.Dice;
 import com.questkeeper.inventory.Inventory;
 import com.questkeeper.inventory.Item;
 import com.questkeeper.inventory.Weapon;
+import com.questkeeper.magic.Spell;
+import com.questkeeper.magic.Spellbook;
+import com.questkeeper.magic.SpellRegistry;
+import com.questkeeper.magic.SpellResult;
 import com.questkeeper.state.GameState;
 
 import java.util.ArrayList;
@@ -279,6 +283,10 @@ public class CombatSystem {
             case "sacredweapon":
             case "sacred weapon":
                 return handleSacredWeapon();
+
+            // Spellcasting
+            case "cast":
+                return handleCastSpell(target);
 
             default:
                 return CombatResult.error(
@@ -1573,6 +1581,132 @@ public class CombatSystem {
      */
     public boolean isSacredWeaponActive() {
         return sacredWeaponActive;
+    }
+
+    /**
+     * Handles casting a spell in combat.
+     * Format: "cast <spell name> [on <target>]"
+     */
+    private CombatResult handleCastSpell(String spellInput) {
+        Character player = (Character) getPlayer();
+        if (player == null) {
+            return CombatResult.error("No player character found.");
+        }
+
+        Spellbook spellbook = player.getSpellbook();
+        if (!spellbook.canCastSpells()) {
+            return CombatResult.error("You don't have spellcasting ability.");
+        }
+
+        if (spellInput == null || spellInput.trim().isEmpty()) {
+            // Show available spells
+            return showAvailableSpells(spellbook);
+        }
+
+        // Parse spell name and optional target
+        String spellName;
+        String targetName = null;
+        String input = spellInput.trim().toLowerCase();
+
+        // Check for "on <target>" suffix
+        int onIndex = input.lastIndexOf(" on ");
+        if (onIndex > 0) {
+            spellName = input.substring(0, onIndex).trim();
+            targetName = input.substring(onIndex + 4).trim();
+        } else {
+            spellName = input;
+        }
+
+        // Find the spell
+        Spell spell = SpellRegistry.getSpellByName(spellName);
+        if (spell == null) {
+            return CombatResult.error("Unknown spell: " + spellName +
+                "\nTry: cast fire bolt, cast magic missile, cast cure wounds");
+        }
+
+        // Check if we can cast it
+        if (!spellbook.canCast(spell.getId())) {
+            if (spell.getLevel() == 0) {
+                return CombatResult.error("You don't know the " + spell.getName() + " cantrip.");
+            } else {
+                return CombatResult.error("You can't cast " + spell.getName() +
+                    ". Either it's not prepared or you have no spell slots.");
+            }
+        }
+
+        // Determine target
+        Combatant target = null;
+        if (spell.canTargetEnemy()) {
+            if (targetName != null) {
+                Optional<Combatant> found = findEnemyByName(targetName);
+                if (found.isEmpty()) {
+                    return CombatResult.error("Can't find enemy: " + targetName);
+                }
+                target = found.get();
+            } else {
+                // Default to first living enemy for offensive spells
+                List<Combatant> enemies = getLivingEnemies();
+                if (!enemies.isEmpty()) {
+                    target = enemies.get(0);
+                }
+            }
+        } else if (spell.canTargetAlly()) {
+            // Healing/buff spells default to self
+            target = player;
+        }
+
+        // Cast the spell
+        SpellResult result = spellbook.cast(spell.getId(), player, target);
+
+        if (result.getType() == SpellResult.Type.ERROR) {
+            return CombatResult.error(result.getMessage());
+        }
+
+        // Convert SpellResult to CombatResult
+        StringBuilder message = new StringBuilder(result.getMessage());
+
+        // Check if target died (combat end is handled by advanceTurn)
+        if (target != null && !target.isAlive() && isEnemy(target)) {
+            message.append("\n").append(target.getName()).append(" is defeated!");
+        }
+
+        // End turn after casting (unless it's a cantrip with leftover action from Action Surge)
+        if (!actionSurgeActive) {
+            advanceTurn();
+        } else {
+            actionSurgeActive = false;
+            message.append("\n(Action Surge allows another action this turn)");
+        }
+
+        return CombatResult.info(message.toString());
+    }
+
+    /**
+     * Shows available spells when no spell name is given.
+     */
+    private CombatResult showAvailableSpells(Spellbook spellbook) {
+        StringBuilder sb = new StringBuilder("Available spells:\n");
+
+        var cantrips = spellbook.getKnownCantrips();
+        if (!cantrips.isEmpty()) {
+            sb.append("Cantrips: ");
+            sb.append(String.join(", ", cantrips.stream().map(Spell::getName).toList()));
+            sb.append("\n");
+        }
+
+        var prepared = spellbook.getPreparedSpells();
+        if (!prepared.isEmpty()) {
+            sb.append("Prepared: ");
+            sb.append(String.join(", ", prepared.stream().map(Spell::getName).toList()));
+            sb.append("\n");
+        }
+
+        if (spellbook.getSpellSlots() != null) {
+            sb.append(spellbook.getSpellSlots().getStatus());
+        }
+
+        sb.append("\nUsage: cast <spell name> [on <target>]");
+        return CombatResult.info(sb.toString());
     }
 
     /**
