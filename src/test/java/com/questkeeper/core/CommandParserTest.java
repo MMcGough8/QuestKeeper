@@ -121,12 +121,31 @@ class CommandParserTest {
             "walk, go",
             "move, go",
             "travel, go",
-            "run, go"
+            "head, go",
+            "run, go",
+            "trek, go",
+            "journey, go",
+            "march, go",
+            "dash, go",
+            "sprint, go",
+            "jog, go",
+            "stride, go",
+            "hike, go",
+            "climb, go",
+            "ascend, go",
+            "descend, go",
+            "swim, go",
+            "dive, go",
+            "leap, go",
+            "wade, go",
+            "crawl, go",
+            "sneak, go",
+            "submerge, go"
         })
         @DisplayName("Movement synonyms map to 'go'")
         void movementSynonyms(String input, String expected) {
             Command cmd = CommandParser.parse(input + " north");
-            
+
             assertEquals(expected, cmd.getVerb());
         }
         
@@ -136,12 +155,29 @@ class CommandParserTest {
             "examine, look",
             "inspect, look",
             "check, look",
-            "l, look"
+            "view, look",
+            "observe, look",
+            "search, look",
+            "l, look",
+            "peek, look",
+            "peer, look",
+            "glance, look",
+            "scrutinize, look",
+            "survey, look",
+            "scan, look",
+            "eye, look",
+            "watch, look",
+            "study, look",
+            "ponder, look",
+            "gaze, look",
+            "regard, look",
+            "decipher, look",
+            "decode, look"
         })
         @DisplayName("Look synonyms map to 'look'")
         void lookSynonyms(String input, String expected) {
             Command cmd = CommandParser.parse(input);
-            
+
             assertEquals(expected, cmd.getVerb());
         }
         
@@ -151,12 +187,25 @@ class CommandParserTest {
             "get, take",
             "grab, take",
             "pick, take",
-            "pickup, take"
+            "pickup, take",
+            "collect, take",
+            "seize, take",
+            "snatch, take",
+            "lift, take",
+            "gather, take",
+            "loot, take",
+            "claim, take",
+            "nab, take",
+            "swipe, take",
+            "retrieve, take",
+            "fetch, take",
+            "scoop, take",
+            "pluck, take"
         })
         @DisplayName("Take synonyms map to 'take'")
         void takeSynonyms(String input, String expected) {
             Command cmd = CommandParser.parse(input + " item");
-            
+
             assertEquals(expected, cmd.getVerb());
         }
         
@@ -165,7 +214,14 @@ class CommandParserTest {
             "talk, talk",
             "speak, talk",
             "chat, talk",
-            "converse, talk"
+            "converse, talk",
+            "greet, talk",
+            "hail, talk",
+            "address, talk",
+            "approach, talk",
+            "parley, talk",
+            "confer, talk",
+            "whisper, talk"
         })
         @DisplayName("Talk synonyms map to 'talk'")
         void talkSynonyms(String input, String expected) {
@@ -178,7 +234,13 @@ class CommandParserTest {
         @CsvSource({
             "ask, ask",
             "inquire, ask",
-            "question, ask"
+            "question, ask",
+            "query, ask",
+            "interrogate, ask",
+            "demand, ask",
+            "request, ask",
+            "petition, ask",
+            "beseech, ask"
         })
         @DisplayName("Ask synonyms map to 'ask'")
         void askSynonyms(String input, String expected) {
@@ -193,12 +255,33 @@ class CommandParserTest {
             "hit, attack",
             "strike, attack",
             "fight, attack",
-            "kill, attack"
+            "kill, attack",
+            "slay, attack",
+            "smite, attack",
+            "slash, attack",
+            "stab, attack",
+            "swing, attack",
+            "parry, attack",
+            "lunge, attack",
+            "charge, attack",
+            "pummel, attack",
+            "bash, attack",
+            "cleave, attack",
+            "pierce, attack",
+            "slice, attack",
+            "rend, attack",
+            "hack, attack",
+            "dispatch, attack",
+            "assault, attack",
+            "maul, attack",
+            "club, attack",
+            "batter, attack",
+            "thrust, attack"
         })
         @DisplayName("Attack synonyms map to 'attack'")
         void attackSynonyms(String input, String expected) {
             Command cmd = CommandParser.parse(input + " goblin");
-            
+
             assertEquals(expected, cmd.getVerb());
         }
         
@@ -208,12 +291,16 @@ class CommandParserTest {
             "inv, inventory",
             "i, inventory",
             "items, inventory",
-            "bag, inventory"
+            "bag, inventory",
+            "pack, inventory",
+            "pouch, inventory",
+            "satchel, inventory",
+            "kit, inventory"
         })
         @DisplayName("Inventory synonyms map to 'inventory'")
         void inventorySynonyms(String input, String expected) {
             Command cmd = CommandParser.parse(input);
-            
+
             assertEquals(expected, cmd.getVerb());
         }
         
@@ -245,12 +332,14 @@ class CommandParserTest {
         @CsvSource({
             "help, help",
             "?, help",
-            "commands, help"
+            "commands, help",
+            "hint, help",
+            "h, help"
         })
         @DisplayName("Help synonyms map to 'help'")
         void helpSynonyms(String input, String expected) {
             Command cmd = CommandParser.parse(input);
-            
+
             assertEquals(expected, cmd.getVerb());
         }
         
@@ -258,13 +347,330 @@ class CommandParserTest {
         @CsvSource({
             "equip, equip",
             "wear, equip",
-            "wield, equip"
+            "wield, equip",
+            "hold, equip",
+            "don, equip",
+            "strap, equip",
+            "brandish, equip",
+            "draw, equip"
         })
         @DisplayName("Equip synonyms map to 'equip'")
         void equipSynonyms(String input, String expected) {
             Command cmd = CommandParser.parse(input + " armor");
-            
+
             assertEquals(expected, cmd.getVerb());
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+            "cast, cast",
+            "spell, cast",
+            "invoke, cast",
+            "channel, cast",
+            "evoke, cast",
+            "conjure, cast",
+            "summon, cast",
+            "weave, cast",
+            "hex, cast",
+            "banish, cast",
+            "enchant, cast",
+            "intone, cast",
+            "incant, cast",
+            "manifest, cast",
+            "unleash, cast"
+        })
+        @DisplayName("Cast synonyms map to 'cast'")
+        void castSynonyms(String input, String expected) {
+            Command cmd = CommandParser.parse(input + " spell");
+
+            assertEquals(expected, cmd.getVerb());
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+            "drop, drop",
+            "discard, drop",
+            "throw, drop",
+            "toss, drop",
+            "release, drop",
+            "dump, drop",
+            "ditch, drop",
+            "abandon, drop",
+            "jettison, drop",
+            "scatter, drop"
+        })
+        @DisplayName("Drop synonyms map to 'drop'")
+        void dropSynonyms(String input, String expected) {
+            Command cmd = CommandParser.parse(input + " sword");
+
+            assertEquals(expected, cmd.getVerb());
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+            "use, use",
+            "activate, use",
+            "apply, use",
+            "operate, use",
+            "manipulate, use",
+            "push, use",
+            "pull, use",
+            "press, use",
+            "turn, use",
+            "twist, use",
+            "rotate, use",
+            "spin, use",
+            "wind, use",
+            "crank, use",
+            "toggle, use",
+            "flip, use",
+            "adjust, use",
+            "align, use",
+            "calibrate, use",
+            "redirect, use",
+            "reset, use",
+            "trigger, use",
+            "resonate, use"
+        })
+        @DisplayName("Use synonyms map to 'use'")
+        void useSynonyms(String input, String expected) {
+            Command cmd = CommandParser.parse(input + " gear");
+
+            assertEquals(expected, cmd.getVerb());
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+            "rest, rest",
+            "sleep, rest",
+            "camp, rest",
+            "nap, rest",
+            "meditate, rest",
+            "recover, rest",
+            "recuperate, rest",
+            "snooze, rest"
+        })
+        @DisplayName("Rest synonyms map to 'rest'")
+        void restSynonyms(String input, String expected) {
+            Command cmd = CommandParser.parse(input);
+
+            assertEquals(expected, cmd.getVerb());
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+            "unequip, unequip",
+            "remove, unequip",
+            "doff, unequip",
+            "stow, unequip",
+            "sheathe, unequip",
+            "holster, unequip"
+        })
+        @DisplayName("Unequip synonyms map to 'unequip'")
+        void unequipSynonyms(String input, String expected) {
+            Command cmd = CommandParser.parse(input + " armor");
+
+            assertEquals(expected, cmd.getVerb());
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+            "read, read",
+            "peruse, read",
+            "browse, read"
+        })
+        @DisplayName("Read synonyms map to 'read'")
+        void readSynonyms(String input, String expected) {
+            Command cmd = CommandParser.parse(input + " tome");
+
+            assertEquals(expected, cmd.getVerb());
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+            "bye, bye",
+            "farewell, bye",
+            "goodbye, bye",
+            "later, bye",
+            "adieu, bye",
+            "ciao, bye"
+        })
+        @DisplayName("Bye synonyms map to 'bye'")
+        void byeSynonyms(String input, String expected) {
+            Command cmd = CommandParser.parse(input);
+
+            assertEquals(expected, cmd.getVerb());
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+            "trial, trial",
+            "trials, trial",
+            "challenge, trial",
+            "puzzle, trial",
+            "mission, trial",
+            "ordeal, trial",
+            "gauntlet, trial"
+        })
+        @DisplayName("Trial synonyms map to 'trial'")
+        void trialSynonyms(String input, String expected) {
+            Command cmd = CommandParser.parse(input);
+
+            assertEquals(expected, cmd.getVerb());
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+            "attempt, attempt",
+            "try, attempt",
+            "solve, attempt",
+            "do, attempt",
+            "tackle, attempt",
+            "perform, attempt",
+            "execute, attempt"
+        })
+        @DisplayName("Attempt synonyms map to 'attempt'")
+        void attemptSynonyms(String input, String expected) {
+            Command cmd = CommandParser.parse(input + " athletics");
+
+            assertEquals(expected, cmd.getVerb());
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+            "stats, stats",
+            "status, stats",
+            "character, stats",
+            "char, stats",
+            "me, stats",
+            "sheet, stats",
+            "info, stats",
+            "abilities, stats",
+            "attributes, stats"
+        })
+        @DisplayName("Stats synonyms map to 'stats'")
+        void statsSynonyms(String input, String expected) {
+            Command cmd = CommandParser.parse(input);
+
+            assertEquals(expected, cmd.getVerb());
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+            "equipment, equipment",
+            "equipped, equipment",
+            "gear, equipment",
+            "worn, equipment",
+            "loadout, equipment",
+            "getup, equipment",
+            "outfit, equipment"
+        })
+        @DisplayName("Equipment synonyms map to 'equipment'")
+        void equipmentSynonyms(String input, String expected) {
+            Command cmd = CommandParser.parse(input);
+
+            assertEquals(expected, cmd.getVerb());
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+            "close, close",
+            "shut, close",
+            "seal, close"
+        })
+        @DisplayName("Close synonyms map to 'close'")
+        void closeSynonyms(String input, String expected) {
+            Command cmd = CommandParser.parse(input + " door");
+
+            assertEquals(expected, cmd.getVerb());
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+            "load, load",
+            "restore, load",
+            "reload, load"
+        })
+        @DisplayName("Load synonyms map to 'load'")
+        void loadSynonyms(String input, String expected) {
+            Command cmd = CommandParser.parse(input);
+
+            assertEquals(expected, cmd.getVerb());
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+            "smite, attack",
+            "slash, attack",
+            "stab, attack",
+            "cleave, attack",
+            "parry, attack",
+            "lunge, attack",
+            "pummel, attack",
+            "channel, cast",
+            "invoke, cast",
+            "evoke, cast",
+            "conjure, cast",
+            "summon, cast",
+            "hex, cast",
+            "banish, cast",
+            "dive, go",
+            "swim, go",
+            "descend, go",
+            "leap, go",
+            "climb, go",
+            "submerge, go",
+            "wind, use",
+            "align, use",
+            "manipulate, use",
+            "redirect, use",
+            "crank, use",
+            "resonate, use",
+            "peruse, read",
+            "decipher, look",
+            "scrutinize, look",
+            "greet, talk",
+            "hail, talk",
+            "parley, talk"
+        })
+        @DisplayName("Key D&D phrases resolve to expected canonical verbs")
+        void keyDndPhrasesResolveCorrectly(String input, String expected) {
+            Command cmd = CommandParser.parse(input + " target");
+
+            assertEquals(expected, cmd.getVerb(),
+                "Expected '" + input + "' to map to canonical '" + expected + "'");
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+            "wind, use",
+            "spin, use",
+            "rotate, use",
+            "crank, use",
+            "manipulate, use",
+            "reset, use",
+            "trigger, use",
+            "decipher, look",
+            "resonate, use",
+            "align, use",
+            "redirect, use",
+            "channel, cast",
+            "leap, go",
+            "ascend, go",
+            "dive, go",
+            "descend, go",
+            "submerge, go",
+            "swim, go",
+            "wade, go",
+            "seal, close",
+            "whisper, talk"
+        })
+        @DisplayName("Campaign-flavor verbs map to expected canonical actions")
+        void campaignFlavorSynonyms(String input, String expected) {
+            Command cmd = CommandParser.parse(input + " target");
+
+            assertEquals(expected, cmd.getVerb(),
+                "Campaign verb '" + input + "' should map to canonical '" + expected + "'");
         }
     }
     
