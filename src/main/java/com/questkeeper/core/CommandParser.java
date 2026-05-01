@@ -70,7 +70,25 @@ public class CommandParser {
         SYNONYM_MAP.put("travel", VERB_GO);
         SYNONYM_MAP.put("head", VERB_GO);
         SYNONYM_MAP.put("run", VERB_GO);
-        
+        SYNONYM_MAP.put("trek", VERB_GO);
+        SYNONYM_MAP.put("journey", VERB_GO);
+        SYNONYM_MAP.put("march", VERB_GO);
+        SYNONYM_MAP.put("dash", VERB_GO);
+        SYNONYM_MAP.put("sprint", VERB_GO);
+        SYNONYM_MAP.put("jog", VERB_GO);
+        SYNONYM_MAP.put("stride", VERB_GO);
+        SYNONYM_MAP.put("hike", VERB_GO);
+        SYNONYM_MAP.put("climb", VERB_GO);
+        SYNONYM_MAP.put("ascend", VERB_GO);
+        SYNONYM_MAP.put("descend", VERB_GO);
+        SYNONYM_MAP.put("swim", VERB_GO);
+        SYNONYM_MAP.put("dive", VERB_GO);
+        SYNONYM_MAP.put("leap", VERB_GO);
+        SYNONYM_MAP.put("wade", VERB_GO);
+        SYNONYM_MAP.put("crawl", VERB_GO);
+        SYNONYM_MAP.put("sneak", VERB_GO);
+        SYNONYM_MAP.put("submerge", VERB_GO);
+
         // Look synonyms → "look"
         SYNONYM_MAP.put("look", VERB_LOOK);
         SYNONYM_MAP.put("examine", VERB_LOOK);
@@ -80,7 +98,21 @@ public class CommandParser {
         SYNONYM_MAP.put("observe", VERB_LOOK);
         SYNONYM_MAP.put("search", VERB_LOOK);
         SYNONYM_MAP.put("l", VERB_LOOK);
-        
+        SYNONYM_MAP.put("peek", VERB_LOOK);
+        SYNONYM_MAP.put("peer", VERB_LOOK);
+        SYNONYM_MAP.put("glance", VERB_LOOK);
+        SYNONYM_MAP.put("scrutinize", VERB_LOOK);
+        SYNONYM_MAP.put("survey", VERB_LOOK);
+        SYNONYM_MAP.put("scan", VERB_LOOK);
+        SYNONYM_MAP.put("eye", VERB_LOOK);
+        SYNONYM_MAP.put("watch", VERB_LOOK);
+        SYNONYM_MAP.put("study", VERB_LOOK);
+        SYNONYM_MAP.put("ponder", VERB_LOOK);
+        SYNONYM_MAP.put("gaze", VERB_LOOK);
+        SYNONYM_MAP.put("regard", VERB_LOOK);
+        SYNONYM_MAP.put("decipher", VERB_LOOK);
+        SYNONYM_MAP.put("decode", VERB_LOOK);
+
         // Take synonyms → "take"
         SYNONYM_MAP.put("take", VERB_TAKE);
         SYNONYM_MAP.put("get", VERB_TAKE);
@@ -88,65 +120,160 @@ public class CommandParser {
         SYNONYM_MAP.put("pick", VERB_TAKE);
         SYNONYM_MAP.put("pickup", VERB_TAKE);
         SYNONYM_MAP.put("collect", VERB_TAKE);
-        
+        SYNONYM_MAP.put("seize", VERB_TAKE);
+        SYNONYM_MAP.put("snatch", VERB_TAKE);
+        SYNONYM_MAP.put("lift", VERB_TAKE);
+        SYNONYM_MAP.put("gather", VERB_TAKE);
+        SYNONYM_MAP.put("loot", VERB_TAKE);
+        SYNONYM_MAP.put("claim", VERB_TAKE);
+        SYNONYM_MAP.put("nab", VERB_TAKE);
+        SYNONYM_MAP.put("swipe", VERB_TAKE);
+        SYNONYM_MAP.put("retrieve", VERB_TAKE);
+        SYNONYM_MAP.put("fetch", VERB_TAKE);
+        SYNONYM_MAP.put("scoop", VERB_TAKE);
+        SYNONYM_MAP.put("pluck", VERB_TAKE);
+
         // Drop synonyms → "drop"
         SYNONYM_MAP.put("drop", VERB_DROP);
         SYNONYM_MAP.put("discard", VERB_DROP);
         SYNONYM_MAP.put("throw", VERB_DROP);
         SYNONYM_MAP.put("toss", VERB_DROP);
-        
-        // Use synonyms → "use"
+        SYNONYM_MAP.put("release", VERB_DROP);
+        SYNONYM_MAP.put("dump", VERB_DROP);
+        SYNONYM_MAP.put("ditch", VERB_DROP);
+        SYNONYM_MAP.put("abandon", VERB_DROP);
+        SYNONYM_MAP.put("jettison", VERB_DROP);
+        SYNONYM_MAP.put("scatter", VERB_DROP);
+
+        // Use synonyms → "use" (campaign-flavor: wind/spin/crank/align/redirect/resonate)
         SYNONYM_MAP.put("use", VERB_USE);
         SYNONYM_MAP.put("activate", VERB_USE);
         SYNONYM_MAP.put("apply", VERB_USE);
-        
-        // Talk synonyms → "talk"
+        SYNONYM_MAP.put("operate", VERB_USE);
+        SYNONYM_MAP.put("manipulate", VERB_USE);
+        SYNONYM_MAP.put("push", VERB_USE);
+        SYNONYM_MAP.put("pull", VERB_USE);
+        SYNONYM_MAP.put("press", VERB_USE);
+        SYNONYM_MAP.put("turn", VERB_USE);
+        SYNONYM_MAP.put("twist", VERB_USE);
+        SYNONYM_MAP.put("rotate", VERB_USE);
+        SYNONYM_MAP.put("spin", VERB_USE);
+        SYNONYM_MAP.put("wind", VERB_USE);
+        SYNONYM_MAP.put("crank", VERB_USE);
+        SYNONYM_MAP.put("toggle", VERB_USE);
+        SYNONYM_MAP.put("flip", VERB_USE);
+        SYNONYM_MAP.put("adjust", VERB_USE);
+        SYNONYM_MAP.put("align", VERB_USE);
+        SYNONYM_MAP.put("calibrate", VERB_USE);
+        SYNONYM_MAP.put("redirect", VERB_USE);
+        SYNONYM_MAP.put("reset", VERB_USE);
+        SYNONYM_MAP.put("trigger", VERB_USE);
+        SYNONYM_MAP.put("resonate", VERB_USE);
+
+        // Talk synonyms → "talk" ("whisper" maps here, not to ambient narrative)
         SYNONYM_MAP.put("talk", VERB_TALK);
         SYNONYM_MAP.put("speak", VERB_TALK);
         SYNONYM_MAP.put("chat", VERB_TALK);
         SYNONYM_MAP.put("converse", VERB_TALK);
+        SYNONYM_MAP.put("greet", VERB_TALK);
+        SYNONYM_MAP.put("hail", VERB_TALK);
+        SYNONYM_MAP.put("address", VERB_TALK);
+        SYNONYM_MAP.put("approach", VERB_TALK);
+        SYNONYM_MAP.put("parley", VERB_TALK);
+        SYNONYM_MAP.put("confer", VERB_TALK);
+        SYNONYM_MAP.put("whisper", VERB_TALK);
 
         // Ask synonyms → "ask"
         SYNONYM_MAP.put("ask", VERB_ASK);
         SYNONYM_MAP.put("inquire", VERB_ASK);
         SYNONYM_MAP.put("question", VERB_ASK);
-        
-        // Attack synonyms → "attack"
+        SYNONYM_MAP.put("query", VERB_ASK);
+        SYNONYM_MAP.put("interrogate", VERB_ASK);
+        SYNONYM_MAP.put("demand", VERB_ASK);
+        SYNONYM_MAP.put("request", VERB_ASK);
+        SYNONYM_MAP.put("petition", VERB_ASK);
+        SYNONYM_MAP.put("beseech", VERB_ASK);
+
+        // Attack synonyms → "attack" ("swing" prefers attack over pendulum-swing flavor)
         SYNONYM_MAP.put(VERB_ATTACK, VERB_ATTACK);
         SYNONYM_MAP.put("hit", VERB_ATTACK);
         SYNONYM_MAP.put("strike", VERB_ATTACK);
         SYNONYM_MAP.put("fight", VERB_ATTACK);
         SYNONYM_MAP.put("kill", VERB_ATTACK);
         SYNONYM_MAP.put("slay", VERB_ATTACK);
-        
-        // Cast synonyms → "cast"
+        SYNONYM_MAP.put("smite", VERB_ATTACK);
+        SYNONYM_MAP.put("slash", VERB_ATTACK);
+        SYNONYM_MAP.put("stab", VERB_ATTACK);
+        SYNONYM_MAP.put("swing", VERB_ATTACK);
+        SYNONYM_MAP.put("parry", VERB_ATTACK);
+        SYNONYM_MAP.put("lunge", VERB_ATTACK);
+        SYNONYM_MAP.put("charge", VERB_ATTACK);
+        SYNONYM_MAP.put("pummel", VERB_ATTACK);
+        SYNONYM_MAP.put("bash", VERB_ATTACK);
+        SYNONYM_MAP.put("cleave", VERB_ATTACK);
+        SYNONYM_MAP.put("pierce", VERB_ATTACK);
+        SYNONYM_MAP.put("slice", VERB_ATTACK);
+        SYNONYM_MAP.put("rend", VERB_ATTACK);
+        SYNONYM_MAP.put("hack", VERB_ATTACK);
+        SYNONYM_MAP.put("dispatch", VERB_ATTACK);
+        SYNONYM_MAP.put("assault", VERB_ATTACK);
+        SYNONYM_MAP.put("maul", VERB_ATTACK);
+        SYNONYM_MAP.put("club", VERB_ATTACK);
+        SYNONYM_MAP.put("batter", VERB_ATTACK);
+        SYNONYM_MAP.put("thrust", VERB_ATTACK);
+
+        // Cast synonyms → "cast" ("channel" prefers cast over flow-through-pipe meaning)
         SYNONYM_MAP.put("cast", VERB_CAST);
         SYNONYM_MAP.put("spell", VERB_CAST);
-        
+        SYNONYM_MAP.put("invoke", VERB_CAST);
+        SYNONYM_MAP.put("channel", VERB_CAST);
+        SYNONYM_MAP.put("evoke", VERB_CAST);
+        SYNONYM_MAP.put("conjure", VERB_CAST);
+        SYNONYM_MAP.put("summon", VERB_CAST);
+        SYNONYM_MAP.put("weave", VERB_CAST);
+        SYNONYM_MAP.put("hex", VERB_CAST);
+        SYNONYM_MAP.put("banish", VERB_CAST);
+        SYNONYM_MAP.put("enchant", VERB_CAST);
+        SYNONYM_MAP.put("intone", VERB_CAST);
+        SYNONYM_MAP.put("incant", VERB_CAST);
+        SYNONYM_MAP.put("manifest", VERB_CAST);
+        SYNONYM_MAP.put("unleash", VERB_CAST);
+
         // Inventory synonyms → "inventory"
         SYNONYM_MAP.put(VERB_INVENTORY, VERB_INVENTORY);
         SYNONYM_MAP.put("inv", VERB_INVENTORY);
         SYNONYM_MAP.put("i", VERB_INVENTORY);
         SYNONYM_MAP.put("items", VERB_INVENTORY);
         SYNONYM_MAP.put("bag", VERB_INVENTORY);
-        
+        SYNONYM_MAP.put("pack", VERB_INVENTORY);
+        SYNONYM_MAP.put("pouch", VERB_INVENTORY);
+        SYNONYM_MAP.put("satchel", VERB_INVENTORY);
+        SYNONYM_MAP.put("kit", VERB_INVENTORY);
+
         // Stats synonyms → "stats"
         SYNONYM_MAP.put(VERB_STATS, VERB_STATS);
         SYNONYM_MAP.put("status", VERB_STATS);
         SYNONYM_MAP.put("character", VERB_STATS);
         SYNONYM_MAP.put("char", VERB_STATS);
         SYNONYM_MAP.put("me", VERB_STATS);
-        
+        SYNONYM_MAP.put("sheet", VERB_STATS);
+        SYNONYM_MAP.put("info", VERB_STATS);
+        SYNONYM_MAP.put("abilities", VERB_STATS);
+        SYNONYM_MAP.put("attributes", VERB_STATS);
+
         // Help synonyms → "help"
         SYNONYM_MAP.put("help", VERB_HELP);
         SYNONYM_MAP.put("?", VERB_HELP);
         SYNONYM_MAP.put("commands", VERB_HELP);
-        
+        SYNONYM_MAP.put("hint", VERB_HELP);
+        SYNONYM_MAP.put("h", VERB_HELP);
+
         // Save/Load → direct mapping
         SYNONYM_MAP.put("save", VERB_SAVE);
         SYNONYM_MAP.put("load", VERB_LOAD);
         SYNONYM_MAP.put("restore", VERB_LOAD);
-        
+        SYNONYM_MAP.put("reload", VERB_LOAD);
+
         // Quit synonyms → "quit"
         SYNONYM_MAP.put("quit", VERB_QUIT);
         SYNONYM_MAP.put("q", VERB_QUIT);
@@ -158,6 +285,8 @@ public class CommandParser {
         SYNONYM_MAP.put("farewell", VERB_BYE);
         SYNONYM_MAP.put("goodbye", VERB_BYE);
         SYNONYM_MAP.put("later", VERB_BYE);
+        SYNONYM_MAP.put("adieu", VERB_BYE);
+        SYNONYM_MAP.put("ciao", VERB_BYE);
 
         // Leave/exit location → "leave"
         SYNONYM_MAP.put("leave", VERB_LEAVE);
@@ -167,42 +296,67 @@ public class CommandParser {
         SYNONYM_MAP.put("rest", VERB_REST);
         SYNONYM_MAP.put("sleep", VERB_REST);
         SYNONYM_MAP.put("camp", VERB_REST);
-        
-        // Open/Close → direct mapping
+        SYNONYM_MAP.put("nap", VERB_REST);
+        SYNONYM_MAP.put("meditate", VERB_REST);
+        SYNONYM_MAP.put("recover", VERB_REST);
+        SYNONYM_MAP.put("recuperate", VERB_REST);
+        SYNONYM_MAP.put("snooze", VERB_REST);
+
+        // Open/Close → direct mapping ("seal" maps to close, narratively closing-tight)
         SYNONYM_MAP.put("open", VERB_OPEN);
         SYNONYM_MAP.put(VERB_CLOSE, VERB_CLOSE);
         SYNONYM_MAP.put("shut", VERB_CLOSE);
-        
+        SYNONYM_MAP.put("seal", VERB_CLOSE);
+
         // Read → direct mapping
         SYNONYM_MAP.put("read", VERB_READ);
-        
-        // Equip synonyms → "equip"
+        SYNONYM_MAP.put("peruse", VERB_READ);
+        SYNONYM_MAP.put("browse", VERB_READ);
+
+        // Equip synonyms → "equip" ("draw" prefers equip-weapon over draw-bow attack)
         SYNONYM_MAP.put(VERB_EQUIP, VERB_EQUIP);
         SYNONYM_MAP.put("wear", VERB_EQUIP);
         SYNONYM_MAP.put("wield", VERB_EQUIP);
         SYNONYM_MAP.put("hold", VERB_EQUIP);
-        
+        SYNONYM_MAP.put("don", VERB_EQUIP);
+        SYNONYM_MAP.put("strap", VERB_EQUIP);
+        SYNONYM_MAP.put("brandish", VERB_EQUIP);
+        SYNONYM_MAP.put("draw", VERB_EQUIP);
+
         // Unequip synonyms → "unequip"
         SYNONYM_MAP.put(VERB_UNEQUIP, VERB_UNEQUIP);
         SYNONYM_MAP.put("remove", VERB_UNEQUIP);
+        SYNONYM_MAP.put("doff", VERB_UNEQUIP);
+        SYNONYM_MAP.put("stow", VERB_UNEQUIP);
+        SYNONYM_MAP.put("sheathe", VERB_UNEQUIP);
+        SYNONYM_MAP.put("holster", VERB_UNEQUIP);
 
         // Trial synonyms → "trial"
         SYNONYM_MAP.put(VERB_TRIAL, VERB_TRIAL);
         SYNONYM_MAP.put("trials", VERB_TRIAL);
         SYNONYM_MAP.put("challenge", VERB_TRIAL);
         SYNONYM_MAP.put("puzzle", VERB_TRIAL);
+        SYNONYM_MAP.put("mission", VERB_TRIAL);
+        SYNONYM_MAP.put("ordeal", VERB_TRIAL);
+        SYNONYM_MAP.put("gauntlet", VERB_TRIAL);
 
         // Attempt synonyms → "attempt"
         SYNONYM_MAP.put(VERB_ATTEMPT, VERB_ATTEMPT);
         SYNONYM_MAP.put("try", VERB_ATTEMPT);
         SYNONYM_MAP.put("solve", VERB_ATTEMPT);
         SYNONYM_MAP.put("do", VERB_ATTEMPT);
+        SYNONYM_MAP.put("tackle", VERB_ATTEMPT);
+        SYNONYM_MAP.put("perform", VERB_ATTEMPT);
+        SYNONYM_MAP.put("execute", VERB_ATTEMPT);
 
         // Equipment synonyms → "equipment"
         SYNONYM_MAP.put(VERB_EQUIPMENT, VERB_EQUIPMENT);
         SYNONYM_MAP.put("equipped", VERB_EQUIPMENT);
         SYNONYM_MAP.put("gear", VERB_EQUIPMENT);
         SYNONYM_MAP.put("worn", VERB_EQUIPMENT);
+        SYNONYM_MAP.put("loadout", VERB_EQUIPMENT);
+        SYNONYM_MAP.put("getup", VERB_EQUIPMENT);
+        SYNONYM_MAP.put("outfit", VERB_EQUIPMENT);
     }
     
     private CommandParser() {
