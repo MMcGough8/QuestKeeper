@@ -205,6 +205,7 @@ class RestSystemTest {
             fighter.addExperience(2700);  // Level 4
             fighter.takeDamage(20);
             while (fighter.getAvailableHitDice() > 0) {
+                fighter.takeDamage(100);
                 fighter.useHitDie();
             }
             assertEquals(0, fighter.getAvailableHitDice());
