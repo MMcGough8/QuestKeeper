@@ -1219,6 +1219,13 @@ public class Character implements Combatant {
         currentHitPoints += (maxHitPoints - oldMax);
         availableHitDice++;  // Gain one hit die per level
 
+        for (int threshold : ASI_LEVELS) {
+            if (threshold == level) {
+                pendingAbilityScoreImprovements++;
+                break;
+            }
+        }
+
         // Update class features for new level
         initializeClassFeatures();
 

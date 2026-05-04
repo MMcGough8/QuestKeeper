@@ -21,6 +21,7 @@ import com.questkeeper.save.SaveState;
 import com.questkeeper.state.GameState;
 import com.questkeeper.ui.CharacterCreator;
 import com.questkeeper.ui.Display;
+import com.questkeeper.ui.LevelUpFlow;
 import com.questkeeper.world.Location;
 
 import java.io.IOException;
@@ -322,6 +323,15 @@ public class GameEngine implements AutoCloseable {
         Display.showTutorialTip("Use 'look' to examine your surroundings, 'go <direction>' to move, and 'talk <name>' to speak with characters.");
 
         while (running) {
+            // Drain any pending Ability Score Improvements before the player
+            // gets the next prompt, so XP earned in the prior tick (combat
+            // victory, trial reward) finishes its level-up bookkeeping
+            // before they act.
+            Character player = gameState.getCharacter();
+            if (player.getPendingAbilityScoreImprovements() > 0) {
+                LevelUpFlow.applyPendingAbilityScoreImprovements(player, scanner);
+            }
+
             // Show action prompt with suggestions
             Display.showActionPrompt(generateSuggestions());
             Display.showPrompt();
