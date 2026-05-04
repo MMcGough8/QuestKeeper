@@ -462,13 +462,14 @@ public final class PaladinFeatures {
          * Gets a formatted string of current spell slots.
          */
         public String getSlotsStatus() {
+            int[] current = readCurrentSlots();
             int[] max = getMaxSlots();
             StringBuilder sb = new StringBuilder("Spell Slots: ");
             boolean first = true;
             for (int i = 0; i < 5; i++) {
                 if (max[i] > 0) {
                     if (!first) sb.append(", ");
-                    sb.append("L").append(i + 1).append(": ").append(currentSlots[i]).append("/").append(max[i]);
+                    sb.append("L").append(i + 1).append(": ").append(current[i]).append("/").append(max[i]);
                     first = false;
                 }
             }

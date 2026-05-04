@@ -446,5 +446,21 @@ class PaladinFeaturesTest {
             assertTrue(smite.expendSlot(1));
             assertEquals(before - 1, smite.getCurrentSlots()[0]);
         }
+
+        @Test
+        @DisplayName("getSlotsStatus reflects Spellbook slot expends when bound")
+        void getSlotsStatusReflectsBoundExpends() {
+            Character paladin = new Character("Test", Race.HUMAN, CharacterClass.PALADIN);
+            paladin.setLevel(2);
+
+            PaladinFeatures.DivineSmite smite = (PaladinFeatures.DivineSmite)
+                paladin.getFeature(PaladinFeatures.DIVINE_SMITE_ID).orElseThrow();
+
+            paladin.getSpellbook().getSpellSlots().expendSlot(1);
+
+            String status = smite.getSlotsStatus();
+            assertTrue(status.contains("L1: 1/2"),
+                "Expected status to show L1: 1/2 after expend; got: " + status);
+        }
     }
 }
