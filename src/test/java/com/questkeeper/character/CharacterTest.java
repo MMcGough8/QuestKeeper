@@ -1000,6 +1000,74 @@ class CharacterTest {
     }
 
     @Nested
+    @DisplayName("Cleric class features")
+    class ClericClassFeatureTests {
+
+        @Test
+        @DisplayName("L2 Cleric without domain still gets Channel Divinity + Turn Undead")
+        void l2ClericBaselineFeatures() {
+            Character c = new Character("Mira", Race.HUMAN, CharacterClass.CLERIC,
+                10, 10, 14, 10, 16, 10);
+            c.setLevel(2);
+            assertTrue(c.getFeature(
+                com.questkeeper.character.features.ClericFeatures.CLERIC_CHANNEL_DIVINITY_ID
+            ).isPresent(), "Cleric L2 should have Channel Divinity");
+            assertTrue(c.getFeature(
+                com.questkeeper.character.features.ClericFeatures.TURN_UNDEAD_ID
+            ).isPresent(), "Cleric L2 should have Turn Undead");
+        }
+
+        @Test
+        @DisplayName("Setting Life Domain at L1 grants heavy armor proficiency + Disciple of Life")
+        void lifeDomainGrantsLifeFeatures() {
+            Character c = new Character("Mira", Race.HUMAN, CharacterClass.CLERIC,
+                10, 10, 14, 10, 16, 10);
+            c.setDivineDomain(
+                com.questkeeper.character.features.ClericFeatures.DivineDomain.LIFE);
+            assertTrue(c.getFeature(
+                com.questkeeper.character.features.ClericFeatures.BONUS_PROFICIENCY_HEAVY_ARMOR_ID
+            ).isPresent(), "Life Domain should grant heavy armor proficiency");
+            assertTrue(c.getFeature(
+                com.questkeeper.character.features.ClericFeatures.DISCIPLE_OF_LIFE_ID
+            ).isPresent(), "Life Domain should grant Disciple of Life");
+        }
+
+        @Test
+        @DisplayName("L2 Life Cleric also gets Preserve Life (CD option)")
+        void l2LifeClericGetsPreserveLife() {
+            Character c = new Character("Mira", Race.HUMAN, CharacterClass.CLERIC,
+                10, 10, 14, 10, 16, 10);
+            c.setDivineDomain(
+                com.questkeeper.character.features.ClericFeatures.DivineDomain.LIFE);
+            c.setLevel(2);
+            assertTrue(c.getFeature(
+                com.questkeeper.character.features.ClericFeatures.PRESERVE_LIFE_ID
+            ).isPresent(), "L2 Life Cleric should have Preserve Life");
+        }
+
+        @Test
+        @DisplayName("L5 Cleric gains Destroy Undead")
+        void l5ClericGetsDestroyUndead() {
+            Character c = new Character("Mira", Race.HUMAN, CharacterClass.CLERIC,
+                10, 10, 14, 10, 16, 10);
+            c.setLevel(5);
+            assertTrue(c.getFeature(
+                com.questkeeper.character.features.ClericFeatures.DESTROY_UNDEAD_ID
+            ).isPresent(), "Cleric L5 should have Destroy Undead");
+        }
+
+        @Test
+        @DisplayName("setDivineDomain on a non-Cleric throws")
+        void setDivineDomainOnNonClericThrows() {
+            Character fighter = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            assertThrows(IllegalStateException.class,
+                () -> fighter.setDivineDomain(
+                    com.questkeeper.character.features.ClericFeatures.DivineDomain.LIFE));
+        }
+    }
+
+    @Nested
     @DisplayName("Extra Attack distribution")
     class ExtraAttackDistributionTests {
 

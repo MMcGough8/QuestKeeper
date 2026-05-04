@@ -238,6 +238,7 @@ public class Character implements Combatant {
     private final List<ClassFeature> classFeatures = new ArrayList<>();
     private FightingStyle fightingStyle;  // Fighter-specific; null for other classes
     private Set<Skill> expertiseSkills = EnumSet.noneOf(Skill.class);  // Rogue-specific
+    private com.questkeeper.character.features.ClericFeatures.DivineDomain divineDomain;
 
     // Spellcasting
     private final Spellbook spellbook = new Spellbook();
@@ -755,6 +756,15 @@ public class Character implements Combatant {
                         .ifPresent(rs -> rs.setRangerLevel(level));
                 }
             }
+        } else if (characterClass == CharacterClass.CLERIC) {
+            List<ClassFeature> clericFeatures =
+                com.questkeeper.character.features.ClericFeatures.createFeaturesForLevel(
+                    level, divineDomain);
+            for (ClassFeature feature : clericFeatures) {
+                if (getFeature(feature.getId()).isEmpty()) {
+                    classFeatures.add(feature);
+                }
+            }
         }
         // Other classes will be added here as features are implemented
     }
@@ -841,6 +851,30 @@ public class Character implements Combatant {
      */
     public FightingStyle getFightingStyle() {
         return fightingStyle;
+    }
+
+    /**
+     * Sets the Cleric's Divine Domain (chosen at L1 in 5e RAW). Replaces any
+     * prior choice and rebuilds the class-features list so domain features
+     * (heavy armor proficiency, Disciple of Life, Preserve Life, etc.) appear.
+     */
+    public void setDivineDomain(
+            com.questkeeper.character.features.ClericFeatures.DivineDomain domain) {
+        if (characterClass != CharacterClass.CLERIC) {
+            throw new IllegalStateException("Divine Domain is only available to Clerics");
+        }
+        this.divineDomain = domain;
+        // Drop any prior domain features so a re-pick doesn't accumulate.
+        classFeatures.removeIf(f ->
+            f.getId().equals(com.questkeeper.character.features.ClericFeatures.DIVINE_DOMAIN_ID)
+            || f.getId().equals(com.questkeeper.character.features.ClericFeatures.BONUS_PROFICIENCY_HEAVY_ARMOR_ID)
+            || f.getId().equals(com.questkeeper.character.features.ClericFeatures.DISCIPLE_OF_LIFE_ID)
+            || f.getId().equals(com.questkeeper.character.features.ClericFeatures.PRESERVE_LIFE_ID));
+        initializeClassFeatures();
+    }
+
+    public com.questkeeper.character.features.ClericFeatures.DivineDomain getDivineDomain() {
+        return divineDomain;
     }
 
     /**
