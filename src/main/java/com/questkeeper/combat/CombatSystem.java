@@ -1068,9 +1068,13 @@ public class CombatSystem {
 
         CombatResult attackResult = processAttack(getPlayer(), targetEnemy);
 
-        // Consume one main-action attack from the per-turn budget.
+        // Consume one attack from whichever budget has charges. Main-action
+        // budget (Extra Attack) drains first; bonus-action attack pools
+        // (Flurry of Blows, eventually Frenzy) drain after.
         if (mainActionAttacksRemaining > 0) {
             mainActionAttacksRemaining--;
+        } else if (flurryAttacksRemaining > 0) {
+            flurryAttacksRemaining--;
         }
 
         // Check if enemy was defeated
@@ -1106,11 +1110,12 @@ public class CombatSystem {
                 return CombatResult.info(message);
             }
 
-            // Extra Attack: still have attacks in the budget — keep the turn open.
-            if (mainActionAttacksRemaining > 0) {
+            // Extra Attack / Flurry: still have attacks in any budget — keep turn open.
+            int remaining = mainActionAttacksRemaining + flurryAttacksRemaining;
+            if (remaining > 0) {
                 String message = attackResult.getMessage() + "\n" +
                     targetEnemy.getName() + " is defeated!\n" +
-                    "[Extra Attack: " + mainActionAttacksRemaining + " attack(s) remaining.]";
+                    "[" + remaining + " attack(s) remaining.]";
                 return CombatResult.info(message);
             }
 
@@ -1128,10 +1133,11 @@ public class CombatSystem {
             return CombatResult.info(message);
         }
 
-        // Extra Attack: still have attacks in the budget — keep the turn open.
-        if (mainActionAttacksRemaining > 0) {
+        // Extra Attack / Flurry: still have attacks in any budget — keep turn open.
+        int remaining = mainActionAttacksRemaining + flurryAttacksRemaining;
+        if (remaining > 0) {
             String message = attackResult.getMessage() + "\n" +
-                "[Extra Attack: " + mainActionAttacksRemaining + " attack(s) remaining.]";
+                "[" + remaining + " attack(s) remaining.]";
             return CombatResult.info(message);
         }
 
@@ -1546,6 +1552,30 @@ public class CombatSystem {
      */
     public int getMainActionAttacksRemaining() {
         return mainActionAttacksRemaining;
+    }
+
+    public boolean isBonusActionUsed() {
+        return bonusActionUsed;
+    }
+
+    /**
+     * Helper for bonus-action handlers. Returns a CombatResult error if the
+     * player has already spent their bonus action this turn; null otherwise.
+     * Pattern: `CombatResult err = requireBonusAction(); if (err != null) return err;`
+     */
+    private CombatResult requireBonusAction() {
+        if (bonusActionUsed) {
+            return CombatResult.error("You've already used your bonus action this turn.");
+        }
+        return null;
+    }
+
+    /**
+     * Marks the bonus action as consumed for this turn. Call after the
+     * handler has confirmed the action will succeed.
+     */
+    private void consumeBonusAction() {
+        bonusActionUsed = true;
     }
 
     public boolean isPatientDefenseActive() {
