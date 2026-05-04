@@ -130,12 +130,11 @@ public class GameState {
                     state.startedTrials.add(trialId);
                 }
             } else if (flag.startsWith("completed_minigame_")) {
-                // Restore mini-game completion state
-                String miniGameId = flag.substring("completed_minigame_".length());
-                var miniGame = campaign.getMiniGame(miniGameId);
-                if (miniGame != null) {
-                    miniGame.complete();
-                }
+                // No-op: the flag is the single source of truth.
+                // TrialCommandHandler reads completion via the flag, so we no
+                // longer mutate the shared Campaign-held MiniGame instance
+                // here — that was leaking state across re-loads in the same
+                // JVM.
             } else if (flag.startsWith("completed_")) {
                 String trialId = flag.substring("completed_".length());
                 if (campaign.getTrials().containsKey(trialId)) {
