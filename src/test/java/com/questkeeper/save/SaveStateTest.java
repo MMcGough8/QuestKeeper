@@ -403,6 +403,45 @@ class SaveStateTest {
     }
 
     @Nested
+    @DisplayName("listSaves discovery")
+    class ListSavesTests {
+
+        @Test
+        @DisplayName("listSaves(Path) finds .yaml files in subdirectories")
+        void findsYamlInSubdirectories() throws IOException {
+            Character character = createTestCharacter();
+
+            Path topLevel = tempDir.resolve("top.yaml");
+            new SaveState(character, "muddlebrook").save(topLevel);
+
+            Path subDir = tempDir.resolve("demo");
+            Files.createDirectories(subDir);
+            Path nested = subDir.resolve("01-parser-showcase.yaml");
+            new SaveState(character, "muddlebrook").save(nested);
+
+            List<SaveState.SaveInfo> saves = SaveState.listSaves(tempDir);
+
+            assertEquals(2, saves.size(),
+                "Expected to find both top-level and nested .yaml saves");
+            assertTrue(saves.stream().anyMatch(s -> s.path().equals(nested)),
+                "Expected the nested demo save to be discovered");
+        }
+
+        @Test
+        @DisplayName("listSaves(Path) ignores non-.yaml files in subdirectories")
+        void ignoresNonYamlInSubdirectories() throws IOException {
+            Path subDir = tempDir.resolve("demo");
+            Files.createDirectories(subDir);
+            Files.writeString(subDir.resolve("README.md"), "# Demo saves");
+
+            List<SaveState.SaveInfo> saves = SaveState.listSaves(tempDir);
+
+            assertTrue(saves.isEmpty(),
+                "README.md in a subdir should not be returned as a save");
+        }
+    }
+
+    @Nested
     @DisplayName("SaveInfo")
     class SaveInfoTests {
 

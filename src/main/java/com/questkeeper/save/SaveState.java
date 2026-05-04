@@ -168,30 +168,37 @@ public class SaveState {
     }
 
     /**
-     * Lists all save files in the default save directory.
-     * Corrupted save files are logged to stderr but still skipped.
+     * Lists all save files in the default save directory, recursing into
+     * subdirectories. Corrupted save files are logged to stderr but skipped.
      */
     public static List<SaveInfo> listSaves() throws IOException {
-        Path saveDir = Path.of(DEFAULT_SAVE_DIR);
+        return listSaves(Path.of(DEFAULT_SAVE_DIR));
+    }
+
+    /**
+     * Lists all save files under the given directory, recursing into
+     * subdirectories so saves grouped under e.g. saves/demo/ are still
+     * discovered.
+     */
+    public static List<SaveInfo> listSaves(Path saveDir) throws IOException {
         if (!Files.exists(saveDir)) {
             return Collections.emptyList();
         }
 
         List<SaveInfo> saves = new ArrayList<>();
-        try (var stream = Files.list(saveDir)) {
-            stream.filter(p -> p.toString().endsWith(".yaml"))
+        try (var stream = Files.walk(saveDir)) {
+            stream.filter(Files::isRegularFile)
+                  .filter(p -> p.toString().endsWith(".yaml"))
                   .forEach(p -> {
                       try {
                           saves.add(SaveInfo.fromFile(p));
                       } catch (IOException e) {
-                          // Log corrupted save files so user knows there's an issue
                           System.err.println("Warning: Could not read save file " +
                               p.getFileName() + ": " + e.getMessage());
                       }
                   });
         }
 
-        // Sort by timestamp, newest first
         saves.sort((a, b) -> b.timestamp().compareTo(a.timestamp()));
         return saves;
     }
