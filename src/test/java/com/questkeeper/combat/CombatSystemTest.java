@@ -2180,6 +2180,46 @@ class CombatSystemTest {
         }
 
         @Test
+        @DisplayName("Lvl 5 Barbarian gets 2 attacks per turn through combat (Extra Attack plumbed)")
+        void lvl5BarbarianGetsTwoAttacksThroughCombat() {
+            Character barb = new Character("Grog", Race.HUMAN, CharacterClass.BARBARIAN,
+                16, 14, 14, 10, 10, 10);
+            barb.setLevel(5);
+            assertEquals(2, barb.getAttacksPerTurn());
+
+            Weapon axe = Weapon.createGreataxe();
+            barb.getInventory().addItem(axe);
+            barb.getInventory().equip(axe);
+
+            state = new GameState(barb, campaign);
+            combatSystem = new CombatSystem();
+
+            Monster brute = new Monster("brute", "Brute", 5, 200);
+            brute.setAttackBonus(0);
+            brute.setDamageDice("1d4");
+            brute.setDexterityMod(0);
+            combatSystem.startCombat(state, List.of(brute));
+
+            int safety = 0;
+            while (combatSystem.isInCombat() && safety++ < 20) {
+                CombatResult tr = combatSystem.executeTurn();
+                if (tr.getType() == CombatResult.Type.TURN_START
+                    && combatSystem.getCurrentCombatant() == barb) break;
+            }
+
+            assertEquals(2, combatSystem.getMainActionAttacksRemaining(),
+                "Barbarian's turn should start with full attack budget");
+            combatSystem.playerTurn("attack", "brute");
+            assertEquals(1, combatSystem.getMainActionAttacksRemaining(),
+                "First attack should leave 1 attack remaining");
+            assertEquals(barb, combatSystem.getCurrentCombatant(),
+                "Turn should still belong to the barbarian");
+            combatSystem.playerTurn("attack", "brute");
+            assertEquals(0, combatSystem.getMainActionAttacksRemaining(),
+                "Second attack should exhaust the budget");
+        }
+
+        @Test
         @DisplayName("Smited hit expends a spell slot and clears smiteReady")
         void smitedHitExpendsSlotAndClearsFlag() {
             setUpPaladinCombat();

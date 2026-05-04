@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import com.questkeeper.character.Character.Ability;
 import com.questkeeper.character.Character.CharacterClass;
@@ -994,6 +996,75 @@ class CharacterTest {
             lowDexCharacter.getInventory().addItem(plate);
             lowDexCharacter.getInventory().equip(plate);
             assertEquals(18, lowDexCharacter.getArmorClass());
+        }
+    }
+
+    @Nested
+    @DisplayName("Extra Attack distribution")
+    class ExtraAttackDistributionTests {
+
+        @ParameterizedTest(name = "Lvl 4 {0} has 1 attack")
+        @CsvSource({
+            "FIGHTER",
+            "PALADIN",
+            "RANGER",
+            "MONK",
+            "BARBARIAN"
+        })
+        @DisplayName("Pre-L5 martial classes have 1 attack per turn")
+        void preL5HasOneAttack(CharacterClass cls) {
+            Character c = new Character("X", Race.HUMAN, cls,
+                14, 14, 14, 10, 10, 10);
+            c.setLevel(4);
+            assertEquals(1, c.getAttacksPerTurn(),
+                cls + " at L4 should still have 1 attack");
+        }
+
+        @ParameterizedTest(name = "Lvl 5 {0} gets Extra Attack -> 2 attacks")
+        @CsvSource({
+            "FIGHTER",
+            "PALADIN",
+            "RANGER",
+            "MONK",
+            "BARBARIAN"
+        })
+        @DisplayName("L5 martial classes gain Extra Attack")
+        void l5MartialsGetExtraAttack(CharacterClass cls) {
+            Character c = new Character("X", Race.HUMAN, cls,
+                14, 14, 14, 10, 10, 10);
+            c.setLevel(5);
+            assertEquals(2, c.getAttacksPerTurn(),
+                cls + " at L5 should have 2 attacks (Extra Attack)");
+        }
+
+        @ParameterizedTest(name = "Lvl 5 {0} (non-martial) keeps 1 attack")
+        @CsvSource({
+            "WIZARD",
+            "SORCERER",
+            "WARLOCK",
+            "BARD",
+            "CLERIC",
+            "DRUID",
+            "ROGUE"
+        })
+        @DisplayName("Non-extra-attack classes stay at 1 attack at L5")
+        void l5NonExtraAttackClassesUnchanged(CharacterClass cls) {
+            Character c = new Character("X", Race.HUMAN, cls,
+                14, 14, 14, 10, 10, 10);
+            c.setLevel(5);
+            assertEquals(1, c.getAttacksPerTurn(),
+                cls + " does not get Extra Attack");
+        }
+
+        @Test
+        @DisplayName("Fighter L11 -> 3 attacks, L20 -> 4 attacks")
+        void fighterTieredExtraAttack() {
+            Character f = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            f.setLevel(11);
+            assertEquals(3, f.getAttacksPerTurn(), "Fighter L11 should have 3 attacks");
+            f.setLevel(20);
+            assertEquals(4, f.getAttacksPerTurn(), "Fighter L20 should have 4 attacks");
         }
     }
 
