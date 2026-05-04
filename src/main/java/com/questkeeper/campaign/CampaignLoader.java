@@ -522,9 +522,10 @@ class CampaignLoader {
         // Parse required skill
         String requiredSkillStr = getString(data, "required_skill", null);
         if (requiredSkillStr != null) {
-            try {
-                miniGame.setRequiredSkill(Skill.valueOf(requiredSkillStr.toUpperCase()));
-            } catch (IllegalArgumentException e) {
+            Skill resolved = parseSkill(requiredSkillStr);
+            if (resolved != null) {
+                miniGame.setRequiredSkill(resolved);
+            } else {
                 loadErrors.add("Invalid required_skill '" + requiredSkillStr + "' for minigame " + id);
             }
         }
@@ -532,9 +533,10 @@ class CampaignLoader {
         // Parse alternate skill
         String altSkillStr = getString(data, "alternate_skill", null);
         if (altSkillStr != null) {
-            try {
-                miniGame.setAlternateSkill(Skill.valueOf(altSkillStr.toUpperCase()));
-            } catch (IllegalArgumentException e) {
+            Skill resolved = parseSkill(altSkillStr);
+            if (resolved != null) {
+                miniGame.setAlternateSkill(resolved);
+            } else {
                 loadErrors.add("Invalid alternate_skill '" + altSkillStr + "' for minigame " + id);
             }
         }
@@ -731,7 +733,7 @@ class CampaignLoader {
         String name = getString(data, "name", "Unknown Item");
 
         String typeStr = getString(data, "type", "MISCELLANEOUS");
-        Item.ItemType type = Item.ItemType.valueOf(typeStr.toUpperCase());
+        Item.ItemType type = parseItemType(typeStr);
 
         String description = getString(data, "description", "");
         double weight = getDouble(data, "weight", 0);
@@ -772,6 +774,49 @@ class CampaignLoader {
         item.setQuestItem(getBoolean(data, "quest_item", false));
 
         return item;
+    }
+
+    /**
+     * Resolves a YAML skill string to a {@link Skill} enum value, with
+     * fallback aliases for ability-name authoring (e.g. WISDOM→PERCEPTION).
+     * Returns null if the string is not recognizable as a skill or ability.
+     */
+    private static Skill parseSkill(String skillStr) {
+        String norm = skillStr.toUpperCase();
+        try {
+            return Skill.valueOf(norm);
+        } catch (IllegalArgumentException ignored) {}
+        return switch (norm) {
+            case "STR", "STRENGTH" -> Skill.ATHLETICS;
+            case "DEX", "DEXTERITY" -> Skill.ACROBATICS;
+            case "CON", "CONSTITUTION" -> Skill.ATHLETICS;
+            case "INT", "INTELLIGENCE" -> Skill.INVESTIGATION;
+            case "WIS", "WISDOM" -> Skill.PERCEPTION;
+            case "CHA", "CHARISMA" -> Skill.PERSUASION;
+            default -> null;
+        };
+    }
+
+    /**
+     * Resolves a YAML item-type string to an {@link Item.ItemType} enum,
+     * handling common authoring aliases. Unknown values fall back to
+     * MISCELLANEOUS so a single typo doesn't drop the item from the load.
+     */
+    private static Item.ItemType parseItemType(String typeStr) {
+        String norm = typeStr.toUpperCase();
+        // Direct enum match first.
+        try {
+            return Item.ItemType.valueOf(norm);
+        } catch (IllegalArgumentException ignored) {}
+        // YAML authoring aliases used in shipped campaigns.
+        return switch (norm) {
+            case "MISC" -> Item.ItemType.MISCELLANEOUS;
+            case "WONDROUS_ITEM", "WONDROUS" -> Item.ItemType.MAGIC_ITEM;
+            case "EQUIPMENT", "GEAR" -> Item.ItemType.MISCELLANEOUS;
+            case "AMMUNITION", "AMMO" -> Item.ItemType.MISCELLANEOUS;
+            case "POTION", "SCROLL" -> Item.ItemType.CONSUMABLE;
+            default -> Item.ItemType.MISCELLANEOUS;
+        };
     }
 
     private Item parseMagicItem(Map<String, Object> data) {

@@ -108,7 +108,6 @@ locations:
       in Saltmire has a price. The Guild can help you pay it."
     exits:
       west: harbor_district
-      down: guild_vault
     npcs:
       - guildmaster_vex
       - relic_appraiser_thom
@@ -189,7 +188,6 @@ locations:
       east: noble_district
       west: lighthouse_base
     npcs:
-      - merchant_vara
       - fortuneteller_whisper
       - fishmonger_gill
     items: []
@@ -223,7 +221,6 @@ locations:
     exits:
       west: market_square
       north: deepholm_manor
-      east: sunken_garden
     npcs:
       - lord_deepholm
       - lady_coralline
@@ -261,7 +258,6 @@ locations:
     exits:
       east: market_square
       up: lighthouse_beacon
-      down: keeper_armory
     npcs:
       - keeper_commander_storm
       - keeper_veteran_hark
@@ -298,7 +294,6 @@ locations:
       broken. "But you'll listen. Everyone does."
     exits:
       north: harbor_district
-      down: flooded_streets
       east: cult_hideout
     npcs:
       - mad_prophet_jorah
@@ -335,7 +330,6 @@ locations:
     locked_message: "The entrance is barred. The locals say it's for everyone's safety."
     exits:
       up: harbor_district
-      north: drowned_warehouse
       down: sunken_ruins_entrance
     npcs: []
     items:
@@ -380,8 +374,6 @@ locations:
     exits:
       up: flooded_underdock
       north: temple_of_the_deep
-      east: relic_vault
-      west: breeding_pools
       down: the_drowning_heart
     npcs: []
     items: []
@@ -418,7 +410,6 @@ locations:
     locked_message: "Sealed doors block the way. The Tidekeepers might know how to open them."
     exits:
       south: sunken_ruins_entrance
-      down: sanctum_of_whispers
     npcs:
       - deep_priest_specter
     items:
@@ -461,7 +452,6 @@ locations:
       "All you have to do is let go."
     locked_message: "The way is sealed by ancient wards. You must gather the three Depth Keys."
     exits:
-      up: sanctum_of_whispers
     npcs:
       - prophet_mira
       - the_drowned_god
@@ -501,7 +491,6 @@ locations:
       Something large passes beneath the floor. Lord Deepholm doesn't look down.
     exits:
       south: noble_district
-      down: deepholm_depths
     npcs:
       - lord_deepholm
       - heir_sirena
@@ -584,7 +573,6 @@ locations:
     locked_message: "The entrance is hidden. You'll need to find another way in."
     exits:
       west: drowned_quarter
-      down: underwater_passage
     npcs:
       - cult_leader_wave
       - transformed_child
@@ -628,7 +616,6 @@ locations:
     locked_message: "The crypt entrance is sealed. Only Tidekeepers may enter."
     exits:
       up: tidekeeper_temple
-      north: inner_sanctum
     npcs:
       - elder_tidekeeper_vorn
       - awakened_dead
