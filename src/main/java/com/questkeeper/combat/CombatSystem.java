@@ -185,6 +185,10 @@ public class CombatSystem {
             return enemyTurn();
         }
 
+        // Player turn-start: Patient Defense expires now (it lasted through
+        // enemy turns since the monk activated it last round).
+        patientDefenseActive = false;
+
         // Player turn - return notification (include any turn start messages)
         CombatResult turnStart = CombatResult.turnStart(current);
         if (!turnStartMessages.isEmpty()) {
@@ -476,6 +480,12 @@ public class CombatSystem {
         boolean hasAdvantage = statusEffectManager.hasAdvantageOnAttacks(attacker) ||
                                statusEffectManager.attacksHaveAdvantageAgainst(target);
         boolean hasDisadvantage = statusEffectManager.hasDisadvantageOnAttacks(attacker);
+
+        // Patient Defense (Monk): attacks against the protected target have
+        // disadvantage until the start of the monk's next turn.
+        if (target instanceof Character && patientDefenseActive) {
+            hasDisadvantage = true;
+        }
 
         // Reckless Attack: enemies have advantage on attacks against a reckless barbarian
         if (target instanceof Character targetChar && targetChar.isRecklessAttackActive()) {
@@ -914,13 +924,16 @@ public class CombatSystem {
             statusEffectManager.processTurnEnd(current);
         }
 
-        // Reset per-turn flags for player
+        // Reset per-turn flags for player. Note that patientDefenseActive
+        // is *not* cleared here — Patient Defense is supposed to last
+        // until the start of the monk's next turn, so it persists
+        // through intervening enemy turns and is cleared in executeTurn
+        // when the player's next turn begins.
         if (current instanceof Character character) {
             bonusActionUsed = false;
             actionSurgeActive = false;
             sneakAttackUsed = false;
             disengageActive = false;
-            patientDefenseActive = false;
             flurryAttacksRemaining = 0;
             smiteReady = false;  // Smite expires if not used
             character.resetRecklessAttack();
@@ -1102,19 +1115,25 @@ public class CombatSystem {
 
         StringBuilder fleeMessage = new StringBuilder();
 
-        // Opportunity attacks from all living enemies
-        List<Combatant> enemies = getLivingEnemies();
-        for (Combatant enemy : enemies) {
-            if (enemy instanceof Monster monster) {
-                CombatResult oppAttack = processOpportunityAttack(monster, player);
-                if (oppAttack != null) {
-                    fleeMessage.append(oppAttack.getMessage()).append("\n");
-                }
+        // Disengage (Cunning Action / Step of the Wind): movement doesn't
+        // provoke opportunity attacks. Skip the OA loop entirely.
+        if (disengageActive) {
+            fleeMessage.append("You disengage cleanly — no opportunity attacks!\n");
+        } else {
+            // Opportunity attacks from all living enemies
+            List<Combatant> enemies = getLivingEnemies();
+            for (Combatant enemy : enemies) {
+                if (enemy instanceof Monster monster) {
+                    CombatResult oppAttack = processOpportunityAttack(monster, player);
+                    if (oppAttack != null) {
+                        fleeMessage.append(oppAttack.getMessage()).append("\n");
+                    }
 
-                // Check if player died from opportunity attack
-                if (!player.isAlive()) {
-                    inCombat = false;
-                    return CombatResult.playerDefeated(player);
+                    // Check if player died from opportunity attack
+                    if (!player.isAlive()) {
+                        inCombat = false;
+                        return CombatResult.playerDefeated(player);
+                    }
                 }
             }
         }
