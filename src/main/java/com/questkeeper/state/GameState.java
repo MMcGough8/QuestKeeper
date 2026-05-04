@@ -95,6 +95,12 @@ public class GameState {
             if (loc != null) {
                 state.currentLocation = loc;
                 state.visitedLocations.add(locationId);
+            } else {
+                // Saved location no longer exists in this campaign (renamed/removed).
+                // Player will fall back to starting_location set by the constructor.
+                System.err.println("Warning: saved location '" + locationId +
+                    "' not found in campaign '" + campaign.getId() +
+                    "'. Falling back to starting location.");
             }
         }
 
@@ -142,7 +148,10 @@ public class GameState {
         for (String itemId : saveState.getInventoryItems()) {
             Item item = findItem(itemId, campaign, stdEquip);
             if (item != null) {
-                character.getInventory().addItem(item);
+                if (!character.getInventory().addItem(item)) {
+                    System.err.println("Warning: could not load item '" + itemId +
+                        "' (likely over carrying capacity).");
+                }
             }
         }
 
