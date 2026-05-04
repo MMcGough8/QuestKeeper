@@ -174,12 +174,6 @@ public final class FighterFeatures {
             active = false;
         }
 
-        /**
-         * Resets the active state at end of turn.
-         */
-        public void endTurn() {
-            active = false;
-        }
     }
 
     /**

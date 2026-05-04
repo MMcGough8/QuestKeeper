@@ -324,16 +324,6 @@ public class GameState {
     }
 
     /**
-     * Locks a location, making it inaccessible.
-     * @param locationId the location ID to lock
-     */
-    public void lockLocation(String locationId) {
-        if (locationId != null) {
-            unlockedLocations.remove(locationId);
-        }
-    }
-
-    /**
      * Gets all unlocked location IDs.
      * @return unmodifiable set of unlocked location IDs
      */
@@ -594,13 +584,6 @@ public class GameState {
             return String.format("%dh %dm", hours, minutes);
         }
         return String.format("%dm", minutes);
-    }
-
-    /**
-     * Resets session start time (call when resuming from pause).
-     */
-    public void resumeSession() {
-        this.sessionStartTime = Instant.now();
     }
 
     // ==========================================
