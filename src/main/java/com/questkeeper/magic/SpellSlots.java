@@ -250,10 +250,15 @@ public class SpellSlots {
      * Updates caster level and recalculates max slots.
      */
     public void setCasterLevel(int level) {
+        int[] oldMax = maxSlots;
         this.casterLevel = level;
         this.maxSlots = calculateMaxSlots(casterType, level);
-        // Cap current slots at new max
         for (int i = 0; i < 9; i++) {
+            // Grant any newly unlocked slots from leveling up
+            if (maxSlots[i] > oldMax[i]) {
+                currentSlots[i] += (maxSlots[i] - oldMax[i]);
+            }
+            // Cap at new max (in case level decreased)
             currentSlots[i] = Math.min(currentSlots[i], maxSlots[i]);
         }
     }

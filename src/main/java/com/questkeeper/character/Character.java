@@ -650,6 +650,11 @@ public class Character implements Combatant {
             for (ClassFeature feature : paladinFeatures) {
                 if (getFeature(feature.getId()).isEmpty()) {
                     classFeatures.add(feature);
+                    // Bind newly added Divine Smite to the Spellbook's slot tracker
+                    if (feature.getId().equals(PaladinFeatures.DIVINE_SMITE_ID)
+                            && feature instanceof PaladinFeatures.DivineSmite ds) {
+                        ds.bindSpellSlots(spellbook.getSpellSlots());
+                    }
                 } else if (feature.getId().equals(PaladinFeatures.LAY_ON_HANDS_ID)) {
                     // Update Lay on Hands pool when leveling up
                     getFeature(PaladinFeatures.LAY_ON_HANDS_ID)

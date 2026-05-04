@@ -398,4 +398,53 @@ class PaladinFeaturesTest {
             assertTrue(features.stream().anyMatch(f -> f.getId().equals(PaladinFeatures.TURN_THE_UNHOLY_ID)));
         }
     }
+
+    @Nested
+    @DisplayName("Divine Smite spell slot sync with Spellbook")
+    class DivineSmiteSlotSyncTests {
+
+        @Test
+        @DisplayName("Expending via Spellbook is visible to Divine Smite on a real Paladin")
+        void spellbookExpendVisibleToSmite() {
+            Character paladin = new Character("Test", Race.HUMAN, CharacterClass.PALADIN);
+            paladin.setLevel(2);
+
+            PaladinFeatures.DivineSmite smite = (PaladinFeatures.DivineSmite)
+                paladin.getFeature(PaladinFeatures.DIVINE_SMITE_ID).orElseThrow();
+            int initialFirst = smite.getCurrentSlots()[0];
+
+            paladin.getSpellbook().getSpellSlots().expendSlot(1);
+
+            assertEquals(initialFirst - 1, smite.getCurrentSlots()[0],
+                "Divine Smite should reflect Spellbook slot expend");
+        }
+
+        @Test
+        @DisplayName("Expending via Divine Smite is visible to Spellbook on a real Paladin")
+        void smiteExpendVisibleToSpellbook() {
+            Character paladin = new Character("Test", Race.HUMAN, CharacterClass.PALADIN);
+            paladin.setLevel(2);
+
+            PaladinFeatures.DivineSmite smite = (PaladinFeatures.DivineSmite)
+                paladin.getFeature(PaladinFeatures.DIVINE_SMITE_ID).orElseThrow();
+            int initialSpellbookSlots = paladin.getSpellbook().getSpellSlots().getSlotsRemaining(1);
+
+            smite.expendSlot(1);
+
+            assertEquals(initialSpellbookSlots - 1,
+                paladin.getSpellbook().getSpellSlots().getSlotsRemaining(1),
+                "Spellbook should reflect Divine Smite slot expend");
+        }
+
+        @Test
+        @DisplayName("Standalone (unbound) Divine Smite still tracks its own slots")
+        void unboundSmiteUsesOwnSlots() {
+            PaladinFeatures.DivineSmite smite = PaladinFeatures.createDivineSmite(2);
+
+            assertTrue(smite.hasSlot(1));
+            int before = smite.getCurrentSlots()[0];
+            assertTrue(smite.expendSlot(1));
+            assertEquals(before - 1, smite.getCurrentSlots()[0]);
+        }
+    }
 }

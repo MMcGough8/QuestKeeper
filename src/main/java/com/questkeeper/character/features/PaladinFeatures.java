@@ -323,7 +323,8 @@ public final class PaladinFeatures {
     public static class DivineSmite extends PassiveFeature {
 
         private int paladinLevel;
-        private int[] currentSlots;  // Current available spell slots
+        private int[] currentSlots;                          // Standalone tracking when not bound
+        private com.questkeeper.magic.SpellSlots boundSlots; // When set, all slot ops delegate here
 
         public DivineSmite(int paladinLevel) {
             super(
@@ -338,6 +339,15 @@ public final class PaladinFeatures {
             );
             this.paladinLevel = paladinLevel;
             this.currentSlots = getSpellSlots(paladinLevel).clone();
+        }
+
+        /**
+         * Binds this Divine Smite to the Paladin's Spellbook spell slots so the
+         * two trackers stay in sync. After binding, all slot reads and writes
+         * delegate to the bound SpellSlots instance.
+         */
+        public void bindSpellSlots(com.questkeeper.magic.SpellSlots slots) {
+            this.boundSlots = slots;
         }
 
         /**
@@ -367,6 +377,7 @@ public final class PaladinFeatures {
          */
         public boolean hasSlot(int slotLevel) {
             if (slotLevel < 1 || slotLevel > 5) return false;
+            if (boundSlots != null) return boundSlots.hasSlot(slotLevel);
             return currentSlots[slotLevel - 1] > 0;
         }
 
@@ -375,8 +386,9 @@ public final class PaladinFeatures {
          * @return slot level (1-5) or 0 if no slots
          */
         public int getHighestAvailableSlot() {
+            int[] slots = readCurrentSlots();
             for (int i = 4; i >= 0; i--) {
-                if (currentSlots[i] > 0) {
+                if (slots[i] > 0) {
                     return i + 1;
                 }
             }
@@ -388,8 +400,9 @@ public final class PaladinFeatures {
          * @return slot level (1-5) or 0 if no slots
          */
         public int getLowestAvailableSlot() {
+            int[] slots = readCurrentSlots();
             for (int i = 0; i < 5; i++) {
-                if (currentSlots[i] > 0) {
+                if (slots[i] > 0) {
                     return i + 1;
                 }
             }
@@ -405,15 +418,30 @@ public final class PaladinFeatures {
             if (!hasSlot(slotLevel)) {
                 return false;
             }
+            if (boundSlots != null) return boundSlots.expendSlot(slotLevel);
             currentSlots[slotLevel - 1]--;
             return true;
         }
 
         /**
-         * Gets current spell slots.
-         * @return array of current slots (index 0 = 1st level, etc.)
+         * Gets current spell slots (1st-5th level, 5 entries).
+         * When bound, reads from the Spellbook's tracker and returns the first 5 levels.
          */
         public int[] getCurrentSlots() {
+            return readCurrentSlots();
+        }
+
+        /**
+         * Reads the current 1st-5th level slot counts as a 5-entry array,
+         * routing through the bound SpellSlots when set.
+         */
+        private int[] readCurrentSlots() {
+            if (boundSlots != null) {
+                int[] all = boundSlots.getCurrentSlots();
+                int[] firstFive = new int[5];
+                System.arraycopy(all, 0, firstFive, 0, Math.min(5, all.length));
+                return firstFive;
+            }
             return currentSlots.clone();
         }
 
@@ -421,6 +449,12 @@ public final class PaladinFeatures {
          * Gets max spell slots for current level.
          */
         public int[] getMaxSlots() {
+            if (boundSlots != null) {
+                int[] all = boundSlots.getMaxSlotsArray();
+                int[] firstFive = new int[5];
+                System.arraycopy(all, 0, firstFive, 0, Math.min(5, all.length));
+                return firstFive;
+            }
             return getSpellSlots(paladinLevel);
         }
 
@@ -445,22 +479,30 @@ public final class PaladinFeatures {
          * Restores all spell slots (on long rest).
          */
         public void restoreAllSlots() {
+            if (boundSlots != null) {
+                boundSlots.restoreOnLongRest();
+                return;
+            }
             currentSlots = getSpellSlots(paladinLevel).clone();
         }
 
         /**
-         * Updates Paladin level and spell slots.
+         * Updates Paladin level and spell slots. When bound, the bound
+         * SpellSlots owns slot resizing (via Spellbook.onLevelUp), so here we
+         * only update paladinLevel; otherwise we resize the standalone array.
          */
         public void setPaladinLevel(int level) {
+            int oldLevel = this.paladinLevel;
             this.paladinLevel = level;
-            // Keep track of used slots vs new max
+            if (boundSlots != null) {
+                return;
+            }
             int[] newMax = getSpellSlots(level);
+            int[] oldMax = getSpellSlots(oldLevel);
             for (int i = 0; i < 5; i++) {
-                // Add any new slots from leveling
-                if (newMax[i] > getSpellSlots(paladinLevel)[i]) {
-                    currentSlots[i] += (newMax[i] - getSpellSlots(paladinLevel)[i]);
+                if (newMax[i] > oldMax[i]) {
+                    currentSlots[i] += (newMax[i] - oldMax[i]);
                 }
-                // Cap at new max
                 currentSlots[i] = Math.min(currentSlots[i], newMax[i]);
             }
         }

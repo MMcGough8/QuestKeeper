@@ -109,4 +109,52 @@ class SpellbookTest {
             assertEquals(0, book.getKnownCantrips().size());
         }
     }
+
+    @Nested
+    @DisplayName("Spell slot table updates on level-up")
+    class SlotTableUpdateTests {
+
+        @Test
+        @DisplayName("Half-caster leveled from 1 to 2 gains 2 first-level slots")
+        void halfCasterLeveledTo2GainsSlots() {
+            Spellbook book = new Spellbook();
+            book.initializeForClass(CharacterClass.PALADIN, 1);
+            assertEquals(0, book.getSpellSlots().getSlotsRemaining(1),
+                "precondition: Paladin at Lvl 1 has no slots");
+
+            book.onLevelUp(2);
+
+            assertEquals(2, book.getSpellSlots().getSlotsRemaining(1),
+                "Paladin should have 2 first-level slots after leveling to 2");
+        }
+
+        @Test
+        @DisplayName("Full-caster leveled from 2 to 3 gains a 2nd-level slot")
+        void fullCasterLeveledTo3GainsSecondLevelSlot() {
+            Spellbook book = new Spellbook();
+            book.initializeForClass(CharacterClass.WIZARD, 2);
+            assertEquals(0, book.getSpellSlots().getSlotsRemaining(2),
+                "precondition: Wizard at Lvl 2 has no 2nd-level slots");
+
+            book.onLevelUp(3);
+
+            assertEquals(2, book.getSpellSlots().getSlotsRemaining(2),
+                "Wizard should have 2 second-level slots after leveling to 3");
+        }
+
+        @Test
+        @DisplayName("Already-expended slots are not refilled on level-up")
+        void levelUpDoesNotRefillUsedSlots() {
+            Spellbook book = new Spellbook();
+            book.initializeForClass(CharacterClass.WIZARD, 2);
+            book.getSpellSlots().expendSlot(1);
+            int firstLevelBefore = book.getSpellSlots().getSlotsRemaining(1);
+
+            book.onLevelUp(3);
+
+            int firstLevelAfter = book.getSpellSlots().getSlotsRemaining(1);
+            assertEquals(firstLevelBefore + (4 - 3), firstLevelAfter,
+                "Lvl 2->3 wizard 1st-level slot count should grow by (newMax - oldMax)=1, not refill the spent one");
+        }
+    }
 }
