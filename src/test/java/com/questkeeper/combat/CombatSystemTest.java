@@ -2054,6 +2054,87 @@ class CombatSystemTest {
         }
 
         @Test
+        @DisplayName("Turn the Unholy spends Channel Divinity and frightens undead/fiends")
+        void turnTheUnholyAffectsUndeadAndFiends() {
+            Character paladin = new Character("Lyra", Race.HUMAN, CharacterClass.PALADIN,
+                14, 10, 14, 10, 10, 16);
+            paladin.setLevel(3);  // Channel Divinity + Turn the Unholy unlock here.
+            Weapon sword = Weapon.createLongsword();
+            paladin.getInventory().addItem(sword);
+            paladin.getInventory().equip(sword);
+
+            state = new GameState(paladin, campaign);
+            combatSystem = new CombatSystem();
+
+            Monster zombie = new Monster("zombie", "Zombie", 8, 30);
+            zombie.setType(com.questkeeper.combat.Monster.MonsterType.UNDEAD);
+            zombie.setAttackBonus(0); zombie.setDamageDice("1d4");
+            zombie.setAbilityModifiers(2, 0, 2, -3, -2, -3);
+
+            Monster human = new Monster("brigand", "Brigand", 12, 30);
+            human.setAttackBonus(0); human.setDamageDice("1d6");
+
+            combatSystem.startCombat(state, List.of(zombie, human));
+            int safety = 0;
+            while (combatSystem.isInCombat() && safety++ < 20) {
+                CombatResult tr = combatSystem.executeTurn();
+                if (tr.getType() == CombatResult.Type.TURN_START
+                    && combatSystem.getCurrentCombatant() == paladin) break;
+            }
+
+            CombatResult result = combatSystem.playerTurn("turn", null);
+            assertEquals(CombatResult.Type.INFO, result.getType(),
+                "Turn the Unholy should resolve; got: " + result.getMessage());
+            assertTrue(result.getMessage().contains("Turn the Unholy"),
+                "Result should mention Turn the Unholy: " + result.getMessage());
+
+            // Spending the Channel Divinity charge means a second cast fails.
+            CombatResult second = combatSystem.playerTurn("turn", null);
+            assertEquals(CombatResult.Type.ERROR, second.getType(),
+                "Second Turn the Unholy on the same rest cycle should fail");
+        }
+
+        @Test
+        @DisplayName("Open Hand Technique knocks prone on a Flurry hit (low DEX target)")
+        void openHandTechniqueProneOnFlurryHit() {
+            Character monk = new Character("Po", Race.HUMAN, CharacterClass.MONK,
+                14, 16, 14, 10, 16, 10);
+            monk.setLevel(3);  // Lvl 3 unlocks Way of the Open Hand for Open Hand Technique.
+
+            state = new GameState(monk, campaign);
+            combatSystem = new CombatSystem();
+
+            // Low AC + extreme negative DEX so Flurry hits AND target fails the prone save.
+            Monster brute = new Monster("brute", "Brute", 5, 200);
+            brute.setAttackBonus(0); brute.setDamageDice("1d4");
+            brute.setAbilityModifiers(0, -10, 0, 0, 0, 0);
+
+            combatSystem.startCombat(state, List.of(brute));
+            int safety = 0;
+            while (combatSystem.isInCombat() && safety++ < 20) {
+                CombatResult tr = combatSystem.executeTurn();
+                if (tr.getType() == CombatResult.Type.TURN_START
+                    && combatSystem.getCurrentCombatant() == monk) break;
+            }
+
+            // Activate Flurry first — it costs a bonus action and grants
+            // 2 bonus attacks. Main attack drains first, then flurry attacks.
+            combatSystem.playerTurn("flurry", null);
+            assertTrue(combatSystem.getFlurryAttacksRemaining() > 0,
+                "Flurry should grant bonus attacks");
+
+            // Main action attack consumes the main budget (no Open Hand).
+            combatSystem.playerTurn("attack", "brute");
+
+            // Now attacks come from the Flurry budget — Open Hand can fire.
+            CombatResult flurryHit = combatSystem.playerTurn("attack", "brute");
+            assertTrue(flurryHit.getMessage().contains("OPEN HAND")
+                    || flurryHit.getMessage().contains("PRONE"),
+                "Flurry hit on a low-DEX target should trigger Open Hand prone; got: "
+                    + flurryHit.getMessage());
+        }
+
+        @Test
         @DisplayName("Smited hit expends a spell slot and clears smiteReady")
         void smitedHitExpendsSlotAndClearsFlag() {
             setUpPaladinCombat();

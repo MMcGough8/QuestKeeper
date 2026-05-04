@@ -307,6 +307,11 @@ public class CombatSystem {
             case "sacred weapon":
                 return handleSacredWeapon();
 
+            case "turn":
+            case "turntheunholy":
+            case "turn the unholy":
+                return handleTurnTheUnholy();
+
             // Spellcasting
             case "cast":
                 return handleCastSpell(target);
@@ -1125,6 +1130,9 @@ public class CombatSystem {
             targetEnemy = found.get();
         }
 
+        boolean wasFlurryAttack =
+            mainActionAttacksRemaining == 0 && flurryAttacksRemaining > 0;
+
         CombatResult attackResult = processAttack(getPlayer(), targetEnemy);
 
         // Consume one attack from whichever budget has charges. Main-action
@@ -1134,6 +1142,27 @@ public class CombatSystem {
             mainActionAttacksRemaining--;
         } else if (flurryAttacksRemaining > 0) {
             flurryAttacksRemaining--;
+        }
+
+        // Open Hand Technique (Way of the Open Hand, Lvl 3 Monk): a
+        // landing Flurry attack imposes a DEX save vs the monk's Ki DC;
+        // failure knocks the target prone.
+        if (wasFlurryAttack
+            && attackResult.getType() == CombatResult.Type.ATTACK_HIT
+            && targetEnemy.isAlive()
+            && getPlayer() instanceof Character monk
+            && monk.getFeature(MonkFeatures.OPEN_HAND_TECHNIQUE_ID).isPresent()
+            && targetEnemy instanceof Monster m) {
+            int dc = MonkFeatures.getKiSaveDC(monk);
+            int roll = Dice.rollWithModifier(20, m.getDexterityMod());
+            if (roll < dc) {
+                statusEffectManager.applyEffect(m,
+                    com.questkeeper.combat.status.ConditionEffect.prone());
+                attackResult = CombatResult.info(attackResult.getMessage()
+                    + String.format(
+                        "\n[OPEN HAND: %s knocked PRONE! (DEX %d vs DC %d)]",
+                        m.getName(), roll, dc));
+            }
         }
 
         // Check if enemy was defeated
@@ -1809,6 +1838,64 @@ public class CombatSystem {
         sacredWeaponActive = true;
 
         return CombatResult.info(result);
+    }
+
+    /**
+     * Turn the Unholy (Channel Divinity, Lvl 3 Paladin). Each living
+     * fiend or undead enemy makes a WIS save vs the paladin's CD; failure
+     * applies FRIGHTENED for 3 rounds. Spends one Channel Divinity use.
+     */
+    private CombatResult handleTurnTheUnholy() {
+        Character player = (Character) getPlayer();
+        if (player == null) {
+            return CombatResult.error("No player character found.");
+        }
+        var channelFeature = player.getFeature(PaladinFeatures.CHANNEL_DIVINITY_ID);
+        if (channelFeature.isEmpty()) {
+            return CombatResult.error("You don't have Channel Divinity yet (requires level 3).");
+        }
+        PaladinFeatures.ChannelDivinity channel =
+            (PaladinFeatures.ChannelDivinity) channelFeature.get();
+        if (!channel.canUse()) {
+            return CombatResult.error(
+                "You've already used Channel Divinity. Take a short rest to restore it.");
+        }
+        var ttuFeature = player.getFeature(PaladinFeatures.TURN_THE_UNHOLY_ID);
+        if (ttuFeature.isEmpty()) {
+            return CombatResult.error("You don't have Turn the Unholy.");
+        }
+        PaladinFeatures.TurnTheUnholy ttu = (PaladinFeatures.TurnTheUnholy) ttuFeature.get();
+        int dc = ttu.getSaveDC(player);
+
+        StringBuilder log = new StringBuilder();
+        log.append(String.format(
+            "%s presents a holy symbol! [Turn the Unholy: WIS save DC %d]\n",
+            player.getName(), dc));
+
+        int affected = 0;
+        for (Combatant target : getLivingEnemies()) {
+            if (!(target instanceof Monster m)) continue;
+            if (m.getType() != Monster.MonsterType.UNDEAD
+                && m.getType() != Monster.MonsterType.FIEND) {
+                continue;
+            }
+            int roll = Dice.rollWithModifier(20, m.getWisdomMod());
+            if (roll >= dc) {
+                log.append(String.format("  %s saves (rolled %d).\n", m.getName(), roll));
+            } else {
+                statusEffectManager.applyEffect(m,
+                    com.questkeeper.combat.status.ConditionEffect.frightened(3));
+                affected++;
+                log.append(String.format("  %s is TURNED! (rolled %d)\n",
+                    m.getName(), roll));
+            }
+        }
+        if (affected == 0 && log.indexOf("\n  ") < 0) {
+            log.append("  No fiends or undead in sight.\n");
+        }
+
+        channel.use(player);
+        return CombatResult.info(log.toString().trim());
     }
 
     /**
