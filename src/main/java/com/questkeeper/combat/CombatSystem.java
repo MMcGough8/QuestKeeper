@@ -60,6 +60,7 @@ public class CombatSystem {
     private boolean disengageActive;      // Track if Disengage is active (no opportunity attacks)
     private boolean patientDefenseActive; // Track if Patient Defense is active (attacks have disadvantage)
     private int flurryAttacksRemaining;   // Track remaining Flurry of Blows attacks
+    private int mainActionAttacksRemaining; // Track remaining main-action attacks (Extra Attack)
     private boolean sacredWeaponActive;   // Track if Sacred Weapon is active (+CHA to attacks)
     private boolean smiteReady;           // Track if Divine Smite will be used on next hit
 
@@ -80,6 +81,7 @@ public class CombatSystem {
         this.disengageActive = false;
         this.patientDefenseActive = false;
         this.flurryAttacksRemaining = 0;
+        this.mainActionAttacksRemaining = 0;
         this.sacredWeaponActive = false;
         this.smiteReady = false;
     }
@@ -115,6 +117,7 @@ public class CombatSystem {
         this.disengageActive = false;
         this.patientDefenseActive = false;
         this.flurryAttacksRemaining = 0;
+        this.mainActionAttacksRemaining = 0;
         this.sacredWeaponActive = false;
         this.smiteReady = false;
 
@@ -188,6 +191,12 @@ public class CombatSystem {
         // Player turn-start: Patient Defense expires now (it lasted through
         // enemy turns since the monk activated it last round).
         patientDefenseActive = false;
+
+        // Reset Extra Attack budget for the new turn (martial classes get
+        // 2+ attacks per main action at Lvl 5+).
+        if (current instanceof Character c) {
+            mainActionAttacksRemaining = c.getAttacksPerTurn();
+        }
 
         // Player turn - return notification (include any turn start messages)
         CombatResult turnStart = CombatResult.turnStart(current);
@@ -1059,6 +1068,11 @@ public class CombatSystem {
 
         CombatResult attackResult = processAttack(getPlayer(), targetEnemy);
 
+        // Consume one main-action attack from the per-turn budget.
+        if (mainActionAttacksRemaining > 0) {
+            mainActionAttacksRemaining--;
+        }
+
         // Check if enemy was defeated
         if (!targetEnemy.isAlive()) {
             // Check for victory - include killing blow details
@@ -1080,12 +1094,23 @@ public class CombatSystem {
                 return CombatResult.victoryWithKillingBlow(xp, attackResult.getMessage());
             }
 
-            // Check if Action Surge is active - allow another attack
+            // Action Surge: refill the attack budget for another full action.
             if (actionSurgeActive) {
-                actionSurgeActive = false;  // Consume the surge
+                actionSurgeActive = false;
+                if (getPlayer() instanceof Character ch) {
+                    mainActionAttacksRemaining = ch.getAttacksPerTurn();
+                }
                 String message = attackResult.getMessage() + "\n" +
                     targetEnemy.getName() + " is defeated!\n" +
                     "[Action Surge: You can take another action!]";
+                return CombatResult.info(message);
+            }
+
+            // Extra Attack: still have attacks in the budget — keep the turn open.
+            if (mainActionAttacksRemaining > 0) {
+                String message = attackResult.getMessage() + "\n" +
+                    targetEnemy.getName() + " is defeated!\n" +
+                    "[Extra Attack: " + mainActionAttacksRemaining + " attack(s) remaining.]";
                 return CombatResult.info(message);
             }
 
@@ -1093,10 +1118,20 @@ public class CombatSystem {
             return CombatResult.enemyDefeated((Monster) targetEnemy);
         }
 
-        // Check if Action Surge is active - allow another attack
+        // Action Surge: refill the attack budget for another full action.
         if (actionSurgeActive) {
-            actionSurgeActive = false;  // Consume the surge
+            actionSurgeActive = false;
+            if (getPlayer() instanceof Character ch) {
+                mainActionAttacksRemaining = ch.getAttacksPerTurn();
+            }
             String message = attackResult.getMessage() + "\n[Action Surge: You can take another action!]";
+            return CombatResult.info(message);
+        }
+
+        // Extra Attack: still have attacks in the budget — keep the turn open.
+        if (mainActionAttacksRemaining > 0) {
+            String message = attackResult.getMessage() + "\n" +
+                "[Extra Attack: " + mainActionAttacksRemaining + " attack(s) remaining.]";
             return CombatResult.info(message);
         }
 
@@ -1509,6 +1544,10 @@ public class CombatSystem {
     /**
      * Checks if Patient Defense is active (attacks have disadvantage).
      */
+    public int getMainActionAttacksRemaining() {
+        return mainActionAttacksRemaining;
+    }
+
     public boolean isPatientDefenseActive() {
         return patientDefenseActive;
     }

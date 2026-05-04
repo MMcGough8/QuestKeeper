@@ -577,6 +577,25 @@ public class Character implements Combatant {
         return (level - 1) / 4 + 2;
     }
 
+    /**
+     * Returns the number of weapon attacks this character makes per main
+     * action. Per PHB: most martial classes get Extra Attack at Lvl 5
+     * (2 attacks); Fighter additionally gets 3 at Lvl 11 and 4 at Lvl 20.
+     * Non-martial classes (Wizard, Sorcerer, etc.) always get 1.
+     */
+    public int getAttacksPerTurn() {
+        return switch (characterClass) {
+            case FIGHTER -> {
+                if (level >= 20) yield 4;
+                if (level >= 11) yield 3;
+                if (level >= 5) yield 2;
+                yield 1;
+            }
+            case PALADIN, RANGER, MONK, BARBARIAN -> level >= 5 ? 2 : 1;
+            default -> 1;
+        };
+    }
+
     private int calculateMaxHitPoints() {
         int conMod = getAbilityModifier(Ability.CONSTITUTION);
         int hitDie = characterClass.getHitDie();

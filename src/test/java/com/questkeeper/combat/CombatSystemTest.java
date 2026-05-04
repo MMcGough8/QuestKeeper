@@ -1838,6 +1838,56 @@ class CombatSystemTest {
         }
 
         @Test
+        @DisplayName("Lvl 5 Fighter has 2 attacks per turn (Extra Attack)")
+        void lvl5FighterGetsTwoAttacks() {
+            Character fighter = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                16, 12, 14, 10, 10, 10);
+            fighter.setLevel(5);
+            assertEquals(2, fighter.getAttacksPerTurn(),
+                "Lvl 5 Fighter should have 2 attacks per turn");
+
+            state = new GameState(fighter, campaign);
+            combatSystem = new CombatSystem();
+
+            Weapon sword = Weapon.createLongsword();
+            fighter.getInventory().addItem(sword);
+            fighter.getInventory().equip(sword);
+
+            Monster weakling = new Monster("weakling", "Weakling", 5, 200);
+            weakling.setAttackBonus(0);
+            weakling.setDamageDice("1d4");
+            weakling.setDexterityMod(0);
+            combatSystem.startCombat(state, List.of(weakling));
+
+            // Tick the combat loop until it returns the fighter's TURN_START.
+            // executeTurn is what fires the per-turn budget reset.
+            int safety = 0;
+            while (combatSystem.isInCombat() && safety++ < 20) {
+                CombatResult tr = combatSystem.executeTurn();
+                if (tr.getType() == CombatResult.Type.TURN_START
+                    && combatSystem.getCurrentCombatant() == fighter) {
+                    break;
+                }
+            }
+
+            assertEquals(2, combatSystem.getMainActionAttacksRemaining(),
+                "Player turn should start with full attack budget");
+
+            CombatResult firstAttack = combatSystem.playerTurn("attack", "weakling");
+            assertEquals(1, combatSystem.getMainActionAttacksRemaining(),
+                "First attack should leave 1 attack in budget");
+            assertTrue(firstAttack.getMessage().contains("Extra Attack")
+                    || firstAttack.getMessage().contains("attack(s) remaining"),
+                "First attack should signal that more attacks remain");
+            assertEquals(fighter, combatSystem.getCurrentCombatant(),
+                "Turn should still belong to the player");
+
+            combatSystem.playerTurn("attack", "weakling");
+            assertEquals(0, combatSystem.getMainActionAttacksRemaining(),
+                "Second attack should exhaust the budget");
+        }
+
+        @Test
         @DisplayName("Sacred Weapon adds CHA bonus to attack rolls and tags the result")
         void sacredWeaponAddsBonusToAttack() {
             setUpPaladinCombat();
