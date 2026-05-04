@@ -245,6 +245,10 @@ public class CombatSystem {
             case "escape":
                 return handleFlee();
 
+            case "help":
+            case "?":
+                return CombatResult.info(buildCombatHelp());
+
             case "secondwind":
             case "second wind":
             case "second_wind":
@@ -325,8 +329,68 @@ public class CombatSystem {
 
             default:
                 return CombatResult.error(
-                    String.format("Unknown action: %s. Try: attack, flee, or class abilities", action));
+                    String.format("Unknown action: %s. Type 'help' for available actions.", action));
         }
+    }
+
+    /**
+     * Builds an in-combat help string listing the verbs the player's
+     * character has available right now, based on their class features.
+     */
+    private String buildCombatHelp() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("=== COMBAT ACTIONS ===\n");
+        sb.append("  attack <target>  - make a weapon attack\n");
+        sb.append("  flee             - try to escape (DEX check)\n");
+        sb.append("  cast <spell>     - cast a spell (uses a slot)\n");
+        sb.append("  help             - this menu\n");
+
+        Combatant p = getPlayer();
+        if (!(p instanceof Character ch)) return sb.toString();
+
+        StringBuilder cls = new StringBuilder();
+        if (ch.getFeature(FighterFeatures.SECOND_WIND_ID).isPresent()) {
+            cls.append("  secondwind       - Fighter: bonus-action self-heal\n");
+        }
+        if (ch.getFeature(FighterFeatures.ACTION_SURGE_ID).isPresent()) {
+            cls.append("  actionsurge      - Fighter: another action this turn\n");
+        }
+        if (ch.getFeature(PaladinFeatures.DIVINE_SMITE_ID).isPresent()) {
+            cls.append("  smite            - Paladin: prime Divine Smite\n");
+        }
+        if (ch.getFeature(PaladinFeatures.LAY_ON_HANDS_ID).isPresent()) {
+            cls.append("  layonhands       - Paladin: heal from your divine pool\n");
+        }
+        if (ch.getFeature(PaladinFeatures.SACRED_WEAPON_ID).isPresent()) {
+            cls.append("  sacredweapon     - Paladin: Channel Divinity buff\n");
+        }
+        if (ch.getFeature(PaladinFeatures.TURN_THE_UNHOLY_ID).isPresent()
+            || ch.getFeature(com.questkeeper.character.features.ClericFeatures.TURN_UNDEAD_ID).isPresent()) {
+            cls.append("  turn             - frighten undead/fiends (Channel Divinity)\n");
+        }
+        if (ch.getFeature(BarbarianFeatures.RAGE_ID).isPresent()) {
+            cls.append("  rage             - Barbarian: enter rage\n");
+            cls.append("  reckless         - Barbarian: advantage on attacks (and on you)\n");
+        }
+        if (ch.getFeature(BarbarianFeatures.FRENZY_ID).isPresent()) {
+            cls.append("  frenzy           - Berserker: bonus melee attack while raging\n");
+        }
+        if (ch.getFeature(MonkFeatures.FLURRY_OF_BLOWS_ID).isPresent()) {
+            cls.append("  flurry           - Monk: 2 bonus attacks (1 ki)\n");
+            cls.append("  patient          - Monk: defensive (1 ki)\n");
+            cls.append("  step             - Monk: dash/disengage (1 ki)\n");
+        }
+        if (ch.getFeature(MonkFeatures.STUNNING_STRIKE_ID).isPresent()) {
+            cls.append("  stun             - Monk L5: prime Stunning Strike\n");
+        }
+        if (ch.getFeature(RogueFeatures.CUNNING_ACTION_ID).isPresent()) {
+            cls.append("  dash / disengage / hide - Rogue: Cunning Action\n");
+        }
+
+        if (cls.length() > 0) {
+            sb.append("=== CLASS ACTIONS ===\n").append(cls);
+        }
+        return sb.toString();
     }
 
     /**

@@ -258,23 +258,64 @@ public class Display {
         println();
         printBox("AVAILABLE COMMANDS", DEFAULT_WIDTH, YELLOW);
         println();
-        
+
+        println(colorize("Exploration", YELLOW));
         showHelpCommand("look / examine", "Examine your surroundings or an object");
-        showHelpCommand("go <direction>", "Move in a direction (north, south, east, west)");
-        showHelpCommand("talk <npc>", "Talk to a character");
-        showHelpCommand("buy <item>", "Buy from a shopkeeper (while talking)");
-        showHelpCommand("take <item>", "Pick up an item");
-        showHelpCommand("use <item>", "Use an item from your inventory");
+        showHelpCommand("go <direction>", "Move (n/s/e/w/ne/nw/se/sw/up/down)");
+        showHelpCommand("rest", "Short or long rest (recover HP / hit dice)");
+        println();
+
+        println(colorize("Items & Equipment", YELLOW));
+        showHelpCommand("take <item>", "Pick up an item from the room");
+        showHelpCommand("drop <item>", "Drop an item from your inventory");
+        showHelpCommand("use <item>", "Use a consumable or magic item");
+        showHelpCommand("equip <item>", "Equip a weapon, armor, or accessory");
+        showHelpCommand("unequip <slot>", "Remove equipped gear");
         showHelpCommand("inventory / i", "View your inventory");
-        showHelpCommand("stats / character", "View your character stats");
-        showHelpCommand("attack <target>", "Attack a target in combat");
-        showHelpCommand("cast <spell>", "Cast a spell");
-        showHelpCommand("rest", "Take a short or long rest");
-        showHelpCommand("save", "Save your game");
+        showHelpCommand("equipment", "View what you have equipped");
+        showHelpCommand("stats", "View character sheet + class features");
+        println();
+
+        println(colorize("Dialogue", YELLOW));
+        showHelpCommand("talk <npc>", "Begin a conversation");
+        showHelpCommand("ask about <topic>", "Ask the NPC about a topic");
+        showHelpCommand("buy <item>", "Buy from a shopkeeper");
+        showHelpCommand("bye", "End the conversation");
+        println();
+
+        println(colorize("Combat", YELLOW));
+        showHelpCommand("attack <target>", "Make a weapon attack");
+        showHelpCommand("cast <spell>", "Cast a spell (uses a slot)");
+        showHelpCommand("flee", "Attempt to escape combat (DEX check)");
+        println();
+
+        println(colorize("Class Actions (use what your class has)", YELLOW));
+        showHelpCommand("smite", "Paladin: prime Divine Smite for next hit");
+        showHelpCommand("sacredweapon", "Paladin: Channel Divinity weapon buff");
+        showHelpCommand("turn", "Paladin/Cleric: Channel Divinity vs undead/fiends");
+        showHelpCommand("layonhands", "Paladin: heal from your divine pool");
+        showHelpCommand("rage", "Barbarian: enter rage (bonus damage / resistance)");
+        showHelpCommand("reckless", "Barbarian: advantage on attacks (and on you)");
+        showHelpCommand("frenzy", "Barbarian Berserker: bonus attack while raging");
+        showHelpCommand("flurry", "Monk: spend 1 ki for two bonus attacks");
+        showHelpCommand("patient / step", "Monk: defensive / mobility ki actions");
+        showHelpCommand("stun", "Monk L5: prime Stunning Strike on next hit");
+        showHelpCommand("dash / disengage", "Rogue: bonus-action movement");
+        showHelpCommand("hide", "Rogue: bonus-action stealth");
+        showHelpCommand("actionsurge", "Fighter: take an extra action this turn");
+        showHelpCommand("secondwind", "Fighter: bonus action self-heal");
+        println();
+
+        println(colorize("Trials", YELLOW));
+        showHelpCommand("trial", "Begin a trial at this location");
+        showHelpCommand("attempt <skill>", "Attempt a mini-game with a skill check");
+        println();
+
+        println(colorize("System", YELLOW));
+        showHelpCommand("save", "Save your game (YAML)");
         showHelpCommand("load", "Load a saved game");
+        showHelpCommand("help", "Show this menu");
         showHelpCommand("quit / exit", "Exit the game");
-        showHelpCommand("help", "Show this help menu");
-        
         println();
     }
 

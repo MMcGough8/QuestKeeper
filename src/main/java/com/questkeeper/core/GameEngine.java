@@ -990,13 +990,21 @@ public class GameEngine implements AutoCloseable {
             return;
         }
 
-        // Get a random monster from the campaign
+        // Get a random monster from the campaign, excluding bosses (they
+        // are reserved for scripted trial encounters; spawning them as
+        // random encounters one-shots low-level characters).
         var templates = campaign.getMonsterTemplates();
         if (templates.isEmpty()) {
             return;
         }
 
-        String[] monsterIds = templates.keySet().toArray(new String[0]);
+        String[] monsterIds = templates.entrySet().stream()
+            .filter(e -> !e.getValue().isBoss())
+            .map(java.util.Map.Entry::getKey)
+            .toArray(String[]::new);
+        if (monsterIds.length == 0) {
+            return;
+        }
         String randomId = monsterIds[random.nextInt(monsterIds.length)];
         Monster monster = campaign.createMonster(randomId);
 

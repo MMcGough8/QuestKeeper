@@ -258,6 +258,9 @@ class CampaignLoader {
             }
         }
 
+        monster.setBoss(getBoolean(data, "is_boss", false));
+        monster.setRangedAttack(getBoolean(data, "ranged_attack", false));
+
         return monster;
     }
 
