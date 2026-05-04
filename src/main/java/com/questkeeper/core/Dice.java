@@ -310,9 +310,12 @@ public final class Dice {
     }
 
     public static RollResult parseDetailed(String notation) {
-        int historyIndexBefore = rollHistory.size();
         int result = parse(notation);
-        String historyEntry = rollHistory.get(historyIndexBefore);
+        // The freshest entry is always last; computing the index after parse
+        // also handles the case where addToHistory trimmed at MAX_HISTORY_SIZE.
+        String historyEntry = rollHistory.isEmpty()
+            ? notation
+            : rollHistory.get(rollHistory.size() - 1);
         return new RollResult(result, historyEntry, notation);
     }
 

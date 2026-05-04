@@ -88,11 +88,17 @@ public abstract class ActivatedFeature implements ClassFeature {
 
     /**
      * Sets the maximum number of uses (for features that scale with level).
+     * On growth (level-up), grants only the delta of newly unlocked uses
+     * rather than refilling the pool.
      */
     public void setMaxUses(int maxUses) {
+        int oldMax = this.maxUses;
         this.maxUses = maxUses;
-        // Also restore uses when max increases
-        if (currentUses < maxUses) {
+        if (maxUses > oldMax) {
+            currentUses += (maxUses - oldMax);
+        }
+        // Cap at new max in case max decreased
+        if (currentUses > maxUses) {
             currentUses = maxUses;
         }
     }
