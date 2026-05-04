@@ -1000,6 +1000,79 @@ class CharacterTest {
     }
 
     @Nested
+    @DisplayName("Bard class features")
+    class BardClassFeatureTests {
+
+        @Test
+        @DisplayName("L1 Bard gets Bardic Inspiration with d6 die")
+        void l1BardGetsBardicInspirationD6() {
+            Character b = new Character("Halo", Race.HUMAN, CharacterClass.BARD,
+                10, 14, 14, 10, 10, 16);
+            var bi = (com.questkeeper.character.features.BardFeatures.BardicInspiration)
+                b.getFeature(
+                    com.questkeeper.character.features.BardFeatures.BARDIC_INSPIRATION_ID
+                ).orElseThrow();
+            assertEquals(6, bi.getInspirationDie(), "L1 Bard inspiration die is d6");
+        }
+
+        @Test
+        @DisplayName("L5 Bard inspiration die scales to d8 and resets on short rest")
+        void l5BardInspirationScales() {
+            Character b = new Character("Halo", Race.HUMAN, CharacterClass.BARD,
+                10, 14, 14, 10, 10, 16);
+            b.setLevel(5);
+            var bi = (com.questkeeper.character.features.BardFeatures.BardicInspiration)
+                b.getFeature(
+                    com.questkeeper.character.features.BardFeatures.BARDIC_INSPIRATION_ID
+                ).orElseThrow();
+            assertEquals(8, bi.getInspirationDie(), "L5 Bard inspiration die is d8");
+            assertTrue(b.getFeature(
+                com.questkeeper.character.features.BardFeatures.FONT_OF_INSPIRATION_ID
+            ).isPresent(), "Lvl 5 Bard should gain Font of Inspiration");
+        }
+
+        @Test
+        @DisplayName("L2 Bard gains Jack of All Trades + Song of Rest")
+        void l2BardL2Features() {
+            Character b = new Character("Halo", Race.HUMAN, CharacterClass.BARD,
+                10, 14, 14, 10, 10, 16);
+            b.setLevel(2);
+            assertTrue(b.getFeature(
+                com.questkeeper.character.features.BardFeatures.JACK_OF_ALL_TRADES_ID
+            ).isPresent());
+            assertTrue(b.getFeature(
+                com.questkeeper.character.features.BardFeatures.SONG_OF_REST_ID
+            ).isPresent());
+        }
+
+        @Test
+        @DisplayName("L3 Bard with College of Lore gets Cutting Words + Bonus Proficiencies")
+        void l3LoreBardSubclassFeatures() {
+            Character b = new Character("Halo", Race.HUMAN, CharacterClass.BARD,
+                10, 14, 14, 10, 10, 16);
+            b.setLevel(3);
+            b.setBardCollege(
+                com.questkeeper.character.features.BardFeatures.BardCollege.LORE);
+            assertTrue(b.getFeature(
+                com.questkeeper.character.features.BardFeatures.CUTTING_WORDS_ID
+            ).isPresent());
+            assertTrue(b.getFeature(
+                com.questkeeper.character.features.BardFeatures.LORE_BONUS_PROFICIENCIES_ID
+            ).isPresent());
+        }
+
+        @Test
+        @DisplayName("setBardCollege on a non-Bard throws")
+        void setBardCollegeOnNonBardThrows() {
+            Character fighter = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            assertThrows(IllegalStateException.class,
+                () -> fighter.setBardCollege(
+                    com.questkeeper.character.features.BardFeatures.BardCollege.LORE));
+        }
+    }
+
+    @Nested
     @DisplayName("Sorcerer class features")
     class SorcererClassFeatureTests {
 

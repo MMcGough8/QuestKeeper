@@ -241,6 +241,7 @@ public class Character implements Combatant {
     private com.questkeeper.character.features.ClericFeatures.DivineDomain divineDomain;
     private com.questkeeper.character.features.WizardFeatures.ArcaneTradition arcaneTradition;
     private com.questkeeper.character.features.SorcererFeatures.SorcerousOrigin sorcerousOrigin;
+    private com.questkeeper.character.features.BardFeatures.BardCollege bardCollege;
 
     // Spellcasting
     private final Spellbook spellbook = new Spellbook();
@@ -802,6 +803,22 @@ public class Character implements Combatant {
                         .ifPresent(fom -> fom.setSorcererLevel(level));
                 }
             }
+        } else if (characterClass == CharacterClass.BARD) {
+            List<ClassFeature> bardFeatures =
+                com.questkeeper.character.features.BardFeatures.createFeaturesForLevel(
+                    level, bardCollege);
+            for (ClassFeature feature : bardFeatures) {
+                if (getFeature(feature.getId()).isEmpty()) {
+                    classFeatures.add(feature);
+                } else if (feature.getId().equals(
+                        com.questkeeper.character.features.BardFeatures.BARDIC_INSPIRATION_ID)) {
+                    getFeature(com.questkeeper.character.features.BardFeatures.BARDIC_INSPIRATION_ID)
+                        .filter(f -> f instanceof
+                            com.questkeeper.character.features.BardFeatures.BardicInspiration)
+                        .map(f -> (com.questkeeper.character.features.BardFeatures.BardicInspiration) f)
+                        .ifPresent(bi -> bi.setBardLevel(level));
+                }
+            }
         }
         // Other classes will be added here as features are implemented
     }
@@ -955,6 +972,27 @@ public class Character implements Combatant {
 
     public com.questkeeper.character.features.SorcererFeatures.SorcerousOrigin getSorcerousOrigin() {
         return sorcerousOrigin;
+    }
+
+    /**
+     * Sets the Bard's College (chosen at L3 in 5e RAW). Replaces any prior
+     * choice and rebuilds the class-features list.
+     */
+    public void setBardCollege(
+            com.questkeeper.character.features.BardFeatures.BardCollege college) {
+        if (characterClass != CharacterClass.BARD) {
+            throw new IllegalStateException("Bard College is only available to Bards");
+        }
+        this.bardCollege = college;
+        classFeatures.removeIf(f ->
+            f.getId().equals(com.questkeeper.character.features.BardFeatures.BARD_COLLEGE_ID)
+            || f.getId().equals(com.questkeeper.character.features.BardFeatures.LORE_BONUS_PROFICIENCIES_ID)
+            || f.getId().equals(com.questkeeper.character.features.BardFeatures.CUTTING_WORDS_ID));
+        initializeClassFeatures();
+    }
+
+    public com.questkeeper.character.features.BardFeatures.BardCollege getBardCollege() {
+        return bardCollege;
     }
 
     /**
