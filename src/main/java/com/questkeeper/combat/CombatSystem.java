@@ -61,6 +61,7 @@ public class CombatSystem {
     private boolean patientDefenseActive; // Track if Patient Defense is active (attacks have disadvantage)
     private int flurryAttacksRemaining;   // Track remaining Flurry of Blows attacks
     private int mainActionAttacksRemaining; // Track remaining main-action attacks (Extra Attack)
+    private boolean reactionUsed;         // Track if reaction was used this turn
     private boolean sacredWeaponActive;   // Track if Sacred Weapon is active (+CHA to attacks)
     private boolean smiteReady;           // Track if Divine Smite will be used on next hit
 
@@ -82,6 +83,7 @@ public class CombatSystem {
         this.patientDefenseActive = false;
         this.flurryAttacksRemaining = 0;
         this.mainActionAttacksRemaining = 0;
+        this.reactionUsed = false;
         this.sacredWeaponActive = false;
         this.smiteReady = false;
     }
@@ -118,6 +120,7 @@ public class CombatSystem {
         this.patientDefenseActive = false;
         this.flurryAttacksRemaining = 0;
         this.mainActionAttacksRemaining = 0;
+        this.reactionUsed = false;
         this.sacredWeaponActive = false;
         this.smiteReady = false;
 
@@ -197,6 +200,10 @@ public class CombatSystem {
         if (current instanceof Character c) {
             mainActionAttacksRemaining = c.getAttacksPerTurn();
         }
+
+        // Reaction refreshes at the start of each player turn (5e: one
+        // reaction per round, refreshed at start of your turn).
+        reactionUsed = false;
 
         // Player turn - return notification (include any turn start messages)
         CombatResult turnStart = CombatResult.turnStart(current);
@@ -1558,6 +1565,10 @@ public class CombatSystem {
         return bonusActionUsed;
     }
 
+    public boolean isReactionUsed() {
+        return reactionUsed;
+    }
+
     /**
      * Helper for bonus-action handlers. Returns a CombatResult error if the
      * player has already spent their bonus action this turn; null otherwise.
@@ -1576,6 +1587,26 @@ public class CombatSystem {
      */
     private void consumeBonusAction() {
         bonusActionUsed = true;
+    }
+
+    /**
+     * True if the player has a reaction available this turn. Reactions
+     * fire automatically (e.g., Deflect Missiles when hit by ranged) so
+     * callers check this guard, then call consumeReaction() if they fire.
+     * Refreshed at the start of each player turn.
+     */
+    boolean reactionAvailable() {
+        return !reactionUsed;
+    }
+
+    /**
+     * Marks the reaction as spent for this turn. Reactions are once per
+     * round (5e); the next refresh is at the start of the player's next
+     * turn. Phase 1.3 establishes the API; specific reactions (Deflect
+     * Missiles, Uncanny Dodge) wire in during Phase 2.
+     */
+    void consumeReaction() {
+        reactionUsed = true;
     }
 
     public boolean isPatientDefenseActive() {
