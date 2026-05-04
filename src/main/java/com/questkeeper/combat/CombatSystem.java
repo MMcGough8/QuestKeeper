@@ -917,6 +917,12 @@ public class CombatSystem {
                     }
                 });
 
+            // Process Rage duration (decrements roundsRemaining; auto-ends at 0)
+            character.getFeature(BarbarianFeatures.RAGE_ID)
+                .filter(f -> f instanceof BarbarianFeatures.Rage)
+                .map(f -> (BarbarianFeatures.Rage) f)
+                .ifPresent(BarbarianFeatures.Rage::processTurnEnd);
+
             // Reset Colossus Slayer for Ranger
             character.getFeature(RangerFeatures.COLOSSUS_SLAYER_ID)
                 .filter(f -> f instanceof RangerFeatures.ColossusSlayer)
