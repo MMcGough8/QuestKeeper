@@ -229,6 +229,20 @@ class CombatSystemTest {
         }
 
         @Test
+        @DisplayName("'help' in combat lists base actions and class-specific verbs")
+        void helpInCombatListsActionsAndClassVerbs() {
+            CombatResult result = combatSystem.playerTurn("help", null);
+            assertEquals(CombatResult.Type.INFO, result.getType(),
+                "help should be an INFO result, not error");
+            String msg = result.getMessage();
+            assertTrue(msg.contains("attack"), "help should mention attack");
+            assertTrue(msg.contains("flee"), "help should mention flee");
+            // Test character is a Fighter; should see Fighter verbs
+            assertTrue(msg.contains("secondwind") || msg.contains("Fighter"),
+                "Fighter help should mention class-specific actions; got:\n" + msg);
+        }
+
+        @Test
         @DisplayName("attack hits when roll meets AC")
         void attackHitsWhenRollMeetsAC() {
             // Use high-HP weak enemy so player survives long enough to hit

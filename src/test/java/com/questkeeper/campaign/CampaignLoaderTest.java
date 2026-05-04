@@ -193,6 +193,58 @@ class CampaignLoaderTest {
         }
 
         @Test
+        @DisplayName("is_boss YAML field populates Monster.isBoss()")
+        void isBossYamlFieldRoundTrips() throws IOException {
+            createMonstersYaml("""
+                monsters:
+                  - id: minion
+                    name: Minion
+                    armor_class: 12
+                    hit_points: 5
+                  - id: archvillain
+                    name: Archvillain
+                    armor_class: 18
+                    hit_points: 200
+                    is_boss: true
+                """);
+
+            loader = new CampaignLoader(campaignDir);
+            assertTrue(loader.load());
+
+            var minion = loader.getMonsterTemplates().get("minion");
+            var boss = loader.getMonsterTemplates().get("archvillain");
+            assertFalse(minion.isBoss(),
+                "Default is_boss should be false");
+            assertTrue(boss.isBoss(),
+                "is_boss: true must populate Monster.isBoss() so random encounters can filter");
+        }
+
+        @Test
+        @DisplayName("ranged_attack YAML field populates Monster.isRangedAttack()")
+        void rangedAttackYamlFieldRoundTrips() throws IOException {
+            createMonstersYaml("""
+                monsters:
+                  - id: melee_brute
+                    name: Brute
+                    armor_class: 14
+                    hit_points: 20
+                  - id: archer
+                    name: Archer
+                    armor_class: 12
+                    hit_points: 12
+                    ranged_attack: true
+                """);
+
+            loader = new CampaignLoader(campaignDir);
+            assertTrue(loader.load());
+
+            assertFalse(loader.getMonsterTemplates().get("melee_brute").isRangedAttack(),
+                "Default ranged_attack should be false");
+            assertTrue(loader.getMonsterTemplates().get("archer").isRangedAttack(),
+                "ranged_attack: true must populate Monster.isRangedAttack() so Deflect Missiles fires");
+        }
+
+        @Test
         @DisplayName("creates monster instances from templates")
         void createsMonsterInstances() throws IOException {
             createMonstersYaml("""
