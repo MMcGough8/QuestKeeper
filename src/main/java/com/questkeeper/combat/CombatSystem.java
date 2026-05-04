@@ -662,6 +662,26 @@ public class CombatSystem {
                     }
                 }
 
+                // Divine Smite (Paladin): expend a spell slot for radiant damage on a melee hit
+                int smiteDamage = 0;
+                if (smiteReady && weapon != null && !isRangedAttack) {
+                    var smiteFeature = character.getFeature(PaladinFeatures.DIVINE_SMITE_ID);
+                    if (smiteFeature.isPresent() &&
+                        smiteFeature.get() instanceof PaladinFeatures.DivineSmite divineSmite) {
+                        int slotLevel = divineSmite.getLowestAvailableSlot();
+                        if (slotLevel > 0) {
+                            int diceCount = divineSmite.getSmiteDice(slotLevel, false);
+                            smiteDamage = Dice.rollMultiple(diceCount, 8);
+                            if (isCrit) {
+                                smiteDamage += Dice.rollMultiple(diceCount, 8);
+                            }
+                            damage += smiteDamage;
+                            divineSmite.expendSlot(slotLevel);
+                            smiteReady = false;
+                        }
+                    }
+                }
+
                 damage = Math.max(1, damage); // Minimum 1 damage
 
                 target.takeDamage(damage);
@@ -676,6 +696,10 @@ public class CombatSystem {
                 if (sneakAttackDamage > 0) {
                     if (specialEffects.length() > 0) specialEffects.append(" ");
                     specialEffects.append(String.format("[SNEAK ATTACK +%d!]", sneakAttackDamage));
+                }
+                if (smiteDamage > 0) {
+                    if (specialEffects.length() > 0) specialEffects.append(" ");
+                    specialEffects.append(String.format("[DIVINE SMITE +%d radiant!]", smiteDamage));
                 }
                 if (isReckless) {
                     if (specialEffects.length() > 0) specialEffects.append(" ");

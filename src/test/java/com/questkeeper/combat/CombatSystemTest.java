@@ -1774,4 +1774,86 @@ class CombatSystemTest {
             assertTrue(damage2 >= 3 && damage2 <= 8);
         }
     }
+
+    @Nested
+    @DisplayName("Divine Smite combat integration")
+    class DivineSmiteCombatTests {
+
+        private Character paladin;
+        private com.questkeeper.character.features.PaladinFeatures.DivineSmite smite;
+
+        private void setUpPaladinCombat() {
+            // Lvl 2 Paladin: STR 16 -> +3, +2 prof = +5 attack. Monster AC 5 -> any roll hits.
+            paladin = new Character("PalTest", Race.HUMAN, CharacterClass.PALADIN,
+                16, 10, 14, 10, 10, 14);
+            paladin.setLevel(2);
+
+            // Smite requires a melee weapon
+            Weapon longsword = Weapon.createLongsword();
+            paladin.getInventory().addItem(longsword);
+            paladin.getInventory().equip(longsword);
+
+            state = new GameState(paladin, campaign);
+            combatSystem = new CombatSystem();
+
+            smite = (com.questkeeper.character.features.PaladinFeatures.DivineSmite)
+                paladin.getFeature(
+                    com.questkeeper.character.features.PaladinFeatures.DIVINE_SMITE_ID
+                ).orElseThrow();
+        }
+
+        private Monster createWeakling() {
+            // AC 5 ensures every roll hits a Lvl 2 Paladin's +5 attack
+            Monster m = new Monster("weakling", "Weakling", 5, 200);
+            m.setAttackBonus(0);
+            m.setDamageDice("1d4");
+            m.setDexterityMod(0);
+            m.setExperienceValue(10);
+            return m;
+        }
+
+        private void advanceToPlayerTurn() {
+            int safety = 0;
+            while (combatSystem.isInCombat()
+                    && combatSystem.getCurrentCombatant() != paladin
+                    && safety++ < 20) {
+                combatSystem.executeTurn();
+            }
+        }
+
+        @Test
+        @DisplayName("smite sets isSmiteReady() and does not expend a slot yet")
+        void smiteActionMarksReady() {
+            setUpPaladinCombat();
+            combatSystem.startCombat(state, List.of(createWeakling()));
+            advanceToPlayerTurn();
+            int slotsBefore = smite.getCurrentSlots()[0];
+
+            combatSystem.playerTurn("smite", null);
+
+            assertTrue(combatSystem.isSmiteReady(),
+                "smite action should set smiteReady");
+            assertEquals(slotsBefore, smite.getCurrentSlots()[0],
+                "Slot should not be expended until the attack lands");
+        }
+
+        @Test
+        @DisplayName("Smited hit expends a spell slot and clears smiteReady")
+        void smitedHitExpendsSlotAndClearsFlag() {
+            setUpPaladinCombat();
+            combatSystem.startCombat(state, List.of(createWeakling()));
+            advanceToPlayerTurn();
+            int slotsBefore = smite.getCurrentSlots()[0];
+
+            combatSystem.playerTurn("smite", null);
+            assertTrue(combatSystem.isSmiteReady(), "precondition: smite ready");
+
+            combatSystem.playerTurn("attack", "weakling");
+
+            assertEquals(slotsBefore - 1, smite.getCurrentSlots()[0],
+                "Smited hit should expend exactly one spell slot");
+            assertFalse(combatSystem.isSmiteReady(),
+                "smiteReady should be cleared after a smited attack");
+        }
+    }
 }
