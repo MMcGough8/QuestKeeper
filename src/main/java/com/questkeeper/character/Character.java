@@ -647,215 +647,7 @@ public class Character implements Combatant {
      * Called from constructor and levelUp().
      */
     private void initializeClassFeatures() {
-        if (characterClass == CharacterClass.FIGHTER) {
-            List<ClassFeature> fighterFeatures = FighterFeatures.createFeaturesForLevel(level, fightingStyle);
-
-            // Add any features we don't already have
-            for (ClassFeature feature : fighterFeatures) {
-                if (getFeature(feature.getId()).isEmpty()) {
-                    classFeatures.add(feature);
-                }
-            }
-        } else if (characterClass == CharacterClass.ROGUE) {
-            List<ClassFeature> rogueFeatures = RogueFeatures.createFeaturesForLevel(level, expertiseSkills);
-
-            // Add any features we don't already have
-            for (ClassFeature feature : rogueFeatures) {
-                if (getFeature(feature.getId()).isEmpty()) {
-                    classFeatures.add(feature);
-                } else if (feature.getId().equals(RogueFeatures.SNEAK_ATTACK_ID)) {
-                    // Update Sneak Attack dice when leveling up
-                    getFeature(RogueFeatures.SNEAK_ATTACK_ID)
-                        .filter(f -> f instanceof RogueFeatures.SneakAttack)
-                        .map(f -> (RogueFeatures.SneakAttack) f)
-                        .ifPresent(sa -> sa.setRogueLevel(level));
-                }
-            }
-        } else if (characterClass == CharacterClass.BARBARIAN) {
-            List<ClassFeature> barbarianFeatures = BarbarianFeatures.createFeaturesForLevel(level);
-
-            // Add any features we don't already have
-            for (ClassFeature feature : barbarianFeatures) {
-                if (getFeature(feature.getId()).isEmpty()) {
-                    classFeatures.add(feature);
-                } else if (feature.getId().equals(BarbarianFeatures.RAGE_ID)) {
-                    // Update Rage uses and damage when leveling up
-                    getFeature(BarbarianFeatures.RAGE_ID)
-                        .filter(f -> f instanceof BarbarianFeatures.Rage)
-                        .map(f -> (BarbarianFeatures.Rage) f)
-                        .ifPresent(rage -> rage.setBarbarianLevel(level));
-                }
-            }
-        } else if (characterClass == CharacterClass.MONK) {
-            List<ClassFeature> monkFeatures = MonkFeatures.createFeaturesForLevel(level);
-
-            // Add any features we don't already have
-            for (ClassFeature feature : monkFeatures) {
-                if (getFeature(feature.getId()).isEmpty()) {
-                    classFeatures.add(feature);
-                } else if (feature.getId().equals(MonkFeatures.MARTIAL_ARTS_ID)) {
-                    // Update Martial Arts die when leveling up
-                    getFeature(MonkFeatures.MARTIAL_ARTS_ID)
-                        .filter(f -> f instanceof MonkFeatures.MartialArts)
-                        .map(f -> (MonkFeatures.MartialArts) f)
-                        .ifPresent(ma -> ma.setMonkLevel(level));
-                } else if (feature.getId().equals(MonkFeatures.KI_ID)) {
-                    // Update Ki points when leveling up
-                    getFeature(MonkFeatures.KI_ID)
-                        .filter(f -> f instanceof MonkFeatures.Ki)
-                        .map(f -> (MonkFeatures.Ki) f)
-                        .ifPresent(ki -> ki.setMonkLevel(level));
-                } else if (feature.getId().equals(MonkFeatures.DEFLECT_MISSILES_ID)) {
-                    // Update Deflect Missiles when leveling up
-                    getFeature(MonkFeatures.DEFLECT_MISSILES_ID)
-                        .filter(f -> f instanceof MonkFeatures.DeflectMissiles)
-                        .map(f -> (MonkFeatures.DeflectMissiles) f)
-                        .ifPresent(dm -> dm.setMonkLevel(level));
-                }
-            }
-        } else if (characterClass == CharacterClass.PALADIN) {
-            List<ClassFeature> paladinFeatures = PaladinFeatures.createFeaturesForLevel(level, fightingStyle);
-
-            // Add any features we don't already have
-            for (ClassFeature feature : paladinFeatures) {
-                if (getFeature(feature.getId()).isEmpty()) {
-                    classFeatures.add(feature);
-                    // Bind newly added Divine Smite to the Spellbook's slot tracker
-                    if (feature.getId().equals(PaladinFeatures.DIVINE_SMITE_ID)
-                            && feature instanceof PaladinFeatures.DivineSmite ds) {
-                        ds.bindSpellSlots(spellbook.getSpellSlots());
-                    }
-                } else if (feature.getId().equals(PaladinFeatures.LAY_ON_HANDS_ID)) {
-                    // Update Lay on Hands pool when leveling up
-                    getFeature(PaladinFeatures.LAY_ON_HANDS_ID)
-                        .filter(f -> f instanceof PaladinFeatures.LayOnHands)
-                        .map(f -> (PaladinFeatures.LayOnHands) f)
-                        .ifPresent(loh -> loh.setPaladinLevel(level));
-                } else if (feature.getId().equals(PaladinFeatures.DIVINE_SMITE_ID)) {
-                    // Update Divine Smite spell slots when leveling up
-                    getFeature(PaladinFeatures.DIVINE_SMITE_ID)
-                        .filter(f -> f instanceof PaladinFeatures.DivineSmite)
-                        .map(f -> (PaladinFeatures.DivineSmite) f)
-                        .ifPresent(ds -> ds.setPaladinLevel(level));
-                }
-            }
-
-            // Update Divine Sense uses based on CHA
-            getFeature(PaladinFeatures.DIVINE_SENSE_ID)
-                .filter(f -> f instanceof PaladinFeatures.DivineSense)
-                .map(f -> (PaladinFeatures.DivineSense) f)
-                .ifPresent(ds -> ds.updateMaxUses(this));
-        } else if (characterClass == CharacterClass.RANGER) {
-            // Ranger features - choices default to null until set
-            List<ClassFeature> rangerFeatures = RangerFeatures.createFeaturesForLevel(
-                level, null, null, fightingStyle, null);
-
-            // Add any features we don't already have
-            for (ClassFeature feature : rangerFeatures) {
-                if (getFeature(feature.getId()).isEmpty()) {
-                    classFeatures.add(feature);
-                } else if (feature.getId().equals(RangerFeatures.RANGER_SPELLCASTING_ID)) {
-                    // Update spell slots when leveling up
-                    getFeature(RangerFeatures.RANGER_SPELLCASTING_ID)
-                        .filter(f -> f instanceof RangerFeatures.RangerSpellcasting)
-                        .map(f -> (RangerFeatures.RangerSpellcasting) f)
-                        .ifPresent(rs -> rs.setRangerLevel(level));
-                }
-            }
-        } else if (characterClass == CharacterClass.CLERIC) {
-            List<ClassFeature> clericFeatures =
-                com.questkeeper.character.features.ClericFeatures.createFeaturesForLevel(
-                    level, divineDomain);
-            for (ClassFeature feature : clericFeatures) {
-                if (getFeature(feature.getId()).isEmpty()) {
-                    classFeatures.add(feature);
-                }
-            }
-        } else if (characterClass == CharacterClass.WIZARD) {
-            List<ClassFeature> wizardFeatures =
-                com.questkeeper.character.features.WizardFeatures.createFeaturesForLevel(
-                    level, arcaneTradition);
-            for (ClassFeature feature : wizardFeatures) {
-                if (getFeature(feature.getId()).isEmpty()) {
-                    classFeatures.add(feature);
-                } else if (feature.getId().equals(
-                        com.questkeeper.character.features.WizardFeatures.ARCANE_RECOVERY_ID)) {
-                    // Update wizard level on the existing ArcaneRecovery so
-                    // its recovery budget tracks the new level.
-                    getFeature(com.questkeeper.character.features.WizardFeatures.ARCANE_RECOVERY_ID)
-                        .filter(f -> f instanceof
-                            com.questkeeper.character.features.WizardFeatures.ArcaneRecovery)
-                        .map(f -> (com.questkeeper.character.features.WizardFeatures.ArcaneRecovery) f)
-                        .ifPresent(ar -> ar.setWizardLevel(level));
-                }
-            }
-        } else if (characterClass == CharacterClass.SORCERER) {
-            List<ClassFeature> sorcererFeatures =
-                com.questkeeper.character.features.SorcererFeatures.createFeaturesForLevel(
-                    level, sorcerousOrigin);
-            for (ClassFeature feature : sorcererFeatures) {
-                if (getFeature(feature.getId()).isEmpty()) {
-                    classFeatures.add(feature);
-                } else if (feature.getId().equals(
-                        com.questkeeper.character.features.SorcererFeatures.FONT_OF_MAGIC_ID)) {
-                    // Grow sorcery point pool with level.
-                    getFeature(com.questkeeper.character.features.SorcererFeatures.FONT_OF_MAGIC_ID)
-                        .filter(f -> f instanceof
-                            com.questkeeper.character.features.SorcererFeatures.FontOfMagic)
-                        .map(f -> (com.questkeeper.character.features.SorcererFeatures.FontOfMagic) f)
-                        .ifPresent(fom -> fom.setSorcererLevel(level));
-                }
-            }
-        } else if (characterClass == CharacterClass.BARD) {
-            List<ClassFeature> bardFeatures =
-                com.questkeeper.character.features.BardFeatures.createFeaturesForLevel(
-                    level, bardCollege);
-            for (ClassFeature feature : bardFeatures) {
-                if (getFeature(feature.getId()).isEmpty()) {
-                    classFeatures.add(feature);
-                } else if (feature.getId().equals(
-                        com.questkeeper.character.features.BardFeatures.BARDIC_INSPIRATION_ID)) {
-                    getFeature(com.questkeeper.character.features.BardFeatures.BARDIC_INSPIRATION_ID)
-                        .filter(f -> f instanceof
-                            com.questkeeper.character.features.BardFeatures.BardicInspiration)
-                        .map(f -> (com.questkeeper.character.features.BardFeatures.BardicInspiration) f)
-                        .ifPresent(bi -> bi.setBardLevel(level));
-                }
-            }
-        } else if (characterClass == CharacterClass.DRUID) {
-            List<ClassFeature> druidFeatures =
-                com.questkeeper.character.features.DruidFeatures.createFeaturesForLevel(
-                    level, druidCircle);
-            for (ClassFeature feature : druidFeatures) {
-                if (getFeature(feature.getId()).isEmpty()) {
-                    classFeatures.add(feature);
-                } else if (feature.getId().equals(
-                        com.questkeeper.character.features.DruidFeatures.WILD_SHAPE_ID)) {
-                    getFeature(com.questkeeper.character.features.DruidFeatures.WILD_SHAPE_ID)
-                        .filter(f -> f instanceof
-                            com.questkeeper.character.features.DruidFeatures.WildShape)
-                        .map(f -> (com.questkeeper.character.features.DruidFeatures.WildShape) f)
-                        .ifPresent(ws -> ws.setDruidLevel(level));
-                } else if (feature.getId().equals(
-                        com.questkeeper.character.features.DruidFeatures.NATURAL_RECOVERY_ID)) {
-                    getFeature(com.questkeeper.character.features.DruidFeatures.NATURAL_RECOVERY_ID)
-                        .filter(f -> f instanceof
-                            com.questkeeper.character.features.DruidFeatures.NaturalRecovery)
-                        .map(f -> (com.questkeeper.character.features.DruidFeatures.NaturalRecovery) f)
-                        .ifPresent(nr -> nr.setDruidLevel(level));
-                }
-            }
-        } else if (characterClass == CharacterClass.WARLOCK) {
-            List<ClassFeature> warlockFeatures =
-                com.questkeeper.character.features.WarlockFeatures.createFeaturesForLevel(
-                    level, warlockPatron, warlockPactBoon);
-            for (ClassFeature feature : warlockFeatures) {
-                if (getFeature(feature.getId()).isEmpty()) {
-                    classFeatures.add(feature);
-                }
-            }
-        }
-        // Other classes will be added here as features are implemented
+        ClassFeatureWiring.wire(this);
     }
 
     /**
@@ -863,6 +655,17 @@ public class Character implements Combatant {
      */
     public List<ClassFeature> getClassFeatures() {
         return Collections.unmodifiableList(classFeatures);
+    }
+
+    /**
+     * Package-private mutator used by {@link ClassFeatureWiring} to attach
+     * level-gated class features. External callers must go through
+     * {@link #initializeClassFeatures()} (or the level-up path).
+     */
+    void addClassFeatureInternal(ClassFeature feature) {
+        if (feature != null) {
+            classFeatures.add(feature);
+        }
     }
 
     /**
