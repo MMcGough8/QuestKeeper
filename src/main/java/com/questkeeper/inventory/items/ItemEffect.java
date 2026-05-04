@@ -40,9 +40,20 @@ public interface ItemEffect {
     void resetDaily();
  
     int getCurrentCharges();
-    
+
     int getMaxCharges();
-    
+
+    /**
+     * Returns an effect that can be safely shared with a duplicated item.
+     * Default returns `this`, preserving the legacy "effects shared between
+     * MagicItem copies" behavior. Effect classes with mutable state
+     * (charges, cooldowns) should override to return an independent
+     * instance.
+     */
+    default ItemEffect copy() {
+        return this;
+    }
+
     default String getChargeDisplay() {
         if (getUsageType() == UsageType.UNLIMITED || getUsageType() == UsageType.PASSIVE) {
             return getUsageType().getDisplayName();

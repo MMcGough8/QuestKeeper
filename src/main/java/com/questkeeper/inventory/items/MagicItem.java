@@ -396,8 +396,12 @@ public class MagicItem extends Item {
                 getGoldValue(), getRarity());
         copy.requiresAttunement = this.requiresAttunement;
         copy.attunementRequirement = this.attunementRequirement;
-        // Effects are shared (not deep copied) - they're stateful
-        copy.effects.addAll(this.effects);
+        // Each effect decides whether it's safe to share or needs a fresh
+        // instance via ItemEffect.copy(). Stateless effects return `this`;
+        // effects with charges/cooldowns return an independent copy.
+        for (ItemEffect effect : this.effects) {
+            copy.effects.add(effect.copy());
+        }
         return copy;
     }
 
