@@ -1000,6 +1000,61 @@ class CharacterTest {
     }
 
     @Nested
+    @DisplayName("Warlock class features")
+    class WarlockClassFeatureTests {
+
+        @Test
+        @DisplayName("L1 Fiend Warlock gets Dark One's Blessing")
+        void l1FiendWarlockBlessing() {
+            Character w = new Character("Vex", Race.HUMAN, CharacterClass.WARLOCK,
+                10, 14, 14, 10, 10, 16);
+            w.setWarlockPatron(
+                com.questkeeper.character.features.WarlockFeatures.OtherworldlyPatron.FIEND);
+            assertTrue(w.getFeature(
+                com.questkeeper.character.features.WarlockFeatures.DARK_ONES_BLESSING_ID
+            ).isPresent());
+        }
+
+        @Test
+        @DisplayName("L2 Warlock gets Eldritch Invocations (count scales with level)")
+        void l2WarlockInvocations() {
+            Character w = new Character("Vex", Race.HUMAN, CharacterClass.WARLOCK,
+                10, 14, 14, 10, 10, 16);
+            w.setLevel(2);
+            assertTrue(w.getFeature(
+                com.questkeeper.character.features.WarlockFeatures.ELDRITCH_INVOCATIONS_ID
+            ).isPresent());
+            assertEquals(2,
+                com.questkeeper.character.features.WarlockFeatures.getInvocationCount(2));
+            assertEquals(3,
+                com.questkeeper.character.features.WarlockFeatures.getInvocationCount(5));
+        }
+
+        @Test
+        @DisplayName("L3 Warlock with Pact of the Tome gets Pact Boon marker")
+        void l3WarlockTomeBoon() {
+            Character w = new Character("Vex", Race.HUMAN, CharacterClass.WARLOCK,
+                10, 14, 14, 10, 10, 16);
+            w.setLevel(3);
+            w.setWarlockPactBoon(
+                com.questkeeper.character.features.WarlockFeatures.PactBoon.TOME);
+            assertTrue(w.getFeature(
+                com.questkeeper.character.features.WarlockFeatures.PACT_BOON_ID
+            ).isPresent());
+        }
+
+        @Test
+        @DisplayName("setWarlockPatron on a non-Warlock throws")
+        void setPatronOnNonWarlockThrows() {
+            Character fighter = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            assertThrows(IllegalStateException.class,
+                () -> fighter.setWarlockPatron(
+                    com.questkeeper.character.features.WarlockFeatures.OtherworldlyPatron.FIEND));
+        }
+    }
+
+    @Nested
     @DisplayName("Druid class features")
     class DruidClassFeatureTests {
 

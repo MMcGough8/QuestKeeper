@@ -243,6 +243,8 @@ public class Character implements Combatant {
     private com.questkeeper.character.features.SorcererFeatures.SorcerousOrigin sorcerousOrigin;
     private com.questkeeper.character.features.BardFeatures.BardCollege bardCollege;
     private com.questkeeper.character.features.DruidFeatures.DruidCircle druidCircle;
+    private com.questkeeper.character.features.WarlockFeatures.OtherworldlyPatron warlockPatron;
+    private com.questkeeper.character.features.WarlockFeatures.PactBoon warlockPactBoon;
 
     // Spellcasting
     private final Spellbook spellbook = new Spellbook();
@@ -843,6 +845,15 @@ public class Character implements Combatant {
                         .ifPresent(nr -> nr.setDruidLevel(level));
                 }
             }
+        } else if (characterClass == CharacterClass.WARLOCK) {
+            List<ClassFeature> warlockFeatures =
+                com.questkeeper.character.features.WarlockFeatures.createFeaturesForLevel(
+                    level, warlockPatron, warlockPactBoon);
+            for (ClassFeature feature : warlockFeatures) {
+                if (getFeature(feature.getId()).isEmpty()) {
+                    classFeatures.add(feature);
+                }
+            }
         }
         // Other classes will be added here as features are implemented
     }
@@ -1038,6 +1049,45 @@ public class Character implements Combatant {
 
     public com.questkeeper.character.features.DruidFeatures.DruidCircle getDruidCircle() {
         return druidCircle;
+    }
+
+    /**
+     * Sets the Warlock's Otherworldly Patron (chosen at L1 in 5e RAW).
+     * Replaces any prior choice and rebuilds the class-features list.
+     */
+    public void setWarlockPatron(
+            com.questkeeper.character.features.WarlockFeatures.OtherworldlyPatron patron) {
+        if (characterClass != CharacterClass.WARLOCK) {
+            throw new IllegalStateException("Otherworldly Patron is only available to Warlocks");
+        }
+        this.warlockPatron = patron;
+        classFeatures.removeIf(f ->
+            f.getId().equals(com.questkeeper.character.features.WarlockFeatures.OTHERWORLDLY_PATRON_ID)
+            || f.getId().equals(com.questkeeper.character.features.WarlockFeatures.DARK_ONES_BLESSING_ID));
+        initializeClassFeatures();
+    }
+
+    public com.questkeeper.character.features.WarlockFeatures.OtherworldlyPatron getWarlockPatron() {
+        return warlockPatron;
+    }
+
+    /**
+     * Sets the Warlock's Pact Boon (chosen at L3 in 5e RAW). Replaces any
+     * prior choice and rebuilds the class-features list.
+     */
+    public void setWarlockPactBoon(
+            com.questkeeper.character.features.WarlockFeatures.PactBoon boon) {
+        if (characterClass != CharacterClass.WARLOCK) {
+            throw new IllegalStateException("Pact Boon is only available to Warlocks");
+        }
+        this.warlockPactBoon = boon;
+        classFeatures.removeIf(f ->
+            f.getId().equals(com.questkeeper.character.features.WarlockFeatures.PACT_BOON_ID));
+        initializeClassFeatures();
+    }
+
+    public com.questkeeper.character.features.WarlockFeatures.PactBoon getWarlockPactBoon() {
+        return warlockPactBoon;
     }
 
     /**
