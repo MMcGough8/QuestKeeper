@@ -696,10 +696,15 @@ public class Display {
     }
 
     /**
-     * Displays the action prompt with a help hint.
+     * Displays the action prompt with optional command suggestions and a
+     * help hint. GameEngine computes context-aware suggestions every loop;
+     * surface them so the player sees what's actionable right now.
      */
     public static void showActionPrompt(String[] suggestions) {
         println();
+        if (suggestions != null && suggestions.length > 0) {
+            println(colorize("Try: " + String.join(", ", suggestions), DEFAULT));
+        }
         println(colorize("(type 'help' for commands)", DEFAULT));
     }
 

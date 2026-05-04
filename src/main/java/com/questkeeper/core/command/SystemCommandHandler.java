@@ -65,7 +65,6 @@ public class SystemCommandHandler implements CommandHandler {
         String confirm = context.readInput().trim().toLowerCase();
 
         if (confirm.equals("y") || confirm.equals("yes")) {
-            context.stopGame();
             return CommandResult.quit();
         }
 

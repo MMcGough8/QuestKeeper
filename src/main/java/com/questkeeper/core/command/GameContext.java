@@ -32,7 +32,6 @@ public class GameContext {
     private final Random random;
 
     private Trial activeTrial;
-    private boolean running;
 
     public GameContext(Campaign campaign, GameState gameState,
                        DialogueSystem dialogueSystem, CombatSystem combatSystem,
@@ -44,7 +43,6 @@ public class GameContext {
         this.restSystem = restSystem;
         this.scanner = scanner;
         this.random = random;
-        this.running = true;
     }
 
     // ==========================================
@@ -106,18 +104,6 @@ public class GameContext {
     // ==========================================
     // Game Running State
     // ==========================================
-
-    public boolean isRunning() {
-        return running;
-    }
-
-    public void setRunning(boolean running) {
-        this.running = running;
-    }
-
-    public void stopGame() {
-        this.running = false;
-    }
 
     // ==========================================
     // Convenience Methods
