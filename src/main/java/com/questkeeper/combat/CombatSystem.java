@@ -705,6 +705,40 @@ public class CombatSystem {
                     }
                 }
 
+                // Colossus Slayer (Ranger Hunter): +1d8 once per turn on a hit
+                // against a creature already below max HP.
+                int colossusSlayerDamage = 0;
+                var colossusSlayerOpt = character.getFeature(
+                    RangerFeatures.COLOSSUS_SLAYER_ID);
+                if (colossusSlayerOpt.isPresent()
+                    && colossusSlayerOpt.get() instanceof
+                        RangerFeatures.ColossusSlayer colossus
+                    && colossus.canUse()
+                    && weapon != null
+                    && target.getCurrentHitPoints() < target.getMaxHitPoints()) {
+                    colossusSlayerDamage = Dice.rollMultiple(1, 8);
+                    if (isCrit) {
+                        colossusSlayerDamage += Dice.rollMultiple(1, 8);
+                    }
+                    damage += colossusSlayerDamage;
+                    colossus.use();
+                }
+
+                // Horde Breaker (Ranger Hunter): grant one extra weapon attack
+                // once per turn, drawing from the bonus-attack budget. Requires
+                // a "different target" — only fires when 2+ enemies are alive.
+                var hordeBreakerOpt = character.getFeature(
+                    RangerFeatures.HORDE_BREAKER_ID);
+                if (hordeBreakerOpt.isPresent()
+                    && hordeBreakerOpt.get() instanceof
+                        RangerFeatures.HordeBreaker horde
+                    && horde.canUse()
+                    && weapon != null
+                    && getLivingEnemies().size() >= 2) {
+                    flurryAttacksRemaining += 1;
+                    horde.use();
+                }
+
                 // Divine Smite (Paladin): expend a spell slot for radiant damage on a melee hit
                 int smiteDamage = 0;
                 if (smiteReady && weapon != null && !isRangedAttack) {
@@ -743,6 +777,11 @@ public class CombatSystem {
                 if (smiteDamage > 0) {
                     if (specialEffects.length() > 0) specialEffects.append(" ");
                     specialEffects.append(String.format("[DIVINE SMITE +%d radiant!]", smiteDamage));
+                }
+                if (colossusSlayerDamage > 0) {
+                    if (specialEffects.length() > 0) specialEffects.append(" ");
+                    specialEffects.append(String.format(
+                        "[COLOSSUS SLAYER +%d!]", colossusSlayerDamage));
                 }
                 if (sacredWeaponBonus > 0) {
                     if (specialEffects.length() > 0) specialEffects.append(" ");
@@ -956,6 +995,16 @@ public class CombatSystem {
             flurryAttacksRemaining = 0;
             smiteReady = false;  // Smite expires if not used
             character.resetRecklessAttack();
+
+            // Reset Hunter's Prey once-per-turn riders.
+            character.getFeature(RangerFeatures.COLOSSUS_SLAYER_ID)
+                .filter(f -> f instanceof RangerFeatures.ColossusSlayer)
+                .map(f -> (RangerFeatures.ColossusSlayer) f)
+                .ifPresent(RangerFeatures.ColossusSlayer::resetTurn);
+            character.getFeature(RangerFeatures.HORDE_BREAKER_ID)
+                .filter(f -> f instanceof RangerFeatures.HordeBreaker)
+                .map(f -> (RangerFeatures.HordeBreaker) f)
+                .ifPresent(RangerFeatures.HordeBreaker::resetTurn);
 
             // Process Sacred Weapon duration
             character.getFeature(PaladinFeatures.SACRED_WEAPON_ID)

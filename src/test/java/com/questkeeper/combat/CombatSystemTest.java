@@ -1978,6 +1978,82 @@ class CombatSystemTest {
         }
 
         @Test
+        @DisplayName("Colossus Slayer adds bonus damage to wounded targets, once per turn")
+        void colossusSlayerAddsBonusDamageOncePerTurn() {
+            Character ranger = new Character("Vex", Race.HUMAN, CharacterClass.RANGER,
+                14, 16, 14, 10, 14, 10);
+            ranger.setLevel(3);
+            ranger.setHuntersPrey(
+                com.questkeeper.character.features.RangerFeatures.HuntersPrey.COLOSSUS_SLAYER);
+            Weapon sword = Weapon.createLongsword();
+            ranger.getInventory().addItem(sword);
+            ranger.getInventory().equip(sword);
+
+            state = new GameState(ranger, campaign);
+            combatSystem = new CombatSystem();
+
+            Monster brute = new Monster("brute", "Brute", 5, 200);
+            brute.setAttackBonus(0);
+            brute.setDamageDice("1d4");
+            brute.setDexterityMod(0);
+
+            combatSystem.startCombat(state, List.of(brute));
+            int safety = 0;
+            while (combatSystem.isInCombat() && safety++ < 20) {
+                CombatResult tr = combatSystem.executeTurn();
+                if (tr.getType() == CombatResult.Type.TURN_START
+                    && combatSystem.getCurrentCombatant() == ranger) break;
+            }
+
+            // Wound the brute so the rider can fire (current < max).
+            // startCombat() resets enemy HP, so this must happen post-start.
+            brute.takeDamage(1);
+
+            CombatResult hit = combatSystem.playerTurn("attack", "brute");
+            assertTrue(hit.getMessage().contains("COLOSSUS SLAYER"),
+                "Wounded target should trigger Colossus Slayer; got: "
+                    + hit.getMessage());
+        }
+
+        @Test
+        @DisplayName("Horde Breaker grants a free extra weapon attack with two enemies present")
+        void hordeBreakerGrantsExtraAttackWithMultipleEnemies() {
+            Character ranger = new Character("Vex", Race.HUMAN, CharacterClass.RANGER,
+                14, 16, 14, 10, 14, 10);
+            ranger.setLevel(3);
+            ranger.setHuntersPrey(
+                com.questkeeper.character.features.RangerFeatures.HuntersPrey.HORDE_BREAKER);
+            Weapon sword = Weapon.createLongsword();
+            ranger.getInventory().addItem(sword);
+            ranger.getInventory().equip(sword);
+
+            state = new GameState(ranger, campaign);
+            combatSystem = new CombatSystem();
+
+            Monster a = new Monster("brute1", "Brute1", 5, 200);
+            a.setAttackBonus(0); a.setDamageDice("1d4"); a.setDexterityMod(0);
+            Monster b = new Monster("brute2", "Brute2", 5, 200);
+            b.setAttackBonus(0); b.setDamageDice("1d4"); b.setDexterityMod(0);
+
+            combatSystem.startCombat(state, List.of(a, b));
+            int safety = 0;
+            while (combatSystem.isInCombat() && safety++ < 20) {
+                CombatResult tr = combatSystem.executeTurn();
+                if (tr.getType() == CombatResult.Type.TURN_START
+                    && combatSystem.getCurrentCombatant() == ranger) break;
+            }
+
+            // Lvl 3 Ranger: 1 main attack. Horde Breaker should top up the
+            // bonus-attack budget on the first weapon attack.
+            assertEquals(1, combatSystem.getMainActionAttacksRemaining());
+            combatSystem.playerTurn("attack", "brute1");
+            // After main attack: main=0, but Horde Breaker added 1 bonus.
+            // Turn must still belong to the ranger.
+            assertEquals(ranger, combatSystem.getCurrentCombatant(),
+                "Horde Breaker should grant another weapon attack this turn");
+        }
+
+        @Test
         @DisplayName("Smited hit expends a spell slot and clears smiteReady")
         void smitedHitExpendsSlotAndClearsFlag() {
             setUpPaladinCombat();

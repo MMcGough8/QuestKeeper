@@ -837,6 +837,31 @@ public class Character implements Combatant {
     }
 
     /**
+     * Sets the Ranger's Hunter's Prey choice (Lvl 3 Hunter conclave).
+     * Replaces any prior choice. Permitted only for Rangers level 3+.
+     */
+    public void setHuntersPrey(
+            com.questkeeper.character.features.RangerFeatures.HuntersPrey choice) {
+        if (characterClass != CharacterClass.RANGER) {
+            throw new IllegalStateException(
+                "Hunter's Prey is only available to Rangers");
+        }
+        if (level < 3) {
+            throw new IllegalStateException(
+                "Hunter's Prey is unlocked at Ranger level 3");
+        }
+        // Remove any existing Hunter's Prey feature.
+        classFeatures.removeIf(f ->
+            f.getId().equals(com.questkeeper.character.features.RangerFeatures.COLOSSUS_SLAYER_ID)
+            || f.getId().equals(com.questkeeper.character.features.RangerFeatures.GIANT_KILLER_ID)
+            || f.getId().equals(com.questkeeper.character.features.RangerFeatures.HORDE_BREAKER_ID));
+        if (choice != null) {
+            classFeatures.add(
+                com.questkeeper.character.features.RangerFeatures.createHuntersPrey(choice));
+        }
+    }
+
+    /**
      * Sets the character's fighting style. Permitted for Fighter (Lvl 1),
      * Paladin (Lvl 2), and Ranger (Lvl 2). Each class uses its own feature
      * ID so the right feature is removed/added.
