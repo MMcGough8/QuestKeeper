@@ -1000,6 +1000,91 @@ class CharacterTest {
     }
 
     @Nested
+    @DisplayName("Druid class features")
+    class DruidClassFeatureTests {
+
+        @Test
+        @DisplayName("L1 Druid gets Druidic")
+        void l1DruidGetsDruidic() {
+            Character d = new Character("Sylven", Race.HALF_ELF, CharacterClass.DRUID,
+                10, 10, 14, 10, 16, 10);
+            assertTrue(d.getFeature(
+                com.questkeeper.character.features.DruidFeatures.DRUIDIC_ID
+            ).isPresent());
+        }
+
+        @Test
+        @DisplayName("L2 Druid gets Wild Shape with CR 1/4 cap")
+        void l2DruidWildShapeCR4() {
+            Character d = new Character("Sylven", Race.HALF_ELF, CharacterClass.DRUID,
+                10, 10, 14, 10, 16, 10);
+            d.setLevel(2);
+            var ws = (com.questkeeper.character.features.DruidFeatures.WildShape)
+                d.getFeature(
+                    com.questkeeper.character.features.DruidFeatures.WILD_SHAPE_ID
+                ).orElseThrow();
+            assertEquals(0.25, ws.getMaxChallengeRating());
+            assertFalse(ws.canTakeFlyingForms());
+            assertFalse(ws.canTakeSwimmingForms());
+        }
+
+        @Test
+        @DisplayName("L4 Druid Wild Shape CR scales to 1/2 with swim forms")
+        void l4DruidWildShapeCRHalf() {
+            Character d = new Character("Sylven", Race.HALF_ELF, CharacterClass.DRUID,
+                10, 10, 14, 10, 16, 10);
+            d.setLevel(4);
+            var ws = (com.questkeeper.character.features.DruidFeatures.WildShape)
+                d.getFeature(
+                    com.questkeeper.character.features.DruidFeatures.WILD_SHAPE_ID
+                ).orElseThrow();
+            assertEquals(0.5, ws.getMaxChallengeRating());
+            assertTrue(ws.canTakeSwimmingForms());
+        }
+
+        @Test
+        @DisplayName("L2 Land Druid gets Bonus Cantrip + Natural Recovery")
+        void l2LandDruidSubclassFeatures() {
+            Character d = new Character("Sylven", Race.HALF_ELF, CharacterClass.DRUID,
+                10, 10, 14, 10, 16, 10);
+            d.setLevel(2);
+            d.setDruidCircle(
+                com.questkeeper.character.features.DruidFeatures.DruidCircle.LAND);
+            assertTrue(d.getFeature(
+                com.questkeeper.character.features.DruidFeatures.LAND_BONUS_CANTRIP_ID
+            ).isPresent());
+            assertTrue(d.getFeature(
+                com.questkeeper.character.features.DruidFeatures.NATURAL_RECOVERY_ID
+            ).isPresent());
+        }
+
+        @Test
+        @DisplayName("Natural Recovery budget = ceil(level/2)")
+        void naturalRecoveryBudget() {
+            Character d = new Character("Sylven", Race.HALF_ELF, CharacterClass.DRUID,
+                10, 10, 14, 10, 16, 10);
+            d.setLevel(5);
+            d.setDruidCircle(
+                com.questkeeper.character.features.DruidFeatures.DruidCircle.LAND);
+            var nr = (com.questkeeper.character.features.DruidFeatures.NaturalRecovery)
+                d.getFeature(
+                    com.questkeeper.character.features.DruidFeatures.NATURAL_RECOVERY_ID
+                ).orElseThrow();
+            assertEquals(3, nr.getRecoveryBudget(), "L5 -> ceil(5/2) = 3");
+        }
+
+        @Test
+        @DisplayName("setDruidCircle on a non-Druid throws")
+        void setDruidCircleOnNonDruidThrows() {
+            Character fighter = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            assertThrows(IllegalStateException.class,
+                () -> fighter.setDruidCircle(
+                    com.questkeeper.character.features.DruidFeatures.DruidCircle.LAND));
+        }
+    }
+
+    @Nested
     @DisplayName("Bard class features")
     class BardClassFeatureTests {
 

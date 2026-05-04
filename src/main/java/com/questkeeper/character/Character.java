@@ -242,6 +242,7 @@ public class Character implements Combatant {
     private com.questkeeper.character.features.WizardFeatures.ArcaneTradition arcaneTradition;
     private com.questkeeper.character.features.SorcererFeatures.SorcerousOrigin sorcerousOrigin;
     private com.questkeeper.character.features.BardFeatures.BardCollege bardCollege;
+    private com.questkeeper.character.features.DruidFeatures.DruidCircle druidCircle;
 
     // Spellcasting
     private final Spellbook spellbook = new Spellbook();
@@ -819,6 +820,29 @@ public class Character implements Combatant {
                         .ifPresent(bi -> bi.setBardLevel(level));
                 }
             }
+        } else if (characterClass == CharacterClass.DRUID) {
+            List<ClassFeature> druidFeatures =
+                com.questkeeper.character.features.DruidFeatures.createFeaturesForLevel(
+                    level, druidCircle);
+            for (ClassFeature feature : druidFeatures) {
+                if (getFeature(feature.getId()).isEmpty()) {
+                    classFeatures.add(feature);
+                } else if (feature.getId().equals(
+                        com.questkeeper.character.features.DruidFeatures.WILD_SHAPE_ID)) {
+                    getFeature(com.questkeeper.character.features.DruidFeatures.WILD_SHAPE_ID)
+                        .filter(f -> f instanceof
+                            com.questkeeper.character.features.DruidFeatures.WildShape)
+                        .map(f -> (com.questkeeper.character.features.DruidFeatures.WildShape) f)
+                        .ifPresent(ws -> ws.setDruidLevel(level));
+                } else if (feature.getId().equals(
+                        com.questkeeper.character.features.DruidFeatures.NATURAL_RECOVERY_ID)) {
+                    getFeature(com.questkeeper.character.features.DruidFeatures.NATURAL_RECOVERY_ID)
+                        .filter(f -> f instanceof
+                            com.questkeeper.character.features.DruidFeatures.NaturalRecovery)
+                        .map(f -> (com.questkeeper.character.features.DruidFeatures.NaturalRecovery) f)
+                        .ifPresent(nr -> nr.setDruidLevel(level));
+                }
+            }
         }
         // Other classes will be added here as features are implemented
     }
@@ -993,6 +1017,27 @@ public class Character implements Combatant {
 
     public com.questkeeper.character.features.BardFeatures.BardCollege getBardCollege() {
         return bardCollege;
+    }
+
+    /**
+     * Sets the Druid's Circle (chosen at L2 in 5e RAW). Replaces any prior
+     * choice and rebuilds the class-features list.
+     */
+    public void setDruidCircle(
+            com.questkeeper.character.features.DruidFeatures.DruidCircle circle) {
+        if (characterClass != CharacterClass.DRUID) {
+            throw new IllegalStateException("Druid Circle is only available to Druids");
+        }
+        this.druidCircle = circle;
+        classFeatures.removeIf(f ->
+            f.getId().equals(com.questkeeper.character.features.DruidFeatures.DRUID_CIRCLE_ID)
+            || f.getId().equals(com.questkeeper.character.features.DruidFeatures.LAND_BONUS_CANTRIP_ID)
+            || f.getId().equals(com.questkeeper.character.features.DruidFeatures.NATURAL_RECOVERY_ID));
+        initializeClassFeatures();
+    }
+
+    public com.questkeeper.character.features.DruidFeatures.DruidCircle getDruidCircle() {
+        return druidCircle;
     }
 
     /**
