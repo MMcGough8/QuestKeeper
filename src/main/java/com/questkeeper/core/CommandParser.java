@@ -448,7 +448,10 @@ public class CommandParser {
     }
 
     private static String removeLeadingArticles(String noun) {
-        String[] articlesToRemove = {"the", "a", "an", "at", "to", "with", "on", "in", "about"};
+        // "about" is intentionally NOT in this list — parseAskAbout handles
+        // "ask X about Y" as a structured pattern; stripping "about" here
+        // would corrupt nouns for direct command.getNoun() consumers.
+        String[] articlesToRemove = {"the", "a", "an", "at", "to", "with", "on", "in"};
 
         String result = noun;
         for (String article : articlesToRemove) {

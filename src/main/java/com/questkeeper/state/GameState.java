@@ -109,21 +109,26 @@ public class GameState {
             state.visitedLocations.add(visitedId);
         }
 
-        // Restore flags
+        // Restore flags (lowercase to match setFlag's normalization, so
+        // hand-edited saves with mixed-case keys still resolve via hasFlag).
         for (Map.Entry<String, Boolean> entry : saveState.getStateFlags().entrySet()) {
             if (entry.getValue()) {
-                state.flags.add(entry.getKey());
+                state.flags.add(entry.getKey().toLowerCase());
             }
         }
 
         // Restore location unlocks based on progression flags (data-driven)
         restoreLocationUnlocks(state.unlockedLocations, campaign, state.flags);
 
-        // Restore trial states from flags
+        // Restore trial states from flags. Filter against the campaign's
+        // actual trial IDs so non-trial "started_X"/"completed_X" flags
+        // (e.g., quest flags) don't pollute the trial sets.
         for (String flag : state.flags) {
             if (flag.startsWith("started_")) {
                 String trialId = flag.substring("started_".length());
-                state.startedTrials.add(trialId);
+                if (campaign.getTrials().containsKey(trialId)) {
+                    state.startedTrials.add(trialId);
+                }
             } else if (flag.startsWith("completed_minigame_")) {
                 // Restore mini-game completion state
                 String miniGameId = flag.substring("completed_minigame_".length());
@@ -133,7 +138,9 @@ public class GameState {
                 }
             } else if (flag.startsWith("completed_")) {
                 String trialId = flag.substring("completed_".length());
-                state.completedTrials.add(trialId);
+                if (campaign.getTrials().containsKey(trialId)) {
+                    state.completedTrials.add(trialId);
+                }
             }
         }
 
