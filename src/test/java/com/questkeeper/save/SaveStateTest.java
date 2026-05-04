@@ -5,6 +5,7 @@ import com.questkeeper.character.Character.Ability;
 import com.questkeeper.character.Character.CharacterClass;
 import com.questkeeper.character.Character.Race;
 import com.questkeeper.character.Character.Skill;
+import com.questkeeper.character.features.FightingStyle;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -399,6 +401,61 @@ class SaveStateTest {
             save.save(deepPath);
 
             assertTrue(Files.exists(deepPath));
+        }
+    }
+
+    @Nested
+    @DisplayName("Character class/race choice fields round-trip")
+    class CharacterChoiceFieldsRoundTripTests {
+
+        @Test
+        @DisplayName("Fighter fighting style survives save/load")
+        void fightingStyleRoundTrips() throws IOException {
+            Character fighter = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER);
+            fighter.setFightingStyle(FightingStyle.DEFENSE);
+            assertEquals(FightingStyle.DEFENSE, fighter.getFightingStyle());
+
+            Path savePath = tempDir.resolve("fighter.yaml");
+            new SaveState(fighter, "muddlebrook").save(savePath);
+
+            Character restored = SaveState.load(savePath).restoreCharacter();
+
+            assertEquals(FightingStyle.DEFENSE, restored.getFightingStyle(),
+                "Defense fighting style should survive round-trip");
+        }
+
+        @Test
+        @DisplayName("Rogue expertise skills survive save/load")
+        void expertiseSkillsRoundTrip() throws IOException {
+            Character rogue = new Character("Lia", Race.HALFLING, CharacterClass.ROGUE);
+            rogue.addSkillProficiency(Skill.STEALTH);
+            rogue.addSkillProficiency(Skill.ATHLETICS);
+            rogue.setExpertiseSkills(Set.of(Skill.STEALTH, Skill.ATHLETICS));
+
+            Path savePath = tempDir.resolve("rogue.yaml");
+            new SaveState(rogue, "muddlebrook").save(savePath);
+
+            Character restored = SaveState.load(savePath).restoreCharacter();
+
+            assertEquals(Set.of(Skill.STEALTH, Skill.ATHLETICS),
+                restored.getExpertiseSkills(),
+                "Expertise skills should survive round-trip");
+        }
+
+        @Test
+        @DisplayName("Half-Elf bonus abilities survive save/load")
+        void halfElfBonusAbilitiesRoundTrip() throws IOException {
+            Character bard = new Character("Halo", Race.HALF_ELF, CharacterClass.BARD);
+            bard.setHalfElfBonusAbilities(Ability.INTELLIGENCE, Ability.WISDOM);
+
+            Path savePath = tempDir.resolve("halfelf.yaml");
+            new SaveState(bard, "muddlebrook").save(savePath);
+
+            Character restored = SaveState.load(savePath).restoreCharacter();
+
+            assertEquals(Set.of(Ability.INTELLIGENCE, Ability.WISDOM),
+                restored.getHalfElfBonusAbilities(),
+                "Half-Elf bonus abilities should survive round-trip");
         }
     }
 

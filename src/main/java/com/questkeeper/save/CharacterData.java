@@ -5,6 +5,7 @@ import com.questkeeper.character.Character.Ability;
 import com.questkeeper.character.Character.CharacterClass;
 import com.questkeeper.character.Character.Race;
 import com.questkeeper.character.Character.Skill;
+import com.questkeeper.character.features.FightingStyle;
 
 import java.util.*;
 
@@ -45,12 +46,18 @@ public class CharacterData {
     // Rest state
     private int availableHitDice;
 
+    // Class/race choice fields (round-tripped because re-derivation isn't possible)
+    private String fightingStyle;                  // FightingStyle enum name, null if unset
+    private Set<String> expertiseSkills;           // Skill enum names
+    private Set<String> halfElfBonusAbilities;     // Ability enum names; size 0 or 2
 
     //creates empty CharacterData
     public CharacterData() {
         this.baseAbilityScores = new HashMap<>();
         this.skillProficiencies = new HashSet<>();
         this.savingThrowProficiencies = new HashSet<>();
+        this.expertiseSkills = new HashSet<>();
+        this.halfElfBonusAbilities = new HashSet<>();
     }
 
     //creates CharacterData from existing Character
@@ -93,6 +100,17 @@ public class CharacterData {
         // Rest state
         data.availableHitDice = character.getAvailableHitDice();
 
+        // Class/race choice fields
+        if (character.getFightingStyle() != null) {
+            data.fightingStyle = character.getFightingStyle().name();
+        }
+        for (Skill skill : character.getExpertiseSkills()) {
+            data.expertiseSkills.add(skill.name());
+        }
+        for (Ability ability : character.getHalfElfBonusAbilities()) {
+            data.halfElfBonusAbilities.add(ability.name());
+        }
+
         return data;
     }
 
@@ -113,20 +131,53 @@ public class CharacterData {
         character.setAbilityScore(ability, entry.getValue());
     }
     
+    // Skill proficiencies must be restored before expertise (expertise
+    // requires proficiency) and before setLevel (Rogue features rely on it).
+    for (String skillName : skillProficiencies) {
+        try {
+            character.addSkillProficiency(Skill.valueOf(skillName));
+        } catch (IllegalArgumentException e) {
+            // Unknown skill; skip
+        }
+    }
+
+    // Class/race choice fields must be set BEFORE setLevel so that
+    // initializeClassFeatures sees them when adding level-gated features.
+    if (halfElfBonusAbilities != null && halfElfBonusAbilities.size() == 2) {
+        Iterator<String> it = halfElfBonusAbilities.iterator();
+        try {
+            Ability a1 = Ability.valueOf(it.next());
+            Ability a2 = Ability.valueOf(it.next());
+            character.setHalfElfBonusAbilities(a1, a2);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            // Invalid bonus abilities (wrong race or unknown enum); skip
+        }
+    }
+    if (fightingStyle != null) {
+        try {
+            character.setFightingStyle(FightingStyle.valueOf(fightingStyle));
+        } catch (IllegalArgumentException e) {
+            // Unknown fighting style; skip
+        }
+    }
+    if (expertiseSkills != null && !expertiseSkills.isEmpty()) {
+        Set<Skill> skills = new HashSet<>();
+        for (String name : expertiseSkills) {
+            try {
+                skills.add(Skill.valueOf(name));
+            } catch (IllegalArgumentException e) {
+                // Unknown skill; skip
+            }
+        }
+        if (!skills.isEmpty()) {
+            character.setExpertiseSkills(skills);
+        }
+    }
+
     // Set level (will recalculate max HP)
     character.setLevel(level);
     character.setExperiencePoints(experiencePoints);
     
-    // Restore skill proficiencies
-    for (String skillName : skillProficiencies) {
-        try {
-            Skill skill = Skill.valueOf(skillName);
-            character.addSkillProficiency(skill);
-        } catch (IllegalArgumentException e) {
-            // Skip unknown skills (forward compatibility)
-        }
-    }
-        
     // Restore combat state
     character.setArmorBonus(armorBonus);
     character.setShieldBonus(shieldBonus);
@@ -162,6 +213,16 @@ public class CharacterData {
         map.put("armor_bonus", armorBonus);
         map.put("shield_bonus", shieldBonus);
         map.put("available_hit_dice", availableHitDice);
+
+        if (fightingStyle != null) {
+            map.put("fighting_style", fightingStyle);
+        }
+        if (expertiseSkills != null && !expertiseSkills.isEmpty()) {
+            map.put("expertise_skills", new ArrayList<>(expertiseSkills));
+        }
+        if (halfElfBonusAbilities != null && !halfElfBonusAbilities.isEmpty()) {
+            map.put("half_elf_bonus_abilities", new ArrayList<>(halfElfBonusAbilities));
+        }
 
         return map;
 
@@ -209,6 +270,20 @@ public class CharacterData {
 
         // Rest state (default to level for old saves without hit dice tracking)
         cd.availableHitDice = getInt(data, "available_hit_dice", cd.level);
+
+        // Class/race choice fields (all optional, missing on old saves)
+        Object fs = data.get("fighting_style");
+        if (fs instanceof String fsStr) {
+            cd.fightingStyle = fsStr;
+        }
+        List<String> exp = (List<String>) data.get("expertise_skills");
+        if (exp != null) {
+            cd.expertiseSkills = new HashSet<>(exp);
+        }
+        List<String> heAbilities = (List<String>) data.get("half_elf_bonus_abilities");
+        if (heAbilities != null) {
+            cd.halfElfBonusAbilities = new HashSet<>(heAbilities);
+        }
 
         return cd;
     }
