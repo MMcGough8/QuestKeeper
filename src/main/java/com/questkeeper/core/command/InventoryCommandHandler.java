@@ -110,6 +110,14 @@ public class InventoryCommandHandler implements CommandHandler {
         Display.println(Display.colorize("Proficiency Bonus: ", WHITE) + "+" + character.getProficiencyBonus());
         Display.println();
 
+        if (!character.getClassFeatures().isEmpty()) {
+            Display.println(Display.colorize("Class Features:", WHITE));
+            for (var feature : character.getClassFeatures()) {
+                Display.println("  - " + feature.getName());
+            }
+            Display.println();
+        }
+
         return CommandResult.success();
     }
 

@@ -1121,7 +1121,26 @@ public class Character implements Combatant {
     }
  
     public boolean makeSavingThrowAgainstDC(Ability ability, int dc) {
+        if (hasAdvantageOnSavingThrow(ability)) {
+            int roll = Math.max(Dice.roll(20), Dice.roll(20));
+            return roll + getSavingThrowModifier(ability) >= dc;
+        }
         return Dice.checkAgainstDC(getSavingThrowModifier(ability), dc);
+    }
+
+    /**
+     * True if this character rolls the named saving throw with advantage.
+     * Currently honors Barbarian Danger Sense (advantage on DEX saves).
+     * Does not yet check blinded/deafened/incapacitated state — those
+     * conditions live in StatusEffectManager and would block the benefit
+     * in 5e RAW (TODO once condition state is queryable from Character).
+     */
+    public boolean hasAdvantageOnSavingThrow(Ability ability) {
+        if (ability == Ability.DEXTERITY
+            && getFeature(BarbarianFeatures.DANGER_SENSE_ID).isPresent()) {
+            return true;
+        }
+        return false;
     }
     
     public int getTemporaryHitPoints() {

@@ -996,4 +996,40 @@ class CharacterTest {
             assertEquals(18, lowDexCharacter.getArmorClass());
         }
     }
+
+    @Nested
+    @DisplayName("Saving Throw Advantage")
+    class SavingThrowAdvantageTests {
+
+        @Test
+        @DisplayName("Lvl 2+ Barbarian gets advantage on DEX saves (Danger Sense)")
+        void barbarianDangerSenseGrantsDexAdvantage() {
+            Character barb = new Character("Grog", Race.HUMAN, CharacterClass.BARBARIAN,
+                14, 14, 14, 10, 10, 10);
+            barb.setLevel(2);
+            assertTrue(barb.hasAdvantageOnSavingThrow(Ability.DEXTERITY),
+                "Lvl 2 Barbarian should have advantage on DEX saves");
+            assertFalse(barb.hasAdvantageOnSavingThrow(Ability.STRENGTH),
+                "Danger Sense should not affect STR saves");
+        }
+
+        @Test
+        @DisplayName("Lvl 1 Barbarian has no Danger Sense advantage")
+        void lvl1BarbarianHasNoDangerSense() {
+            Character barb = new Character("Grog", Race.HUMAN, CharacterClass.BARBARIAN,
+                14, 14, 14, 10, 10, 10);
+            assertFalse(barb.hasAdvantageOnSavingThrow(Ability.DEXTERITY),
+                "Lvl 1 Barbarian should not yet have Danger Sense");
+        }
+
+        @Test
+        @DisplayName("Non-barbarian classes do not benefit from Danger Sense")
+        void nonBarbarianHasNoDangerSense() {
+            Character fighter = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            fighter.setLevel(5);
+            assertFalse(fighter.hasAdvantageOnSavingThrow(Ability.DEXTERITY),
+                "Fighter does not have Danger Sense");
+        }
+    }
 }
