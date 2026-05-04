@@ -322,6 +322,8 @@ public class GameEngine implements AutoCloseable {
         // Show tutorial tip on first play
         Display.showTutorialTip("Use 'look' to examine your surroundings, 'go <direction>' to move, and 'talk <name>' to speak with characters.");
 
+        int lastSeenLevel = gameState.getCharacter().getLevel();
+
         while (running) {
             // Drain any pending Ability Score Improvements before the player
             // gets the next prompt, so XP earned in the prior tick (combat
@@ -330,6 +332,17 @@ public class GameEngine implements AutoCloseable {
             Character player = gameState.getCharacter();
             if (player.getPendingAbilityScoreImprovements() > 0) {
                 LevelUpFlow.applyPendingAbilityScoreImprovements(player, scanner);
+            }
+
+            // Auto-save on level-up. Best-effort; failures don't block.
+            if (player.getLevel() > lastSeenLevel) {
+                var autoPath = com.questkeeper.save.SaveState.autoSave(
+                    gameState, "level-" + player.getLevel());
+                if (autoPath != null) {
+                    Display.println(Display.colorize(
+                        "[Auto-saved: " + autoPath + "]", YELLOW));
+                }
+                lastSeenLevel = player.getLevel();
             }
 
             // Show action prompt with suggestions
@@ -538,12 +551,26 @@ public class GameEngine implements AutoCloseable {
                 Display.println();
             }
 
-            Display.println("Enter number to load, or 'cancel' to go back:");
+            Display.println("Enter number to load, 'd <n>' to delete, 'r <n>' to rename, or 'cancel':");
             Display.showPrompt("Load> ");
             String input = scanner.nextLine().trim().toLowerCase();
 
             if (input.equals("cancel") || input.isEmpty()) {
                 Display.println("Load cancelled.");
+                return;
+            }
+
+            // Delete: "d <n>"
+            if (input.startsWith("d ") || input.startsWith("delete ")) {
+                String numStr = input.replaceFirst("^(d|delete)\\s+", "");
+                handleDeleteSave(saves, numStr);
+                return;
+            }
+
+            // Rename: "r <n>"
+            if (input.startsWith("r ") || input.startsWith("rename ")) {
+                String numStr = input.replaceFirst("^(r|rename)\\s+", "");
+                handleRenameSave(saves, numStr);
                 return;
             }
 
@@ -560,6 +587,77 @@ public class GameEngine implements AutoCloseable {
 
         } catch (IOException e) {
             Display.showError("Failed to list saves: " + e.getMessage());
+        }
+    }
+
+    private void handleDeleteSave(List<SaveState.SaveInfo> saves, String numStr) {
+        int idx;
+        try {
+            idx = Integer.parseInt(numStr.trim()) - 1;
+        } catch (NumberFormatException e) {
+            Display.showError("Expected: d <number>");
+            return;
+        }
+        if (idx < 0 || idx >= saves.size()) {
+            Display.showError("Save number out of range.");
+            return;
+        }
+        SaveState.SaveInfo target = saves.get(idx);
+        Display.println(Display.colorize(
+            "Delete '" + target.saveName() + "'? This cannot be undone. (y/n)", YELLOW));
+        Display.showPrompt("> ");
+        String confirm = scanner.nextLine().trim().toLowerCase();
+        if (!confirm.startsWith("y")) {
+            Display.println("Delete cancelled.");
+            return;
+        }
+        try {
+            java.nio.file.Files.delete(target.path());
+            Display.println(Display.colorize("Deleted: " + target.path(), GREEN));
+        } catch (IOException e) {
+            Display.showError("Delete failed: " + e.getMessage());
+        }
+    }
+
+    private void handleRenameSave(List<SaveState.SaveInfo> saves, String numStr) {
+        int idx;
+        try {
+            idx = Integer.parseInt(numStr.trim()) - 1;
+        } catch (NumberFormatException e) {
+            Display.showError("Expected: r <number>");
+            return;
+        }
+        if (idx < 0 || idx >= saves.size()) {
+            Display.showError("Save number out of range.");
+            return;
+        }
+        SaveState.SaveInfo target = saves.get(idx);
+        Display.println("Renaming '" + target.saveName() + "'.");
+        Display.println("Enter new name (or blank to cancel):");
+        Display.showPrompt("New name> ");
+        String newName = scanner.nextLine().trim();
+        if (newName.isEmpty()) {
+            Display.println("Rename cancelled.");
+            return;
+        }
+        try {
+            // Update the save's display name and rewrite to a new slug-based path.
+            SaveState saveState = SaveState.load(target.path());
+            saveState.setSaveName(newName);
+            String newSlug = newName.replaceAll("[^a-zA-Z0-9_-]", "_").toLowerCase() + ".yaml";
+            Path newPath = target.path().resolveSibling(newSlug);
+            if (!newPath.equals(target.path()) && java.nio.file.Files.exists(newPath)) {
+                Display.showError("A save already exists at: " + newPath);
+                return;
+            }
+            saveState.save(newPath);
+            if (!newPath.equals(target.path())) {
+                java.nio.file.Files.deleteIfExists(target.path());
+            }
+            Display.println(Display.colorize(
+                "Renamed to '" + newName + "' (" + newPath + ")", GREEN));
+        } catch (IOException e) {
+            Display.showError("Rename failed: " + e.getMessage());
         }
     }
 

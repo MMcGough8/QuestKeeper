@@ -472,6 +472,14 @@ public class TrialCommandHandler implements CommandHandler {
         // Mark trial as completed in GameState
         context.getGameState().completeTrial(trial.getId());
 
+        // Auto-save: trial completion is a milestone. Best-effort; never
+        // blocks the game on failure.
+        var autoPath = com.questkeeper.save.SaveState.autoSave(
+            context.getGameState(), "trial-" + trial.getId());
+        if (autoPath != null) {
+            Display.println(Display.colorize("[Auto-saved: " + autoPath + "]", DEFAULT));
+        }
+
         // Show clue gained notification
         Display.showClueGained("You've learned more about the mystery!");
 

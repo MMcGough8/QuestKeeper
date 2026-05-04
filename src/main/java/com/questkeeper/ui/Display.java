@@ -312,7 +312,7 @@ public class Display {
         println();
 
         println(colorize("System", YELLOW));
-        showHelpCommand("save", "Save your game (YAML)");
+        showHelpCommand("save", "Save your game (YAML; auto-saves on level-up + trial completion)");
         showHelpCommand("load", "Load a saved game");
         showHelpCommand("help", "Show this menu");
         showHelpCommand("quit / exit", "Exit the game");

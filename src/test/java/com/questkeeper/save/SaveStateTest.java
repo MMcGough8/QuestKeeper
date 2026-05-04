@@ -660,4 +660,40 @@ class SaveStateTest {
                 save.getVisitedLocations().add("place"));
         }
     }
+
+    @Nested
+    @DisplayName("Auto-save")
+    class AutoSaveTests {
+
+        @Test
+        @DisplayName("autoSave writes to saves/auto/<char>-<reason>.yaml and the file is loadable")
+        void autoSaveWritesAndIsLoadable() throws IOException {
+            Character cleric = new Character("AutosaveTester", Race.HUMAN, CharacterClass.CLERIC,
+                10, 10, 14, 10, 16, 10);
+            cleric.setLevel(2);
+            com.questkeeper.campaign.Campaign campaign = com.questkeeper.campaign.Campaign.loadFromYaml(
+                com.questkeeper.campaign.Campaign.listAvailable().stream()
+                    .filter(c -> c.id().equalsIgnoreCase("muddlebrook"))
+                    .findFirst().orElseThrow().path());
+            com.questkeeper.state.GameState state = new com.questkeeper.state.GameState(cleric, campaign);
+
+            Path path = SaveState.autoSave(state, "unit-test-" + System.nanoTime());
+            try {
+                assertNotNull(path, "autoSave should return a non-null path on success");
+                assertTrue(Files.exists(path), "Auto-save file should exist at " + path);
+                assertTrue(path.toString().contains("auto"),
+                    "Auto-saves should live under saves/auto/");
+
+                SaveState restored = SaveState.load(path);
+                assertEquals("muddlebrook", restored.getCampaignId());
+                Character restoredChar = restored.restoreCharacter();
+                assertNotNull(restoredChar);
+                assertEquals("AutosaveTester", restoredChar.getName());
+                assertEquals(2, restoredChar.getLevel(),
+                    "Auto-saved level should round-trip");
+            } finally {
+                if (path != null) Files.deleteIfExists(path);
+            }
+        }
+    }
 }

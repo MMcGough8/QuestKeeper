@@ -168,6 +168,34 @@ public class SaveState {
     }
 
     /**
+     * Auto-save triggered by milestone events (level-up, trial completion).
+     * Writes to {@code saves/auto/<character>-<reason>.yaml} to avoid
+     * clobbering player-named saves. Failures are swallowed and logged so
+     * gameplay never breaks on an auto-save miss.
+     *
+     * @param game source state
+     * @param reason short kebab-case event tag (e.g. "level-up", "trial-1")
+     * @return the path written, or null on failure
+     */
+    public static Path autoSave(
+            com.questkeeper.state.GameState game, String reason) {
+        try {
+            SaveState snapshot = game.toSaveState();
+            String charSlug = sanitizeFilename(game.getCharacter().getName());
+            String reasonSlug = sanitizeFilename(reason);
+            String label = game.getCharacter().getName() + " (auto: " + reason + ")";
+            snapshot.setSaveName(label);
+            String filename = charSlug + "-" + reasonSlug + ".yaml";
+            Path savePath = Path.of(DEFAULT_SAVE_DIR, "auto", filename);
+            snapshot.save(savePath);
+            return savePath;
+        } catch (Exception e) {
+            System.err.println("[autosave] " + reason + " failed: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Lists all save files in the default save directory, recursing into
      * subdirectories. Corrupted save files are logged to stderr but skipped.
      */
