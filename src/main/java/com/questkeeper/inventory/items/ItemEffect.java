@@ -45,10 +45,17 @@ public interface ItemEffect {
 
     /**
      * Returns an effect that can be safely shared with a duplicated item.
-     * Default returns `this`, preserving the legacy "effects shared between
-     * MagicItem copies" behavior. Effect classes with mutable state
-     * (charges, cooldowns) should override to return an independent
-     * instance.
+     * Default returns `this` — safe for stateless / passive effects (most
+     * StatBonus / Resistance / SkillBonus / AbilitySet / Description /
+     * DamageReduction / ExtraDamage / Movement variants).
+     *
+     * <p><strong>NOT SAFE</strong> for effects with mutable runtime state
+     * such as {@link UsageType#CHARGES}, {@link UsageType#DAILY},
+     * {@link UsageType#LONG_REST}, {@link UsageType#CONSUMABLE} — sharing
+     * the instance across duplicated MagicItems will drain charges from
+     * both. If a campaign starts placing duplicate magic items with
+     * charges, the affected effect class must override this method to
+     * return an independent instance with copied state.
      */
     default ItemEffect copy() {
         return this;

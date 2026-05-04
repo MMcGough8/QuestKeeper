@@ -818,22 +818,35 @@ public class Character implements Combatant {
     }
 
     /**
-     * Sets the character's fighting style (Fighter only).
-     * This will update the class features list.
+     * Sets the character's fighting style. Permitted for Fighter (Lvl 1),
+     * Paladin (Lvl 2), and Ranger (Lvl 2). Each class uses its own feature
+     * ID so the right feature is removed/added.
      */
     public void setFightingStyle(FightingStyle style) {
-        if (characterClass != CharacterClass.FIGHTER) {
-            throw new IllegalStateException("Only Fighters can have a Fighting Style");
+        String featureId;
+        switch (characterClass) {
+            case FIGHTER -> featureId = FighterFeatures.FIGHTING_STYLE_ID;
+            case PALADIN -> featureId = com.questkeeper.character.features.PaladinFeatures.PALADIN_FIGHTING_STYLE_ID;
+            case RANGER -> featureId = com.questkeeper.character.features.RangerFeatures.RANGER_FIGHTING_STYLE_ID;
+            default -> throw new IllegalStateException(
+                "Fighting Style is only available to Fighter, Paladin, or Ranger");
         }
 
         this.fightingStyle = style;
 
-        // Remove any existing fighting style feature
-        classFeatures.removeIf(f -> f.getId().equals(FighterFeatures.FIGHTING_STYLE_ID));
+        // Remove any existing fighting style feature for this class
+        classFeatures.removeIf(f -> f.getId().equals(featureId));
 
-        // Add the new fighting style feature
+        // Add the new fighting style feature using the appropriate factory
         if (style != null) {
-            classFeatures.add(FighterFeatures.createFightingStyleFeature(style));
+            switch (characterClass) {
+                case FIGHTER -> classFeatures.add(FighterFeatures.createFightingStyleFeature(style));
+                case PALADIN -> classFeatures.add(
+                    com.questkeeper.character.features.PaladinFeatures.createFightingStyleFeature(style));
+                case RANGER -> classFeatures.add(
+                    com.questkeeper.character.features.RangerFeatures.createFightingStyleFeature(style));
+                default -> { /* unreachable */ }
+            }
         }
     }
 
