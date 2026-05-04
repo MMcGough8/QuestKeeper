@@ -1952,15 +1952,6 @@ public class CombatSystem {
     }
 
     /**
-     * Uses one Flurry of Blows attack.
-     */
-    public void useFlurryAttack() {
-        if (flurryAttacksRemaining > 0) {
-            flurryAttacksRemaining--;
-        }
-    }
-
-    /**
      * Checks if Patient Defense is active (attacks have disadvantage).
      */
     public int getMainActionAttacksRemaining() {
@@ -2198,13 +2189,6 @@ public class CombatSystem {
      */
     public boolean isSmiteReady() {
         return smiteReady;
-    }
-
-    /**
-     * Clears smite ready status (after attack resolves).
-     */
-    public void clearSmiteReady() {
-        smiteReady = false;
     }
 
     /**
