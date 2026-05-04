@@ -181,8 +181,11 @@ public class CharacterCreator {
      * Prompts for the subclass for classes that pick at L1
      * (Cleric, Sorcerer, Warlock). Other classes pick later via the
      * level-up flow (post-pitch).
+     *
+     * <p>Package-private to enable direct testing without driving the full
+     * 7-step creator flow.
      */
-    private static void promptSubclassIfNeeded(Character character) {
+    static void promptSubclassIfNeeded(Character character) {
         switch (character.getCharacterClass()) {
             case CLERIC -> promptDivineDomain(character);
             case SORCERER -> promptSorcerousOrigin(character);

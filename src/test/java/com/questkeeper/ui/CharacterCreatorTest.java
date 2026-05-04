@@ -427,6 +427,81 @@ class CharacterCreatorTest {
     }
 
     @Nested
+    @DisplayName("Subclass prompts during creation")
+    class SubclassPromptTests {
+
+        @Test
+        @DisplayName("Cleric: picking '1' sets Divine Domain to LIFE")
+        void clericPicksLifeDomain() {
+            Character cleric = new Character("Mira",
+                Race.HUMAN, CharacterClass.CLERIC,
+                10, 10, 14, 10, 16, 10);
+            // Script: "1" -> Life domain (first in enum), then Enter to dismiss "Press Enter to continue".
+            CharacterCreator.setScanner(new Scanner("1\n\n"));
+
+            CharacterCreator.promptSubclassIfNeeded(cleric);
+
+            assertEquals(
+                com.questkeeper.character.features.ClericFeatures.DivineDomain.LIFE,
+                cleric.getDivineDomain(),
+                "Cleric picking option 1 should select LIFE domain");
+            assertTrue(cleric.getFeature(
+                com.questkeeper.character.features.ClericFeatures.BONUS_PROFICIENCY_HEAVY_ARMOR_ID
+            ).isPresent(),
+                "Life Domain feature wiring should fire when domain is set");
+        }
+
+        @Test
+        @DisplayName("Sorcerer: picking '1' sets Sorcerous Origin to DRACONIC")
+        void sorcererPicksDraconic() {
+            Character sorc = new Character("Eldra",
+                Race.HUMAN, CharacterClass.SORCERER,
+                10, 14, 14, 10, 10, 16);
+            CharacterCreator.setScanner(new Scanner("1\n\n"));
+
+            CharacterCreator.promptSubclassIfNeeded(sorc);
+
+            assertEquals(
+                com.questkeeper.character.features.SorcererFeatures.SorcerousOrigin.DRACONIC,
+                sorc.getSorcerousOrigin());
+            assertTrue(sorc.getFeature(
+                com.questkeeper.character.features.SorcererFeatures.DRACONIC_RESILIENCE_ID
+            ).isPresent());
+        }
+
+        @Test
+        @DisplayName("Warlock: picking '1' sets Otherworldly Patron to FIEND")
+        void warlockPicksFiend() {
+            Character lock = new Character("Vex",
+                Race.HUMAN, CharacterClass.WARLOCK,
+                10, 14, 14, 10, 10, 16);
+            CharacterCreator.setScanner(new Scanner("1\n\n"));
+
+            CharacterCreator.promptSubclassIfNeeded(lock);
+
+            assertEquals(
+                com.questkeeper.character.features.WarlockFeatures.OtherworldlyPatron.FIEND,
+                lock.getWarlockPatron());
+            assertTrue(lock.getFeature(
+                com.questkeeper.character.features.WarlockFeatures.DARK_ONES_BLESSING_ID
+            ).isPresent());
+        }
+
+        @Test
+        @DisplayName("Fighter does not get a subclass prompt at creation")
+        void fighterNoSubclassPrompt() {
+            Character f = new Character("Aelar",
+                Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            // Empty scanner — if the prompt fires, it would block trying to read.
+            CharacterCreator.setScanner(new Scanner(""));
+
+            // Should return without reading anything.
+            CharacterCreator.promptSubclassIfNeeded(f);
+        }
+    }
+
+    @Nested
     @DisplayName("Edge Cases")
     class EdgeCaseTests {
 
