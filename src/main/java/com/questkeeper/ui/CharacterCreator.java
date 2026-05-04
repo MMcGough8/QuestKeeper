@@ -168,10 +168,72 @@ public class CharacterCreator {
         selectStartingEquipment(character);
         pressEnterToContinue();
 
+        // Step 7: Subclass pick (only for classes that pick at L1)
+        promptSubclassIfNeeded(character);
+
         // Final Character Sheet
         showFinalCharacterSheet(character);
 
         return character;
+    }
+
+    /**
+     * Prompts for the subclass for classes that pick at L1
+     * (Cleric, Sorcerer, Warlock). Other classes pick later via the
+     * level-up flow (post-pitch).
+     */
+    private static void promptSubclassIfNeeded(Character character) {
+        switch (character.getCharacterClass()) {
+            case CLERIC -> promptDivineDomain(character);
+            case SORCERER -> promptSorcerousOrigin(character);
+            case WARLOCK -> promptWarlockPatron(character);
+            default -> { /* Other classes pick at L3+ */ }
+        }
+    }
+
+    private static void promptDivineDomain(Character character) {
+        clearScreen();
+        printBox("STEP 7: CHOOSE YOUR DIVINE DOMAIN", 70, MAGENTA);
+        println();
+        var options = com.questkeeper.character.features.ClericFeatures.DivineDomain.values();
+        for (int i = 0; i < options.length; i++) {
+            println("  " + (i + 1) + ") " + colorize(options[i].getDisplayName(), CYAN)
+                + " — " + options[i].getDescription());
+        }
+        var pick = promptForEnum(options, "Select your domain (number): ");
+        character.setDivineDomain(pick);
+        println(colorize("Divine Domain: " + pick.getDisplayName(), GREEN));
+        pressEnterToContinue();
+    }
+
+    private static void promptSorcerousOrigin(Character character) {
+        clearScreen();
+        printBox("STEP 7: CHOOSE YOUR SORCEROUS ORIGIN", 70, MAGENTA);
+        println();
+        var options = com.questkeeper.character.features.SorcererFeatures.SorcerousOrigin.values();
+        for (int i = 0; i < options.length; i++) {
+            println("  " + (i + 1) + ") " + colorize(options[i].getDisplayName(), CYAN)
+                + " — " + options[i].getDescription());
+        }
+        var pick = promptForEnum(options, "Select your origin (number): ");
+        character.setSorcerousOrigin(pick);
+        println(colorize("Sorcerous Origin: " + pick.getDisplayName(), GREEN));
+        pressEnterToContinue();
+    }
+
+    private static void promptWarlockPatron(Character character) {
+        clearScreen();
+        printBox("STEP 7: CHOOSE YOUR OTHERWORLDLY PATRON", 70, MAGENTA);
+        println();
+        var options = com.questkeeper.character.features.WarlockFeatures.OtherworldlyPatron.values();
+        for (int i = 0; i < options.length; i++) {
+            println("  " + (i + 1) + ") " + colorize(options[i].getDisplayName(), CYAN)
+                + " — " + options[i].getDescription());
+        }
+        var pick = promptForEnum(options, "Select your patron (number): ");
+        character.setWarlockPatron(pick);
+        println(colorize("Otherworldly Patron: " + pick.getDisplayName(), GREEN));
+        pressEnterToContinue();
     }
 
     private static String getRaceBonusString(Race race) {
