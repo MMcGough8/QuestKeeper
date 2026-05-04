@@ -1014,5 +1014,27 @@ class InventoryTest {
             assertEquals(ring1, inventory.getEquipped(EquipmentSlot.RING_LEFT));
             assertEquals(ring2, inventory.getEquipped(EquipmentSlot.RING_RIGHT));
         }
+
+        @Test
+        @DisplayName("Ring of Protection grants +1 AC and +1 saves once equipped")
+        void ringOfProtectionAggregatesIntoCharacterStats() {
+            com.questkeeper.character.Character paladin =
+                new com.questkeeper.character.Character("Test",
+                    com.questkeeper.character.Character.Race.HUMAN,
+                    com.questkeeper.character.Character.CharacterClass.PALADIN);
+            int baseAC = paladin.getArmorClass();
+            int baseStrSave = paladin.getSavingThrowModifier(
+                com.questkeeper.character.Character.Ability.STRENGTH);
+
+            MagicItem ring = MagicItem.createRingOfProtection();
+            paladin.getInventory().addItem(ring);
+            paladin.getInventory().equip(ring);
+
+            assertEquals(baseAC + 1, paladin.getArmorClass(),
+                "Ring of Protection should add +1 AC");
+            assertEquals(baseStrSave + 1, paladin.getSavingThrowModifier(
+                com.questkeeper.character.Character.Ability.STRENGTH),
+                "Ring of Protection should add +1 to saving throws");
+        }
     }
 }

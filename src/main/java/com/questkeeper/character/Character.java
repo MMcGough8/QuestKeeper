@@ -22,6 +22,10 @@ import com.questkeeper.combat.Combatant;
 import com.questkeeper.core.Dice;
 import com.questkeeper.inventory.Armor;
 import com.questkeeper.inventory.Inventory;
+import com.questkeeper.inventory.Item;
+import com.questkeeper.inventory.items.ItemEffect;
+import com.questkeeper.inventory.items.MagicItem;
+import com.questkeeper.inventory.items.effects.StatBonusEffect;
 import com.questkeeper.magic.Spellbook;
 
 /**
@@ -340,12 +344,35 @@ public class Character implements Combatant {
         // Add any additional bonuses (magic items, class features, etc.)
         ac += armorBonus + shieldBonus;
 
+        // Aggregate StatBonusEffect.AC across equipped magic items
+        // (Ring of Protection, Cloak of Protection, etc.)
+        ac += sumMagicItemBonus(StatBonusEffect.StatType.ARMOR_CLASS);
+
         // Defense Fighting Style: +1 AC while wearing armor
         if (fightingStyle == FightingStyle.DEFENSE && equippedArmor != null) {
             ac += 1;
         }
 
         return ac;
+    }
+
+    /**
+     * Sums StatBonusEffect bonuses for the given stat type across all
+     * currently-equipped magic items. Returns 0 if no equipped magic items
+     * grant a matching bonus.
+     */
+    private int sumMagicItemBonus(StatBonusEffect.StatType statType) {
+        int total = 0;
+        for (Item equipped : inventory.getEquippedItems().values()) {
+            if (equipped instanceof MagicItem magic) {
+                for (ItemEffect effect : magic.getEffects()) {
+                    if (effect instanceof StatBonusEffect sbe && sbe.appliesTo(statType)) {
+                        total += sbe.getBonusAmount();
+                    }
+                }
+            }
+        }
+        return total;
     }
     
     @Override
@@ -998,7 +1025,22 @@ public class Character implements Combatant {
         if (savingThrowProficiencies.contains(ability)) {
             modifier += getProficiencyBonus();
         }
+        // StatBonusEffect.appliesTo handles "general SAVING_THROWS bonus
+        // applies to every specific save" — query just the specific type
+        // to avoid double-counting general+specific matches.
+        modifier += sumMagicItemBonus(saveStatTypeFor(ability));
         return modifier;
+    }
+
+    private static StatBonusEffect.StatType saveStatTypeFor(Ability ability) {
+        return switch (ability) {
+            case STRENGTH -> StatBonusEffect.StatType.STRENGTH_SAVE;
+            case DEXTERITY -> StatBonusEffect.StatType.DEXTERITY_SAVE;
+            case CONSTITUTION -> StatBonusEffect.StatType.CONSTITUTION_SAVE;
+            case INTELLIGENCE -> StatBonusEffect.StatType.INTELLIGENCE_SAVE;
+            case WISDOM -> StatBonusEffect.StatType.WISDOM_SAVE;
+            case CHARISMA -> StatBonusEffect.StatType.CHARISMA_SAVE;
+        };
     }
     
     public int makeAbilityCheck(Ability ability) {
