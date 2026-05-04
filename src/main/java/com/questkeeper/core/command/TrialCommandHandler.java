@@ -132,6 +132,20 @@ public class TrialCommandHandler implements CommandHandler {
         return 0;
     }
 
+    /**
+     * Source of truth for "is this minigame complete." Checks the persisted
+     * GameState flag first (which survives save/load), then falls back to
+     * the in-memory MiniGame.isCompleted() (which doesn't, but is set during
+     * live play before the flag write happens).
+     */
+    private boolean isMiniGameDone(GameContext context, MiniGame game) {
+        if (game == null) return false;
+        if (context.getGameState().hasFlag("completed_minigame_" + game.getId())) {
+            return true;
+        }
+        return game.isCompleted();
+    }
+
     private void displayTrialStatus(GameContext context, Trial trial) {
         Display.println();
         Display.printBox(trial.getName(), 60, MAGENTA);
@@ -142,13 +156,14 @@ public class TrialCommandHandler implements CommandHandler {
 
         int i = 1;
         for (MiniGame game : trial.getMiniGames()) {
-            String status = game.isCompleted() ?
+            boolean done = isMiniGameDone(context, game);
+            String status = done ?
                 Display.colorize("[COMPLETE]", GREEN) :
                 Display.colorize("[INCOMPLETE]", YELLOW);
 
             Display.println(String.format("  %d. %s %s", i++, game.getName(), status));
 
-            if (!game.isCompleted()) {
+            if (!done) {
                 String desc = game.getDescription();
                 String firstLine = (desc != null && !desc.isEmpty()) ? desc.split("\n")[0] : "";
                 Display.println("     " + Display.colorize(firstLine, WHITE));
@@ -214,7 +229,7 @@ public class TrialCommandHandler implements CommandHandler {
             return CommandResult.failure("Challenge not found");
         }
 
-        if (game.isCompleted()) {
+        if (isMiniGameDone(context, game)) {
             Display.println("You've already completed '" + game.getName() + "'.");
             return CommandResult.success();
         }
