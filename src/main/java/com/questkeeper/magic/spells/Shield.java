@@ -39,7 +39,10 @@ public class Shield extends AbstractSpell {
             caster.getName(),
             AC_BONUS);
 
-        return SpellResult.buff(this, caster, "+5 AC until start of next turn");
+        return new SpellResult.Builder(SpellResult.Type.BUFF, message)
+            .spell(this)
+            .target(caster)
+            .build();
     }
 
     /**

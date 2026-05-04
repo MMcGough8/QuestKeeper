@@ -193,14 +193,17 @@ public class TrialCommandHandler implements CommandHandler {
             return CommandResult.failure("No target specified");
         }
 
-        // Parse "attempt X with Y" syntax
+        // Parse "attempt X with Y" syntax. Use lastIndexOf so a challenge name
+        // that itself contains "with" (e.g. "Wrestle with Snake") still parses
+        // the trailing skill correctly.
         String challengeName = target;
         String skillName = null;
 
-        if (target.toLowerCase().contains(" with ")) {
-            String[] parts = target.toLowerCase().split(" with ");
-            challengeName = parts[0].trim();
-            skillName = parts.length > 1 ? parts[1].trim() : null;
+        String lower = target.toLowerCase();
+        int withIdx = lower.lastIndexOf(" with ");
+        if (withIdx >= 0) {
+            challengeName = target.substring(0, withIdx).trim();
+            skillName = target.substring(withIdx + " with ".length()).trim().toLowerCase();
         }
 
         // Find the mini-game

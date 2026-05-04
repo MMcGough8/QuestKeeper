@@ -68,7 +68,11 @@ public class CureWounds extends AbstractSpell {
             target.getCurrentHitPoints(),
             target.getMaxHitPoints());
 
-        return SpellResult.healing(this, target, actualHealing);
+        return new SpellResult.Builder(SpellResult.Type.HEALING, message)
+            .spell(this)
+            .target(target)
+            .healing(actualHealing)
+            .build();
     }
 
     private String getOrdinalSuffix(int n) {
