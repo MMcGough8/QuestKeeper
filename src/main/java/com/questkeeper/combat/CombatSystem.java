@@ -578,6 +578,13 @@ public class CombatSystem {
                 totalMod += 2;
             }
 
+            // Sacred Weapon (Paladin): +CHA mod (min +1) to attack rolls while active
+            int sacredWeaponBonus = 0;
+            if (sacredWeaponActive && weapon != null) {
+                sacredWeaponBonus = Math.max(1, character.getAbilityModifier(Ability.CHARISMA));
+                totalMod += sacredWeaponBonus;
+            }
+
             // Reckless Attack (Barbarian): grants advantage on melee STR attacks
             boolean isReckless = character.isRecklessAttackActive();
             boolean isMeleeStrAttack = !isRangedAttack && abilityMod == strMod;
@@ -700,6 +707,10 @@ public class CombatSystem {
                 if (smiteDamage > 0) {
                     if (specialEffects.length() > 0) specialEffects.append(" ");
                     specialEffects.append(String.format("[DIVINE SMITE +%d radiant!]", smiteDamage));
+                }
+                if (sacredWeaponBonus > 0) {
+                    if (specialEffects.length() > 0) specialEffects.append(" ");
+                    specialEffects.append(String.format("[SACRED WEAPON +%d attack!]", sacredWeaponBonus));
                 }
                 if (isReckless) {
                     if (specialEffects.length() > 0) specialEffects.append(" ");

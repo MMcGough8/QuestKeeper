@@ -1838,6 +1838,25 @@ class CombatSystemTest {
         }
 
         @Test
+        @DisplayName("Sacred Weapon adds CHA bonus to attack rolls and tags the result")
+        void sacredWeaponAddsBonusToAttack() {
+            setUpPaladinCombat();
+            paladin.setLevel(3);  // Sacred Weapon unlocks at Lvl 3
+            combatSystem.startCombat(state, List.of(createWeakling()));
+            advanceToPlayerTurn();
+
+            combatSystem.playerTurn("sacredweapon", null);
+            assertTrue(combatSystem.isSacredWeaponActive(),
+                "precondition: Sacred Weapon active");
+
+            CombatResult attackResult = combatSystem.playerTurn("attack", "weakling");
+
+            assertTrue(attackResult.getMessage().contains("SACRED WEAPON"),
+                "Attack message should include the SACRED WEAPON tag; got: "
+                    + attackResult.getMessage());
+        }
+
+        @Test
         @DisplayName("Smited hit expends a spell slot and clears smiteReady")
         void smitedHitExpendsSlotAndClearsFlag() {
             setUpPaladinCombat();
