@@ -2135,6 +2135,51 @@ class CombatSystemTest {
         }
 
         @Test
+        @DisplayName("Deflect Missiles reduces incoming ranged damage and consumes the reaction")
+        void deflectMissilesReducesRangedDamageAndConsumesReaction() {
+            Character monk = new Character("Po", Race.HUMAN, CharacterClass.MONK,
+                14, 16, 14, 10, 16, 10);
+            monk.setLevel(3);
+
+            state = new GameState(monk, campaign);
+            combatSystem = new CombatSystem();
+
+            // High attack bonus, ranged tag, modest damage so the reduction is meaningful.
+            Monster archer = new Monster("archer", "Archer", 10, 30);
+            archer.setAttackBonus(20);
+            archer.setDamageDice("1d4");
+            archer.setRangedAttack(true);
+            // Initiative ties broken by DEX mod; ensure archer goes first.
+            archer.setDexterityMod(20);
+
+            combatSystem.startCombat(state, List.of(archer));
+
+            int beforeHp = monk.getCurrentHitPoints();
+
+            // Loop until the archer's ranged attack triggers Deflect Missiles.
+            CombatResult deflectResult = null;
+            int safety = 0;
+            while (combatSystem.isInCombat() && safety++ < 30) {
+                CombatResult tr = combatSystem.executeTurn();
+                if (tr.getMessage() != null
+                    && tr.getMessage().contains("DEFLECT MISSILES")) {
+                    deflectResult = tr;
+                    break;
+                }
+            }
+
+            assertNotNull(deflectResult,
+                "Archer's ranged attack should have triggered Deflect Missiles");
+            assertTrue(combatSystem.isReactionUsed(),
+                "Deflect Missiles should consume the reaction");
+            // Damage taken cannot exceed `weapon damage - reduction`. Worst case
+            // (max die roll, min reduction): 4 damage - (1 + 3 + 3) = -3 → 0.
+            // Best case: full damage reduced to 0.
+            assertTrue(monk.getCurrentHitPoints() >= beforeHp - 4,
+                "Damage taken should be bounded by raw weapon damage");
+        }
+
+        @Test
         @DisplayName("Smited hit expends a spell slot and clears smiteReady")
         void smitedHitExpendsSlotAndClearsFlag() {
             setUpPaladinCombat();

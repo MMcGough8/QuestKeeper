@@ -112,6 +112,7 @@ public class Monster implements Combatant {
     private String description;
     private String specialAbility;
     private Behavior behavior;
+    private boolean rangedAttack;  // true => primary attack is ranged (bow, crossbow, javelin, etc.)
 
     public Monster(String id, String name, int armorClass, int maxHitPoints) {
         this.id  = id;
@@ -358,6 +359,14 @@ public class Monster implements Combatant {
 
     public void setBehavior(Behavior behavior) {
         this.behavior = behavior != null ? behavior : Behavior.AGGRESSIVE;
+    }
+
+    public boolean isRangedAttack() {
+        return rangedAttack;
+    }
+
+    public void setRangedAttack(boolean rangedAttack) {
+        this.rangedAttack = rangedAttack;
     }
 
     public void setAbilityModifiers(int str, int dex, int con, int intel, int wis, int cha) {

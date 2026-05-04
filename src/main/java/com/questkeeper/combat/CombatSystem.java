@@ -558,6 +558,25 @@ public class CombatSystem {
                     rageResisted = true;
                 }
 
+                // Deflect Missiles (Lvl 3 Monk): reaction reduces incoming
+                // ranged damage by 1d10 + DEX + level. The monk uses it
+                // automatically when available.
+                int deflectReduction = 0;
+                boolean deflected = false;
+                if (target instanceof Character monkTarget
+                    && monster.isRangedAttack()
+                    && reactionAvailable()) {
+                    var dmFeature = monkTarget.getFeature(MonkFeatures.DEFLECT_MISSILES_ID);
+                    if (dmFeature.isPresent()
+                        && dmFeature.get() instanceof MonkFeatures.DeflectMissiles dm) {
+                        int roll = Dice.roll(10);
+                        deflectReduction = dm.calculateReduction(monkTarget, roll);
+                        damage = Math.max(0, damage - deflectReduction);
+                        deflected = true;
+                        consumeReaction();
+                    }
+                }
+
                 target.takeDamage(damage);
 
                 // Track aggro - target remembers who hit them
@@ -567,6 +586,12 @@ public class CombatSystem {
                 String specialEffect = processSpecialAbilityOnHit(monster, target);
                 if (rageResisted) {
                     specialEffect = (specialEffect != null ? specialEffect + " " : "") + "[RAGE RESISTED!]";
+                }
+                if (deflected) {
+                    String tag = damage == 0
+                        ? String.format("[DEFLECT MISSILES: -%d, fully deflected!]", deflectReduction)
+                        : String.format("[DEFLECT MISSILES: -%d damage]", deflectReduction);
+                    specialEffect = (specialEffect != null ? specialEffect + " " : "") + tag;
                 }
                 if (isCrit) {
                     String critType = isNaturalCrit ? "[CRITICAL HIT!]" : "[AUTO-CRIT!]";
