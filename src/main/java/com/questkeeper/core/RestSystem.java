@@ -128,11 +128,10 @@ public class RestSystem {
         int totalHealing = Math.max(1, roll + conMod);
 
         int startHp = character.getCurrentHitPoints();
-        character.useHitDie();  // This does the actual healing
+        // Pass the precomputed roll so the displayed value matches the actual heal
+        character.useHitDie(roll);
         int actualHealing = character.getCurrentHitPoints() - startHp;
 
-        // Note: useHitDie() does its own roll, so we recalculate for display
-        // This is slightly inconsistent but keeps the Character class self-contained
         return new HitDieResult(
                 roll,
                 conMod,

@@ -415,6 +415,15 @@ public class Character implements Combatant {
      * @return the amount healed, or -1 if no hit dice available
      */
     public int useHitDie() {
+        return useHitDie(Dice.roll(characterClass.getHitDie()));
+    }
+
+    /**
+     * Spends a hit die using a precomputed roll. Allows callers (e.g.,
+     * RestSystem) to roll once and display the same value that drives
+     * the actual heal, instead of producing two independent rolls.
+     */
+    public int useHitDie(int roll) {
         if (availableHitDice <= 0) {
             return -1;
         }
@@ -423,7 +432,6 @@ public class Character implements Combatant {
         }
 
         availableHitDice--;
-        int roll = Dice.roll(characterClass.getHitDie());
         int conMod = getAbilityModifier(Ability.CONSTITUTION);
         int healing = Math.max(1, roll + conMod);  // Minimum 1 HP healed
 

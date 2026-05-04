@@ -3,6 +3,7 @@ package com.questkeeper.core;
 import com.questkeeper.character.Character;
 import com.questkeeper.character.Character.CharacterClass;
 import com.questkeeper.character.Character.Race;
+import com.questkeeper.core.RestSystem.HitDieResult;
 import com.questkeeper.core.RestSystem.RestResult;
 import com.questkeeper.core.RestSystem.RestType;
 import org.junit.jupiter.api.BeforeEach;
@@ -337,6 +338,34 @@ class RestSystemTest {
             // Wiz average: 3.5 + 0 = 3.5
             assertTrue(barbarianTotal > wizardTotal,
                     "Barbarian should heal more on average: " + barbarianTotal + " vs " + wizardTotal);
+        }
+    }
+
+    @Nested
+    @DisplayName("Hit die roll consistency")
+    class HitDieRollConsistencyTests {
+
+        @Test
+        @DisplayName("Displayed roll matches actual HP gained when below max")
+        void displayedRollMatchesActualHealing() {
+            // Drop well below max so heal is not capped by maxHP.
+            // Run multiple iterations to expose the dual-roll bug if present.
+            for (int i = 0; i < 20; i++) {
+                Character f = new Character("F" + i, Race.HUMAN, CharacterClass.FIGHTER,
+                    14, 12, 14, 10, 10, 10);
+                f.takeDamage(100);  // bottom out HP
+                if (f.getAvailableHitDice() <= 0) {
+                    continue;
+                }
+
+                HitDieResult result = restSystem.useHitDie(f);
+
+                assertEquals(result.roll() + result.conModifier(),
+                    result.actualHealing(),
+                    "Iteration " + i + ": displayed roll+conMod (" +
+                        (result.roll() + result.conModifier()) +
+                        ") should equal actual HP gained (" + result.actualHealing() + ")");
+            }
         }
     }
 }
