@@ -267,11 +267,13 @@ public class Character implements Combatant {
         // Initialize inventory with strength-based carrying capacity
         this.inventory = new Inventory(getAbilityScore(Ability.STRENGTH));
 
+        // Spellbook must initialize BEFORE class features so the DivineSmite
+        // bind path (Character.initializeClassFeatures Paladin branch) sees
+        // a non-null spellbook.getSpellSlots() to bind to.
+        spellbook.initializeForClass(characterClass, level);
+
         // Initialize class features for starting level
         initializeClassFeatures();
-
-        // Initialize spellcasting for casting classes
-        spellbook.initializeForClass(characterClass, level);
     }
 
     public Character(String name, Race race, CharacterClass characterClass,

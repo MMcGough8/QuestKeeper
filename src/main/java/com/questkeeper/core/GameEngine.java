@@ -325,6 +325,13 @@ public class GameEngine implements AutoCloseable {
             // Show action prompt with suggestions
             Display.showActionPrompt(generateSuggestions());
             Display.showPrompt();
+            if (!scanner.hasNextLine()) {
+                // EOF (Ctrl-D / piped input exhausted). Exit cleanly instead
+                // of throwing NoSuchElementException up the stack.
+                Display.println();
+                Display.println(Display.colorize("Input closed. Exiting.", YELLOW));
+                break;
+            }
             String input = scanner.nextLine().trim();
 
             if (input.isEmpty()) {

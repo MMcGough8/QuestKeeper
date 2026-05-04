@@ -78,11 +78,24 @@ public class CombatCommandHandler implements CommandHandler {
         String searchTerm = name.trim().toLowerCase();
         Map<String, Monster> templates = context.getCampaign().getMonsterTemplates();
 
+        // Prefer exact id or full-name match so accidental typos like
+        // `attack i` don't summon a random monster from anywhere in the
+        // campaign. Falls back to a partial match only if no exact match
+        // and the term is at least three characters.
+        for (String id : templates.keySet()) {
+            Monster template = templates.get(id);
+            if (id.equalsIgnoreCase(searchTerm) ||
+                template.getName().equalsIgnoreCase(searchTerm)) {
+                return context.getCampaign().createMonster(id);
+            }
+        }
+        if (searchTerm.length() < 3) {
+            return null;
+        }
         for (String id : templates.keySet()) {
             Monster template = templates.get(id);
             if (template.getName().toLowerCase().contains(searchTerm) ||
                 id.toLowerCase().contains(searchTerm)) {
-                // Create a new instance from the template
                 return context.getCampaign().createMonster(id);
             }
         }

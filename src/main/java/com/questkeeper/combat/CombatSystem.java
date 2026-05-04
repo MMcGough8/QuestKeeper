@@ -365,9 +365,16 @@ public class CombatSystem {
         boolean success = Dice.checkAgainstDC(dexMod, ENEMY_FLEE_DC);
 
         if (success) {
-            // Remove monster from combat
+            // Remove monster from combat. If the fleer's index in `initiative`
+            // was at or before currentTurn, every later index shifts down by
+            // one — adjust currentTurn so advanceTurn doesn't skip the
+            // combatant that took the fleer's place.
             participants.remove(monster);
+            int fledIdx = initiative.indexOf(monster);
             initiative.remove(monster);
+            if (fledIdx >= 0 && fledIdx <= currentTurn && currentTurn > 0) {
+                currentTurn--;
+            }
 
             String message = String.format("%s flees from combat! [DEX check vs DC %d - SUCCESS]",
                 monster.getName(), ENEMY_FLEE_DC);

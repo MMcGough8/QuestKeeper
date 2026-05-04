@@ -285,15 +285,19 @@ public class Inventory {
 
         // Handle two-handed weapons
         if (item instanceof Weapon weapon && weapon.isTwoHanded()) {
-            Item offHand = unequip(EquipmentSlot.OFF_HAND);
-            if (offHand != null) {
-                addItem(offHand);
+            Item offHand = equipped.remove(EquipmentSlot.OFF_HAND);
+            if (offHand != null && !addItem(offHand)) {
+                // Inventory full / over capacity — abort rather than drop the item.
+                equipped.put(EquipmentSlot.OFF_HAND, offHand);
+                return null;
             }
         }
 
         Item previous = equipped.get(slot);
-        if (previous != null) {
-            addItem(previous);
+        if (previous != null && !addItem(previous)) {
+            // Couldn't return the previous item to the bag; abort rather than
+            // delete it. Caller sees null = equip failed; previous stays put.
+            return null;
         }
 
         // Remove and get the actual item from inventory (not the passed reference)
@@ -308,10 +312,16 @@ public class Inventory {
     }
 
     public Item unequip(EquipmentSlot slot) {
-        Item item = equipped.remove(slot);
-        if (item != null) {
-            addItem(item);
+        Item item = equipped.get(slot);
+        if (item == null) {
+            return null;
         }
+        // Try to return to the bag. If over capacity, leave it equipped
+        // rather than silently destroying it.
+        if (!addItem(item)) {
+            return null;
+        }
+        equipped.remove(slot);
         return item;
     }
 
