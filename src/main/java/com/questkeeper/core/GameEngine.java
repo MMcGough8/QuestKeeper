@@ -777,6 +777,42 @@ public class GameEngine implements AutoCloseable {
                 String action = parts[0];
                 String target = parts.length > 1 ? parts[1] : null;
 
+                // System commands that should work even mid-combat
+                if (action.equals("quit") || action.equals("q")) {
+                    Display.println();
+                    Display.println(Display.colorize("Quit during combat? Unsaved progress will be lost. (y/n)", RED));
+                    Display.showPrompt("> ");
+                    String confirm = scanner.nextLine().trim().toLowerCase();
+                    if (confirm.startsWith("y")) {
+                        running = false;
+                        return;
+                    }
+                    Display.println(Display.colorize("Returning to combat.", CYAN));
+                    continue;
+                }
+                if (action.equals("save")) {
+                    Display.showError("Cannot save during combat. Finish or flee first.");
+                    continue;
+                }
+                if (action.equals("load")) {
+                    Display.showError("Cannot load during combat. Quit first, then load.");
+                    continue;
+                }
+                if (action.equals("rest")) {
+                    Display.showError("You can't rest with enemies nearby.");
+                    continue;
+                }
+                if (action.equals("help") || action.equals("?")) {
+                    Display.println(Display.colorize(
+                        "Combat actions: attack, flee, secondwind, surge, smite, layonhands, " +
+                        "rage, reckless, dash, disengage, hide, flurry, patient, step, cast.",
+                        YELLOW));
+                    Display.println(Display.colorize(
+                        "System: quit (with confirmation). save/load/rest are blocked mid-combat.",
+                        YELLOW));
+                    continue;
+                }
+
                 CombatResult actionResult = combatSystem.playerTurn(action, target);
                 displayCombatResult(actionResult);
 
