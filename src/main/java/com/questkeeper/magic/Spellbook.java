@@ -21,6 +21,7 @@ public class Spellbook {
     private SpellSlots spellSlots;
     private Ability spellcastingAbility;
     private boolean usesPreparedSpells;  // Wizard, Cleric, Druid, Paladin prepare; Sorcerer, Bard, Ranger know
+    private CharacterClass charClass;    // Stored so onLevelUp can re-grant level-gated default spells
 
     /**
      * Creates an empty spellbook.
@@ -35,6 +36,7 @@ public class Spellbook {
      * Initializes spellcasting for a character class.
      */
     public void initializeForClass(CharacterClass charClass, int level) {
+        this.charClass = charClass;
         SpellSlots.CasterType casterType = getCasterType(charClass);
         if (casterType != null) {
             this.spellSlots = new SpellSlots(casterType, level);
@@ -390,6 +392,9 @@ public class Spellbook {
     public void onLevelUp(int newLevel) {
         if (spellSlots != null) {
             spellSlots.setCasterLevel(newLevel);
+        }
+        if (charClass != null) {
+            addDefaultSpells(charClass, newLevel);
         }
     }
 }
