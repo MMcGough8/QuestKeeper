@@ -143,6 +143,52 @@ class SpellbookTest {
         }
 
         @Test
+        @DisplayName("Full-caster L3 -> L4 gains a 2nd-level slot (2 -> 3)")
+        void fullCasterL3ToL4GainsSecondLevelSlot() {
+            Spellbook book = new Spellbook();
+            book.initializeForClass(CharacterClass.WIZARD, 3);
+            assertEquals(2, book.getSpellSlots().getSlotsRemaining(2),
+                "precondition: Wizard L3 has 2 second-level slots");
+
+            book.onLevelUp(4);
+
+            assertEquals(3, book.getSpellSlots().getSlotsRemaining(2),
+                "Wizard L4 should have 3 second-level slots");
+        }
+
+        @Test
+        @DisplayName("Full-caster L4 -> L5 gains 2 third-level slots (0 -> 2)")
+        void fullCasterL4ToL5GainsThirdLevelSlots() {
+            Spellbook book = new Spellbook();
+            book.initializeForClass(CharacterClass.WIZARD, 4);
+            assertEquals(0, book.getSpellSlots().getSlotsRemaining(3),
+                "precondition: Wizard L4 has no 3rd-level slots");
+
+            book.onLevelUp(5);
+
+            assertEquals(2, book.getSpellSlots().getSlotsRemaining(3),
+                "Wizard L5 should have 2 third-level slots");
+        }
+
+        @Test
+        @DisplayName("Half-caster L4 -> L5 gains a 1st-level slot (3 -> 4) and 2 new 2nd-level slots")
+        void halfCasterL4ToL5GainsSlots() {
+            Spellbook book = new Spellbook();
+            book.initializeForClass(CharacterClass.PALADIN, 4);
+            assertEquals(3, book.getSpellSlots().getSlotsRemaining(1),
+                "precondition: Paladin L4 has 3 first-level slots");
+            assertEquals(0, book.getSpellSlots().getSlotsRemaining(2),
+                "precondition: Paladin L4 has no 2nd-level slots");
+
+            book.onLevelUp(5);
+
+            assertEquals(4, book.getSpellSlots().getSlotsRemaining(1),
+                "Paladin L5 should have 4 first-level slots");
+            assertEquals(2, book.getSpellSlots().getSlotsRemaining(2),
+                "Paladin L5 should have 2 second-level slots");
+        }
+
+        @Test
         @DisplayName("Already-expended slots are not refilled on level-up")
         void levelUpDoesNotRefillUsedSlots() {
             Spellbook book = new Spellbook();
