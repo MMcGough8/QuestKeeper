@@ -64,6 +64,7 @@ public class CombatSystem {
     private boolean reactionUsed;         // Track if reaction was used this turn
     private boolean sacredWeaponActive;   // Track if Sacred Weapon is active (+CHA to attacks)
     private boolean smiteReady;           // Track if Divine Smite will be used on next hit
+    private boolean stunningStrikeReady;  // Monk: next melee hit forces a CON save vs Ki DC
 
     public CombatSystem() {
         this.participants = new ArrayList<>();
@@ -86,6 +87,7 @@ public class CombatSystem {
         this.reactionUsed = false;
         this.sacredWeaponActive = false;
         this.smiteReady = false;
+        this.stunningStrikeReady = false;
     }
 
     // ==========================================
@@ -291,6 +293,11 @@ public class CombatSystem {
             case "stepofthewind":
             case "step of the wind":
                 return handleStepOfTheWind();
+
+            case "stun":
+            case "stunningstrike":
+            case "stunning strike":
+                return handleStunningStrike();
 
             // Paladin actions
             case "smite":
@@ -577,6 +584,22 @@ public class CombatSystem {
                     }
                 }
 
+                // Uncanny Dodge (Lvl 5 Rogue): if the rogue still has a
+                // reaction this round and Deflect Missiles didn't already
+                // claim it, halve the incoming damage. Auto-fires when
+                // available.
+                boolean uncannyDodge = false;
+                if (target instanceof Character rogueTarget
+                    && reactionAvailable()
+                    && rogueTarget.getFeature(
+                        com.questkeeper.character.features.RogueFeatures.UNCANNY_DODGE_ID
+                    ).isPresent()
+                    && damage > 0) {
+                    damage = damage / 2;
+                    uncannyDodge = true;
+                    consumeReaction();
+                }
+
                 target.takeDamage(damage);
 
                 // Track aggro - target remembers who hit them
@@ -592,6 +615,10 @@ public class CombatSystem {
                         ? String.format("[DEFLECT MISSILES: -%d, fully deflected!]", deflectReduction)
                         : String.format("[DEFLECT MISSILES: -%d damage]", deflectReduction);
                     specialEffect = (specialEffect != null ? specialEffect + " " : "") + tag;
+                }
+                if (uncannyDodge) {
+                    specialEffect = (specialEffect != null ? specialEffect + " " : "")
+                        + "[UNCANNY DODGE: damage halved!]";
                 }
                 if (isCrit) {
                     String critType = isNaturalCrit ? "[CRITICAL HIT!]" : "[AUTO-CRIT!]";
@@ -796,6 +823,34 @@ public class CombatSystem {
                 // Track aggro - target remembers who hit them
                 lastAttacker.put(target, attacker);
 
+                // Stunning Strike (Monk L5+): primed by playerTurn("stun");
+                // expends 1 ki on the next melee hit and forces a CON save.
+                // Fires on unarmed (null weapon) or any non-ranged weapon.
+                String stunningStrikeTag = null;
+                if (stunningStrikeReady && !isRangedAttack
+                    && target.isAlive() && target instanceof Monster mTarget) {
+                    stunningStrikeReady = false;
+                    var kiOpt = character.getFeature(MonkFeatures.KI_ID);
+                    if (kiOpt.isPresent()
+                        && kiOpt.get() instanceof MonkFeatures.Ki ki
+                        && ki.getKiPoints() >= 1) {
+                        ki.spendKi(1);
+                        int dc = MonkFeatures.getKiSaveDC(character);
+                        int roll = Dice.rollWithModifier(20, mTarget.getConstitutionMod());
+                        if (roll < dc) {
+                            statusEffectManager.applyEffect(mTarget,
+                                com.questkeeper.combat.status.ConditionEffect.stunned(1));
+                            stunningStrikeTag = String.format(
+                                "[STUNNING STRIKE: %s STUNNED! (CON %d vs DC %d)]",
+                                mTarget.getName(), roll, dc);
+                        } else {
+                            stunningStrikeTag = String.format(
+                                "[STUNNING STRIKE: %s saves (CON %d vs DC %d)]",
+                                mTarget.getName(), roll, dc);
+                        }
+                    }
+                }
+
                 StringBuilder specialEffects = new StringBuilder();
                 if (rageDamage > 0) {
                     specialEffects.append(String.format("[RAGE +%d!]", rageDamage));
@@ -807,6 +862,10 @@ public class CombatSystem {
                 if (smiteDamage > 0) {
                     if (specialEffects.length() > 0) specialEffects.append(" ");
                     specialEffects.append(String.format("[DIVINE SMITE +%d radiant!]", smiteDamage));
+                }
+                if (stunningStrikeTag != null) {
+                    if (specialEffects.length() > 0) specialEffects.append(" ");
+                    specialEffects.append(stunningStrikeTag);
                 }
                 if (colossusSlayerDamage > 0) {
                     if (specialEffects.length() > 0) specialEffects.append(" ");
@@ -1024,6 +1083,7 @@ public class CombatSystem {
             disengageActive = false;
             flurryAttacksRemaining = 0;
             smiteReady = false;  // Smite expires if not used
+            stunningStrikeReady = false;  // Stunning Strike expires unused
             character.resetRecklessAttack();
 
             // Reset Hunter's Prey once-per-turn riders.
@@ -1679,6 +1739,37 @@ public class CombatSystem {
      */
     public int getFlurryAttacksRemaining() {
         return flurryAttacksRemaining;
+    }
+
+    /**
+     * Stunning Strike (Monk L5+) — primes the next melee hit to spend 1 ki
+     * and force a CON save vs the monk's Ki DC. On fail, target gains the
+     * STUNNED condition until end of monk's next turn.
+     */
+    private CombatResult handleStunningStrike() {
+        Character player = (Character) getPlayer();
+        if (player == null) {
+            return CombatResult.error("No player character found.");
+        }
+        if (player.getFeature(MonkFeatures.STUNNING_STRIKE_ID).isEmpty()) {
+            return CombatResult.error(
+                "You don't have Stunning Strike yet (requires Monk level 5).");
+        }
+        var kiOpt = player.getFeature(MonkFeatures.KI_ID);
+        if (kiOpt.isEmpty() || ((MonkFeatures.Ki) kiOpt.get()).getKiPoints() < 1) {
+            return CombatResult.error("Not enough ki to ready Stunning Strike.");
+        }
+        if (stunningStrikeReady) {
+            return CombatResult.error("Stunning Strike is already primed.");
+        }
+        stunningStrikeReady = true;
+        return CombatResult.info(
+            player.getName() + " readies a Stunning Strike. "
+            + "[Next melee hit forces a CON save or the target is stunned.]");
+    }
+
+    public boolean isStunningStrikeReady() {
+        return stunningStrikeReady;
     }
 
     /**

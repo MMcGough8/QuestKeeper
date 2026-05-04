@@ -29,6 +29,7 @@ public final class RogueFeatures {
     public static final String THIEVES_CANT_ID = "thieves_cant";
     public static final String FAST_HANDS_ID = "fast_hands";
     public static final String SECOND_STORY_WORK_ID = "second_story_work";
+    public static final String UNCANNY_DODGE_ID = "uncanny_dodge";
 
     private RogueFeatures() {
         // Utility class
@@ -64,7 +65,16 @@ public final class RogueFeatures {
             features.add(createSecondStoryWork());
         }
 
+        // Level 5: Uncanny Dodge
+        if (level >= 5) {
+            features.add(createUncannyDodge());
+        }
+
         return features;
+    }
+
+    public static UncannyDodge createUncannyDodge() {
+        return new UncannyDodge();
     }
 
     /**
@@ -302,6 +312,25 @@ public final class RogueFeatures {
          */
         public int getBonusJumpDistance(Character character) {
             return character.getAbilityModifier(Character.Ability.DEXTERITY);
+        }
+    }
+
+    /**
+     * Uncanny Dodge (L5+) — When an attacker the rogue can see hits with an
+     * attack, the rogue can use their reaction to halve the damage. The
+     * "see attacker" requirement is a coarse approximation in our
+     * text-based combat (no positioning), so this fires on any reactive
+     * incoming hit while the rogue's reaction is available.
+     */
+    public static class UncannyDodge extends PassiveFeature {
+        public UncannyDodge() {
+            super(
+                UNCANNY_DODGE_ID,
+                "Uncanny Dodge",
+                "Starting at 5th level, when an attacker that you can see hits you with an attack, " +
+                    "you can use your reaction to halve the attack's damage against you.",
+                5  // Level required
+            );
         }
     }
 }

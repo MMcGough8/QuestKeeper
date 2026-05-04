@@ -2220,6 +2220,82 @@ class CombatSystemTest {
         }
 
         @Test
+        @DisplayName("Stunning Strike forces a CON save and stuns on a melee hit")
+        void stunningStrikeAppliesStunOnHit() {
+            Character monk = new Character("Po", Race.HUMAN, CharacterClass.MONK,
+                14, 16, 14, 10, 16, 10);
+            monk.setLevel(5);
+            assertTrue(monk.getFeature(
+                com.questkeeper.character.features.MonkFeatures.STUNNING_STRIKE_ID
+            ).isPresent(), "Lvl 5 Monk should have Stunning Strike");
+
+            state = new GameState(monk, campaign);
+            combatSystem = new CombatSystem();
+
+            // Low AC + extreme negative CON to force the save to fail.
+            Monster brute = new Monster("brute", "Brute", 5, 200);
+            brute.setAttackBonus(0); brute.setDamageDice("1d4");
+            brute.setAbilityModifiers(0, 0, -10, 0, 0, 0);
+
+            combatSystem.startCombat(state, List.of(brute));
+            int safety = 0;
+            while (combatSystem.isInCombat() && safety++ < 20) {
+                CombatResult tr = combatSystem.executeTurn();
+                if (tr.getType() == CombatResult.Type.TURN_START
+                    && combatSystem.getCurrentCombatant() == monk) break;
+            }
+
+            CombatResult prime = combatSystem.playerTurn("stun", null);
+            assertEquals(CombatResult.Type.INFO, prime.getType(),
+                "Stunning Strike should prime; got: " + prime.getMessage());
+            assertTrue(combatSystem.isStunningStrikeReady(),
+                "stunningStrikeReady should be set after priming");
+
+            CombatResult hit = combatSystem.playerTurn("attack", "brute");
+            assertTrue(hit.getMessage().contains("STUNNING STRIKE"),
+                "Hit message should mention STUNNING STRIKE; got: " + hit.getMessage());
+            assertFalse(combatSystem.isStunningStrikeReady(),
+                "stunningStrikeReady should clear after the hit resolves");
+        }
+
+        @Test
+        @DisplayName("Uncanny Dodge halves incoming damage and consumes the reaction")
+        void uncannyDodgeHalvesIncomingDamage() {
+            Character rogue = new Character("Vex", Race.HUMAN, CharacterClass.ROGUE,
+                10, 16, 14, 10, 10, 10);
+            rogue.setLevel(5);
+            assertTrue(rogue.getFeature(
+                com.questkeeper.character.features.RogueFeatures.UNCANNY_DODGE_ID
+            ).isPresent());
+
+            state = new GameState(rogue, campaign);
+            combatSystem = new CombatSystem();
+
+            Monster archer = new Monster("archer", "Archer", 10, 30);
+            archer.setAttackBonus(20);
+            archer.setDamageDice("1d4");
+            archer.setDexterityMod(20);  // initiative tiebreak — archer goes first
+
+            combatSystem.startCombat(state, List.of(archer));
+
+            CombatResult dodgeTagged = null;
+            int safety = 0;
+            while (combatSystem.isInCombat() && safety++ < 30) {
+                CombatResult tr = combatSystem.executeTurn();
+                if (tr.getMessage() != null
+                    && tr.getMessage().contains("UNCANNY DODGE")) {
+                    dodgeTagged = tr;
+                    break;
+                }
+            }
+
+            assertNotNull(dodgeTagged,
+                "Archer's hit should have triggered Uncanny Dodge");
+            assertTrue(combatSystem.isReactionUsed(),
+                "Uncanny Dodge consumes the reaction");
+        }
+
+        @Test
         @DisplayName("Smited hit expends a spell slot and clears smiteReady")
         void smitedHitExpendsSlotAndClearsFlag() {
             setUpPaladinCombat();

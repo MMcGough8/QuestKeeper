@@ -28,6 +28,7 @@ public final class MonkFeatures {
     public static final String STEP_OF_THE_WIND_ID = "step_of_the_wind";
     public static final String DEFLECT_MISSILES_ID = "deflect_missiles";
     public static final String OPEN_HAND_TECHNIQUE_ID = "open_hand_technique";
+    public static final String STUNNING_STRIKE_ID = "stunning_strike";
 
     private MonkFeatures() {
         // Utility class
@@ -62,7 +63,17 @@ public final class MonkFeatures {
             features.add(createOpenHandTechnique());
         }
 
+        // Level 5: Stunning Strike, Extra Attack (Extra Attack handled by
+        // Character.getAttacksPerTurn — no feature object needed).
+        if (level >= 5) {
+            features.add(createStunningStrike());
+        }
+
         return features;
+    }
+
+    public static StunningStrike createStunningStrike() {
+        return new StunningStrike();
     }
 
     /**
@@ -386,6 +397,25 @@ public final class MonkFeatures {
                     "- It must make a STR save or be pushed up to 15 feet away\n" +
                     "- It can't take reactions until the end of your next turn",
                 3  // Level required
+            );
+        }
+    }
+
+    /**
+     * Stunning Strike (L5+) — Spend 1 ki point on a melee hit to force the
+     * target to make a CON save (DC = Ki Save DC). On fail, the target is
+     * stunned until the end of the monk's next turn.
+     */
+    public static class StunningStrike extends PassiveFeature {
+        public StunningStrike() {
+            super(
+                STUNNING_STRIKE_ID,
+                "Stunning Strike",
+                "Starting at 5th level, you can interfere with the flow of ki in an opponent's body. " +
+                    "When you hit another creature with a melee weapon attack, you can spend 1 ki point " +
+                    "to force the target to make a Constitution saving throw. " +
+                    "On failed save, the target is stunned until the end of your next turn.",
+                5  // Level required
             );
         }
     }
