@@ -22,6 +22,8 @@ public class SpellRegistry {
         register(Shield.create());
         register(FireBolt.create());
         register(SacredFlame.create());
+        register(HealingWord.create());
+        register(BurningHands.create());
     }
 
     private static void register(Spell spell) {
