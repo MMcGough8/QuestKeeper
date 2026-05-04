@@ -313,9 +313,13 @@ public final class Dice {
         int result = parse(notation);
         // The freshest entry is always last; computing the index after parse
         // also handles the case where addToHistory trimmed at MAX_HISTORY_SIZE.
-        String historyEntry = rollHistory.isEmpty()
-            ? notation
-            : rollHistory.get(rollHistory.size() - 1);
+        // Single synchronized block so isEmpty/size/get see a consistent view.
+        String historyEntry;
+        synchronized (rollHistory) {
+            historyEntry = rollHistory.isEmpty()
+                ? notation
+                : rollHistory.get(rollHistory.size() - 1);
+        }
         return new RollResult(result, historyEntry, notation);
     }
 

@@ -456,6 +456,22 @@ public class GameEngine implements AutoCloseable {
             String filename = saveName.replaceAll("[^a-zA-Z0-9_-]", "_").toLowerCase() + ".yaml";
             Path savePath = Path.of("saves", filename);
 
+            // Warn before overwriting an existing save (the slug is many-to-one,
+            // so different display names can map to the same file).
+            if (java.nio.file.Files.exists(savePath)) {
+                Display.println();
+                Display.println(Display.colorize(
+                    "A save already exists at: " + savePath, YELLOW));
+                Display.println(Display.colorize(
+                    "Overwrite? (y/n)", YELLOW));
+                Display.showPrompt("> ");
+                String confirm = scanner.nextLine().trim().toLowerCase();
+                if (!confirm.startsWith("y")) {
+                    Display.println(Display.colorize("Save cancelled.", CYAN));
+                    return;
+                }
+            }
+
             saveState.save(savePath);
 
             Display.println();
