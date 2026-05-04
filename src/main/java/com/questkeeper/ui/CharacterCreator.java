@@ -28,8 +28,19 @@ import static org.fusesource.jansi.Ansi.Color.*;
  */
 public class CharacterCreator {
 
-    private static final Scanner scanner = new Scanner(System.in);
+    private static Scanner scanner = new Scanner(System.in);
     private static final int POINT_BUY_TOTAL = 27;
+
+    /**
+     * Injects the Scanner the creator should read from. GameEngine calls this
+     * with its own Scanner so both share a single backing buffer over
+     * System.in (avoids the "two Scanners drop bytes between them" trap).
+     */
+    public static void setScanner(Scanner s) {
+        if (s != null) {
+            scanner = s;
+        }
+    }
     private static final int[] POINT_BUY_COSTS = {0, 1, 2, 3, 4, 5, 7, 9}; // Cost to reach score 8 through 15
 
     public static Character createCharacter() {

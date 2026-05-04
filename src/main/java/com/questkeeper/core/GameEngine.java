@@ -239,6 +239,8 @@ public class GameEngine implements AutoCloseable {
             return createQuickStartCharacter();
         }
 
+        // Share GameEngine's Scanner so type-ahead doesn't get split across two buffers
+        CharacterCreator.setScanner(scanner);
         return CharacterCreator.createCharacter();
     }
 
