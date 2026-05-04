@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.questkeeper.character.Character;
+import com.questkeeper.inventory.Inventory;
 import com.questkeeper.inventory.items.effects.*;
 import com.questkeeper.inventory.Item;
 
@@ -36,8 +37,37 @@ public class MagicItem extends Item {
         this.requiresAttunement = false;
         this.attuned = false;
         this.attunedToId = null;
-        this.attunedToName = null;
         this.attunementRequirement = null;
+        this.attunedToName = null;
+    }
+
+    /**
+     * Magic items are equippable when their name implies a body slot
+     * (rings, amulets, helmets, etc.). Items with no inferred slot are
+     * usable but not wearable.
+     */
+    @Override
+    public boolean isEquippable() {
+        return inferEquipmentSlot() != null;
+    }
+
+    /**
+     * Infers which equipment slot this magic item occupies based on name.
+     * Returns null if the item has no body slot.
+     */
+    public Inventory.EquipmentSlot inferEquipmentSlot() {
+        String lower = getName().toLowerCase();
+        if (lower.contains("ring")) {
+            return Inventory.EquipmentSlot.RING_LEFT;
+        }
+        if (lower.contains("amulet") || lower.contains("necklace") || lower.contains("pendant")) {
+            return Inventory.EquipmentSlot.NECK;
+        }
+        if (lower.contains("goggles") || lower.contains("helm") || lower.contains("hat")
+                || lower.contains("circlet") || lower.contains("crown") || lower.contains("hood")) {
+            return Inventory.EquipmentSlot.HEAD;
+        }
+        return null;
     }
 
     /**
@@ -360,7 +390,9 @@ public class MagicItem extends Item {
 
     @Override
     public Item copy() {
-        MagicItem copy = new MagicItem(getName(), getDescription(), getWeight(),
+        // Preserve the original ID so identity-based lookups (hasItem, removeItem,
+        // findItemById) still match after the inventory stores its own copy.
+        MagicItem copy = new MagicItem(getId(), getName(), getDescription(), getWeight(),
                 getGoldValue(), getRarity());
         copy.requiresAttunement = this.requiresAttunement;
         copy.attunementRequirement = this.attunementRequirement;

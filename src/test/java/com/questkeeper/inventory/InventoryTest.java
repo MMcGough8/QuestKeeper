@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import com.questkeeper.inventory.Inventory.EquipmentSlot;
 import com.questkeeper.inventory.Inventory.ItemStack;
+import com.questkeeper.inventory.items.MagicItem;
 
 import java.util.List;
 import java.util.Map;
@@ -972,12 +973,46 @@ class InventoryTest {
         void multiplePotionTypesStackSeparately() {
             Item healingPotion = Item.createConsumable("Healing Potion", "", 0.5, 50);
             Item manaPotion = Item.createConsumable("Mana Potion", "", 0.5, 75);
-            
+
             inventory.addItem(healingPotion, 3);
             inventory.addItem(manaPotion, 2);
-            
+
             assertEquals(5, inventory.getTotalItemCount());
             assertEquals(2, inventory.getUsedSlots()); // Different items, different stacks
+        }
+    }
+
+    @Nested
+    @DisplayName("Magic Item Equipping")
+    class MagicItemEquipTests {
+
+        @Test
+        @DisplayName("Ring of Protection is equippable to RING_LEFT")
+        void ringOfProtectionEquipsToLeftRingSlot() {
+            MagicItem ring = MagicItem.createRingOfProtection();
+            inventory.addItem(ring);
+
+            assertTrue(ring.isEquippable(),
+                "Ring of Protection should be equippable");
+            inventory.equip(ring);
+
+            assertEquals(ring, inventory.getEquipped(EquipmentSlot.RING_LEFT),
+                "Ring should land in RING_LEFT slot");
+        }
+
+        @Test
+        @DisplayName("Second ring goes to RING_RIGHT when RING_LEFT is taken")
+        void secondRingGoesToRightSlot() {
+            MagicItem ring1 = MagicItem.createRingOfProtection();
+            MagicItem ring2 = MagicItem.createRingOfProtection();
+            inventory.addItem(ring1);
+            inventory.addItem(ring2);
+
+            inventory.equip(ring1);
+            inventory.equip(ring2);
+
+            assertEquals(ring1, inventory.getEquipped(EquipmentSlot.RING_LEFT));
+            assertEquals(ring2, inventory.getEquipped(EquipmentSlot.RING_RIGHT));
         }
     }
 }

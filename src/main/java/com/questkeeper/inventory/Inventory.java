@@ -350,6 +350,13 @@ public class Inventory {
                 return EquipmentSlot.OFF_HAND;
             }
             return EquipmentSlot.ARMOR;
+        } else if (item instanceof com.questkeeper.inventory.items.MagicItem magic) {
+            EquipmentSlot slot = magic.inferEquipmentSlot();
+            // Rings: prefer RING_LEFT, fall back to RING_RIGHT if it's already taken
+            if (slot == EquipmentSlot.RING_LEFT && equipped.get(EquipmentSlot.RING_LEFT) != null) {
+                return EquipmentSlot.RING_RIGHT;
+            }
+            return slot;
         }
         return null;
     }
