@@ -54,17 +54,17 @@ public class CombatSystem {
     private GameState currentState;
     private boolean inCombat;
     private boolean playerFled;
-    private boolean bonusActionUsed;      // Track if bonus action was used this turn
-    private boolean actionSurgeActive;    // Track if Action Surge grants an extra action
-    private boolean sneakAttackUsed;      // Track if Sneak Attack was used this turn
-    private boolean disengageActive;      // Track if Disengage is active (no opportunity attacks)
-    private boolean patientDefenseActive; // Track if Patient Defense is active (attacks have disadvantage)
-    private int flurryAttacksRemaining;   // Track remaining Flurry of Blows attacks
-    private int mainActionAttacksRemaining; // Track remaining main-action attacks (Extra Attack)
-    private boolean reactionUsed;         // Track if reaction was used this turn
-    private boolean sacredWeaponActive;   // Track if Sacred Weapon is active (+CHA to attacks)
-    private boolean smiteReady;           // Track if Divine Smite will be used on next hit
-    private boolean stunningStrikeReady;  // Monk: next melee hit forces a CON save vs Ki DC
+    boolean bonusActionUsed;      // Track if bonus action was used this turn
+    boolean actionSurgeActive;    // Track if Action Surge grants an extra action
+    boolean sneakAttackUsed;      // Track if Sneak Attack was used this turn
+    boolean disengageActive;      // Track if Disengage is active (no opportunity attacks)
+    boolean patientDefenseActive; // Track if Patient Defense is active (attacks have disadvantage)
+    int flurryAttacksRemaining;   // Track remaining Flurry of Blows attacks
+    int mainActionAttacksRemaining; // Track remaining main-action attacks (Extra Attack)
+    boolean reactionUsed;         // Track if reaction was used this turn
+    boolean sacredWeaponActive;   // Track if Sacred Weapon is active (+CHA to attacks)
+    boolean smiteReady;           // Track if Divine Smite will be used on next hit
+    boolean stunningStrikeReady;  // Monk: next melee hit forces a CON save vs Ki DC
 
     public CombatSystem() {
         this.participants = new ArrayList<>();
@@ -355,75 +355,7 @@ public class CombatSystem {
      * character has available right now, based on their class features.
      */
     private String buildCombatHelp() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("=== COMBAT ACTIONS ===\n");
-        sb.append("  attack <target>  - make a weapon attack\n");
-        sb.append("  flee             - try to escape (DEX check)\n");
-        sb.append("  cast <spell>     - cast a spell (uses a slot)\n");
-        sb.append("  help             - this menu\n");
-
-        Combatant p = getPlayer();
-        if (!(p instanceof Character ch)) return sb.toString();
-
-        StringBuilder cls = new StringBuilder();
-        if (ch.getFeature(FighterFeatures.SECOND_WIND_ID).isPresent()) {
-            cls.append("  secondwind       - Fighter: bonus-action self-heal\n");
-        }
-        if (ch.getFeature(FighterFeatures.ACTION_SURGE_ID).isPresent()) {
-            cls.append("  actionsurge      - Fighter: another action this turn\n");
-        }
-        if (ch.getFeature(PaladinFeatures.DIVINE_SMITE_ID).isPresent()) {
-            cls.append("  smite            - Paladin: prime Divine Smite\n");
-        }
-        if (ch.getFeature(PaladinFeatures.LAY_ON_HANDS_ID).isPresent()) {
-            cls.append("  layonhands       - Paladin: heal from your divine pool\n");
-        }
-        if (ch.getFeature(PaladinFeatures.SACRED_WEAPON_ID).isPresent()) {
-            cls.append("  sacredweapon     - Paladin: Channel Divinity buff\n");
-        }
-        if (ch.getFeature(PaladinFeatures.TURN_THE_UNHOLY_ID).isPresent()
-            || ch.getFeature(com.questkeeper.character.features.ClericFeatures.TURN_UNDEAD_ID).isPresent()) {
-            cls.append("  turn             - frighten undead/fiends (Channel Divinity)\n");
-        }
-        if (ch.getFeature(BarbarianFeatures.RAGE_ID).isPresent()) {
-            cls.append("  rage             - Barbarian: enter rage\n");
-            cls.append("  reckless         - Barbarian: advantage on attacks (and on you)\n");
-        }
-        if (ch.getFeature(BarbarianFeatures.FRENZY_ID).isPresent()) {
-            cls.append("  frenzy           - Berserker: bonus melee attack while raging\n");
-        }
-        if (ch.getFeature(MonkFeatures.FLURRY_OF_BLOWS_ID).isPresent()) {
-            cls.append("  flurry           - Monk: 2 bonus attacks (1 ki)\n");
-            cls.append("  patient          - Monk: defensive (1 ki)\n");
-            cls.append("  step             - Monk: dash/disengage (1 ki)\n");
-        }
-        if (ch.getFeature(MonkFeatures.STUNNING_STRIKE_ID).isPresent()) {
-            cls.append("  stun             - Monk L5: prime Stunning Strike\n");
-        }
-        if (ch.getFeature(RogueFeatures.CUNNING_ACTION_ID).isPresent()) {
-            cls.append("  dash / disengage / hide - Rogue: Cunning Action\n");
-        }
-        if (ch.getFeature(
-            com.questkeeper.character.features.BardFeatures.BARDIC_INSPIRATION_ID).isPresent()) {
-            cls.append("  inspire          - Bard: grant a Bardic Inspiration die\n");
-        }
-        if (ch.getFeature(
-            com.questkeeper.character.features.DruidFeatures.WILD_SHAPE_ID).isPresent()) {
-            cls.append("  wildshape        - Druid: transform into a beast\n");
-        }
-        if (ch.getFeature(
-            com.questkeeper.character.features.SorcererFeatures.FONT_OF_MAGIC_ID).isPresent()) {
-            cls.append("  fontofmagic      - Sorcerer: show sorcery points\n");
-        }
-        if (ch.getFeature(
-            com.questkeeper.character.features.ClericFeatures.CLERIC_CHANNEL_DIVINITY_ID).isPresent()) {
-            cls.append("  turn             - Cleric: Channel Divinity vs undead\n");
-        }
-
-        if (cls.length() > 0) {
-            sb.append("=== CLASS ACTIONS ===\n").append(cls);
-        }
-        return sb.toString();
+        return CombatHelp.forPlayer(getPlayer());
     }
 
     /**
