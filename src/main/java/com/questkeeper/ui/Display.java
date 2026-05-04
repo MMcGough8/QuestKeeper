@@ -375,10 +375,10 @@ public class Display {
         print(colorize(String.valueOf(BOX_HORIZONTAL).repeat(width - 2), color));
         println(colorize(String.valueOf(BOX_TOP_RIGHT), color));
         
-        // Title line (centered)
-        int padding = (width - 2 - title.length()) / 2;
-        int extraPadding = (width - 2 - title.length()) % 2;
-        
+        // Title line (centered). Clamp at 0 so over-long titles don't throw.
+        int padding = Math.max(0, (width - 2 - title.length()) / 2);
+        int extraPadding = Math.max(0, (width - 2 - title.length()) % 2);
+
         print(colorize(String.valueOf(BOX_VERTICAL), color));
         print(" ".repeat(padding));
         print(colorize(title, color));

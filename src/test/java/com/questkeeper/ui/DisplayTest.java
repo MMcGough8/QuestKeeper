@@ -842,5 +842,12 @@ class DisplayTest {
             assertTrue(output.contains("+"), "Should have + prefix");
             assertTrue(output.contains("Item acquired"), "Should contain message");
         }
+
+        @Test
+        @DisplayName("printBox does not throw on a title longer than the box width")
+        void printBoxHandlesOverlongTitle() {
+            String longTitle = "This is a very long title that exceeds 58 characters easily here";
+            assertDoesNotThrow(() -> Display.printBox(longTitle, 60, org.fusesource.jansi.Ansi.Color.CYAN));
+        }
     }
 }
