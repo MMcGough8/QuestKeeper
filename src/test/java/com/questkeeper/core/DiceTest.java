@@ -802,9 +802,15 @@ class DiceTest {
                 counts[roll - 1]++;
             }
 
+            // d20 has 4x the faces of d6, so per-face standard deviation is
+            // wider relative to its expected count. The 0.20 tolerance used
+            // for d6 yields a ~2.4% flake rate per run when applied to d20
+            // (3.25σ band, P(any face out of band) cumulates over 20 faces).
+            // 0.40 gives a ~6.5σ band — effectively flake-free.
             double expectedCount = SAMPLE_SIZE / 20.0;
-            double minExpected = expectedCount * (1 - TOLERANCE);
-            double maxExpected = expectedCount * (1 + TOLERANCE);
+            double d20Tolerance = 0.40;
+            double minExpected = expectedCount * (1 - d20Tolerance);
+            double maxExpected = expectedCount * (1 + d20Tolerance);
 
             for (int i = 0; i < 20; i++) {
                 assertTrue(counts[i] >= minExpected && counts[i] <= maxExpected,
