@@ -441,6 +441,13 @@ public class GameEngine implements AutoCloseable {
     // ==========================================
 
     private void handleSave() {
+        // Mid-dialogue state is runtime-only and cannot survive load; end
+        // the conversation first so the saved game has a defined entry point.
+        if (dialogueSystem.isInConversation()) {
+            Display.showError("Can't save mid-conversation. Type 'bye' first.");
+            return;
+        }
+
         Display.println();
         Display.printBox("SAVE GAME", 50, CYAN);
         Display.println();
