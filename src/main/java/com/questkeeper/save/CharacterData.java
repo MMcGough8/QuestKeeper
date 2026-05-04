@@ -57,6 +57,9 @@ public class CharacterData {
     // Rage, etc.). Keyed by feature ID; values are current uses / pool.
     private Map<String, Integer> featureUses;
 
+    // Unspent Ability Score Improvements waiting for a UI prompt.
+    private int pendingAbilityScoreImprovements;
+
     //creates empty CharacterData
     public CharacterData() {
         this.baseAbilityScores = new HashMap<>();
@@ -125,6 +128,8 @@ public class CharacterData {
                 data.featureUses.put(af.getId(), af.getCurrentUses());
             }
         }
+
+        data.pendingAbilityScoreImprovements = character.getPendingAbilityScoreImprovements();
 
         return data;
     }
@@ -227,6 +232,10 @@ public class CharacterData {
         }
     }
 
+    // setLevel re-grants ASIs as it crosses thresholds, so overwrite with
+    // the saved (possibly-spent) count last.
+    character.setPendingAbilityScoreImprovements(pendingAbilityScoreImprovements);
+
     return character;
 }
     /**
@@ -263,6 +272,9 @@ public class CharacterData {
         }
         if (featureUses != null && !featureUses.isEmpty()) {
             map.put("feature_uses", new LinkedHashMap<>(featureUses));
+        }
+        if (pendingAbilityScoreImprovements > 0) {
+            map.put("pending_ability_score_improvements", pendingAbilityScoreImprovements);
         }
 
         return map;
@@ -333,6 +345,8 @@ public class CharacterData {
                 }
             }
         }
+
+        cd.pendingAbilityScoreImprovements = getInt(data, "pending_ability_score_improvements", 0);
 
         return cd;
     }

@@ -504,6 +504,44 @@ class SaveStateTest {
                 restored.getHalfElfBonusAbilities(),
                 "Half-Elf bonus abilities should survive round-trip");
         }
+
+        @Test
+        @DisplayName("Pending ASI count survives save/load")
+        void pendingAsiRoundTrip() throws IOException {
+            // Lvl 4 fighter with the ASI unspent — must persist as 1.
+            Character fighter = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            fighter.setLevel(4);
+            assertEquals(1, fighter.getPendingAbilityScoreImprovements(),
+                "precondition: Lvl 4 grants 1 ASI");
+
+            Path savePath = tempDir.resolve("asi.yaml");
+            new SaveState(fighter, "muddlebrook").save(savePath);
+
+            Character restored = SaveState.load(savePath).restoreCharacter();
+            assertEquals(1, restored.getPendingAbilityScoreImprovements(),
+                "Unspent ASI should survive save/load");
+        }
+
+        @Test
+        @DisplayName("Spent ASI does not reappear after save/load")
+        void spentAsiStaysSpentAfterRoundTrip() throws IOException {
+            Character fighter = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            fighter.setLevel(4);
+            fighter.applyAbilityScoreImprovement(Ability.STRENGTH);  // spend it
+            assertEquals(0, fighter.getPendingAbilityScoreImprovements(),
+                "precondition: ASI was spent");
+
+            Path savePath = tempDir.resolve("asi-spent.yaml");
+            new SaveState(fighter, "muddlebrook").save(savePath);
+
+            Character restored = SaveState.load(savePath).restoreCharacter();
+            assertEquals(0, restored.getPendingAbilityScoreImprovements(),
+                "Spent ASI must not regenerate from setLevel during restore");
+            assertEquals(16, restored.getBaseAbilityScore(Ability.STRENGTH),
+                "Spent +2 STR (14 → 16 base) should persist");
+        }
     }
 
     @Nested
