@@ -1000,6 +1000,78 @@ class CharacterTest {
     }
 
     @Nested
+    @DisplayName("Sorcerer class features")
+    class SorcererClassFeatureTests {
+
+        @Test
+        @DisplayName("L1 Draconic Sorcerer gets Draconic Ancestry + Resilience")
+        void l1DraconicGivesAncestryAndResilience() {
+            Character s = new Character("Eldra", Race.HUMAN, CharacterClass.SORCERER,
+                10, 14, 14, 10, 10, 16);
+            s.setSorcerousOrigin(
+                com.questkeeper.character.features.SorcererFeatures.SorcerousOrigin.DRACONIC);
+            assertTrue(s.getFeature(
+                com.questkeeper.character.features.SorcererFeatures.DRACONIC_ANCESTRY_ID
+            ).isPresent());
+            assertTrue(s.getFeature(
+                com.questkeeper.character.features.SorcererFeatures.DRACONIC_RESILIENCE_ID
+            ).isPresent());
+        }
+
+        @Test
+        @DisplayName("L2 Sorcerer gets Font of Magic with sorcerer-level points")
+        void l2SorcererGetsFontOfMagic() {
+            Character s = new Character("Eldra", Race.HUMAN, CharacterClass.SORCERER,
+                10, 14, 14, 10, 10, 16);
+            s.setLevel(2);
+            var fom = (com.questkeeper.character.features.SorcererFeatures.FontOfMagic)
+                s.getFeature(
+                    com.questkeeper.character.features.SorcererFeatures.FONT_OF_MAGIC_ID
+                ).orElseThrow();
+            assertEquals(2, fom.getMaxSorceryPoints(), "L2 Sorcerer has 2 sorcery points");
+        }
+
+        @Test
+        @DisplayName("Font of Magic pool grows with sorcerer level")
+        void fontOfMagicGrowsWithLevel() {
+            Character s = new Character("Eldra", Race.HUMAN, CharacterClass.SORCERER,
+                10, 14, 14, 10, 10, 16);
+            s.setLevel(5);
+            var fom = (com.questkeeper.character.features.SorcererFeatures.FontOfMagic)
+                s.getFeature(
+                    com.questkeeper.character.features.SorcererFeatures.FONT_OF_MAGIC_ID
+                ).orElseThrow();
+            assertEquals(5, fom.getMaxSorceryPoints(), "L5 Sorcerer has 5 sorcery points");
+        }
+
+        @Test
+        @DisplayName("Spending sorcery points reduces the pool")
+        void spendingPointsReducesPool() {
+            Character s = new Character("Eldra", Race.HUMAN, CharacterClass.SORCERER,
+                10, 14, 14, 10, 10, 16);
+            s.setLevel(3);
+            var fom = (com.questkeeper.character.features.SorcererFeatures.FontOfMagic)
+                s.getFeature(
+                    com.questkeeper.character.features.SorcererFeatures.FONT_OF_MAGIC_ID
+                ).orElseThrow();
+            assertEquals(3, fom.getSorceryPoints());
+            assertTrue(fom.spendPoints(2));
+            assertEquals(1, fom.getSorceryPoints());
+            assertFalse(fom.spendPoints(5), "Cannot overspend");
+        }
+
+        @Test
+        @DisplayName("setSorcerousOrigin on a non-Sorcerer throws")
+        void setOriginOnNonSorcererThrows() {
+            Character fighter = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            assertThrows(IllegalStateException.class,
+                () -> fighter.setSorcerousOrigin(
+                    com.questkeeper.character.features.SorcererFeatures.SorcerousOrigin.DRACONIC));
+        }
+    }
+
+    @Nested
     @DisplayName("Wizard class features")
     class WizardClassFeatureTests {
 

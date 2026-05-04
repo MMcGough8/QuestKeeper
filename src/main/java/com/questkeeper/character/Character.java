@@ -240,6 +240,7 @@ public class Character implements Combatant {
     private Set<Skill> expertiseSkills = EnumSet.noneOf(Skill.class);  // Rogue-specific
     private com.questkeeper.character.features.ClericFeatures.DivineDomain divineDomain;
     private com.questkeeper.character.features.WizardFeatures.ArcaneTradition arcaneTradition;
+    private com.questkeeper.character.features.SorcererFeatures.SorcerousOrigin sorcerousOrigin;
 
     // Spellcasting
     private final Spellbook spellbook = new Spellbook();
@@ -784,6 +785,23 @@ public class Character implements Combatant {
                         .ifPresent(ar -> ar.setWizardLevel(level));
                 }
             }
+        } else if (characterClass == CharacterClass.SORCERER) {
+            List<ClassFeature> sorcererFeatures =
+                com.questkeeper.character.features.SorcererFeatures.createFeaturesForLevel(
+                    level, sorcerousOrigin);
+            for (ClassFeature feature : sorcererFeatures) {
+                if (getFeature(feature.getId()).isEmpty()) {
+                    classFeatures.add(feature);
+                } else if (feature.getId().equals(
+                        com.questkeeper.character.features.SorcererFeatures.FONT_OF_MAGIC_ID)) {
+                    // Grow sorcery point pool with level.
+                    getFeature(com.questkeeper.character.features.SorcererFeatures.FONT_OF_MAGIC_ID)
+                        .filter(f -> f instanceof
+                            com.questkeeper.character.features.SorcererFeatures.FontOfMagic)
+                        .map(f -> (com.questkeeper.character.features.SorcererFeatures.FontOfMagic) f)
+                        .ifPresent(fom -> fom.setSorcererLevel(level));
+                }
+            }
         }
         // Other classes will be added here as features are implemented
     }
@@ -916,6 +934,27 @@ public class Character implements Combatant {
 
     public com.questkeeper.character.features.WizardFeatures.ArcaneTradition getArcaneTradition() {
         return arcaneTradition;
+    }
+
+    /**
+     * Sets the Sorcerer's Sorcerous Origin (chosen at L1 in 5e RAW).
+     * Replaces any prior choice and rebuilds the class-features list.
+     */
+    public void setSorcerousOrigin(
+            com.questkeeper.character.features.SorcererFeatures.SorcerousOrigin origin) {
+        if (characterClass != CharacterClass.SORCERER) {
+            throw new IllegalStateException("Sorcerous Origin is only available to Sorcerers");
+        }
+        this.sorcerousOrigin = origin;
+        classFeatures.removeIf(f ->
+            f.getId().equals(com.questkeeper.character.features.SorcererFeatures.SORCEROUS_ORIGIN_ID)
+            || f.getId().equals(com.questkeeper.character.features.SorcererFeatures.DRACONIC_ANCESTRY_ID)
+            || f.getId().equals(com.questkeeper.character.features.SorcererFeatures.DRACONIC_RESILIENCE_ID));
+        initializeClassFeatures();
+    }
+
+    public com.questkeeper.character.features.SorcererFeatures.SorcerousOrigin getSorcerousOrigin() {
+        return sorcerousOrigin;
     }
 
     /**
