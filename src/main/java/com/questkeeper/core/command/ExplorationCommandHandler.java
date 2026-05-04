@@ -87,6 +87,11 @@ public class ExplorationCommandHandler implements CommandHandler {
     }
 
     private CommandResult handleGo(GameContext context, String direction) {
+        if (context.isInDialogue()) {
+            Display.showError("You're in the middle of a conversation. Type 'bye' to leave first.");
+            return CommandResult.failure("Cannot move during dialogue");
+        }
+
         if (direction == null || direction.isEmpty()) {
             Display.showError("Go where? Specify a direction (north, south, east, west, etc.)");
             return CommandResult.failure("No direction specified");

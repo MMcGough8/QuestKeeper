@@ -5,6 +5,10 @@ import com.questkeeper.character.Character;
 import com.questkeeper.character.Character.CharacterClass;
 import com.questkeeper.character.Character.Race;
 import com.questkeeper.character.NPC;
+import com.questkeeper.combat.CombatSystem;
+import com.questkeeper.core.command.CommandResult;
+import com.questkeeper.core.command.ExplorationCommandHandler;
+import com.questkeeper.core.command.GameContext;
 import com.questkeeper.state.GameState;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +21,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Random;
+import java.util.Scanner;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -519,6 +525,34 @@ class DialogueSystemTest {
             assertTrue(result.getAvailableTopics().contains("drinks"));
             assertTrue(result.getAvailableTopics().contains("rumors"));
             assertTrue(result.getAvailableTopics().contains("mayor"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Dialogue mode boundaries")
+    class DialogueModeBoundaryTests {
+
+        @Test
+        @DisplayName("Direction-as-verb does not silently end an active conversation")
+        void directionDoesNotEndDialogue() {
+            DialogueResult start = dialogueSystem.startDialogue(state, "Mara");
+            assertTrue(start.isSuccess(), "precondition: dialogue starts");
+            assertTrue(dialogueSystem.isInConversation(),
+                "precondition: dialogue is active");
+            String locationBefore = state.getCurrentLocation().getId();
+
+            GameContext context = new GameContext(campaign, state, dialogueSystem,
+                new CombatSystem(), null, new Scanner(System.in), new Random());
+
+            ExplorationCommandHandler handler = new ExplorationCommandHandler();
+            CommandResult result = handler.handle(context, "n", null, "n");
+
+            assertTrue(dialogueSystem.isInConversation(),
+                "Dialogue should still be active after attempted movement");
+            assertEquals(locationBefore, state.getCurrentLocation().getId(),
+                "Player should not have moved");
+            assertFalse(result.isSuccess(),
+                "Movement during dialogue should report failure");
         }
     }
 }
