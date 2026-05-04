@@ -1143,6 +1143,11 @@ public class Character implements Combatant {
         // applies to every specific save" — query just the specific type
         // to avoid double-counting general+specific matches.
         modifier += sumMagicItemBonus(saveStatTypeFor(ability));
+
+        // Aura of Protection (Paladin L6+): +CHA mod (min 1) to all saves.
+        if (getFeature(com.questkeeper.character.features.PaladinFeatures.AURA_OF_PROTECTION_ID).isPresent()) {
+            modifier += Math.max(1, getAbilityModifier(Ability.CHARISMA));
+        }
         return modifier;
     }
 
@@ -1162,7 +1167,22 @@ public class Character implements Combatant {
     }
 
     public int makeSkillCheck(Skill skill) {
-        return Dice.rollWithModifier(20, getSkillModifier(skill));
+        int raw = Dice.roll(20);
+        int floored = applyReliableTalentFloor(skill, raw);
+        return floored + getSkillModifier(skill);
+    }
+
+    /**
+     * Reliable Talent (Rogue L11+): on proficient skill checks, any d20
+     * roll ≤9 is treated as 10. Returns the (possibly raised) roll value.
+     */
+    private int applyReliableTalentFloor(Skill skill, int rawRoll) {
+        if (rawRoll >= 10) return rawRoll;
+        if (!isProficientIn(skill)) return rawRoll;
+        if (getFeature(com.questkeeper.character.features.RogueFeatures.RELIABLE_TALENT_ID).isEmpty()) {
+            return rawRoll;
+        }
+        return 10;
     }
 
     public int makeSavingThrow(Ability ability) {
@@ -1174,7 +1194,7 @@ public class Character implements Combatant {
     }
 
     public boolean makeSkillCheckAgainstDC(Skill skill, int dc) {
-        return Dice.checkAgainstDC(getSkillModifier(skill), dc);
+        return makeSkillCheck(skill) >= dc;
     }
  
     public boolean makeSavingThrowAgainstDC(Ability ability, int dc) {

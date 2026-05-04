@@ -30,6 +30,7 @@ public final class RogueFeatures {
     public static final String FAST_HANDS_ID = "fast_hands";
     public static final String SECOND_STORY_WORK_ID = "second_story_work";
     public static final String UNCANNY_DODGE_ID = "uncanny_dodge";
+    public static final String RELIABLE_TALENT_ID = "reliable_talent";
 
     private RogueFeatures() {
         // Utility class
@@ -70,7 +71,16 @@ public final class RogueFeatures {
             features.add(createUncannyDodge());
         }
 
+        // Level 11: Reliable Talent — proficient checks treat d20 ≤9 as 10.
+        if (level >= 11) {
+            features.add(createReliableTalent());
+        }
+
         return features;
+    }
+
+    public static ReliableTalent createReliableTalent() {
+        return new ReliableTalent();
     }
 
     public static UncannyDodge createUncannyDodge() {
@@ -330,6 +340,24 @@ public final class RogueFeatures {
                 "Starting at 5th level, when an attacker that you can see hits you with an attack, " +
                     "you can use your reaction to halve the attack's damage against you.",
                 5  // Level required
+            );
+        }
+    }
+
+    /**
+     * Reliable Talent (L11+) — when you make an ability check that uses
+     * a skill in which you are proficient, you treat any roll of 9 or
+     * lower on the d20 as a 10.
+     */
+    public static class ReliableTalent extends PassiveFeature {
+        public ReliableTalent() {
+            super(
+                RELIABLE_TALENT_ID,
+                "Reliable Talent",
+                "By 11th level, you have refined your chosen skills until they approach " +
+                    "perfection. Whenever you make an ability check that lets you add your " +
+                    "proficiency bonus, you can treat a d20 roll of 9 or lower as a 10.",
+                11
             );
         }
     }

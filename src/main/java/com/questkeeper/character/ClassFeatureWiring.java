@@ -90,6 +90,11 @@ final class ClassFeatureWiring {
                     .filter(f -> f instanceof BarbarianFeatures.Rage)
                     .map(f -> (BarbarianFeatures.Rage) f)
                     .ifPresent(rage -> rage.setBarbarianLevel(level));
+            } else if (feature.getId().equals(BarbarianFeatures.BRUTAL_CRITICAL_ID)) {
+                c.getFeature(BarbarianFeatures.BRUTAL_CRITICAL_ID)
+                    .filter(f -> f instanceof BarbarianFeatures.BrutalCritical)
+                    .map(f -> (BarbarianFeatures.BrutalCritical) f)
+                    .ifPresent(bc -> bc.setBarbarianLevel(level));
             }
         }
     }

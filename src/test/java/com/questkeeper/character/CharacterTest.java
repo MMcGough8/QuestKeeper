@@ -1342,6 +1342,78 @@ class CharacterTest {
     }
 
     @Nested
+    @DisplayName("Higher-level (L6-20) features")
+    class HigherLevelFeatureTests {
+
+        @Test
+        @DisplayName("L9 Barbarian gets Brutal Critical with 1 extra die")
+        void l9BrutalCriticalOneDie() {
+            Character barb = new Character("Grog", Race.HUMAN, CharacterClass.BARBARIAN,
+                16, 14, 14, 10, 10, 10);
+            barb.setLevel(9);
+            var bc = (com.questkeeper.character.features.BarbarianFeatures.BrutalCritical)
+                barb.getFeature(
+                    com.questkeeper.character.features.BarbarianFeatures.BRUTAL_CRITICAL_ID
+                ).orElseThrow();
+            assertEquals(1, bc.getExtraDice());
+        }
+
+        @Test
+        @DisplayName("L13/L17 Brutal Critical scales to 2 / 3 dice")
+        void brutalCriticalScales() {
+            Character barb = new Character("Grog", Race.HUMAN, CharacterClass.BARBARIAN,
+                16, 14, 14, 10, 10, 10);
+            barb.setLevel(13);
+            var bc13 = (com.questkeeper.character.features.BarbarianFeatures.BrutalCritical)
+                barb.getFeature(
+                    com.questkeeper.character.features.BarbarianFeatures.BRUTAL_CRITICAL_ID
+                ).orElseThrow();
+            assertEquals(2, bc13.getExtraDice());
+            barb.setLevel(17);
+            assertEquals(3, bc13.getExtraDice());
+        }
+
+        @Test
+        @DisplayName("L11 Rogue with Reliable Talent floors proficient skill rolls at 10")
+        void reliableTalentFloors() {
+            Character rogue = new Character("Vex", Race.HUMAN, CharacterClass.ROGUE,
+                10, 16, 14, 10, 10, 10);
+            rogue.setLevel(11);
+            rogue.addSkillProficiency(Skill.STEALTH);
+            assertTrue(rogue.getFeature(
+                com.questkeeper.character.features.RogueFeatures.RELIABLE_TALENT_ID
+            ).isPresent());
+            // Stealth modifier = DEX(+3) + prof(+4 at L11) = +7. Reliable Talent
+            // floors raw rolls ≤9 to 10, so totals must be ≥ 17 over many rolls.
+            int min = Integer.MAX_VALUE;
+            for (int i = 0; i < 100; i++) {
+                int total = rogue.makeSkillCheck(Skill.STEALTH);
+                if (total < min) min = total;
+            }
+            assertTrue(min >= 17,
+                "Reliable Talent should floor proficient totals at 17; got min=" + min);
+        }
+
+        @Test
+        @DisplayName("L6 Paladin with high CHA gets Aura of Protection bonus on saves")
+        void auraOfProtectionAddsCHA() {
+            Character pal = new Character("Lyra", Race.HUMAN, CharacterClass.PALADIN,
+                14, 10, 14, 10, 10, 16);
+            // Pre-aura baseline: STR is not a Paladin save proficiency.
+            // STR 14 base + 1 racial = 15 -> mod +2.
+            int strSaveL1 = pal.getSavingThrowModifier(Ability.STRENGTH);
+            assertEquals(2, strSaveL1, "Pre-L6: STR save = STR mod only");
+
+            pal.setLevel(6);
+            // CHA 16 base + 1 racial = 17 -> mod +3.
+            // With Aura: STR save = +2 + max(1, +3) = +5.
+            int strSaveL6 = pal.getSavingThrowModifier(Ability.STRENGTH);
+            assertEquals(5, strSaveL6,
+                "L6 Aura of Protection should add CHA mod +3 to STR save (2 -> 5)");
+        }
+    }
+
+    @Nested
     @DisplayName("Cleric class features")
     class ClericClassFeatureTests {
 

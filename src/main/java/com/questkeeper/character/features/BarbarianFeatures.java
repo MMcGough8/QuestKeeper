@@ -25,6 +25,7 @@ public final class BarbarianFeatures {
     public static final String RECKLESS_ATTACK_ID = "reckless_attack";
     public static final String DANGER_SENSE_ID = "danger_sense";
     public static final String FRENZY_ID = "frenzy";
+    public static final String BRUTAL_CRITICAL_ID = "brutal_critical";
 
     private BarbarianFeatures() {
         // Utility class
@@ -56,7 +57,27 @@ public final class BarbarianFeatures {
             features.add(createFrenzy());
         }
 
+        // Level 9: Brutal Critical (extra die on crit; +1 at 9, +2 at 13, +3 at 17)
+        if (level >= 9) {
+            features.add(createBrutalCritical(level));
+        }
+
         return features;
+    }
+
+    /**
+     * Returns the number of extra weapon-damage dice on a critical hit
+     * granted by Brutal Critical, or 0 if the barbarian isn't yet L9.
+     */
+    public static int getBrutalCriticalExtraDice(int level) {
+        if (level >= 17) return 3;
+        if (level >= 13) return 2;
+        if (level >= 9) return 1;
+        return 0;
+    }
+
+    public static BrutalCritical createBrutalCritical(int barbarianLevel) {
+        return new BrutalCritical(barbarianLevel);
     }
 
     /**
@@ -333,6 +354,37 @@ public final class BarbarianFeatures {
                     "rage ends, you suffer one level of exhaustion.",
                 3  // Level required
             );
+        }
+    }
+
+    /**
+     * Brutal Critical (L9+) — when you score a critical hit with a melee
+     * weapon attack, roll one additional weapon damage die. Increases at
+     * L13 (2 extra) and L17 (3 extra).
+     */
+    public static class BrutalCritical extends PassiveFeature {
+
+        private int barbarianLevel;
+
+        public BrutalCritical(int barbarianLevel) {
+            super(
+                BRUTAL_CRITICAL_ID,
+                "Brutal Critical",
+                "Beginning at 9th level, you can roll one additional weapon damage die " +
+                    "when determining the extra damage for a critical hit with a melee " +
+                    "attack. This increases to two additional dice at 13th level and " +
+                    "three at 17th level.",
+                9
+            );
+            this.barbarianLevel = barbarianLevel;
+        }
+
+        public int getExtraDice() {
+            return getBrutalCriticalExtraDice(barbarianLevel);
+        }
+
+        public void setBarbarianLevel(int level) {
+            this.barbarianLevel = level;
         }
     }
 }

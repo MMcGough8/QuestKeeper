@@ -28,6 +28,7 @@ public final class PaladinFeatures {
     public static final String CHANNEL_DIVINITY_ID = "channel_divinity";
     public static final String SACRED_WEAPON_ID = "sacred_weapon";
     public static final String TURN_THE_UNHOLY_ID = "turn_the_unholy";
+    public static final String AURA_OF_PROTECTION_ID = "aura_of_protection";
 
     private PaladinFeatures() {
         // Utility class
@@ -65,7 +66,17 @@ public final class PaladinFeatures {
             features.add(createTurnTheUnholy());
         }
 
+        // Level 6: Aura of Protection — +CHA mod to saves for self (and
+        // allies in 10ft once positioning is modeled).
+        if (level >= 6) {
+            features.add(createAuraOfProtection());
+        }
+
         return features;
+    }
+
+    public static AuraOfProtection createAuraOfProtection() {
+        return new AuraOfProtection();
     }
 
     /**
@@ -649,6 +660,24 @@ public final class PaladinFeatures {
          */
         public int getSaveDC(Character paladin) {
             return 8 + paladin.getProficiencyBonus() + paladin.getAbilityModifier(Ability.CHARISMA);
+        }
+    }
+
+    /**
+     * Aura of Protection (L6+) — passive marker. Applied via
+     * {@link Character#getSavingThrowModifier} which checks for this
+     * feature and adds +CHA modifier (min 1) to all saves.
+     */
+    public static class AuraOfProtection extends PassiveFeature {
+        public AuraOfProtection() {
+            super(
+                AURA_OF_PROTECTION_ID,
+                "Aura of Protection",
+                "Starting at 6th level, whenever you or a friendly creature within 10 feet of " +
+                    "you must make a saving throw, the creature gains a bonus to the saving " +
+                    "throw equal to your Charisma modifier (minimum +1).",
+                6
+            );
         }
     }
 }

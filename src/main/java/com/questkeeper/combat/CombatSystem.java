@@ -743,6 +743,17 @@ public class CombatSystem {
                     damage = Dice.parse(damageDice);
                     if (isCrit) {
                         damage += Dice.parse(damageDice); // Double the dice, not the modifier
+                        // Brutal Critical (Barbarian L9+): roll N more weapon dice on a melee crit.
+                        if (!isRangedAttack) {
+                            var brutalOpt = character.getFeature(BarbarianFeatures.BRUTAL_CRITICAL_ID);
+                            if (brutalOpt.isPresent()
+                                && brutalOpt.get() instanceof BarbarianFeatures.BrutalCritical bc) {
+                                int extra = bc.getExtraDice();
+                                for (int i = 0; i < extra; i++) {
+                                    damage += Dice.parse(damageDice);
+                                }
+                            }
+                        }
                     }
                 } else {
                     // Unarmed: 1 damage (doubled to 2 on crit)
