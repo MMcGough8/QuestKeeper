@@ -303,6 +303,23 @@ public class CombatSystem {
             case "stunning strike":
                 return handleStunningStrike();
 
+            // Bard
+            case "inspire":
+            case "bardicinspiration":
+            case "bardic inspiration":
+                return handleBardicInspiration();
+
+            // Druid
+            case "wildshape":
+            case "wild shape":
+                return handleWildShape();
+
+            // Sorcerer
+            case "fontofmagic":
+            case "font of magic":
+            case "sorcerypoints":
+                return handleFontOfMagic();
+
             // Paladin actions
             case "smite":
             case "divinesmite":
@@ -385,6 +402,22 @@ public class CombatSystem {
         }
         if (ch.getFeature(RogueFeatures.CUNNING_ACTION_ID).isPresent()) {
             cls.append("  dash / disengage / hide - Rogue: Cunning Action\n");
+        }
+        if (ch.getFeature(
+            com.questkeeper.character.features.BardFeatures.BARDIC_INSPIRATION_ID).isPresent()) {
+            cls.append("  inspire          - Bard: grant a Bardic Inspiration die\n");
+        }
+        if (ch.getFeature(
+            com.questkeeper.character.features.DruidFeatures.WILD_SHAPE_ID).isPresent()) {
+            cls.append("  wildshape        - Druid: transform into a beast\n");
+        }
+        if (ch.getFeature(
+            com.questkeeper.character.features.SorcererFeatures.FONT_OF_MAGIC_ID).isPresent()) {
+            cls.append("  fontofmagic      - Sorcerer: show sorcery points\n");
+        }
+        if (ch.getFeature(
+            com.questkeeper.character.features.ClericFeatures.CLERIC_CHANNEL_DIVINITY_ID).isPresent()) {
+            cls.append("  turn             - Cleric: Channel Divinity vs undead\n");
         }
 
         if (cls.length() > 0) {
@@ -1834,6 +1867,88 @@ public class CombatSystem {
 
     public boolean isStunningStrikeReady() {
         return stunningStrikeReady;
+    }
+
+    /**
+     * Bardic Inspiration (Bard L1+) — bonus action: spend a use to grant
+     * the caller a usable die. We track expenditure here; selecting a
+     * recipient and applying the die to a roll is post-pitch.
+     */
+    private CombatResult handleBardicInspiration() {
+        Character player = (Character) getPlayer();
+        if (player == null) return CombatResult.error("No player character found.");
+        var feat = player.getFeature(
+            com.questkeeper.character.features.BardFeatures.BARDIC_INSPIRATION_ID);
+        if (feat.isEmpty()) {
+            return CombatResult.error("You don't have Bardic Inspiration.");
+        }
+        if (!(feat.get() instanceof
+            com.questkeeper.character.features.BardFeatures.BardicInspiration bi)) {
+            return CombatResult.error("Bardic Inspiration not available.");
+        }
+        if (bi.getCurrentUses() < 1) {
+            return CombatResult.error("No Bardic Inspiration uses remaining.");
+        }
+        CombatResult bonusCheck = requireBonusAction();
+        if (bonusCheck != null) return bonusCheck;
+
+        bi.use(player);
+        consumeBonusAction();
+        return CombatResult.info(String.format(
+            "%s inspires their allies! d%d Bardic Inspiration die granted. Uses: %d/%d.",
+            player.getName(), bi.getInspirationDie(),
+            bi.getCurrentUses(), bi.getMaxUses()));
+    }
+
+    /**
+     * Wild Shape (Druid L2+) — action to transform. We consume one use and
+     * report the form's CR cap; the actual stat-block transformation is
+     * post-pitch (would need a beast-form table).
+     */
+    private CombatResult handleWildShape() {
+        Character player = (Character) getPlayer();
+        if (player == null) return CombatResult.error("No player character found.");
+        var feat = player.getFeature(
+            com.questkeeper.character.features.DruidFeatures.WILD_SHAPE_ID);
+        if (feat.isEmpty()) {
+            return CombatResult.error("You don't have Wild Shape.");
+        }
+        if (!(feat.get() instanceof
+            com.questkeeper.character.features.DruidFeatures.WildShape ws)) {
+            return CombatResult.error("Wild Shape not available.");
+        }
+        if (ws.getCurrentUses() < 1) {
+            return CombatResult.error("No Wild Shape uses remaining (rest to recover).");
+        }
+        ws.use(player);
+        String crStr = ws.getMaxChallengeRating() == 1.0 ? "1"
+            : ws.getMaxChallengeRating() == 0.5 ? "1/2" : "1/4";
+        return CombatResult.info(String.format(
+            "%s assumes a beast form (CR %s max). Uses: %d/%d. "
+            + "[Form-specific stats coming in a future release.]",
+            player.getName(), crStr, ws.getCurrentUses(), ws.getMaxUses()));
+    }
+
+    /**
+     * Font of Magic (Sorcerer L2+) — surfaces the current sorcery-point
+     * pool. Spending points to convert slots / fuel metamagic is
+     * post-pitch (needs metamagic UI).
+     */
+    private CombatResult handleFontOfMagic() {
+        Character player = (Character) getPlayer();
+        if (player == null) return CombatResult.error("No player character found.");
+        var feat = player.getFeature(
+            com.questkeeper.character.features.SorcererFeatures.FONT_OF_MAGIC_ID);
+        if (feat.isEmpty()) {
+            return CombatResult.error("You don't have Font of Magic.");
+        }
+        if (!(feat.get() instanceof
+            com.questkeeper.character.features.SorcererFeatures.FontOfMagic fom)) {
+            return CombatResult.error("Font of Magic not available.");
+        }
+        return CombatResult.info(String.format(
+            "Sorcery points: %d/%d. [Slot conversion / metamagic coming in a future release.]",
+            fom.getSorceryPoints(), fom.getMaxSorceryPoints()));
     }
 
     /**

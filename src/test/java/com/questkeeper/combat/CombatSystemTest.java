@@ -2310,6 +2310,92 @@ class CombatSystemTest {
         }
 
         @Test
+        @DisplayName("Bardic Inspiration consumes a use and the bonus action")
+        void bardicInspirationConsumesUseAndBonusAction() {
+            Character bard = new Character("Halo", Race.HUMAN, CharacterClass.BARD,
+                10, 14, 14, 10, 10, 16);
+            state = new GameState(bard, campaign);
+            combatSystem = new CombatSystem();
+            Monster goblin = new Monster("g", "Goblin", 12, 30);
+            goblin.setAttackBonus(0); goblin.setDamageDice("1d4");
+            combatSystem.startCombat(state, List.of(goblin));
+            int safety = 0;
+            while (combatSystem.isInCombat() && safety++ < 20) {
+                CombatResult tr = combatSystem.executeTurn();
+                if (tr.getType() == CombatResult.Type.TURN_START
+                    && combatSystem.getCurrentCombatant() == bard) break;
+            }
+
+            var bi = (com.questkeeper.character.features.BardFeatures.BardicInspiration)
+                bard.getFeature(
+                    com.questkeeper.character.features.BardFeatures.BARDIC_INSPIRATION_ID
+                ).orElseThrow();
+            int before = bi.getCurrentUses();
+
+            CombatResult result = combatSystem.playerTurn("inspire", null);
+            assertEquals(CombatResult.Type.INFO, result.getType(),
+                "Bardic Inspiration should resolve as INFO");
+            assertEquals(before - 1, bi.getCurrentUses(),
+                "Inspiration use should be consumed");
+            assertTrue(combatSystem.isBonusActionUsed(),
+                "Bardic Inspiration consumes the bonus action");
+        }
+
+        @Test
+        @DisplayName("Wild Shape consumes one use")
+        void wildShapeConsumesUse() {
+            Character druid = new Character("Sylven", Race.HALF_ELF, CharacterClass.DRUID,
+                10, 10, 14, 10, 16, 10);
+            druid.setLevel(2);
+            state = new GameState(druid, campaign);
+            combatSystem = new CombatSystem();
+            Monster goblin = new Monster("g", "Goblin", 12, 30);
+            goblin.setAttackBonus(0); goblin.setDamageDice("1d4");
+            combatSystem.startCombat(state, List.of(goblin));
+            int safety = 0;
+            while (combatSystem.isInCombat() && safety++ < 20) {
+                CombatResult tr = combatSystem.executeTurn();
+                if (tr.getType() == CombatResult.Type.TURN_START
+                    && combatSystem.getCurrentCombatant() == druid) break;
+            }
+
+            var ws = (com.questkeeper.character.features.DruidFeatures.WildShape)
+                druid.getFeature(
+                    com.questkeeper.character.features.DruidFeatures.WILD_SHAPE_ID
+                ).orElseThrow();
+            int before = ws.getCurrentUses();
+
+            CombatResult result = combatSystem.playerTurn("wildshape", null);
+            assertEquals(CombatResult.Type.INFO, result.getType());
+            assertEquals(before - 1, ws.getCurrentUses(),
+                "Wild Shape use should be consumed");
+        }
+
+        @Test
+        @DisplayName("Font of Magic surfaces sorcery point pool without consuming a turn")
+        void fontOfMagicReportsPool() {
+            Character sorc = new Character("Eldra", Race.HUMAN, CharacterClass.SORCERER,
+                10, 14, 14, 10, 10, 16);
+            sorc.setLevel(2);
+            state = new GameState(sorc, campaign);
+            combatSystem = new CombatSystem();
+            Monster goblin = new Monster("g", "Goblin", 12, 30);
+            goblin.setAttackBonus(0); goblin.setDamageDice("1d4");
+            combatSystem.startCombat(state, List.of(goblin));
+            int safety = 0;
+            while (combatSystem.isInCombat() && safety++ < 20) {
+                CombatResult tr = combatSystem.executeTurn();
+                if (tr.getType() == CombatResult.Type.TURN_START
+                    && combatSystem.getCurrentCombatant() == sorc) break;
+            }
+
+            CombatResult result = combatSystem.playerTurn("fontofmagic", null);
+            assertEquals(CombatResult.Type.INFO, result.getType());
+            assertTrue(result.getMessage().contains("Sorcery points"),
+                "Output should mention sorcery points; got: " + result.getMessage());
+        }
+
+        @Test
         @DisplayName("Smited hit expends a spell slot and clears smiteReady")
         void smitedHitExpendsSlotAndClearsFlag() {
             setUpPaladinCombat();
