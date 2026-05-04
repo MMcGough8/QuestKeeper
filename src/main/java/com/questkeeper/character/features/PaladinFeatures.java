@@ -258,6 +258,20 @@ public final class PaladinFeatures {
         }
 
         /**
+         * Lay on Hands tracks a HP pool, not the standard ActivatedFeature
+         * use counter. Override these so save/load operates on the pool.
+         */
+        @Override
+        public int getCurrentUses() {
+            return poolRemaining;
+        }
+
+        @Override
+        public void setCurrentUses(int uses) {
+            this.poolRemaining = Math.max(0, Math.min(uses, getMaxPool()));
+        }
+
+        /**
          * Gets maximum pool HP.
          */
         public int getMaxPool() {

@@ -5,6 +5,8 @@ import com.questkeeper.character.Character.Ability;
 import com.questkeeper.character.Character.CharacterClass;
 import com.questkeeper.character.Character.Race;
 import com.questkeeper.character.Character.Skill;
+import com.questkeeper.character.features.ActivatedFeature;
+import com.questkeeper.character.features.ClassFeature;
 import com.questkeeper.character.features.FightingStyle;
 
 import java.util.*;
@@ -51,6 +53,10 @@ public class CharacterData {
     private Set<String> expertiseSkills;           // Skill enum names
     private Set<String> halfElfBonusAbilities;     // Ability enum names; size 0 or 2
 
+    // Activated feature use counts (Lay on Hands pool, Ki, Action Surge,
+    // Rage, etc.). Keyed by feature ID; values are current uses / pool.
+    private Map<String, Integer> featureUses;
+
     //creates empty CharacterData
     public CharacterData() {
         this.baseAbilityScores = new HashMap<>();
@@ -58,6 +64,7 @@ public class CharacterData {
         this.savingThrowProficiencies = new HashSet<>();
         this.expertiseSkills = new HashSet<>();
         this.halfElfBonusAbilities = new HashSet<>();
+        this.featureUses = new HashMap<>();
     }
 
     //creates CharacterData from existing Character
@@ -109,6 +116,14 @@ public class CharacterData {
         }
         for (Ability ability : character.getHalfElfBonusAbilities()) {
             data.halfElfBonusAbilities.add(ability.name());
+        }
+
+        // Activated feature use counts (Lay on Hands pool, Ki, Action Surge,
+        // Rage, Channel Divinity, Divine Sense, Second Wind...)
+        for (ClassFeature feature : character.getClassFeatures()) {
+            if (feature instanceof ActivatedFeature af) {
+                data.featureUses.put(af.getId(), af.getCurrentUses());
+            }
         }
 
         return data;
@@ -199,6 +214,19 @@ public class CharacterData {
     // Restore rest state
     character.setAvailableHitDice(availableHitDice);
 
+    // Restore activated feature use counts (must come after setLevel which
+    // (re)builds the class-features list).
+    if (featureUses != null) {
+        for (ClassFeature feature : character.getClassFeatures()) {
+            if (feature instanceof ActivatedFeature af) {
+                Integer saved = featureUses.get(af.getId());
+                if (saved != null) {
+                    af.setCurrentUses(saved);
+                }
+            }
+        }
+    }
+
     return character;
 }
     /**
@@ -232,6 +260,9 @@ public class CharacterData {
         }
         if (halfElfBonusAbilities != null && !halfElfBonusAbilities.isEmpty()) {
             map.put("half_elf_bonus_abilities", new ArrayList<>(halfElfBonusAbilities));
+        }
+        if (featureUses != null && !featureUses.isEmpty()) {
+            map.put("feature_uses", new LinkedHashMap<>(featureUses));
         }
 
         return map;
@@ -293,6 +324,14 @@ public class CharacterData {
         List<String> heAbilities = (List<String>) data.get("half_elf_bonus_abilities");
         if (heAbilities != null) {
             cd.halfElfBonusAbilities = new HashSet<>(heAbilities);
+        }
+        Object featureUsesObj = data.get("feature_uses");
+        if (featureUsesObj instanceof Map<?, ?> rawMap) {
+            for (Map.Entry<?, ?> entry : rawMap.entrySet()) {
+                if (entry.getKey() instanceof String key && entry.getValue() instanceof Number num) {
+                    cd.featureUses.put(key, num.intValue());
+                }
+            }
         }
 
         return cd;

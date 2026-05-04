@@ -111,9 +111,11 @@ public abstract class ActivatedFeature implements ClassFeature {
     }
 
     /**
-     * Directly sets current uses (for features like Ki that manage uses differently).
+     * Directly sets current uses. Public so save/load can restore the
+     * exact value rather than refilling to max. Subclasses with custom
+     * pools (e.g., LayOnHands) override to write their own state.
      */
-    protected void setCurrentUses(int uses) {
+    public void setCurrentUses(int uses) {
         this.currentUses = Math.max(0, Math.min(uses, maxUses));
     }
 

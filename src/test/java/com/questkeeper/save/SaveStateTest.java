@@ -461,6 +461,35 @@ class SaveStateTest {
         }
 
         @Test
+        @DisplayName("Lay on Hands pool survives save/load")
+        void layOnHandsPoolRoundTrips() throws IOException {
+            Character paladin = new Character("Aelar", Race.HUMAN, CharacterClass.PALADIN);
+            paladin.setLevel(2);
+
+            com.questkeeper.character.features.PaladinFeatures.LayOnHands loh =
+                (com.questkeeper.character.features.PaladinFeatures.LayOnHands)
+                    paladin.getFeature(
+                        com.questkeeper.character.features.PaladinFeatures.LAY_ON_HANDS_ID
+                    ).orElseThrow();
+            // Spend 4 HP from the pool
+            loh.heal(paladin, 4);
+            int spentPool = loh.getPoolRemaining();
+
+            Path savePath = tempDir.resolve("loh.yaml");
+            new SaveState(paladin, "muddlebrook").save(savePath);
+
+            Character restored = SaveState.load(savePath).restoreCharacter();
+            com.questkeeper.character.features.PaladinFeatures.LayOnHands restoredLoh =
+                (com.questkeeper.character.features.PaladinFeatures.LayOnHands)
+                    restored.getFeature(
+                        com.questkeeper.character.features.PaladinFeatures.LAY_ON_HANDS_ID
+                    ).orElseThrow();
+
+            assertEquals(spentPool, restoredLoh.getPoolRemaining(),
+                "Lay on Hands pool should survive round-trip, not refill");
+        }
+
+        @Test
         @DisplayName("Half-Elf bonus abilities survive save/load")
         void halfElfBonusAbilitiesRoundTrip() throws IOException {
             Character bard = new Character("Halo", Race.HALF_ELF, CharacterClass.BARD);
