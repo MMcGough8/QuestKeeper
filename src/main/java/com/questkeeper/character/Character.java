@@ -239,6 +239,7 @@ public class Character implements Combatant {
     private FightingStyle fightingStyle;  // Fighter-specific; null for other classes
     private Set<Skill> expertiseSkills = EnumSet.noneOf(Skill.class);  // Rogue-specific
     private com.questkeeper.character.features.ClericFeatures.DivineDomain divineDomain;
+    private com.questkeeper.character.features.WizardFeatures.ArcaneTradition arcaneTradition;
 
     // Spellcasting
     private final Spellbook spellbook = new Spellbook();
@@ -765,6 +766,24 @@ public class Character implements Combatant {
                     classFeatures.add(feature);
                 }
             }
+        } else if (characterClass == CharacterClass.WIZARD) {
+            List<ClassFeature> wizardFeatures =
+                com.questkeeper.character.features.WizardFeatures.createFeaturesForLevel(
+                    level, arcaneTradition);
+            for (ClassFeature feature : wizardFeatures) {
+                if (getFeature(feature.getId()).isEmpty()) {
+                    classFeatures.add(feature);
+                } else if (feature.getId().equals(
+                        com.questkeeper.character.features.WizardFeatures.ARCANE_RECOVERY_ID)) {
+                    // Update wizard level on the existing ArcaneRecovery so
+                    // its recovery budget tracks the new level.
+                    getFeature(com.questkeeper.character.features.WizardFeatures.ARCANE_RECOVERY_ID)
+                        .filter(f -> f instanceof
+                            com.questkeeper.character.features.WizardFeatures.ArcaneRecovery)
+                        .map(f -> (com.questkeeper.character.features.WizardFeatures.ArcaneRecovery) f)
+                        .ifPresent(ar -> ar.setWizardLevel(level));
+                }
+            }
         }
         // Other classes will be added here as features are implemented
     }
@@ -875,6 +894,28 @@ public class Character implements Combatant {
 
     public com.questkeeper.character.features.ClericFeatures.DivineDomain getDivineDomain() {
         return divineDomain;
+    }
+
+    /**
+     * Sets the Wizard's Arcane Tradition (chosen at L2 in 5e RAW). Replaces
+     * any prior choice and rebuilds the class-features list so school-specific
+     * features (Sculpt Spells, Evocation Savant, etc.) appear.
+     */
+    public void setArcaneTradition(
+            com.questkeeper.character.features.WizardFeatures.ArcaneTradition tradition) {
+        if (characterClass != CharacterClass.WIZARD) {
+            throw new IllegalStateException("Arcane Tradition is only available to Wizards");
+        }
+        this.arcaneTradition = tradition;
+        classFeatures.removeIf(f ->
+            f.getId().equals(com.questkeeper.character.features.WizardFeatures.ARCANE_TRADITION_ID)
+            || f.getId().equals(com.questkeeper.character.features.WizardFeatures.EVOCATION_SAVANT_ID)
+            || f.getId().equals(com.questkeeper.character.features.WizardFeatures.SCULPT_SPELLS_ID));
+        initializeClassFeatures();
+    }
+
+    public com.questkeeper.character.features.WizardFeatures.ArcaneTradition getArcaneTradition() {
+        return arcaneTradition;
     }
 
     /**

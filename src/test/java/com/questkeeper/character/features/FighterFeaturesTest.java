@@ -60,11 +60,13 @@ class FighterFeaturesTest {
         }
 
         @Test
-        @DisplayName("Non-Fighter class has no features")
-        void nonFighterHasNoFeatures() {
+        @DisplayName("Non-Fighter class has no Fighter features")
+        void nonFighterHasNoFighterFeatures() {
             Character wizard = new Character("Test", Race.HUMAN, CharacterClass.WIZARD);
 
-            assertTrue(wizard.getClassFeatures().isEmpty());
+            assertTrue(wizard.getFeature(FighterFeatures.SECOND_WIND_ID).isEmpty());
+            assertTrue(wizard.getFeature(FighterFeatures.FIGHTING_STYLE_ID).isEmpty());
+            assertTrue(wizard.getFeature(FighterFeatures.ACTION_SURGE_ID).isEmpty());
         }
     }
 

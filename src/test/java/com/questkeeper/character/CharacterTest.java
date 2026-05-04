@@ -1000,6 +1000,63 @@ class CharacterTest {
     }
 
     @Nested
+    @DisplayName("Wizard class features")
+    class WizardClassFeatureTests {
+
+        @Test
+        @DisplayName("L1 Wizard gets Arcane Recovery")
+        void l1WizardGetsArcaneRecovery() {
+            Character w = new Character("Mira", Race.HUMAN, CharacterClass.WIZARD,
+                10, 10, 14, 16, 10, 10);
+            assertTrue(w.getFeature(
+                com.questkeeper.character.features.WizardFeatures.ARCANE_RECOVERY_ID
+            ).isPresent(), "Wizard L1 should have Arcane Recovery");
+        }
+
+        @Test
+        @DisplayName("Arcane Recovery budget = ceil(level/2)")
+        void arcaneRecoveryBudgetGrowsWithLevel() {
+            Character w = new Character("Mira", Race.HUMAN, CharacterClass.WIZARD,
+                10, 10, 14, 16, 10, 10);
+            var ar = (com.questkeeper.character.features.WizardFeatures.ArcaneRecovery)
+                w.getFeature(
+                    com.questkeeper.character.features.WizardFeatures.ARCANE_RECOVERY_ID
+                ).orElseThrow();
+            assertEquals(1, ar.getRecoveryBudget(), "L1 -> 1");
+
+            w.setLevel(5);
+            assertEquals(3, ar.getRecoveryBudget(),
+                "L5 -> ceil(5/2) = 3");
+        }
+
+        @Test
+        @DisplayName("L2 Wizard with Evocation tradition gets Sculpt Spells + Evocation Savant")
+        void l2EvocationGivesSchoolFeatures() {
+            Character w = new Character("Mira", Race.HUMAN, CharacterClass.WIZARD,
+                10, 10, 14, 16, 10, 10);
+            w.setLevel(2);
+            w.setArcaneTradition(
+                com.questkeeper.character.features.WizardFeatures.ArcaneTradition.EVOCATION);
+            assertTrue(w.getFeature(
+                com.questkeeper.character.features.WizardFeatures.SCULPT_SPELLS_ID
+            ).isPresent());
+            assertTrue(w.getFeature(
+                com.questkeeper.character.features.WizardFeatures.EVOCATION_SAVANT_ID
+            ).isPresent());
+        }
+
+        @Test
+        @DisplayName("setArcaneTradition on a non-Wizard throws")
+        void setArcaneTraditionOnNonWizardThrows() {
+            Character fighter = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            assertThrows(IllegalStateException.class,
+                () -> fighter.setArcaneTradition(
+                    com.questkeeper.character.features.WizardFeatures.ArcaneTradition.EVOCATION));
+        }
+    }
+
+    @Nested
     @DisplayName("Cleric class features")
     class ClericClassFeatureTests {
 
