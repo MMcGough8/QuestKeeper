@@ -273,6 +273,9 @@ public class CombatSystem {
             case "recklessattack":
                 return handleRecklessAttack();
 
+            case "frenzy":
+                return handleFrenzy();
+
             // Monk actions
             case "flurry":
             case "flurryofblows":
@@ -1385,6 +1388,36 @@ public class CombatSystem {
         bonusActionUsed = true;
 
         return CombatResult.info(result + "\n(You can still take your action this turn.)");
+    }
+
+    /**
+     * Handles Frenzy (Barbarian Berserker, Lvl 3). Bonus action while
+     * raging; grants one bonus melee attack on this turn. The post-rage
+     * exhaustion penalty is not modeled (post-pitch concern).
+     */
+    private CombatResult handleFrenzy() {
+        Character player = (Character) getPlayer();
+        if (player == null) {
+            return CombatResult.error("No player character found.");
+        }
+        var feature = player.getFeature(BarbarianFeatures.FRENZY_ID);
+        if (feature.isEmpty()) {
+            return CombatResult.error("You don't have the Frenzy ability.");
+        }
+        if (!player.isRaging()) {
+            return CombatResult.error("You can only enter a Frenzy while raging.");
+        }
+        CombatResult bonusCheck = requireBonusAction();
+        if (bonusCheck != null) return bonusCheck;
+
+        // Grant one bonus melee attack via the shared bonus-attack budget
+        // (drains in handlePlayerAttack after main action is exhausted).
+        flurryAttacksRemaining = 1;
+        consumeBonusAction();
+
+        return CombatResult.info(
+            player.getName() + " enters a Frenzy! "
+            + "[1 bonus melee attack available this turn.]");
     }
 
     /**

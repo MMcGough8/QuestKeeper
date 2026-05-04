@@ -1907,6 +1907,77 @@ class CombatSystemTest {
         }
 
         @Test
+        @DisplayName("Frenzy grants 1 bonus attack while raging")
+        void frenzyGrantsBonusAttackWhileRaging() {
+            Character barb = new Character("Grog", Race.HUMAN, CharacterClass.BARBARIAN,
+                16, 14, 14, 10, 10, 10);
+            barb.setLevel(3);
+            Weapon greataxe = Weapon.createGreataxe();
+            barb.getInventory().addItem(greataxe);
+            barb.getInventory().equip(greataxe);
+
+            state = new GameState(barb, campaign);
+            combatSystem = new CombatSystem();
+
+            Monster weakling = new Monster("weakling", "Weakling", 5, 200);
+            weakling.setAttackBonus(0);
+            weakling.setDamageDice("1d4");
+            weakling.setDexterityMod(0);
+            combatSystem.startCombat(state, List.of(weakling));
+
+            int safety = 0;
+            while (combatSystem.isInCombat() && safety++ < 20) {
+                CombatResult tr = combatSystem.executeTurn();
+                if (tr.getType() == CombatResult.Type.TURN_START
+                    && combatSystem.getCurrentCombatant() == barb) break;
+            }
+
+            // No rage → frenzy refused.
+            CombatResult noRage = combatSystem.playerTurn("frenzy", null);
+            assertEquals(CombatResult.Type.ERROR, noRage.getType(),
+                "Frenzy without rage should be rejected");
+
+            // Rage consumes the bonus action on entry, so Frenzy must wait
+            // until the next player turn when the bonus action resets.
+            combatSystem.playerTurn("rage", null);
+            assertTrue(barb.isRaging(), "precondition: barbarian is raging");
+            assertTrue(combatSystem.isBonusActionUsed(),
+                "Rage entry should consume the bonus action");
+
+            // Consume main action so the turn advances; weakling has 200 HP
+            // and won't die from one hit.
+            combatSystem.playerTurn("attack", "weakling");
+
+            // Advance through the enemy turn back to the player.
+            int safety2 = 0;
+            while (combatSystem.isInCombat() && safety2++ < 30) {
+                CombatResult tr = combatSystem.executeTurn();
+                if (tr.getType() == CombatResult.Type.TURN_START
+                    && combatSystem.getCurrentCombatant() == barb) break;
+            }
+            assertFalse(combatSystem.isBonusActionUsed(),
+                "Bonus action should reset at start of next player turn");
+
+            CombatResult frenzy = combatSystem.playerTurn("frenzy", null);
+            assertEquals(CombatResult.Type.INFO, frenzy.getType(),
+                "Frenzy while raging should succeed; got: " + frenzy.getMessage());
+            assertTrue(combatSystem.isBonusActionUsed(),
+                "Frenzy must consume the bonus action");
+
+            // Lvl 3 Barbarian: 1 main + 1 frenzy bonus = 2 attacks total.
+            assertEquals(1, combatSystem.getMainActionAttacksRemaining(),
+                "Lvl 3 Barb has 1 main attack");
+
+            combatSystem.playerTurn("attack", "weakling");
+            assertEquals(barb, combatSystem.getCurrentCombatant(),
+                "Bonus attack should keep the turn with the player");
+
+            combatSystem.playerTurn("attack", "weakling");
+            assertEquals(0, combatSystem.getMainActionAttacksRemaining(),
+                "All attacks should be exhausted after main + frenzy");
+        }
+
+        @Test
         @DisplayName("Smited hit expends a spell slot and clears smiteReady")
         void smitedHitExpendsSlotAndClearsFlag() {
             setUpPaladinCombat();
