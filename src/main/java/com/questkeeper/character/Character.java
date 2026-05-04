@@ -242,6 +242,13 @@ public class Character implements Combatant {
     // Spellcasting
     private final Spellbook spellbook = new Spellbook();
 
+    // Ability Score Improvements (PHB p.15): at levels 4, 8, 12, 16, 19 a
+    // character gains 2 ability points to spend (+2 to one OR +1/+1 to two).
+    // The counter holds unspent improvements; callers spend them via
+    // applyAbilityScoreImprovement.
+    private int pendingAbilityScoreImprovements;
+    private static final int[] ASI_LEVELS = {4, 8, 12, 16, 19};
+
     public Character(String name, Race race, CharacterClass characterClass) {
         this.name = name;
         this.race = race;
@@ -1231,6 +1238,7 @@ public class Character implements Combatant {
         // then cap at the new level in case of shrinkage.
         if (newLevel > oldLevel) {
             availableHitDice += (newLevel - oldLevel);
+            pendingAbilityScoreImprovements += countAsiThresholdsCrossed(oldLevel, newLevel);
         }
         this.availableHitDice = Math.min(availableHitDice, level);
 
@@ -1239,6 +1247,80 @@ public class Character implements Combatant {
 
         // Update spellcasting for new level
         spellbook.onLevelUp(level);
+    }
+
+    private static int countAsiThresholdsCrossed(int oldLevel, int newLevel) {
+        int count = 0;
+        for (int threshold : ASI_LEVELS) {
+            if (threshold > oldLevel && threshold <= newLevel) count++;
+        }
+        return count;
+    }
+
+    /**
+     * Number of unspent Ability Score Improvements waiting to be applied.
+     */
+    public int getPendingAbilityScoreImprovements() {
+        return pendingAbilityScoreImprovements;
+    }
+
+    /**
+     * Used by the save/load layer to restore a partially-spent ASI state.
+     * Clamped to non-negative.
+     */
+    public void setPendingAbilityScoreImprovements(int count) {
+        this.pendingAbilityScoreImprovements = Math.max(0, count);
+    }
+
+    /**
+     * Spend one pending ASI by adding +2 to a single ability (max 20).
+     */
+    public void applyAbilityScoreImprovement(Ability ability) {
+        if (pendingAbilityScoreImprovements <= 0) {
+            throw new IllegalStateException("No pending ability score improvements.");
+        }
+        if (ability == null) {
+            throw new IllegalArgumentException("Ability must not be null.");
+        }
+        int current = baseAbilityScores.getOrDefault(ability, 10);
+        if (current >= MAX_ABILITY_SCORE) {
+            throw new IllegalStateException(
+                ability + " is already at the cap of " + MAX_ABILITY_SCORE + ".");
+        }
+        int newScore = Math.min(MAX_ABILITY_SCORE, current + 2);
+        baseAbilityScores.put(ability, newScore);
+        pendingAbilityScoreImprovements--;
+        this.maxHitPoints = calculateMaxHitPoints();
+        this.currentHitPoints = Math.min(currentHitPoints, maxHitPoints);
+    }
+
+    /**
+     * Spend one pending ASI by adding +1 to two distinct abilities (each max 20).
+     */
+    public void applyAbilityScoreImprovement(Ability first, Ability second) {
+        if (pendingAbilityScoreImprovements <= 0) {
+            throw new IllegalStateException("No pending ability score improvements.");
+        }
+        if (first == null || second == null) {
+            throw new IllegalArgumentException("Both abilities must be specified.");
+        }
+        if (first == second) {
+            throw new IllegalArgumentException(
+                "Pick two different abilities, or use the single-ability overload for +2.");
+        }
+        int firstScore = baseAbilityScores.getOrDefault(first, 10);
+        int secondScore = baseAbilityScores.getOrDefault(second, 10);
+        if (firstScore >= MAX_ABILITY_SCORE) {
+            throw new IllegalStateException(first + " is already capped at " + MAX_ABILITY_SCORE + ".");
+        }
+        if (secondScore >= MAX_ABILITY_SCORE) {
+            throw new IllegalStateException(second + " is already capped at " + MAX_ABILITY_SCORE + ".");
+        }
+        baseAbilityScores.put(first, Math.min(MAX_ABILITY_SCORE, firstScore + 1));
+        baseAbilityScores.put(second, Math.min(MAX_ABILITY_SCORE, secondScore + 1));
+        pendingAbilityScoreImprovements--;
+        this.maxHitPoints = calculateMaxHitPoints();
+        this.currentHitPoints = Math.min(currentHitPoints, maxHitPoints);
     }
 
     public void setArmorBonus(int bonus) {

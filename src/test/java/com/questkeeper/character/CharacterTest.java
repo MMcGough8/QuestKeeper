@@ -998,6 +998,102 @@ class CharacterTest {
     }
 
     @Nested
+    @DisplayName("Ability Score Improvements")
+    class AbilityScoreImprovementTests {
+
+        @Test
+        @DisplayName("Crossing level 4 grants one pending ASI")
+        void levelingTo4GrantsOneASI() {
+            Character fighter = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            assertEquals(0, fighter.getPendingAbilityScoreImprovements());
+            fighter.setLevel(4);
+            assertEquals(1, fighter.getPendingAbilityScoreImprovements(),
+                "Lvl 4 should grant one ASI");
+        }
+
+        @Test
+        @DisplayName("Jumping multiple thresholds grants the right total")
+        void multiThresholdJumpAccumulates() {
+            Character fighter = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            // Going 1 -> 12 crosses 4, 8, 12 (three thresholds).
+            fighter.setLevel(12);
+            assertEquals(3, fighter.getPendingAbilityScoreImprovements());
+        }
+
+        @Test
+        @DisplayName("Pre-L4 levels do not grant an ASI")
+        void preL4NoASI() {
+            Character fighter = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            fighter.setLevel(3);
+            assertEquals(0, fighter.getPendingAbilityScoreImprovements());
+        }
+
+        @Test
+        @DisplayName("Applying +2 to a single ability raises that score by 2 and consumes the ASI")
+        void plusTwoSingleAbility() {
+            Character fighter = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            fighter.setLevel(4);
+            int before = fighter.getAbilityScore(Ability.STRENGTH);
+
+            fighter.applyAbilityScoreImprovement(Ability.STRENGTH);
+
+            assertEquals(before + 2, fighter.getAbilityScore(Ability.STRENGTH));
+            assertEquals(0, fighter.getPendingAbilityScoreImprovements(),
+                "ASI should be consumed");
+        }
+
+        @Test
+        @DisplayName("Applying +1/+1 to two abilities raises both and consumes the ASI")
+        void plusOneOneTwoAbilities() {
+            Character fighter = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            fighter.setLevel(4);
+            int strBefore = fighter.getAbilityScore(Ability.STRENGTH);
+            int dexBefore = fighter.getAbilityScore(Ability.DEXTERITY);
+
+            fighter.applyAbilityScoreImprovement(Ability.STRENGTH, Ability.DEXTERITY);
+
+            assertEquals(strBefore + 1, fighter.getAbilityScore(Ability.STRENGTH));
+            assertEquals(dexBefore + 1, fighter.getAbilityScore(Ability.DEXTERITY));
+            assertEquals(0, fighter.getPendingAbilityScoreImprovements());
+        }
+
+        @Test
+        @DisplayName("ASI cannot raise an ability above 20")
+        void cannotExceedTwenty() {
+            Character fighter = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                20, 14, 14, 10, 10, 10);
+            fighter.setLevel(4);
+            assertThrows(IllegalStateException.class,
+                () -> fighter.applyAbilityScoreImprovement(Ability.STRENGTH),
+                "STR already at 20 — ASI must be rejected");
+        }
+
+        @Test
+        @DisplayName("Single-ability ASI without pending improvements throws")
+        void noPendingThrows() {
+            Character fighter = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            assertThrows(IllegalStateException.class,
+                () -> fighter.applyAbilityScoreImprovement(Ability.STRENGTH));
+        }
+
+        @Test
+        @DisplayName("Two-ability ASI rejects same-ability picks")
+        void twoAbilityRejectsSameAbility() {
+            Character fighter = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            fighter.setLevel(4);
+            assertThrows(IllegalArgumentException.class,
+                () -> fighter.applyAbilityScoreImprovement(Ability.STRENGTH, Ability.STRENGTH));
+        }
+    }
+
+    @Nested
     @DisplayName("Saving Throw Advantage")
     class SavingThrowAdvantageTests {
 
