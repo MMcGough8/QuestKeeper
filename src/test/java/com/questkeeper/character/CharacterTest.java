@@ -343,11 +343,11 @@ class CharacterTest {
         @Test
         @DisplayName("Temp HP don't stack - keeps higher")
         void tempHPDontStack() {
-            fighter.setTemporaryHitPoints(5);
-            fighter.setTemporaryHitPoints(3);
+            fighter.gainTemporaryHitPoints(5);
+            fighter.gainTemporaryHitPoints(3);
             assertEquals(5, fighter.getTemporaryHitPoints());
-            
-            fighter.setTemporaryHitPoints(10);
+
+            fighter.gainTemporaryHitPoints(10);
             assertEquals(10, fighter.getTemporaryHitPoints());
         }
         

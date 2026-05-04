@@ -1027,7 +1027,19 @@ public class Character implements Combatant {
         return temporaryHitPoints;
     }
     
+    /**
+     * Unconditionally sets temporary hit points (used by save/load to
+     * restore the exact saved value).
+     */
     public void setTemporaryHitPoints(int amount) {
+        temporaryHitPoints = Math.max(0, amount);
+    }
+
+    /**
+     * Applies temporary hit points using D&D 5e rules: temp HP does not
+     * stack, take the higher value of existing vs newly gained.
+     */
+    public void gainTemporaryHitPoints(int amount) {
         temporaryHitPoints = Math.max(temporaryHitPoints, amount);
     }
 
@@ -1091,10 +1103,16 @@ public class Character implements Combatant {
         if (newLevel < 1) newLevel = 1;
         if (newLevel > 20) newLevel = 20;
 
+        int oldLevel = this.level;
         this.level = newLevel;
         this.maxHitPoints = calculateMaxHitPoints();
         this.currentHitPoints = Math.min(currentHitPoints, maxHitPoints);
-        this.availableHitDice = Math.min(availableHitDice, level);  // Cap at new level
+        // Grant new hit dice on growth (matches levelUp's per-level increment),
+        // then cap at the new level in case of shrinkage.
+        if (newLevel > oldLevel) {
+            availableHitDice += (newLevel - oldLevel);
+        }
+        this.availableHitDice = Math.min(availableHitDice, level);
 
         // Update class features for new level
         initializeClassFeatures();
