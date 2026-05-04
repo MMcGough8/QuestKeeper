@@ -985,6 +985,12 @@ public class Character implements Combatant {
         return savingThrowProficiencies.contains(ability);
     }
 
+    public void addSavingThrowProficiency(Ability ability) {
+        if (ability != null) {
+            savingThrowProficiencies.add(ability);
+        }
+    }
+
     public int getSavingThrowModifier(Ability ability) {
         int modifier = getAbilityModifier(ability);
         if (savingThrowProficiencies.contains(ability)) {

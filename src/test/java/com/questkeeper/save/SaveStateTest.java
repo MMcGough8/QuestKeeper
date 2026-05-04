@@ -443,6 +443,24 @@ class SaveStateTest {
         }
 
         @Test
+        @DisplayName("Non-default saving throw proficiency survives save/load")
+        void savingThrowProficienciesRoundTrip() throws IOException {
+            Character fighter = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER);
+            // Fighter defaults are STR/CON. Add CHARISMA as a non-default save.
+            fighter.addSavingThrowProficiency(Ability.CHARISMA);
+
+            Path savePath = tempDir.resolve("saves.yaml");
+            new SaveState(fighter, "muddlebrook").save(savePath);
+
+            Character restored = SaveState.load(savePath).restoreCharacter();
+
+            assertTrue(restored.hasSavingThrowProficiency(Ability.CHARISMA),
+                "Non-default CHA save proficiency should survive round-trip");
+            assertTrue(restored.hasSavingThrowProficiency(Ability.STRENGTH),
+                "Class default STR save should still be present");
+        }
+
+        @Test
         @DisplayName("Half-Elf bonus abilities survive save/load")
         void halfElfBonusAbilitiesRoundTrip() throws IOException {
             Character bard = new Character("Halo", Race.HALF_ELF, CharacterClass.BARD);

@@ -141,6 +141,16 @@ public class CharacterData {
         }
     }
 
+    // Saving throw proficiencies (constructor adds class defaults; this
+    // restores any non-default ones that were saved).
+    for (String saveName : savingThrowProficiencies) {
+        try {
+            character.addSavingThrowProficiency(Ability.valueOf(saveName));
+        } catch (IllegalArgumentException e) {
+            // Unknown ability; skip
+        }
+    }
+
     // Class/race choice fields must be set BEFORE setLevel so that
     // initializeClassFeatures sees them when adding level-gated features.
     if (halfElfBonusAbilities != null && halfElfBonusAbilities.size() == 2) {
