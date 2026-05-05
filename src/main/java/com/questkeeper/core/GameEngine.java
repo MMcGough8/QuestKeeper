@@ -961,10 +961,13 @@ public class GameEngine implements AutoCloseable {
                     continue;
                 }
                 if (action.equals("help") || action.equals("?")) {
-                    Display.println(Display.colorize(
-                        "Combat actions: attack, flee, secondwind, surge, smite, layonhands, " +
-                        "rage, reckless, dash, disengage, hide, flurry, patient, step, cast.",
-                        YELLOW));
+                    // Delegate to the in-combat help dispatcher so this
+                    // text reflects the current player's available class
+                    // verbs (Bardic Inspiration, Wild Shape, etc.).
+                    CombatResult helpResult = combatSystem.playerTurn("help", null);
+                    if (helpResult != null && helpResult.getMessage() != null) {
+                        Display.println(Display.colorize(helpResult.getMessage(), YELLOW));
+                    }
                     Display.println(Display.colorize(
                         "System: quit (with confirmation). save/load/rest are blocked mid-combat.",
                         YELLOW));
@@ -1032,20 +1035,24 @@ public class GameEngine implements AutoCloseable {
 
     private void displayCombatStatus() {
         Display.println();
-        Display.printDivider('-', 60, WHITE);
-
-        // Show player status
         Character player = gameState.getCharacter();
-        Display.print(Display.colorize("You: ", GREEN));
-        Display.printHealthBar(player.getCurrentHitPoints(), player.getMaxHitPoints());
 
-        // Show enemy status
+        // One-line combatant summary: [You 12/12 | Goblin 5/8 | Bandit 4/10]
+        StringBuilder line = new StringBuilder();
+        line.append(Display.colorize(
+            String.format("[You %d/%d", player.getCurrentHitPoints(), player.getMaxHitPoints()),
+            GREEN));
         for (Combatant enemy : combatSystem.getLivingEnemies()) {
-            Display.print(Display.colorize(enemy.getName() + ": ", RED));
-            Display.printHealthBar(enemy.getCurrentHitPoints(), enemy.getMaxHitPoints());
+            line.append(Display.colorize(" | ", WHITE));
+            line.append(Display.colorize(
+                String.format("%s %d/%d",
+                    enemy.getName(),
+                    enemy.getCurrentHitPoints(),
+                    enemy.getMaxHitPoints()),
+                RED));
         }
-
-        Display.printDivider('-', 60, WHITE);
+        line.append(Display.colorize("]", WHITE));
+        Display.println(line.toString());
     }
 
     private void displayCombatResult(CombatResult result) {
