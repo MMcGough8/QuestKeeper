@@ -61,10 +61,13 @@ public class TrialCommandHandler implements CommandHandler {
             return CommandResult.failure("Prerequisites not met");
         }
 
-        // Start or continue the trial
+        // Start or continue the trial. Either path must set activeTrial
+        // so 'attempt <skill>' and other trial-mode commands work after a
+        // re-entry (e.g., after a save/load round-trip).
         if (!context.getGameState().hasStartedTrial(trial.getId())) {
             startTrial(context, trial);
         } else {
+            context.setActiveTrial(trial);
             displayTrialStatus(context, trial);
         }
 

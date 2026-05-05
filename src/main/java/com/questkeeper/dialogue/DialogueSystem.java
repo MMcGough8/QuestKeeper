@@ -200,18 +200,24 @@ public class DialogueSystem {
         List<String> npcIds = location.getNpcs();
 
         // Pass 1: exact / contains / descriptor.
+        // Substring match needs >=3 chars so 'talk a' / 'talk co' don't pluck
+        // the first NPC whose name contains those letters. Exact id/name
+        // and descriptor still match regardless of length.
         for (String npcId : npcIds) {
             NPC npc = state.getCampaign().getNPC(npcId);
             if (npc == null) continue;
             String name = npc.getName().toLowerCase();
             if (npc.getId().toLowerCase().equals(searchTerm)
-                    || name.equals(searchTerm)
-                    || name.contains(searchTerm)) {
+                    || name.equals(searchTerm)) {
+                return Optional.of(npc);
+            }
+            if (searchTerm.length() >= 3 && name.contains(searchTerm)) {
                 return Optional.of(npc);
             }
             String descriptor = stripLeadingArticles(npc.getShortDescriptor().toLowerCase());
             if (!descriptor.isEmpty()
-                    && (descriptor.equals(searchTerm) || descriptor.contains(searchTerm))) {
+                    && (descriptor.equals(searchTerm)
+                        || (searchTerm.length() >= 3 && descriptor.contains(searchTerm)))) {
                 return Optional.of(npc);
             }
         }

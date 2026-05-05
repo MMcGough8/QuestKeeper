@@ -105,6 +105,15 @@ public class CombatSystem {
         if (enemies == null || enemies.isEmpty()) {
             return CombatResult.error("No enemies to fight.");
         }
+        // Reject monsters with non-positive max HP — a YAML data error
+        // would otherwise cause an instant auto-victory + free XP grant.
+        for (Monster m : enemies) {
+            if (m.getMaxHitPoints() <= 0) {
+                return CombatResult.error("Monster '" + m.getName()
+                    + "' has invalid max HP " + m.getMaxHitPoints()
+                    + " — check campaign monster YAML.");
+            }
+        }
 
         this.currentState = state;
         this.participants = new ArrayList<>();

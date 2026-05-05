@@ -64,7 +64,7 @@ public class GameEngine implements AutoCloseable {
         "dash", "disengage", "hide",
         "inspire", "bardic",
         "surge", "secondwind",
-        "wildshape", "fontofmagic", "sorrypoint",
+        "wildshape", "fontofmagic", "sorcerypoints",
         "help", "?"
     );
 
