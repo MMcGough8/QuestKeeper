@@ -469,6 +469,18 @@ public class Display {
         return ansi().fg(color).a(text).reset().toString();
     }
 
+    // ===== Semantic color helpers — use these for consistency =====
+    /** Informational neutral text (e.g., counts, timestamps). */
+    public static String info(String text)    { return colorize(text, CYAN); }
+    /** Warnings + tips. Yellow conveys "pay attention but don't panic." */
+    public static String warn(String text)    { return colorize(text, YELLOW); }
+    /** Successful operations + positive outcomes (heals, hits landed). */
+    public static String success(String text) { return colorize(text, GREEN); }
+    /** Errors, damage taken, danger states. */
+    public static String danger(String text)  { return colorize(text, RED); }
+    /** Narrative voice / storyteller asides. */
+    public static String narrative(String text) { return colorize(text, MAGENTA); }
+
     public static String bold(String text) {
         if (!colorsEnabled) {
             return text;
