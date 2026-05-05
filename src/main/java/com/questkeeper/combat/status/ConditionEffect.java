@@ -183,12 +183,13 @@ public class ConditionEffect extends AbstractStatusEffect {
     }
 
     /**
-     * Creates a PRONE condition that lasts indefinitely.
-     * Must crawl, disadvantage on attacks, melee attacks against have advantage.
-     * Typically ended by using movement to stand up.
+     * Creates a PRONE condition. RAW says prone lasts until the creature
+     * uses half its movement to stand. This sim doesn't model movement
+     * costs, so prone auto-recovers at the end of the prone target's
+     * next turn — equivalent to standing up at the start of that turn.
      */
     public static ConditionEffect prone() {
-        return new ConditionEffect(Condition.PRONE, DurationType.INDEFINITE);
+        return new ConditionEffect(Condition.PRONE, 1);
     }
 
     /**

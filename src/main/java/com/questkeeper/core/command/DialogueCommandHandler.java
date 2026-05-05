@@ -179,14 +179,26 @@ public class DialogueCommandHandler implements CommandHandler {
             return CommandResult.failure("Not enough gold");
         }
 
-        // Make the purchase
-        inventory.removeGold(price);
-
-        // Add item to inventory
+        // Resolve the item BEFORE deducting gold so an unknown shop key
+        // (shop_items: { ale: 1 } without a matching items.yaml entry)
+        // doesn't silently charge the player and grant nothing.
         Item purchasedItem = context.getCampaign().getItem(foundItem);
-        if (purchasedItem != null) {
-            inventory.addItem(purchasedItem);
+        if (purchasedItem == null) {
+            System.err.println("WARN: shop sells '" + foundItem
+                + "' but no items.yaml entry resolves it.");
+            Display.showError(npc.getName() + " fumbles for the " + foundItem
+                + "... but it's nowhere to be found. (No charge.)");
+            return CommandResult.failure("Shop item id unresolved");
         }
+
+        // addItem returns false if the item won't fit in the inventory
+        // (over weight cap); refund and bail in that case.
+        if (!inventory.addItem(purchasedItem)) {
+            Display.showError("You can't carry the " + purchasedItem.getName()
+                + " — too heavy. (No charge.)");
+            return CommandResult.failure("Inventory full");
+        }
+        inventory.removeGold(price);
 
         // Display purchase
         Display.println();

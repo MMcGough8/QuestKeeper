@@ -84,13 +84,13 @@ class ConditionEffectTest {
         }
 
         @Test
-        @DisplayName("prone creates indefinite effect")
-        void proneCreatesIndefiniteEffect() {
+        @DisplayName("prone creates a 1-round effect (auto-recovers next turn)")
+        void proneCreates1RoundEffect() {
             ConditionEffect effect = ConditionEffect.prone();
 
             assertEquals(Condition.PRONE, effect.getCondition());
-            assertEquals(DurationType.INDEFINITE, effect.getDurationType());
-            assertEquals(-1, effect.getRemainingDuration());
+            assertEquals(DurationType.ROUNDS, effect.getDurationType());
+            assertEquals(1, effect.getRemainingDuration());
         }
 
         @Test
@@ -184,7 +184,9 @@ class ConditionEffectTest {
         @Test
         @DisplayName("indefinite effects don't expire from decrement")
         void indefiniteEffectsDontExpireFromDecrement() {
-            ConditionEffect effect = ConditionEffect.prone();
+            // Use grappled instead of prone since prone is now a 1-round
+            // auto-recover effect (grappled is the canonical INDEFINITE).
+            ConditionEffect effect = ConditionEffect.grappled();
 
             assertFalse(effect.isExpired());
 
