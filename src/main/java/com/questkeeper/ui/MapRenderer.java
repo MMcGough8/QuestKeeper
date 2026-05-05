@@ -66,11 +66,11 @@ public final class MapRenderer {
         appendGrid(sb, campaign, layout, currentRoomId, isUnlocked);
         appendVerticalStacks(sb, campaign, layout, isUnlocked);
         appendOrphans(sb, campaign, layout);
-        appendConflicts(sb, layout);
+        appendConflicts(sb, campaign, layout);
         appendCounts(sb, campaign, layout, currentRoomId);
         appendVisitedListing(sb, campaign, layout, currentRoomId, isUnlocked);
         appendLegend(sb);
-        return sb.toString();
+        return colorizeOutput(sb.toString());
     }
 
     // ==========================================
@@ -175,7 +175,8 @@ public final class MapRenderer {
     /**
      * Builds the in-cell label for a room: name (or `?`), with `[*]`
      * prefix if it's the current room. Falls back to the room id if
-     * no display name is available.
+     * no display name is available. Strips a leading "The " from long
+     * names so they fit better in the 14-char label slot.
      */
     private static String labelFor(String roomId, String currentRoomId,
                                    MapLayout layout, Campaign campaign,
@@ -187,8 +188,24 @@ public final class MapRenderer {
         String name = (loc != null && loc.getName() != null && !loc.getName().isEmpty())
             ? loc.getName()
             : roomId;
+        String compact = compactForCell(name);
         String marker = roomId.equals(currentRoomId) ? "[*]" : "";
-        return marker + name;
+        return marker + compact;
+    }
+
+    /**
+     * Squeezes a room display name to fit the cell label slot:
+     * drops a leading "The " when the original wouldn't fit, since
+     * that's almost always filler. Idempotent on already-short names.
+     */
+    private static String compactForCell(String name) {
+        if (name.length() <= LABEL_WIDTH) return name;
+        if (name.startsWith("The ")) {
+            String stripped = name.substring(4);
+            if (stripped.length() <= LABEL_WIDTH) return stripped;
+            return stripped;
+        }
+        return name;
     }
 
     private static String fitLabel(String s, int width) {
@@ -220,7 +237,7 @@ public final class MapRenderer {
         List<List<String>> stacks = layout.getVerticalStacks();
         if (stacks.isEmpty()) return;
 
-        sb.append("\nVertical paths:\n");
+        sb.append("\n").append(Display.info("Vertical paths:")).append("\n");
         for (List<String> stack : stacks) {
             sb.append("  ");
             for (int i = 0; i < stack.size(); i++) {
@@ -243,7 +260,7 @@ public final class MapRenderer {
         List<String> orphans = layout.getOrphans();
         if (orphans.isEmpty()) return;
 
-        sb.append("\nOther locations discovered:\n");
+        sb.append("\n").append(Display.warn("Other locations discovered:")).append("\n");
         List<String> sorted = new ArrayList<>(orphans);
         sorted.sort(Comparator.comparing(id -> {
             Location loc = campaign.getLocation(id);
@@ -260,21 +277,30 @@ public final class MapRenderer {
     // Conflicts footer
     // ==========================================
 
-    private static void appendConflicts(StringBuilder sb, MapLayout layout) {
+    private static void appendConflicts(StringBuilder sb, Campaign campaign, MapLayout layout) {
         List<MapLayout.Conflict> conflicts = layout.getConflicts();
         if (conflicts.isEmpty()) return;
 
-        sb.append("\nLayout warnings (").append(conflicts.size()).append("):\n");
+        sb.append("\n").append(Display.warn(
+            "Layout warnings (" + conflicts.size() + "):")).append("\n");
         int shown = Math.min(conflicts.size(), 3);
         for (int i = 0; i < shown; i++) {
             var c = conflicts.get(i);
-            sb.append("  - ").append(c.fromRoom()).append(" ")
-              .append(c.direction()).append(" -> ")
-              .append(c.targetRoom()).append("\n");
+            sb.append("  - ").append(displayName(campaign, c.fromRoom()))
+              .append(" → ").append(c.direction()).append(" → ")
+              .append(displayName(campaign, c.targetRoom()))
+              .append("\n");
         }
         if (conflicts.size() > shown) {
             sb.append("  ... and ").append(conflicts.size() - shown).append(" more\n");
         }
+    }
+
+    private static String displayName(Campaign campaign, String roomId) {
+        Location loc = campaign.getLocation(roomId);
+        return (loc != null && loc.getName() != null && !loc.getName().isEmpty())
+            ? loc.getName()
+            : roomId;
     }
 
     // ==========================================
@@ -312,7 +338,7 @@ public final class MapRenderer {
             return loc != null ? loc.getName() : id;
         }, String.CASE_INSENSITIVE_ORDER));
 
-        sb.append("\nVisited:\n");
+        sb.append("\n").append(Display.info("Visited:")).append("\n");
         for (String id : sorted) {
             Location loc = campaign.getLocation(id);
             String name = loc != null ? loc.getName() : id;
@@ -323,8 +349,23 @@ public final class MapRenderer {
     }
 
     private static void appendLegend(StringBuilder sb) {
-        sb.append("\nLegend:\n");
+        sb.append("\n").append(Display.info("Legend:")).append("\n");
         sb.append("  [*] You are here    ?  Unvisited (you can see it from here)\n");
         sb.append("  ⇕ Vertical path     (locked) Currently inaccessible\n");
+    }
+
+    /**
+     * Post-processes the assembled output to add color highlights.
+     * Operates on simple token substitutions so the grid's width math
+     * (computed before this step in plain ASCII) isn't disturbed.
+     * When colors are disabled, Display.colorize is a no-op and the
+     * output is unchanged.
+     */
+    private static String colorizeOutput(String raw) {
+        String coloredStar = Display.success("[*]");
+        String coloredLocked = Display.danger("(locked)");
+        return raw
+            .replace("[*]", coloredStar)
+            .replace("(locked)", coloredLocked);
     }
 }

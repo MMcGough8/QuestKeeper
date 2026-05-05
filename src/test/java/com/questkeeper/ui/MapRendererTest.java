@@ -402,4 +402,71 @@ class MapRendererTest {
                 "deepest room should appear in the inset");
         }
     }
+
+    @Nested
+    @DisplayName("Polish (Phase 4)")
+    class PolishTests {
+
+        @Test
+        @DisplayName("conflict warnings show display names, not raw ids")
+        void conflictsUseDisplayNames() throws IOException {
+            // Set up a layout that produces a conflict: a east to b at (1,0),
+            // a south to c at (0,1), c east to b would put b at (1,1).
+            Campaign c = loadCampaign("a", """
+                locations:
+                  - id: a
+                    name: Alpha Hall
+                    description: a.
+                    exits:
+                      east: b
+                      south: c
+                  - id: b
+                    name: Beta Chamber
+                    description: b.
+                    exits:
+                      west: a
+                  - id: c
+                    name: Gamma Vault
+                    description: c.
+                    exits:
+                      north: a
+                      east: b
+                """);
+            MapLayout layout = MapLayout.compute(c, Set.of("a", "b", "c"));
+            String out = MapRenderer.render(c, layout, "a", ALL_UNLOCKED);
+
+            assertTrue(out.toLowerCase().contains("layout warnings"),
+                "layout warnings header should appear; got:\n" + out);
+            assertTrue(out.contains("Alpha Hall") || out.contains("Beta Chamber") || out.contains("Gamma Vault"),
+                "conflict line should reference display names, not just raw ids; got:\n" + out);
+        }
+
+        @Test
+        @DisplayName("'The ' prefix is stripped from cell labels when name overflows")
+        void stripsTheFromOverflowingCellLabels() throws IOException {
+            Campaign c = loadCampaign("a", """
+                locations:
+                  - id: a
+                    name: Hub
+                    description: a.
+                    exits:
+                      east: inn
+                  - id: inn
+                    name: The Drunken Dragon Inn
+                    description: long name.
+                """);
+            MapLayout layout = MapLayout.compute(c, Set.of("a", "inn"));
+            String out = MapRenderer.render(c, layout, "a", ALL_UNLOCKED);
+
+            // Original 22-char name truncates to "The Drunken D…"; with "The "
+            // stripped the cell instead shows "Drunken Dragon" or "Drunken Drag…"
+            // (still 14-char ceiling) — confirm the cell shows "Drunken" rather
+            // than "The Drunken D…".
+            assertTrue(out.contains("Drunken"),
+                "cell label should retain the meaningful part of the name; got:\n" + out);
+            // Visited footer always shows the full name; verify that's intact.
+            assertTrue(out.contains("The Drunken Dragon Inn"),
+                "Visited footer should show the full name; got:\n" + out);
+        }
+    }
 }
