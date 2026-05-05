@@ -671,18 +671,18 @@ public class Display {
         // Tagline + author/version layered in contrasting colors so the
         // chrome reads like a book cover, not an engine debug banner.
         print(colorize("    ║         ", YELLOW));
-        print(colorize("⚔  A D&D 5e Terminal Adventure  ⚔", CYAN));
-        println(colorize("            ║", YELLOW));
+        print(colorize("*  A D&D 5e Terminal Adventure  *", CYAN));
+        println(colorize("             ║", YELLOW));
         print(colorize("    ║              ", YELLOW));
         print(colorize("by Marc McGough  ·  v1.0", DEFAULT));
-        println(colorize("                ║", YELLOW));
+        println(colorize("                 ║", YELLOW));
         println(colorize("    ║                                                       ║", YELLOW));
         println(colorize("    ╚═══════════════════════════════════════════════════════╝", YELLOW));
         println();
         // Random flavor quote to vary the demo. Fixed seed via System.nanoTime
         // so multiple title-screen views in one session don't repeat awkwardly.
         String quote = TITLE_QUOTES[(int)(System.nanoTime() & 0x7fffffff) % TITLE_QUOTES.length];
-        println(colorize("                          ⚔ ★ ⚔", RED));
+        println(colorize("                          * ★ *", RED));
         println(colorize(quote, CYAN));
         println();
     }
@@ -692,7 +692,7 @@ public class Display {
      */
     public static void showHeader() {
         println();
-        print(colorize("⚔ QUESTKEEPER ⚔", YELLOW));
+        print(colorize("* QUESTKEEPER *", YELLOW));
         print("  ");
         println(colorize("● ONLINE SESSION: ACTIVE", GREEN));
         printDivider(DIVIDER_ACCENT, DEFAULT_WIDTH);
