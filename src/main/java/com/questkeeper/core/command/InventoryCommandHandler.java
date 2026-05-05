@@ -56,10 +56,10 @@ public class InventoryCommandHandler implements CommandHandler {
         Item weapon = equipped.get(EquipmentSlot.MAIN_HAND);
         Item armor = equipped.get(EquipmentSlot.ARMOR);
         Item offhand = equipped.get(EquipmentSlot.OFF_HAND);
-        Display.println("  Weapon: " + (weapon != null ? weapon.getName() : "(none)"));
-        Display.println("  Armor:  " + (armor != null ? armor.getName() : "(none)"));
+        Display.println("  Weapon: " + Display.itemName(weapon));
+        Display.println("  Armor:  " + Display.itemName(armor));
         if (offhand != null) {
-            Display.println("  Off-hand: " + offhand.getName());
+            Display.println("  Off-hand: " + Display.itemName(offhand));
         }
         Display.println(Display.colorize("  (type 'equipment' for full list)", DEFAULT));
         Display.println();
@@ -123,7 +123,7 @@ public class InventoryCommandHandler implements CommandHandler {
         Display.println("  " + Display.colorize(label, CYAN));
         for (ItemStack s : stacks) {
             String count = s.getQuantity() > 1 ? " (x" + s.getQuantity() + ")" : "";
-            Display.println("    - " + s.getItem().getName() + count);
+            Display.println("    - " + Display.itemName(s.getItem()) + count);
         }
     }
 
@@ -210,7 +210,7 @@ public class InventoryCommandHandler implements CommandHandler {
             Item item = equipped.get(slot);
             String slotName = formatSlotName(slot);
             if (item != null) {
-                Display.println(Display.colorize(slotName + ": ", WHITE) + item.getName());
+                Display.println(Display.colorize(slotName + ": ", WHITE) + Display.itemName(item));
             } else {
                 Display.println(Display.colorize(slotName + ": ", WHITE) +
                     Display.colorize("(empty)", DEFAULT));

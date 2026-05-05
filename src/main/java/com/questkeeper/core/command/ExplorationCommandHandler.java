@@ -78,7 +78,7 @@ public class ExplorationCommandHandler implements CommandHandler {
             if (matchesTarget(itemId, target) || matchesTarget(displayName, target)) {
                 if (item != null) {
                     Display.println();
-                    Display.println(Display.colorize(item.getName(), YELLOW));
+                    Display.println(Display.itemName(item));
                     Display.println(item.getDescription());
                     Display.println();
                     return CommandResult.success();

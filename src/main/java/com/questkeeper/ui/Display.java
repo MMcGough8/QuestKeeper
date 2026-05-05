@@ -412,6 +412,26 @@ public class Display {
         println();
     }
 
+    /**
+     * Pickup announcement variant that colors the item name by its rarity
+     * tier. Prefer this over the String overload so rarity is visible.
+     */
+    public static void showItemGained(com.questkeeper.inventory.Item item) {
+        if (item == null) return;
+        println();
+        println(colorize("╔══════════════════════════════════════╗", YELLOW));
+        println(colorize("║       ✦ NEW ITEM ACQUIRED ✦         ║", YELLOW));
+        println(colorize("╚══════════════════════════════════════╝", YELLOW));
+        println();
+        println("  " + itemName(item)
+            + colorize("  [" + item.getRarity().getDisplayName() + "]", DEFAULT));
+        String desc = item.getDescription();
+        if (desc != null && !desc.isEmpty()) {
+            println(colorize("  " + desc, WHITE));
+        }
+        println();
+    }
+
     public static void printBox(String title, int width, Ansi.Color color) {
         // Top border
         print(colorize(String.valueOf(BOX_TOP_LEFT), color));
@@ -482,6 +502,33 @@ public class Display {
     public static String danger(String text)  { return colorize(text, RED); }
     /** Narrative voice / storyteller asides. */
     public static String narrative(String text) { return colorize(text, MAGENTA); }
+
+    /**
+     * Returns the ANSI color for a D&D 5e item rarity tier:
+     * common white, uncommon green, rare blue, very rare magenta,
+     * legendary yellow (gold-ish), artifact red.
+     */
+    public static Ansi.Color colorForRarity(com.questkeeper.inventory.Item.Rarity rarity) {
+        if (rarity == null) return WHITE;
+        return switch (rarity) {
+            case COMMON     -> WHITE;
+            case UNCOMMON   -> GREEN;
+            case RARE       -> BLUE;
+            case VERY_RARE  -> MAGENTA;
+            case LEGENDARY  -> YELLOW;
+            case ARTIFACT   -> RED;
+        };
+    }
+
+    /**
+     * Returns an item's name colorized by its rarity. Use everywhere
+     * a player-facing item name is displayed so rarity is consistently
+     * recognizable at a glance.
+     */
+    public static String itemName(com.questkeeper.inventory.Item item) {
+        if (item == null) return "(none)";
+        return colorize(item.getName(), colorForRarity(item.getRarity()));
+    }
 
     public static String bold(String text) {
         if (!colorsEnabled) {

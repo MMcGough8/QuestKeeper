@@ -850,4 +850,48 @@ class DisplayTest {
             assertDoesNotThrow(() -> Display.printBox(longTitle, 60, org.fusesource.jansi.Ansi.Color.CYAN));
         }
     }
+
+    @Nested
+    @DisplayName("Item rarity coloring")
+    class RarityColorTests {
+
+        @Test
+        @DisplayName("each rarity maps to its D&D 5e color")
+        void rarityColorMapping() {
+            assertEquals(org.fusesource.jansi.Ansi.Color.WHITE,
+                Display.colorForRarity(com.questkeeper.inventory.Item.Rarity.COMMON));
+            assertEquals(org.fusesource.jansi.Ansi.Color.GREEN,
+                Display.colorForRarity(com.questkeeper.inventory.Item.Rarity.UNCOMMON));
+            assertEquals(org.fusesource.jansi.Ansi.Color.BLUE,
+                Display.colorForRarity(com.questkeeper.inventory.Item.Rarity.RARE));
+            assertEquals(org.fusesource.jansi.Ansi.Color.MAGENTA,
+                Display.colorForRarity(com.questkeeper.inventory.Item.Rarity.VERY_RARE));
+            assertEquals(org.fusesource.jansi.Ansi.Color.YELLOW,
+                Display.colorForRarity(com.questkeeper.inventory.Item.Rarity.LEGENDARY));
+            assertEquals(org.fusesource.jansi.Ansi.Color.RED,
+                Display.colorForRarity(com.questkeeper.inventory.Item.Rarity.ARTIFACT));
+        }
+
+        @Test
+        @DisplayName("null rarity falls back to WHITE")
+        void nullRarityIsWhite() {
+            assertEquals(org.fusesource.jansi.Ansi.Color.WHITE,
+                Display.colorForRarity(null));
+        }
+
+        @Test
+        @DisplayName("itemName(null) returns '(none)' so equipment slots can use it directly")
+        void itemNameOfNull() {
+            assertEquals("(none)", Display.itemName(null));
+        }
+
+        @Test
+        @DisplayName("itemName returns the item's name (colorize is a no-op in tests)")
+        void itemNameReturnsName() {
+            com.questkeeper.inventory.Item potion =
+                com.questkeeper.inventory.Item.createConsumable(
+                    "Healing Potion", "restores HP", 0.5, 50);
+            assertTrue(Display.itemName(potion).contains("Healing Potion"));
+        }
+    }
 }

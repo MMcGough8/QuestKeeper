@@ -66,7 +66,7 @@ public class ItemCommandHandler implements CommandHandler {
                     // Add to inventory and remove from location
                     context.getCharacter().getInventory().addItem(item);
                     location.removeItem(itemId);
-                    Display.showItemGained(item.getName(), item.getDescription());
+                    Display.showItemGained(item);
                     return CommandResult.success();
                 }
             }
@@ -292,7 +292,7 @@ public class ItemCommandHandler implements CommandHandler {
             var usableEffects = magicItem.getUsableEffects();
             if (usableEffects.isEmpty()) {
                 Display.println();
-                Display.println(Display.colorize(magicItem.getName(), CYAN));
+                Display.println(Display.itemName(magicItem));
                 Display.println(magicItem.getDescription());
                 Display.println();
                 Display.println(Display.colorize("This item has no activatable effects right now.", YELLOW));
@@ -318,7 +318,7 @@ public class ItemCommandHandler implements CommandHandler {
 
         // For regular items, show the description (flavor text for non-magic items)
         Display.println();
-        Display.println(Display.colorize(item.getName(), CYAN));
+        Display.println(Display.itemName(item));
         if (!item.getDescription().isEmpty()) {
             Display.println(item.getDescription());
         } else {
