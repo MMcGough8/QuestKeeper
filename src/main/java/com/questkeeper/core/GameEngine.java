@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -61,6 +62,10 @@ public class GameEngine implements AutoCloseable {
     // Command handler infrastructure
     private CommandRouter commandRouter;
     private GameContext gameContext;
+
+    // Locations the player has been shown the full description for in
+    // this session. Subsequent visits render compact. Cleared on load.
+    private final Set<String> shownLocationsThisSession = new HashSet<>();
 
     public GameEngine() {
         this.scanner = new Scanner(System.in);
@@ -401,7 +406,10 @@ public class GameEngine implements AutoCloseable {
                     running = false;
                 }
                 if (result.shouldDisplayLocation()) {
-                    displayCurrentLocation();
+                    // Movement renders compact if the location was already
+                    // shown this session (cleaner exploration). `look`
+                    // always renders full.
+                    displayCurrentLocation(!result.hasPlayerMoved());
                 }
                 if (result.hasPlayerMoved()) {
                     // Post-move checks: trials and random encounters
@@ -685,6 +693,9 @@ public class GameEngine implements AutoCloseable {
                 campaign, gameState, dialogueSystem, combatSystem,
                 restSystem, scanner, random
             );
+            // Reset the compact-revisit tracker so the loaded location
+            // gets a full first-impression display.
+            shownLocationsThisSession.clear();
 
             Display.println(Display.colorize("Game loaded successfully!", GREEN));
             Display.println();
@@ -1209,6 +1220,18 @@ public class GameEngine implements AutoCloseable {
     }
 
     private void displayCurrentLocation() {
+        displayCurrentLocation(true);
+    }
+
+    /**
+     * Renders the current location.
+     *
+     * @param fullDescription when true, prints the description blockquote,
+     *     NPC list, items, and exits in full. When false (post-move on a
+     *     revisited location), prints a compact one-section banner with
+     *     just exits — players type {@code look} to re-show the prose.
+     */
+    private void displayCurrentLocation(boolean fullDescription) {
         Location location = gameState.getCurrentLocation();
         if (location == null) {
             Display.showError("You are nowhere... this shouldn't happen!");
@@ -1226,6 +1249,19 @@ public class GameEngine implements AutoCloseable {
             completedTrials,
             totalTrials
         );
+
+        // Compact path: location already seen this session, render terse.
+        if (!fullDescription && shownLocationsThisSession.contains(location.getId())) {
+            Display.println();
+            Display.println(Display.colorize(
+                "» " + location.getName(), CYAN));
+            Display.println(Display.colorize(buildExitsDisplay(location), WHITE));
+            Display.println();
+            return;
+        }
+
+        // Full path: blockquote, NPCs, items, exits.
+        shownLocationsThisSession.add(location.getId());
 
         Display.println();
         Display.printBox(location.getName(), 60, CYAN);
