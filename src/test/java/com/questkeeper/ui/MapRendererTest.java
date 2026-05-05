@@ -10,6 +10,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -502,6 +503,74 @@ class MapRendererTest {
             assertTrue(visitedSection.contains("Trial Room"));
             assertTrue(visitedSection.contains("▶"),
                 "active trial glyph should appear in visited listing; got:\n" + visitedSection);
+        }
+    }
+
+    @Nested
+    @DisplayName("NPC indicators (Phase 5b)")
+    class NpcMarkerTests {
+
+        @Test
+        @DisplayName("'People to meet:' lists each unmet NPC by room")
+        void peopleToMeetSection() throws IOException {
+            Campaign c = loadCampaign("a", """
+                locations:
+                  - id: a
+                    name: Tavern
+                    description: a.
+                """);
+            MapLayout layout = MapLayout.compute(c, Set.of("a"));
+            Map<String, List<String>> unmet = Map.of(
+                "a", List.of("Norrin the Bard", "Mira the Smith")
+            );
+            String out = MapRenderer.render(c, layout, "a", ALL_UNLOCKED,
+                Map.of(), unmet);
+
+            assertTrue(out.contains("People to meet:"),
+                "people-to-meet header should appear; got:\n" + out);
+            assertTrue(out.contains("Norrin the Bard"));
+            assertTrue(out.contains("Mira the Smith"));
+            assertTrue(out.contains("Tavern"),
+                "location name should appear next to NPC; got:\n" + out);
+        }
+
+        @Test
+        @DisplayName("Visited listing marks rooms with unmet NPCs with •")
+        void visitedListingShowsBullet() throws IOException {
+            Campaign c = loadCampaign("a", """
+                locations:
+                  - id: a
+                    name: Plaza
+                    description: a.
+                """);
+            MapLayout layout = MapLayout.compute(c, Set.of("a"));
+            Map<String, List<String>> unmet = Map.of("a", List.of("Herald"));
+            String out = MapRenderer.render(c, layout, "a", ALL_UNLOCKED,
+                Map.of(), unmet);
+
+            int visitedIdx = out.toLowerCase().indexOf("visited:");
+            assertTrue(visitedIdx >= 0);
+            String visitedSection = out.substring(visitedIdx);
+            assertTrue(visitedSection.contains("Plaza"));
+            assertTrue(visitedSection.contains("•"),
+                "bullet should mark rooms with unmet NPCs; got:\n" + visitedSection);
+        }
+
+        @Test
+        @DisplayName("no 'People to meet:' section when all NPCs are met")
+        void noSectionWhenAllMet() throws IOException {
+            Campaign c = loadCampaign("a", """
+                locations:
+                  - id: a
+                    name: A
+                    description: a.
+                """);
+            MapLayout layout = MapLayout.compute(c, Set.of("a"));
+            String out = MapRenderer.render(c, layout, "a", ALL_UNLOCKED,
+                Map.of(), Map.of());
+
+            assertFalse(out.contains("People to meet:"),
+                "section should be omitted when no unmet NPCs; got:\n" + out);
         }
     }
 

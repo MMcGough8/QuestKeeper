@@ -2,6 +2,7 @@ package com.questkeeper.ui;
 
 import com.questkeeper.campaign.Campaign;
 import com.questkeeper.campaign.Trial;
+import com.questkeeper.character.NPC;
 import com.questkeeper.state.GameState;
 import com.questkeeper.ui.MapLayout.Coord;
 import com.questkeeper.world.Location;
@@ -56,7 +57,8 @@ public final class MapRenderer {
         String currentId = state.getCurrentLocationId();
         Predicate<String> isUnlocked = state::isLocationUnlocked;
         Map<String, TrialMarker> trials = computeTrialMarkers(campaign, state);
-        return render(campaign, layout, currentId, isUnlocked, trials);
+        Map<String, List<String>> unmetNpcs = computeUnmetNpcs(campaign, state);
+        return render(campaign, layout, currentId, isUnlocked, trials, unmetNpcs);
     }
 
     /**
@@ -66,17 +68,31 @@ public final class MapRenderer {
     public static String render(Campaign campaign, MapLayout layout,
                                 String currentRoomId,
                                 Predicate<String> isUnlocked) {
-        return render(campaign, layout, currentRoomId, isUnlocked, Map.of());
+        return render(campaign, layout, currentRoomId, isUnlocked, Map.of(), Map.of());
     }
 
     /**
-     * Test-friendly variant with trial annotations. Pass {@link Map#of()}
-     * for {@code trialsByRoom} to skip the trials section.
+     * Test-friendly variant with trial annotations and no NPC info.
+     * Kept for Phase 5a tests; delegates with empty unmet-NPCs map.
      */
     public static String render(Campaign campaign, MapLayout layout,
                                 String currentRoomId,
                                 Predicate<String> isUnlocked,
                                 Map<String, TrialMarker> trialsByRoom) {
+        return render(campaign, layout, currentRoomId, isUnlocked, trialsByRoom, Map.of());
+    }
+
+    /**
+     * Canonical render with full annotations.
+     *
+     * @param trialsByRoom    roomId -> trial status marker (use {@link Map#of()} to skip)
+     * @param unmetNpcsByRoom roomId -> list of unmet NPC display names (use {@link Map#of()} to skip)
+     */
+    public static String render(Campaign campaign, MapLayout layout,
+                                String currentRoomId,
+                                Predicate<String> isUnlocked,
+                                Map<String, TrialMarker> trialsByRoom,
+                                Map<String, List<String>> unmetNpcsByRoom) {
         StringBuilder sb = new StringBuilder();
         appendHeader(sb);
 
@@ -90,8 +106,10 @@ public final class MapRenderer {
         appendOrphans(sb, campaign, layout);
         appendConflicts(sb, campaign, layout);
         appendTrials(sb, trialsByRoom, campaign);
+        appendNpcsToMeet(sb, unmetNpcsByRoom, campaign);
         appendCounts(sb, campaign, layout, currentRoomId, trialsByRoom);
-        appendVisitedListing(sb, campaign, layout, currentRoomId, isUnlocked, trialsByRoom);
+        appendVisitedListing(sb, campaign, layout, currentRoomId, isUnlocked,
+            trialsByRoom, unmetNpcsByRoom);
         appendLegend(sb);
         return colorizeOutput(sb.toString());
     }
@@ -122,6 +140,29 @@ public final class MapRenderer {
             if (!state.hasFlag(f)) return false;
         }
         return true;
+    }
+
+    /**
+     * Builds a roomId -> [unmet NPC names] map by walking each visited
+     * location's NPCs and skipping those for which a {@code met_<id>}
+     * flag is set in the game state.
+     */
+    private static Map<String, List<String>> computeUnmetNpcs(Campaign campaign, GameState state) {
+        Map<String, List<String>> out = new java.util.LinkedHashMap<>();
+        for (String roomId : state.getVisitedLocations()) {
+            Location loc = campaign.getLocation(roomId);
+            if (loc == null) continue;
+            List<String> unmet = new ArrayList<>();
+            for (String npcId : loc.getNpcs()) {
+                if (state.hasFlag("met_" + npcId)) continue;
+                NPC npc = campaign.getNPC(npcId);
+                unmet.add(npc != null ? npc.getName() : npcId);
+            }
+            if (!unmet.isEmpty()) {
+                out.put(roomId, unmet);
+            }
+        }
+        return out;
     }
 
     // ==========================================
@@ -421,6 +462,32 @@ public final class MapRenderer {
     }
 
     /**
+     * Lists rooms where the player has NPCs they haven't talked to yet.
+     * Skipped when {@code unmetNpcsByRoom} is empty.
+     */
+    private static void appendNpcsToMeet(StringBuilder sb,
+                                         Map<String, List<String>> unmetNpcsByRoom,
+                                         Campaign campaign) {
+        if (unmetNpcsByRoom.isEmpty()) return;
+        sb.append("\n").append(Display.info("People to meet:")).append("\n");
+        // Order by location name for stable output.
+        List<Map.Entry<String, List<String>>> entries =
+            new ArrayList<>(unmetNpcsByRoom.entrySet());
+        entries.sort(Comparator.comparing(e -> {
+            Location loc = campaign.getLocation(e.getKey());
+            return loc != null ? loc.getName() : e.getKey();
+        }, String.CASE_INSENSITIVE_ORDER));
+        for (var entry : entries) {
+            Location loc = campaign.getLocation(entry.getKey());
+            String locName = loc != null ? loc.getName() : entry.getKey();
+            for (String npcName : entry.getValue()) {
+                sb.append("  • ").append(npcName)
+                  .append(" — ").append(locName).append("\n");
+            }
+        }
+    }
+
+    /**
      * Lists every visited room by display name. Cells truncate long
      * names to fit the box, but the listing always shows the full name
      * so tests and players can find every place they've been.
@@ -428,7 +495,8 @@ public final class MapRenderer {
     private static void appendVisitedListing(StringBuilder sb, Campaign campaign,
                                              MapLayout layout, String currentRoomId,
                                              Predicate<String> isUnlocked,
-                                             Map<String, TrialMarker> trialsByRoom) {
+                                             Map<String, TrialMarker> trialsByRoom,
+                                             Map<String, List<String>> unmetNpcsByRoom) {
         Set<String> visited = layout.getVisited();
         if (visited.isEmpty()) return;
 
@@ -448,8 +516,10 @@ public final class MapRenderer {
             String trialGlyph = (tm != null && tm.status() != TrialStatus.LOCKED)
                 ? " " + glyphFor(tm.status())
                 : "";
+            String npcGlyph = unmetNpcsByRoom.containsKey(id) ? " •" : "";
             sb.append("  ").append(marker).append(name)
-              .append(trialGlyph).append(lockTag).append("\n");
+              .append(trialGlyph).append(npcGlyph)
+              .append(lockTag).append("\n");
         }
     }
 
@@ -458,6 +528,7 @@ public final class MapRenderer {
         sb.append("  [*] You are here    ?  Unvisited (you can see it from here)\n");
         sb.append("  ⇕ Vertical path     (locked) Currently inaccessible\n");
         sb.append("  ✓ Trial completed   ▶ Trial in progress    ★ Trial available\n");
+        sb.append("  • Unmet NPC here\n");
     }
 
     /**
