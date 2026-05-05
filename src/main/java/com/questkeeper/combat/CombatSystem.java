@@ -577,20 +577,23 @@ public class CombatSystem {
 
             // Critical hit on natural 20 or auto-crit conditions
             boolean isCrit = isNaturalCrit || autoCrit;
+            // RAW: a natural 1 always misses regardless of modifier.
+            boolean isNaturalMiss = Dice.wasNatural1();
 
-            if (attackRoll >= targetAC || isNaturalCrit) {
+            if (!isNaturalMiss && (attackRoll >= targetAC || isNaturalCrit)) {
                 // Roll damage dice (roll twice on crit per D&D 5e rules)
                 damage = monster.rollDamage();
                 if (isCrit) {
                     damage += monster.rollDamage(); // Double the dice, not the total
                 }
 
-                // Rage resistance: halve physical damage while raging
+                // Rage resistance: halve physical damage while raging,
+                // floored at 1 so a 1-damage attack doesn't round to 0.
                 boolean rageResisted = false;
                 if (target instanceof Character targetChar && targetChar.isRaging()) {
                     // Rage grants resistance to bludgeoning, piercing, slashing
                     // For simplicity, assume all monster attacks are physical
-                    damage = damage / 2;
+                    damage = Math.max(1, damage / 2);
                     rageResisted = true;
                 }
 
@@ -735,8 +738,11 @@ public class CombatSystem {
             int critThreshold = character.getCriticalThreshold();
             boolean isImprovedCrit = naturalRoll >= critThreshold && naturalRoll < 20;
             boolean isCrit = isNaturalCrit || isImprovedCrit || autoCrit;
+            // RAW: a natural 1 always misses regardless of modifier or
+            // crit-range expansions like Improved Critical.
+            boolean isNaturalMiss = Dice.wasNatural1();
 
-            if (attackRoll >= targetAC || isNaturalCrit || isImprovedCrit) {
+            if (!isNaturalMiss && (attackRoll >= targetAC || isNaturalCrit || isImprovedCrit)) {
                 // Damage: weapon dice + ability modifier (roll dice twice on crit)
                 // Unarmed attacks deal 1 flat damage (no dice), weapons use dice notation
                 if (weapon != null) {
@@ -2016,10 +2022,16 @@ public class CombatSystem {
         int healAmount = Math.min(missingHp, loh.getPoolRemaining());
         int actualHeal = loh.heal(player, healAmount);
 
+        // RAW: Lay on Hands costs the paladin's Action, not a bonus action.
+        // Without ending the turn the player could heal AND attack in the
+        // same round.
+        advanceTurn();
+
         return CombatResult.info(String.format(
             "%s uses Lay on Hands!\n" +
             "Healed %d HP. (Now %d/%d HP)\n" +
-            "Pool remaining: %d/%d",
+            "Pool remaining: %d/%d\n" +
+            "(Lay on Hands ends your turn.)",
             player.getName(),
             actualHeal,
             player.getCurrentHitPoints(),
