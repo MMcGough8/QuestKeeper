@@ -418,7 +418,36 @@ public class CommandParser {
     }
 
     private static String cleanInput(String input) {
-        return input.trim().replaceAll("\\s+", " ");
+        String cleaned = input.trim().replaceAll("\\s+", " ");
+        // Collapse common multi-word verb phrases to their canonical single
+        // verb so the rest of the pipeline can split on the first space and
+        // treat the remainder as the noun.
+        cleaned = collapsePhrasalVerbs(cleaned);
+        return cleaned;
+    }
+
+    /**
+     * Replaces known phrasal verbs (e.g. "pick up X" -> "take X") at the
+     * start of the input so {@link #extractVerb} sees a single canonical
+     * verb. Match is case-insensitive and only fires at position 0.
+     */
+    private static String collapsePhrasalVerbs(String input) {
+        String lower = input.toLowerCase();
+        // Order matters: longest match wins so "pick up" beats "pick".
+        String[][] phrases = {
+            {"pick up ",  "take "},
+            {"pickup ",   "take "},
+            {"set down ", "drop "},
+            {"put down ", "drop "},
+            {"lay down ", "drop "},
+            {"throw away ", "drop "},
+        };
+        for (String[] pair : phrases) {
+            if (lower.startsWith(pair[0])) {
+                return pair[1] + input.substring(pair[0].length());
+            }
+        }
+        return input;
     }
 
     private static String normalizeVerb(String verb) {
