@@ -63,6 +63,25 @@ class CommandUtilsTest {
             assertFalse(matchesTarget("test", null));
             assertFalse(matchesTarget(null, null));
         }
+
+        @Test
+        @DisplayName("apostrophe-tolerant: 'mayors journal' matches 'Mayor Alderwick's Journal'")
+        void apostropheTolerant() {
+            assertTrue(matchesTarget("Mayor Alderwick's Journal", "mayors journal"));
+        }
+
+        @Test
+        @DisplayName("last-word fallback: 'old rusty journal' still matches by 'journal'")
+        void lastWordFallback() {
+            assertTrue(matchesTarget("Mayor Alderwick's Journal", "old rusty journal"));
+        }
+
+        @Test
+        @DisplayName("last-word fallback ignores too-short tokens")
+        void lastWordIgnoresShortTokens() {
+            // 'is' is 2 chars — should not trigger a contains match by itself.
+            assertFalse(matchesTarget("longsword", "what is"));
+        }
     }
 
     @Nested

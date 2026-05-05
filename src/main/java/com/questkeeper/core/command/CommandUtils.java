@@ -30,9 +30,24 @@ public final class CommandUtils {
         String lowerActual = actual.toLowerCase();
         String lowerSearch = search.toLowerCase();
         // Exact match or contains match
-        return lowerActual.equals(lowerSearch) ||
-               lowerActual.contains(lowerSearch) ||
-               lowerActual.replace("_", " ").contains(lowerSearch);
+        if (lowerActual.equals(lowerSearch)
+                || lowerActual.contains(lowerSearch)
+                || lowerActual.replace("_", " ").contains(lowerSearch)) {
+            return true;
+        }
+        // Punctuation-tolerant fallback: drop apostrophes/dashes/underscores
+        // from both sides ("mayor alderwick's journal" vs "mayors journal").
+        String stripActual = lowerActual.replaceAll("[_'\\-]", " ").replaceAll("\\s+", " ").trim();
+        String stripSearch = lowerSearch.replaceAll("[_'\\-]", " ").replaceAll("\\s+", " ").trim();
+        if (stripActual.contains(stripSearch)) return true;
+        // Last-word fallback: pick the most specific noun from the search
+        // and match against the actual. "mayors journal" -> "journal".
+        String[] searchTokens = stripSearch.split(" ");
+        if (searchTokens.length > 1) {
+            String last = searchTokens[searchTokens.length - 1];
+            if (last.length() >= 3 && stripActual.contains(last)) return true;
+        }
+        return false;
     }
 
     /**

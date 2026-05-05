@@ -68,10 +68,14 @@ public class ExplorationCommandHandler implements CommandHandler {
             }
         }
 
-        // Check if looking at an item in the location
+        // Check if looking at an item in the location. Match against both
+        // the canonical id ("mayor_alderwicks_journal") and the display
+        // name ("Mayor Alderwick's Journal") so apostrophe-stripped player
+        // input like "the mayors journal" still resolves.
         for (String itemId : location.getItems()) {
-            if (matchesTarget(itemId, target)) {
-                var item = context.getCampaign().getItem(itemId);
+            var item = context.getCampaign().getItem(itemId);
+            String displayName = item != null ? item.getName() : itemId;
+            if (matchesTarget(itemId, target) || matchesTarget(displayName, target)) {
                 if (item != null) {
                     Display.println();
                     Display.println(Display.colorize(item.getName(), YELLOW));

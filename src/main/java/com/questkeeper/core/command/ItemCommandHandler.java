@@ -59,8 +59,9 @@ public class ItemCommandHandler implements CommandHandler {
         List<String> items = location.getItems();
 
         for (String itemId : items) {
-            if (matchesTarget(itemId, target)) {
-                var item = context.getCampaign().getItem(itemId);
+            var item = context.getCampaign().getItem(itemId);
+            String displayName = item != null ? item.getName() : itemId;
+            if (matchesTarget(itemId, target) || matchesTarget(displayName, target)) {
                 if (item != null) {
                     // Add to inventory and remove from location
                     context.getCharacter().getInventory().addItem(item);
