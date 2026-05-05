@@ -382,11 +382,28 @@ public class GameEngine implements AutoCloseable {
     private void processCommand(String input) {
         Command command = CommandParser.parse(input);
 
-        // If in conversation, allow typing just the topic name
-        if (!command.isValid() && dialogueSystem.isInConversation()) {
-            // Try to interpret as a topic
-            handleAsk("ask about " + input);
-            return;
+        // While in dialogue, default to interpreting input as a topic
+        // ("ask about <input>"). Otherwise natural responses like
+        // "i havent" get hijacked by the synonym map (i -> inventory).
+        // Allow a small set of system verbs to escape: bye/quit/help/
+        // ask/save/load/look/stats/clear and the explicit ask form.
+        if (dialogueSystem.isInConversation()) {
+            String lower = input.trim().toLowerCase();
+            String firstWord = lower.split("\\s+", 2)[0];
+            java.util.Set<String> allowed = java.util.Set.of(
+                "bye", "farewell", "goodbye", "leave",
+                "quit", "exit", "q",
+                "help", "?",
+                "ask",
+                "save", "load",
+                "look",
+                "stats", "character",
+                "clear", "cls"
+            );
+            if (!allowed.contains(firstWord)) {
+                handleAsk("ask about " + input);
+                return;
+            }
         }
 
         // Bare exit name shortcut: "market" -> "go market" when an exit
