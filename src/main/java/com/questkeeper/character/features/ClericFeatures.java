@@ -136,8 +136,10 @@ public final class ClericFeatures {
     }
 
     /**
-     * Cleric Channel Divinity — one use per short or long rest. Scales to
-     * 2 at L6 and 3 at L18 in 5e RAW (post-pitch).
+     * Cleric Channel Divinity. RAW use-per-short-rest pool: 1 at L2-5,
+     * 2 at L6-17, 3 at L18+. ClassFeatureWiring should call
+     * {@link #setClericLevel(int)} on level-up to keep the pool sized
+     * correctly.
      */
     public static class ChannelDivinity extends ActivatedFeature {
         public ChannelDivinity() {
@@ -148,7 +150,7 @@ public final class ClericFeatures {
                     + "Choose Turn Undead or your domain's Channel Divinity option. "
                     + "Recovers on a short or long rest.",
                 2,  // Level required
-                1,  // Max uses
+                1,  // Max uses at L2-5
                 ResetType.SHORT_REST,
                 true,
                 true
@@ -159,6 +161,17 @@ public final class ClericFeatures {
         protected String activate(Character user) {
             return "Channel Divinity is ready. Choose: Turn Undead"
                 + " (or domain option if available).";
+        }
+
+        /**
+         * Resizes the use pool per RAW: 1 at L2, 2 at L6, 3 at L18.
+         * ActivatedFeature.setMaxUses grants the delta on growth and
+         * clamps current on shrink, so calling this on every level-up
+         * is safe and idempotent.
+         */
+        public void setClericLevel(int level) {
+            int newMax = level >= 18 ? 3 : level >= 6 ? 2 : 1;
+            setMaxUses(newMax);
         }
     }
 }

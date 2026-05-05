@@ -174,6 +174,15 @@ public final class FighterFeatures {
             active = false;
         }
 
+        /**
+         * Resizes the use pool: 1 at L2-16, 2 at L17+ per RAW.
+         * Idempotent — ActivatedFeature.setMaxUses grants the delta on
+         * growth and clamps current on shrink.
+         */
+        public void setFighterLevel(int level) {
+            setMaxUses(level >= 17 ? 2 : 1);
+        }
+
     }
 
     /**

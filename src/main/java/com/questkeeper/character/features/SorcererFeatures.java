@@ -129,14 +129,11 @@ public final class SorcererFeatures {
 
         public void setSorcererLevel(int level) {
             this.sorcererLevel = level;
-            int newMax = getMaxSorceryPoints();
-            int oldMax = getMaxUses();
-            setMaxUses(newMax);
-            if (newMax > oldMax) {
-                setCurrentUses(getCurrentUses() + (newMax - oldMax));
-            } else if (newMax < oldMax) {
-                setCurrentUses(Math.min(getCurrentUses(), newMax));
-            }
+            // ActivatedFeature.setMaxUses already grants the delta on growth
+            // and clamps current to the new max on shrink. The previous code
+            // applied the delta a second time, doubling sorcery-point gains
+            // every level-up.
+            setMaxUses(getMaxSorceryPoints());
         }
 
         public int getSorcererLevel() {

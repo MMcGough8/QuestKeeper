@@ -66,6 +66,11 @@ final class ClassFeatureWiring {
                 c.addClassFeatureInternal(feature);
             }
         }
+        // Action Surge gains a second use at Fighter L17.
+        c.getFeature(FighterFeatures.ACTION_SURGE_ID)
+            .filter(f -> f instanceof FighterFeatures.ActionSurge)
+            .map(f -> (FighterFeatures.ActionSurge) f)
+            .ifPresent(as -> as.setFighterLevel(level));
     }
 
     private static void wireRogue(Character c, int level) {
@@ -173,6 +178,11 @@ final class ClassFeatureWiring {
                 c.addClassFeatureInternal(feature);
             }
         }
+        // Channel Divinity scales 1 -> 2 at L6 -> 3 at L18; resize on each level-up.
+        c.getFeature(ClericFeatures.CLERIC_CHANNEL_DIVINITY_ID)
+            .filter(f -> f instanceof ClericFeatures.ChannelDivinity)
+            .map(f -> (ClericFeatures.ChannelDivinity) f)
+            .ifPresent(cd -> cd.setClericLevel(level));
     }
 
     private static void wireWizard(Character c, int level) {
