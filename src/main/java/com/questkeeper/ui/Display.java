@@ -471,21 +471,38 @@ public class Display {
         print(colorize(String.valueOf(BOX_TOP_LEFT), color));
         print(colorize(String.valueOf(BOX_HORIZONTAL).repeat(width - 2), color));
         println(colorize(String.valueOf(BOX_TOP_RIGHT), color));
-        
-        // Title line (centered). Clamp at 0 so over-long titles don't throw.
-        int padding = Math.max(0, (width - 2 - title.length()) / 2);
-        int extraPadding = Math.max(0, (width - 2 - title.length()) % 2);
+
+        // Title line (centered). Use visible width — string length over-
+        // counts when the caller pre-wraps the title with ANSI codes
+        // (e.g., bold(), colorize()), which would otherwise push the right
+        // border out of alignment. Clamp at 0 so over-long titles don't throw.
+        int titleVisible = visibleWidth(title);
+        int padding = Math.max(0, (width - 2 - titleVisible) / 2);
+        int extraPadding = Math.max(0, (width - 2 - titleVisible) % 2);
 
         print(colorize(String.valueOf(BOX_VERTICAL), color));
         print(" ".repeat(padding));
         print(colorize(title, color));
         print(" ".repeat(padding + extraPadding));
         println(colorize(String.valueOf(BOX_VERTICAL), color));
-        
+
         // Bottom border
         print(colorize(String.valueOf(BOX_BOTTOM_LEFT), color));
         print(colorize(String.valueOf(BOX_HORIZONTAL).repeat(width - 2), color));
         println(colorize(String.valueOf(BOX_BOTTOM_RIGHT), color));
+    }
+
+    private static final java.util.regex.Pattern ANSI_ESCAPE =
+        java.util.regex.Pattern.compile("\\[[0-9;]*m");
+
+    /**
+     * Returns the rendered column width of {@code s}, ignoring ANSI escape
+     * sequences. Use this anywhere padding/alignment math is done on a
+     * string that may contain colorize() or bold() wrappers.
+     */
+    public static int visibleWidth(String s) {
+        if (s == null) return 0;
+        return ANSI_ESCAPE.matcher(s).replaceAll("").length();
     }
 
     public static void printDivider(char character, int width) {

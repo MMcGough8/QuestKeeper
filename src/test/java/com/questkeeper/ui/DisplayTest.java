@@ -852,6 +852,40 @@ class DisplayTest {
     }
 
     @Nested
+    @DisplayName("visibleWidth (ANSI-stripped column count)")
+    class VisibleWidthTests {
+
+        @Test
+        @DisplayName("plain text width equals string length")
+        void plainText() {
+            assertEquals(5, Display.visibleWidth("Hello"));
+        }
+
+        @Test
+        @DisplayName("colorize-wrapped text reports the visible (uncolored) width")
+        void colorizedText() {
+            String wrapped = Display.colorize("17",
+                org.fusesource.jansi.Ansi.Color.RED);
+            // When colors are disabled in tests, colorize returns the raw
+            // input, so visible width equals string length. When enabled,
+            // visibleWidth still returns 2 by stripping the escape codes.
+            assertEquals(2, Display.visibleWidth(wrapped));
+        }
+
+        @Test
+        @DisplayName("bold-wrapped text reports the visible width")
+        void boldText() {
+            assertEquals(3, Display.visibleWidth(Display.bold("foo")));
+        }
+
+        @Test
+        @DisplayName("null returns 0")
+        void nullReturnsZero() {
+            assertEquals(0, Display.visibleWidth(null));
+        }
+    }
+
+    @Nested
     @DisplayName("Per-campaign theme palettes")
     class CampaignThemeTests {
 
