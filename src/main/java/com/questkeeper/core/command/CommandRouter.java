@@ -98,6 +98,7 @@ public class CommandRouter {
         router.registerHandler(new ExplorationCommandHandler());
         router.registerHandler(new CombatCommandHandler());
         router.registerHandler(new TrialCommandHandler());
+        router.registerHandler(new MapCommandHandler());
 
         return router;
     }

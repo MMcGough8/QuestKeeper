@@ -42,6 +42,7 @@ public class CommandParser {
     private static final String VERB_ATTEMPT = "attempt";
     private static final String VERB_EQUIPMENT = "equipment";
     private static final String VERB_LEAVE = "leave";
+    private static final String VERB_MAP = "map";
 
     private static final Map<String, String> SYNONYM_MAP = new HashMap<>();
 
@@ -50,7 +51,7 @@ public class CommandParser {
         VERB_ATTACK, VERB_CAST, VERB_INVENTORY, VERB_STATS, VERB_HELP, VERB_SAVE,
         VERB_LOAD, VERB_QUIT, VERB_REST, VERB_OPEN, VERB_CLOSE, VERB_READ,
         VERB_EQUIP, VERB_UNEQUIP, VERB_BYE, VERB_TRIAL, VERB_ATTEMPT, VERB_EQUIPMENT,
-        VERB_LEAVE, "exit"
+        VERB_LEAVE, VERB_MAP, "exit"
     );
 
     private static final Map<String, String> DIRECTION_ALIASES = Map.of(
@@ -273,6 +274,10 @@ public class CommandParser {
         SYNONYM_MAP.put("load", VERB_LOAD);
         SYNONYM_MAP.put("restore", VERB_LOAD);
         SYNONYM_MAP.put("reload", VERB_LOAD);
+
+        // World map
+        SYNONYM_MAP.put("map", VERB_MAP);
+        SYNONYM_MAP.put("m", VERB_MAP);
 
         // Quit synonyms → "quit"
         SYNONYM_MAP.put("quit", VERB_QUIT);

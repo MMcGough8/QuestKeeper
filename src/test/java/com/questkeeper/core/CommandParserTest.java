@@ -1115,4 +1115,23 @@ class CommandParserTest {
             assertEquals("mask", cmd.getNoun());
         }
     }
+
+    @Nested
+    @DisplayName("World map verb")
+    class WorldMapVerbTests {
+
+        @Test
+        @DisplayName("'map' parses as map")
+        void mapParsesAsMap() {
+            CommandParser.Command cmd = CommandParser.parse("map");
+            assertEquals("map", cmd.getVerb());
+        }
+
+        @Test
+        @DisplayName("'m' parses as map")
+        void singleLetterMParsesAsMap() {
+            CommandParser.Command cmd = CommandParser.parse("m");
+            assertEquals("map", cmd.getVerb());
+        }
+    }
 }

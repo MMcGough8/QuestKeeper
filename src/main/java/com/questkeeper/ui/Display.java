@@ -262,6 +262,7 @@ public class Display {
         println(colorize("Exploration", YELLOW));
         showHelpCommand("look / examine", "Examine your surroundings or an object");
         showHelpCommand("go <direction>", "Move (n/s/e/w/ne/nw/se/sw/up/down)");
+        showHelpCommand("map / m", "Show the world map of places you've discovered");
         showHelpCommand("rest", "Short or long rest (recover HP / hit dice)");
         println();
 
