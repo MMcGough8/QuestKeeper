@@ -1570,9 +1570,10 @@ class CharacterTest {
         void multiThresholdJumpAccumulates() {
             Character fighter = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
                 14, 14, 14, 10, 10, 10);
-            // Going 1 -> 12 crosses 4, 8, 12 (three thresholds).
+            // 1 -> 12 crosses standard ASI levels 4, 8, 12 plus the Fighter
+            // bonus ASI at L6 (Fighter gets bonus ASIs at L6 + L14). 4 total.
             fighter.setLevel(12);
-            assertEquals(3, fighter.getPendingAbilityScoreImprovements());
+            assertEquals(4, fighter.getPendingAbilityScoreImprovements());
         }
 
         @Test

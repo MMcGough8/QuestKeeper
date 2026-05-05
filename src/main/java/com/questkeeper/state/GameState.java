@@ -50,6 +50,8 @@ public class GameState {
 
     private Instant sessionStartTime;
     private long previousPlayTimeSeconds;
+    /** Carried over from prior saves so the save count accumulates across loads. */
+    private int previousSaveCount = 0;
 
     /**
      * Warnings produced during the most recent {@link #fromSaveState} call —
@@ -270,6 +272,9 @@ public class GameState {
         // Restore play time
         state.previousPlayTimeSeconds = saveState.getTotalPlayTimeSeconds();
         state.sessionStartTime = Instant.now();
+        // Carry the save counter forward so loading + saving doesn't reset
+        // it to 1 on each cycle.
+        state.previousSaveCount = saveState.getSaveCount();
 
         return state;
     }
@@ -279,6 +284,9 @@ public class GameState {
      */
     public SaveState toSaveState() {
         SaveState save = new SaveState(character, campaign.getId());
+        // Thread the save count forward; the SaveState.save() call later
+        // increments it, so a fresh load + save sequence produces N+1.
+        save.setSaveCount(previousSaveCount);
 
         // Location
         if (currentLocation != null) {

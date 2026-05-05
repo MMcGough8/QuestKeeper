@@ -1306,11 +1306,8 @@ public class Character implements Combatant {
         currentHitPoints += (maxHitPoints - oldMax);
         availableHitDice++;  // Gain one hit die per level
 
-        for (int threshold : ASI_LEVELS) {
-            if (threshold == level) {
-                pendingAbilityScoreImprovements++;
-                break;
-            }
+        if (isAsiLevelForClass(characterClass, level)) {
+            pendingAbilityScoreImprovements++;
         }
 
         // Update class features for new level
@@ -1318,6 +1315,19 @@ public class Character implements Combatant {
 
         // Update spellcasting for new level
         spellbook.onLevelUp(level);
+    }
+
+    /**
+     * Per-class ASI level table. Standard ASI levels are 4, 8, 12, 16, 19.
+     * Fighters get bonus ASIs at 6 and 14; Rogues get a bonus at 10.
+     */
+    private static boolean isAsiLevelForClass(CharacterClass cls, int level) {
+        for (int t : ASI_LEVELS) {
+            if (t == level) return true;
+        }
+        if (cls == CharacterClass.FIGHTER && (level == 6 || level == 14)) return true;
+        if (cls == CharacterClass.ROGUE && level == 10) return true;
+        return false;
     }
     
     public void setLevel(int newLevel) {
@@ -1343,10 +1353,10 @@ public class Character implements Combatant {
         spellbook.onLevelUp(level);
     }
 
-    private static int countAsiThresholdsCrossed(int oldLevel, int newLevel) {
+    private int countAsiThresholdsCrossed(int oldLevel, int newLevel) {
         int count = 0;
-        for (int threshold : ASI_LEVELS) {
-            if (threshold > oldLevel && threshold <= newLevel) count++;
+        for (int l = oldLevel + 1; l <= newLevel; l++) {
+            if (isAsiLevelForClass(characterClass, l)) count++;
         }
         return count;
     }

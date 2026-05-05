@@ -625,8 +625,18 @@ public class SaveState {
         return totalPlayTimeSeconds; 
     }
 
-    public int getSaveCount() { 
-        return saveCount; 
+    public int getSaveCount() {
+        return saveCount;
+    }
+
+    /**
+     * Sets the save count. Used by GameState.toSaveState to thread the
+     * accumulated save count from the previous load through to the next
+     * save() call (which still increments). Without this, every save
+     * reset the count to 1.
+     */
+    public void setSaveCount(int saveCount) {
+        this.saveCount = Math.max(0, saveCount);
     }
 
     public void setSaveName(String saveName) { 

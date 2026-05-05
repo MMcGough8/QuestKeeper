@@ -65,23 +65,25 @@ class LevelUpFlowTest {
         }
 
         @Test
-        @DisplayName("Two pending ASIs both get spent before the flow returns")
+        @DisplayName("All pending ASIs get spent before the flow returns")
         void drainsAllPending() {
             Character fighter = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
                 14, 14, 14, 10, 10, 10);
-            fighter.setLevel(8);  // crosses L4 + L8 = 2 ASIs
-            assertEquals(2, fighter.getPendingAbilityScoreImprovements(),
-                "precondition: 2 ASIs after L8");
+            // Fighter 1 -> 8 crosses ASI levels 4, 6 (Fighter bonus), 8 = 3.
+            fighter.setLevel(8);
+            assertEquals(3, fighter.getPendingAbilityScoreImprovements(),
+                "precondition: 3 ASIs after L8 (Fighter gets a bonus at L6)");
 
             String input = String.join("\n",
                 "1", "str",
                 "1", "dex",
+                "1", "con",
                 ""
             );
             LevelUpFlow.applyPendingAbilityScoreImprovements(fighter, scannerOf(input));
 
             assertEquals(0, fighter.getPendingAbilityScoreImprovements(),
-                "Both ASIs should be drained");
+                "All ASIs should be drained");
         }
 
         @Test
