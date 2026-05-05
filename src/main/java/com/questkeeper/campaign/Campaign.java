@@ -229,6 +229,33 @@ public class Campaign {
         validateTrialLocations();
         validateTrialMiniGames();
         validateMiniGameRewards();
+        validateTrialPrerequisites();
+    }
+
+    /**
+     * Verifies every trial prerequisite flag is produced by some other
+     * trial's completion_flags (or by GameState's automatic
+     * 'completed_<trial_id>' flag). A typo like 'trial_01_complette'
+     * would otherwise create an unreachable trial with no warning.
+     */
+    private void validateTrialPrerequisites() {
+        java.util.Set<String> producedFlags = new java.util.HashSet<>();
+        for (Trial t : trials.values()) {
+            if (t.hasCompletionFlags()) {
+                producedFlags.addAll(t.getCompletionFlags());
+            }
+            producedFlags.add("completed_" + t.getId());
+        }
+        for (Trial t : trials.values()) {
+            for (String prereq : t.getPrerequisites()) {
+                if (!producedFlags.contains(prereq)) {
+                    validationErrors.add(String.format(
+                        "Trial '%s' prerequisite flag '%s' is never set by any "
+                        + "trial's completion_flags. Likely typo or missing trial.",
+                        t.getId(), prereq));
+                }
+            }
+        }
     }
 
     private void validateStartingLocation() {
