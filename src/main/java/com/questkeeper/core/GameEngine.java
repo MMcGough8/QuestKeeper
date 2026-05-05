@@ -874,13 +874,25 @@ public class GameEngine implements AutoCloseable {
         Display.showPrompt("Rest type (short/long/cancel)> ");
         String choice = scanner.nextLine().trim().toLowerCase();
 
-        if (choice.equals("short") || choice.equals("s")) {
-            performShortRest(character);
-        } else if (choice.equals("long") || choice.equals("l")) {
-            performLongRest(character);
-        } else {
-            Display.println("Rest cancelled.");
+        // Apply prefix matching so 'sh', 'short', 'sleep', 'long', 'l',
+        // 'lng' all resolve. Empty input cancels gracefully.
+        if (choice.isEmpty() || choice.startsWith("c") || choice.equals("cancel")) {
+            Display.println(Display.colorize("Rest cancelled.", DEFAULT));
+            return;
         }
+        if (choice.startsWith("s") || choice.startsWith("nap")
+                || choice.startsWith("snooze")) {
+            performShortRest(character);
+            return;
+        }
+        if (choice.startsWith("l") || choice.startsWith("sleep")) {
+            performLongRest(character);
+            return;
+        }
+
+        // Anything else: treat as cancel and tell the player.
+        Display.println(Display.colorize(
+            "Unknown rest type '" + choice + "'. Type short/long/cancel.", YELLOW));
     }
 
     private void performShortRest(Character character) {

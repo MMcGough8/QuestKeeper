@@ -168,6 +168,21 @@ public final class BardFeatures {
             this.bardLevel = level;
         }
 
+        /**
+         * Scales the use pool to max(1, Cha mod) per RAW. Caller passes
+         * the current CHA modifier; this also updates bardLevel for
+         * inspiration die size.
+         *
+         * <p>Note: the LR -> SR resetType change at L5 (Font of Inspiration)
+         * is not handled here because resetType is final on
+         * ActivatedFeature. Pre-pitch acceptable for the L3 demo Bard;
+         * post-pitch the feature should be rebuilt at the L5 boundary.
+         */
+        public void setBardLevel(int level, int chaMod) {
+            this.bardLevel = level;
+            setMaxUses(Math.max(1, chaMod));
+        }
+
         public int getBardLevel() {
             return bardLevel;
         }

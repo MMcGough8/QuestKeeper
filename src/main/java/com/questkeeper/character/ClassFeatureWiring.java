@@ -216,10 +216,11 @@ final class ClassFeatureWiring {
             if (c.getFeature(feature.getId()).isEmpty()) {
                 c.addClassFeatureInternal(feature);
             } else if (feature.getId().equals(BardFeatures.BARDIC_INSPIRATION_ID)) {
+                int chaMod = c.getAbilityModifier(Character.Ability.CHARISMA);
                 c.getFeature(BardFeatures.BARDIC_INSPIRATION_ID)
                     .filter(f -> f instanceof BardFeatures.BardicInspiration)
                     .map(f -> (BardFeatures.BardicInspiration) f)
-                    .ifPresent(bi -> bi.setBardLevel(level));
+                    .ifPresent(bi -> bi.setBardLevel(level, chaMod));
             }
         }
     }
