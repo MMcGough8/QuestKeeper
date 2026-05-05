@@ -512,6 +512,21 @@ public class CombatSystem {
         lastAttacker.clear();
         currentTurn = 0;
         currentState = null;
+        // Reset all per-turn / per-encounter flags so they don't leak
+        // into the next fight. startCombat re-initializes these too, but
+        // some code paths read flags BETWEEN encounters (e.g., test
+        // assertions, status displays) and would see stale values.
+        bonusActionUsed = false;
+        actionSurgeActive = false;
+        sneakAttackUsed = false;
+        disengageActive = false;
+        patientDefenseActive = false;
+        flurryAttacksRemaining = 0;
+        mainActionAttacksRemaining = 0;
+        reactionUsed = false;
+        sacredWeaponActive = false;
+        smiteReady = false;
+        stunningStrikeReady = false;
 
         return CombatResult.victory(xp);
     }

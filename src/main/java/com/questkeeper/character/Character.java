@@ -779,6 +779,9 @@ public class Character implements Combatant {
         if (characterClass != CharacterClass.WIZARD) {
             throw new IllegalStateException("Arcane Tradition is only available to Wizards");
         }
+        if (level < 2) {
+            throw new IllegalStateException("Arcane Tradition is chosen at Wizard L2 (current: " + level + ")");
+        }
         this.arcaneTradition = tradition;
         classFeatures.removeIf(f ->
             f.getId().equals(com.questkeeper.character.features.WizardFeatures.ARCANE_TRADITION_ID)
@@ -821,6 +824,9 @@ public class Character implements Combatant {
         if (characterClass != CharacterClass.BARD) {
             throw new IllegalStateException("Bard College is only available to Bards");
         }
+        if (level < 3) {
+            throw new IllegalStateException("Bard College is chosen at Bard L3 (current: " + level + ")");
+        }
         this.bardCollege = college;
         classFeatures.removeIf(f ->
             f.getId().equals(com.questkeeper.character.features.BardFeatures.BARD_COLLEGE_ID)
@@ -841,6 +847,9 @@ public class Character implements Combatant {
             com.questkeeper.character.features.DruidFeatures.DruidCircle circle) {
         if (characterClass != CharacterClass.DRUID) {
             throw new IllegalStateException("Druid Circle is only available to Druids");
+        }
+        if (level < 2) {
+            throw new IllegalStateException("Druid Circle is chosen at Druid L2 (current: " + level + ")");
         }
         this.druidCircle = circle;
         classFeatures.removeIf(f ->
@@ -882,6 +891,9 @@ public class Character implements Combatant {
             com.questkeeper.character.features.WarlockFeatures.PactBoon boon) {
         if (characterClass != CharacterClass.WARLOCK) {
             throw new IllegalStateException("Pact Boon is only available to Warlocks");
+        }
+        if (level < 3) {
+            throw new IllegalStateException("Pact Boon is chosen at Warlock L3 (current: " + level + ")");
         }
         this.warlockPactBoon = boon;
         classFeatures.removeIf(f ->
