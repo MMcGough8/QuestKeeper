@@ -52,6 +52,13 @@ public class SaveState {
     private List<String> inventoryItems;
     private List<String> equippedItems;  // Legacy format for backwards compatibility
     private Map<String, String> equippedSlots;  // New format: slot name -> item ID
+    /**
+     * Item ids the character is attuned to. A subset of inventory + equipped.
+     * Populated by GameState.toSaveState; consumed on load to call attune()
+     * after the item is restored. Per-effect charges aren't persisted yet
+     * (instance-state stacking makes round-trip nontrivial; deferred).
+     */
+    private Set<String> attunedItemIds;
     private int gold;
 
     private long totalPlayTimeSeconds;
@@ -75,6 +82,7 @@ public class SaveState {
         this.stateStrings = new HashMap<>();
         this.inventoryItems = new ArrayList<>();
         this.equippedItems = new ArrayList<>();
+        this.attunedItemIds = new LinkedHashSet<>();
         this.equippedSlots = new HashMap<>();
         this.gold = 0;
         
@@ -253,6 +261,9 @@ public class SaveState {
         map.put("inventory", inventoryItems);
         map.put("equipped", equippedItems);  // Legacy format
         map.put("equipped_slots", equippedSlots);  // New format with slot info
+        if (attunedItemIds != null && !attunedItemIds.isEmpty()) {
+            map.put("attuned_items", new ArrayList<>(attunedItemIds));
+        }
         map.put("gold", gold);
         
         map.put("play_time_seconds", totalPlayTimeSeconds);
@@ -301,6 +312,7 @@ public class SaveState {
         state.inventoryItems = getStringList(data, "inventory");
         state.equippedItems = getStringList(data, "equipped");  // Legacy format
         state.equippedSlots = getStringMap(data, "equipped_slots");  // New format
+        state.attunedItemIds = new LinkedHashSet<>(getStringList(data, "attuned_items"));
         state.gold = getInt(data, "gold", 0);
 
         // Stats
@@ -447,6 +459,20 @@ public class SaveState {
 
     public void addItem(String itemId) {
         inventoryItems.add(itemId);
+    }
+
+    /** Marks (or unmarks) an item id as attuned for save round-trip. */
+    public void setItemAttuned(String itemId, boolean attuned) {
+        if (itemId == null) return;
+        if (attuned) {
+            attunedItemIds.add(itemId);
+        } else {
+            attunedItemIds.remove(itemId);
+        }
+    }
+
+    public Set<String> getAttunedItemIds() {
+        return Collections.unmodifiableSet(attunedItemIds);
     }
 
     public void removeItem(String itemId) {

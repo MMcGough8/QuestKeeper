@@ -235,6 +235,35 @@ public class GameState {
             state.loadWarnings.addAll(equipWarnings);
         }
 
+        // Restore attunement state on magic items in the inventory and
+        // equipped slots. attune() is idempotent on a freshly-loaded
+        // (un-attuned) item and just flips the boolean.
+        java.util.Set<String> attuned = saveState.getAttunedItemIds();
+        if (attuned != null && !attuned.isEmpty()) {
+            for (var stack : character.getInventory().getAllItems()) {
+                if (stack.getItem() instanceof com.questkeeper.inventory.items.MagicItem mi
+                        && attuned.contains(mi.getId())) {
+                    try {
+                        mi.attune(character);
+                    } catch (RuntimeException e) {
+                        state.loadWarnings.add("Could not re-attune '"
+                            + mi.getName() + "': " + e.getMessage());
+                    }
+                }
+            }
+            for (var item : character.getInventory().getEquippedItems().values()) {
+                if (item instanceof com.questkeeper.inventory.items.MagicItem mi
+                        && attuned.contains(mi.getId()) && !mi.isAttuned()) {
+                    try {
+                        mi.attune(character);
+                    } catch (RuntimeException e) {
+                        state.loadWarnings.add("Could not re-attune '"
+                            + mi.getName() + "': " + e.getMessage());
+                    }
+                }
+            }
+        }
+
         // Restore gold
         character.getInventory().addGold(saveState.getGold());
 
@@ -276,19 +305,31 @@ public class GameState {
             save.setString(entry.getKey(), entry.getValue());
         }
 
-        // Inventory items (backpack)
+        // Inventory items (backpack). Also captures attunement state on
+        // any MagicItem so a Wand of X / Ring of Y stays attuned across
+        // save/load. (Per-effect charge state is deferred — round-trip
+        // for stacked charged items is nontrivial.)
         for (var stack : character.getInventory().getAllItems()) {
             String itemId = stack.getItem().getId();
             for (int i = 0; i < stack.getQuantity(); i++) {
                 save.addItem(itemId);
+            }
+            if (stack.getItem() instanceof com.questkeeper.inventory.items.MagicItem mi
+                    && mi.isAttuned()) {
+                save.setItemAttuned(itemId, true);
             }
         }
 
         // Equipped items (save with slot information)
         for (var entry : character.getInventory().getEquippedItems().entrySet()) {
             EquipmentSlot slot = entry.getKey();
-            String itemId = entry.getValue().getId();
+            var item = entry.getValue();
+            String itemId = item.getId();
             save.equipItemToSlot(slot.name(), itemId);
+            if (item instanceof com.questkeeper.inventory.items.MagicItem mi
+                    && mi.isAttuned()) {
+                save.setItemAttuned(itemId, true);
+            }
         }
 
         // Gold
