@@ -156,6 +156,13 @@ public class CharacterCreator {
         printBox("Ability scores locked in!", 70, GREEN);
         pressEnterToContinue();
 
+        // Step 4b: Half-Elf gets +2 CHA automatically, plus +1 to two other
+        // ability scores of choice. Prompt before skills so the bonuses are
+        // visible on the character sheet that follows.
+        if (race == Race.HALF_ELF) {
+            promptHalfElfBonusAbilities(character);
+        }
+
         // Step 5: Skill Proficiencies (Step 5 is racial bonuses - automatic)
         clearScreen();
         printBox("STEP 5: CHOOSE SKILL PROFICIENCIES", 70, MAGENTA);
@@ -596,6 +603,46 @@ public class CharacterCreator {
             case BARD, RANGER, ROGUE -> 3; // Rogue gets 4, but 3 for simplicity
             default -> 2;
         };
+    }
+
+    /**
+     * Prompts for a Half-Elf's two non-Charisma +1 bonus abilities (5e PHB).
+     * Half-Elf already has +2 CHA from race; this resolves the +1/+1.
+     */
+    private static void promptHalfElfBonusAbilities(Character character) {
+        clearScreen();
+        printBox("HALF-ELF: BONUS ABILITIES (+1)", 70, CYAN);
+        println(bold("Half-Elves get +2 CHA automatically. Pick TWO different non-CHA"
+            + " ability scores to receive +1 each."));
+        println();
+
+        Ability[] options = java.util.Arrays.stream(Ability.values())
+            .filter(a -> a != Ability.CHARISMA)
+            .toArray(Ability[]::new);
+
+        listAbilityOptions(options);
+        Ability first = promptForEnum(options, "First +1 ability (number or name): ");
+        println(colorize("✓ +1 " + first.getFullName(), GREEN));
+        println();
+
+        Ability[] remaining = java.util.Arrays.stream(options)
+            .filter(a -> a != first)
+            .toArray(Ability[]::new);
+        listAbilityOptions(remaining);
+        Ability second = promptForEnum(remaining, "Second +1 ability (number or name): ");
+        println(colorize("✓ +1 " + second.getFullName(), GREEN));
+
+        character.setHalfElfBonusAbilities(first, second);
+        pressEnterToContinue();
+    }
+
+    private static void listAbilityOptions(Ability[] options) {
+        for (int i = 0; i < options.length; i++) {
+            println(String.format("%s) %s",
+                colorize(String.valueOf(i + 1), YELLOW),
+                bold(options[i].getFullName())));
+        }
+        println();
     }
 
     private static void selectSkillProficiencies(Character character) {
