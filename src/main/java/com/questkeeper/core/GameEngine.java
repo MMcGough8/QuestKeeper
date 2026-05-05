@@ -1379,36 +1379,52 @@ public class GameEngine implements AutoCloseable {
     private String[] generateSuggestions() {
         List<String> suggestions = new ArrayList<>();
         Location location = gameState.getCurrentLocation();
+        Character player = gameState.getCharacter();
 
-        // Always suggest look
-        suggestions.add("look");
+        // Active trial gets top billing — players forget it's there.
+        if (location != null) {
+            Trial trial = campaign.getTrialAtLocation(location.getId());
+            if (trial != null && !gameState.hasCompletedTrial(trial.getId())) {
+                suggestions.add(gameState.hasStartedTrial(trial.getId()) ? "trial" : "trial");
+            }
+        }
 
-        // Suggest talking to NPCs if present
+        // Items on the floor → suggest taking the first one.
+        if (location != null && !location.getItems().isEmpty()) {
+            String firstItemId = location.getItems().get(0);
+            var item = campaign.getItem(firstItemId);
+            if (item != null) {
+                String shortName = item.getName().split("\\s+")[0].toLowerCase();
+                suggestions.add("take " + shortName);
+            }
+        }
+
+        // NPCs present → suggest talking.
         if (location != null && !location.getNpcs().isEmpty()) {
             String firstNpc = location.getNpcs().get(0);
             NPC npc = campaign.getNPC(firstNpc);
             if (npc != null) {
-                suggestions.add("talk " + npc.getName().toLowerCase());
+                suggestions.add("talk " + npc.getName().toLowerCase().split("\\s+")[0]);
             }
         }
 
-        // Suggest trial if at trial location
-        if (location != null) {
-            Trial trial = campaign.getTrialAtLocation(location.getId());
-            if (trial != null && !gameState.hasCompletedTrial(trial.getId())) {
-                suggestions.add("trial");
-            }
+        // Low HP cue: under 50% → suggest rest.
+        if (player != null && player.getMaxHitPoints() > 0
+            && player.getCurrentHitPoints() * 2 < player.getMaxHitPoints()) {
+            suggestions.add("rest");
         }
 
-        // Suggest go if there are exits
-        if (location != null && !location.getExits().isEmpty()) {
+        // Movement, but only if no higher-priority context already filled the list.
+        if (suggestions.size() < 4 && location != null && !location.getExits().isEmpty()) {
             String firstExit = location.getExits().iterator().next();
             suggestions.add("go " + firstExit);
         }
 
-        // Suggest inventory and help
-        suggestions.add("inventory");
-        suggestions.add("help");
+        // Look is always cheap and useful.
+        if (!suggestions.contains("look")) suggestions.add("look");
+
+        // Cap to 5 to stop the prompt from getting noisy.
+        if (suggestions.size() > 5) suggestions = suggestions.subList(0, 5);
 
         return suggestions.toArray(new String[0]);
     }
