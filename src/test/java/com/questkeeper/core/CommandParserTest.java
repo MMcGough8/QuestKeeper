@@ -1070,4 +1070,49 @@ class CommandParserTest {
             assertEquals("rumors", result[1]);
         }
     }
+
+    @Nested
+    @DisplayName("Phrasal verb handling")
+    class PhrasalVerbTests {
+
+        @Test
+        @DisplayName("'pick up X' parses as take X")
+        void pickUpParsesAsTake() {
+            CommandParser.Command cmd = CommandParser.parse("pick up the mask");
+            assertEquals("take", cmd.getVerb());
+            assertEquals("mask", cmd.getNoun());
+        }
+
+        @Test
+        @DisplayName("'set down X' parses as drop X")
+        void setDownParsesAsDrop() {
+            CommandParser.Command cmd = CommandParser.parse("set down the sword");
+            assertEquals("drop", cmd.getVerb());
+            assertEquals("sword", cmd.getNoun());
+        }
+
+        @Test
+        @DisplayName("'put down X' parses as drop X")
+        void putDownParsesAsDrop() {
+            CommandParser.Command cmd = CommandParser.parse("put down lantern");
+            assertEquals("drop", cmd.getVerb());
+            assertEquals("lantern", cmd.getNoun());
+        }
+
+        @Test
+        @DisplayName("'pickup X' (no space) also parses as take X")
+        void pickupNoSpaceParsesAsTake() {
+            CommandParser.Command cmd = CommandParser.parse("pickup mask");
+            assertEquals("take", cmd.getVerb());
+            assertEquals("mask", cmd.getNoun());
+        }
+
+        @Test
+        @DisplayName("'pick' alone still parses as take with single-word noun")
+        void plainPickStillWorks() {
+            CommandParser.Command cmd = CommandParser.parse("pick mask");
+            assertEquals("take", cmd.getVerb());
+            assertEquals("mask", cmd.getNoun());
+        }
+    }
 }
