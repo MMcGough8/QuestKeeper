@@ -77,7 +77,7 @@ public class CharacterCreator {
                     r.getSpeed()));
         }
         println();
-        Race race = promptForEnum(Race.values(), "Select your race (number): ");
+        Race race = promptForEnum(Race.values(), "Select your race (number or name): ");
         printBox("You are a proud " + race.getDisplayName() + "!", 70, GREEN);
         pressEnterToContinue();
 
@@ -93,7 +93,7 @@ public class CharacterCreator {
                     cc.getHitDie()));
         }
         println();
-        CharacterClass characterClass = promptForEnum(CharacterClass.values(), "Select your class (number): ");
+        CharacterClass characterClass = promptForEnum(CharacterClass.values(), "Select your class (number or name): ");
         printBox("You are now a Level 1 " + characterClass.getDisplayName() + "!", 70, GREEN);
         pressEnterToContinue();
 
@@ -203,7 +203,7 @@ public class CharacterCreator {
             println("  " + (i + 1) + ") " + colorize(options[i].getDisplayName(), CYAN)
                 + " — " + options[i].getDescription());
         }
-        var pick = promptForEnum(options, "Select your domain (number): ");
+        var pick = promptForEnum(options, "Select your domain (number or name): ");
         character.setDivineDomain(pick);
         println(colorize("Divine Domain: " + pick.getDisplayName(), GREEN));
         pressEnterToContinue();
@@ -218,7 +218,7 @@ public class CharacterCreator {
             println("  " + (i + 1) + ") " + colorize(options[i].getDisplayName(), CYAN)
                 + " — " + options[i].getDescription());
         }
-        var pick = promptForEnum(options, "Select your origin (number): ");
+        var pick = promptForEnum(options, "Select your origin (number or name): ");
         character.setSorcerousOrigin(pick);
         println(colorize("Sorcerous Origin: " + pick.getDisplayName(), GREEN));
         pressEnterToContinue();
@@ -233,7 +233,7 @@ public class CharacterCreator {
             println("  " + (i + 1) + ") " + colorize(options[i].getDisplayName(), CYAN)
                 + " — " + options[i].getDescription());
         }
-        var pick = promptForEnum(options, "Select your patron (number): ");
+        var pick = promptForEnum(options, "Select your patron (number or name): ");
         character.setWarlockPatron(pick);
         println(colorize("Otherworldly Patron: " + pick.getDisplayName(), GREEN));
         pressEnterToContinue();
@@ -363,7 +363,7 @@ public class CharacterCreator {
 
             Ability ability;
             do {
-                ability = promptForEnum(Ability.values(), "Choose ability (number): ");
+                ability = promptForEnum(Ability.values(), "Choose ability (number or name): ");
                 if (assigned.contains(ability)) {
                     println(colorize("Already assigned! Choose another.", RED));
                 }
@@ -432,7 +432,7 @@ public class CharacterCreator {
 
             Ability ability;
             do {
-                ability = promptForEnum(Ability.values(), "Choose ability (number): ");
+                ability = promptForEnum(Ability.values(), "Choose ability (number or name): ");
                 if (assigned.contains(ability)) {
                     println(colorize("Already assigned! Choose another.", RED));
                 }
