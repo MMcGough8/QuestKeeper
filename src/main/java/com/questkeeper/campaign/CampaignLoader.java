@@ -854,14 +854,22 @@ class CampaignLoader {
             return Item.ItemType.valueOf(norm);
         } catch (IllegalArgumentException ignored) {}
         // YAML authoring aliases used in shipped campaigns.
-        return switch (norm) {
+        Item.ItemType result = switch (norm) {
             case "MISC" -> Item.ItemType.MISCELLANEOUS;
             case "WONDROUS_ITEM", "WONDROUS" -> Item.ItemType.MAGIC_ITEM;
             case "EQUIPMENT", "GEAR" -> Item.ItemType.MISCELLANEOUS;
             case "AMMUNITION", "AMMO" -> Item.ItemType.MISCELLANEOUS;
             case "POTION", "SCROLL" -> Item.ItemType.CONSUMABLE;
-            default -> Item.ItemType.MISCELLANEOUS;
+            default -> null;
         };
+        if (result != null) {
+            return result;
+        }
+        // Unknown type — fall back to MISCELLANEOUS but warn the author so
+        // a typo like 'CONSUMEABLE' isn't silent.
+        System.err.println("WARN: unknown item type '" + typeStr
+            + "'; defaulting to MISCELLANEOUS. Check items.yaml type field.");
+        return Item.ItemType.MISCELLANEOUS;
     }
 
     private Item parseMagicItem(Map<String, Object> data) {

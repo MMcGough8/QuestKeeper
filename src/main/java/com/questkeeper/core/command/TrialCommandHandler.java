@@ -473,6 +473,9 @@ public class TrialCommandHandler implements CommandHandler {
             context.getGameState(), "trial-" + trial.getId());
         if (autoPath != null) {
             Display.println(Display.colorize("[Auto-saved: " + autoPath + "]", DEFAULT));
+        } else {
+            Display.showWarning("Auto-save after trial '" + trial.getName()
+                + "' failed; see stderr. Consider 'save' manually.");
         }
 
         // Show clue gained notification

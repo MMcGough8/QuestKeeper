@@ -538,6 +538,16 @@ public class SaveState {
         }
     }
 
+    private static Instant readFileMtimeOrEpoch(Path p) {
+        try {
+            return Files.getLastModifiedTime(p).toInstant();
+        } catch (IOException e) {
+            // Sort to bottom rather than top (Instant.now would have placed
+            // a corrupt save at the top of the load list).
+            return Instant.EPOCH;
+        }
+    }
+
     private static String sanitizeFilename(String name) {
         return name.replaceAll("[^a-zA-Z0-9_-]", "_").toLowerCase();
     }
@@ -661,16 +671,22 @@ public class SaveState {
                 String saveName = getString(data, "save_name", "Unknown");
                 String campaignId = getString(data, "campaign_id", "unknown");
 
+                // Prefer the YAML-recorded timestamp. If missing or unparseable,
+                // fall back to the file's last-modified time (so corrupted-
+                // timestamp saves don't jump to the top of the load list,
+                // hiding genuinely recent saves).
                 Instant timestamp;
                 String timestampStr = getString(data, "timestamp", null);
                 if (timestampStr != null) {
                     try {
                         timestamp = Instant.parse(timestampStr);
                     } catch (Exception e) {
-                        timestamp = Instant.now();
+                        System.err.println("WARN: bad timestamp in " + path
+                            + ": '" + timestampStr + "'; using file mtime");
+                        timestamp = readFileMtimeOrEpoch(path);
                     }
                 } else {
-                    timestamp = Instant.now();
+                    timestamp = readFileMtimeOrEpoch(path);
                 }
 
                 String characterName = "Unknown";

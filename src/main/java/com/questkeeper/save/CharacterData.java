@@ -208,7 +208,11 @@ public class CharacterData {
         try {
             character.addSkillProficiency(Skill.valueOf(skillName));
         } catch (IllegalArgumentException e) {
-            // Unknown skill; skip
+            // Skill enum was renamed/removed since save was written. Log
+            // so renames during development don't silently weaken loaded
+            // characters.
+            System.err.println("WARN: unknown skill '" + skillName
+                + "' in save; proficiency dropped.");
         }
     }
 
@@ -218,7 +222,8 @@ public class CharacterData {
         try {
             character.addSavingThrowProficiency(Ability.valueOf(saveName));
         } catch (IllegalArgumentException e) {
-            // Unknown ability; skip
+            System.err.println("WARN: unknown saving-throw ability '"
+                + saveName + "' in save; proficiency dropped.");
         }
     }
 

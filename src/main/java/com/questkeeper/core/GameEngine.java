@@ -374,6 +374,11 @@ public class GameEngine implements AutoCloseable {
                 if (autoPath != null) {
                     Display.println(Display.colorize(
                         "[Auto-saved: " + autoPath + "]", YELLOW));
+                } else {
+                    // Don't let a milestone auto-save failure pass without a
+                    // visible cue — the player might rely on it for rollback.
+                    Display.showWarning("Auto-save for level " + currentLevel
+                        + " failed; see stderr. Consider 'save' manually.");
                 }
             }
             lastSeenLevel = currentLevel;
