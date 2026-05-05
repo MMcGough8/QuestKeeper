@@ -66,23 +66,65 @@ public class InventoryCommandHandler implements CommandHandler {
 
         Display.println(Display.colorize("Gold: ", WHITE) +
             Display.colorize(String.valueOf(inventory.getGold()) + " gp", YELLOW));
-        Display.println(Display.colorize("Weight: ", WHITE) +
-            String.format("%.1f / %.1f lbs", inventory.getCurrentWeight(), inventory.getMaxWeight()));
+
+        // Visual weight bar so encumbrance is obvious at a glance.
+        renderWeightBar(inventory.getCurrentWeight(), inventory.getMaxWeight());
         Display.println();
 
         List<ItemStack> items = inventory.getAllItems();
         if (items.isEmpty()) {
             Display.println("Your pack is empty.");
         } else {
-            Display.println(Display.colorize("Backpack:", WHITE));
-            for (ItemStack stack : items) {
-                String countStr = stack.getQuantity() > 1 ? " (x" + stack.getQuantity() + ")" : "";
-                Display.println("  - " + stack.getItem().getName() + countStr);
-            }
+            renderBackpackGrouped(items);
         }
 
         Display.println();
         return CommandResult.success();
+    }
+
+    /** 20-cell weight bar; turns yellow >70%, red >90%. */
+    private void renderWeightBar(double current, double max) {
+        int barWidth = 20;
+        double pct = max > 0 ? Math.min(1.0, current / max) : 0;
+        int filled = (int) Math.round(pct * barWidth);
+        org.fusesource.jansi.Ansi.Color color =
+            pct > 0.9 ? RED : (pct > 0.7 ? YELLOW : GREEN);
+        StringBuilder bar = new StringBuilder("[");
+        for (int i = 0; i < barWidth; i++) bar.append(i < filled ? "█" : "░");
+        bar.append("]");
+        Display.println(Display.colorize("Weight: ", WHITE)
+            + Display.colorize(bar.toString(), color)
+            + String.format(" %.1f / %.1f lbs", current, max));
+    }
+
+    /** Groups backpack items into Weapons / Armor / Consumables / Other. */
+    private void renderBackpackGrouped(List<ItemStack> items) {
+        java.util.List<ItemStack> weapons = new java.util.ArrayList<>();
+        java.util.List<ItemStack> armor = new java.util.ArrayList<>();
+        java.util.List<ItemStack> consumables = new java.util.ArrayList<>();
+        java.util.List<ItemStack> other = new java.util.ArrayList<>();
+        for (ItemStack s : items) {
+            switch (s.getItem().getType()) {
+                case WEAPON -> weapons.add(s);
+                case ARMOR, SHIELD -> armor.add(s);
+                case CONSUMABLE -> consumables.add(s);
+                default -> other.add(s);
+            }
+        }
+        Display.println(Display.colorize("Backpack:", WHITE));
+        renderBackpackSection("Weapons", weapons);
+        renderBackpackSection("Armor", armor);
+        renderBackpackSection("Consumables", consumables);
+        renderBackpackSection("Other", other);
+    }
+
+    private void renderBackpackSection(String label, List<ItemStack> stacks) {
+        if (stacks.isEmpty()) return;
+        Display.println("  " + Display.colorize(label, CYAN));
+        for (ItemStack s : stacks) {
+            String count = s.getQuantity() > 1 ? " (x" + s.getQuantity() + ")" : "";
+            Display.println("    - " + s.getItem().getName() + count);
+        }
     }
 
     private CommandResult handleStats(GameContext context) {
