@@ -135,6 +135,20 @@ public class ExplorationCommandHandler implements CommandHandler {
     }
 
     private CommandResult handleLeave(GameContext context) {
+        // 'leave' / 'exit' inside a conversation should leave the
+        // conversation, not the location. Route to the bye behavior so
+        // we don't fight player intent with a 'type bye first' error.
+        if (context.isInDialogue()) {
+            var dialogueSystem = context.getDialogueSystem();
+            var npc = dialogueSystem.getCurrentNpc();
+            dialogueSystem.endDialogue();
+            Display.println();
+            Display.println(Display.colorize(
+                "You end your conversation with " + npc.getName() + ".", CYAN));
+            Display.println();
+            return CommandResult.success();
+        }
+
         Location currentLocation = context.getCurrentLocation();
         Set<String> exits = currentLocation.getExits();
 

@@ -236,10 +236,41 @@ public class Inventory {
 
     public List<Item> findItemsByName(String name) {
         String lowerName = name.toLowerCase();
-        return items.stream()
+        List<Item> matches = items.stream()
                 .filter(stack -> stack.getItem().getName().toLowerCase().contains(lowerName))
                 .map(ItemStack::getItem)
                 .collect(Collectors.toList());
+        if (!matches.isEmpty() || lowerName.length() < 4 || lowerName.contains(" ")) {
+            return matches;
+        }
+        // Typo fallback: Levenshtein distance <= 1 on any token of an
+        // item's display name. 'shortsward' -> 'shortsword'. Gated to
+        // 4+-char single-word inputs so 'i' or 'use' don't false-match.
+        return items.stream()
+                .filter(stack -> {
+                    for (String token : stack.getItem().getName().toLowerCase().split("\\s+")) {
+                        if (token.length() >= 4 && levenshteinDistance(token, lowerName) <= 1) {
+                            return true;
+                        }
+                    }
+                    return false;
+                })
+                .map(ItemStack::getItem)
+                .collect(Collectors.toList());
+    }
+
+    private static int levenshteinDistance(String a, String b) {
+        int[][] d = new int[a.length() + 1][b.length() + 1];
+        for (int i = 0; i <= a.length(); i++) d[i][0] = i;
+        for (int j = 0; j <= b.length(); j++) d[0][j] = j;
+        for (int i = 1; i <= a.length(); i++) {
+            for (int j = 1; j <= b.length(); j++) {
+                int cost = a.charAt(i - 1) == b.charAt(j - 1) ? 0 : 1;
+                d[i][j] = Math.min(Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1),
+                                   d[i - 1][j - 1] + cost);
+            }
+        }
+        return d[a.length()][b.length()];
     }
 
     public List<Item> getItemsByType(Item.ItemType type) {

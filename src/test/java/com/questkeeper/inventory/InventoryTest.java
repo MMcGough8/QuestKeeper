@@ -327,8 +327,34 @@ class InventoryTest {
         @DisplayName("Find by name is case insensitive")
         void findByNameIsCaseInsensitive() {
             List<Item> found = inventory.findItemsByName("LONGSWORD");
-            
+
             assertEquals(1, found.size());
+        }
+
+        @Test
+        @DisplayName("Typo with one swapped letter still finds the item")
+        void typoFallbackOneEdit() {
+            // 'longswurd' is one substitution from 'longsword'. Substring
+            // doesn't match, but Levenshtein-1 should.
+            List<Item> found = inventory.findItemsByName("longswurd");
+            assertEquals(1, found.size());
+            assertTrue(found.get(0).getName().toLowerCase().contains("longsword"));
+        }
+
+        @Test
+        @DisplayName("Typo fallback ignores too-short queries (avoids false matches)")
+        void typoFallbackSkipsShortInputs() {
+            // 'lon' is only 3 chars; substring still matches 'longsword'.
+            // The fallback shouldn't engage and produce extra noise.
+            List<Item> found = inventory.findItemsByName("lon");
+            assertEquals(1, found.size());
+        }
+
+        @Test
+        @DisplayName("Distance > 1 does not trigger a fallback match")
+        void typoFallbackRespectsDistance() {
+            List<Item> found = inventory.findItemsByName("gibberish");
+            assertTrue(found.isEmpty());
         }
 
         @Test

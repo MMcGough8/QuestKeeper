@@ -45,33 +45,30 @@ public class CombatCommandHandler implements CommandHandler {
         // Not in combat - start combat with a monster
         if (target == null || target.isEmpty()) {
             Display.showError("Attack what? Use 'attack <monster>' to start combat.");
-            listAvailableMonsters(context);
             return CommandResult.failure("No target specified");
         }
 
         // Find monster to fight
         Monster monster = findMonsterByName(context, target);
         if (monster == null) {
+            // If the target is actually an NPC at this location, redirect
+            // toward `talk` rather than dumping the whole monster catalog.
+            for (String npcId : context.getCurrentLocation().getNpcs()) {
+                var npc = context.getCampaign().getNPC(npcId);
+                if (npc != null && npc.getName().toLowerCase()
+                        .contains(target.toLowerCase())) {
+                    Display.showError("You don't want to attack "
+                        + npc.getName() + ". Try `talk " + target + "` instead.");
+                    return CommandResult.failure("Target is an NPC");
+                }
+            }
             Display.showError("There's no '" + target + "' here to fight.");
-            listAvailableMonsters(context);
             return CommandResult.failure("Monster not found");
         }
 
         // Start combat
         startCombat(context, monster);
         return CommandResult.combatStarted();
-    }
-
-    private void listAvailableMonsters(GameContext context) {
-        Map<String, Monster> monsters = context.getCampaign().getMonsterTemplates();
-        if (!monsters.isEmpty()) {
-            Display.println("Available monsters in this campaign:");
-            for (String id : monsters.keySet()) {
-                Monster m = monsters.get(id);
-                Display.println("  - " + Display.colorize(m.getName(), RED) +
-                    " (CR " + m.getChallengeRating() + ")");
-            }
-        }
     }
 
     private Monster findMonsterByName(GameContext context, String name) {
