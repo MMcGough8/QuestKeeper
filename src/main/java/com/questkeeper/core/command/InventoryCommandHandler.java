@@ -111,14 +111,48 @@ public class InventoryCommandHandler implements CommandHandler {
         Display.println();
 
         if (!character.getClassFeatures().isEmpty()) {
-            Display.println(Display.colorize("Class Features:", WHITE));
-            for (var feature : character.getClassFeatures()) {
-                Display.println("  - " + feature.getName());
-            }
-            Display.println();
+            renderClassFeatures(character.getClassFeatures());
         }
 
         return CommandResult.success();
+    }
+
+    /**
+     * Splits a character's features into "Active" (consumes an action,
+     * bonus action, or charges) and "Passive" (always-on bonuses) so a
+     * Lvl 5+ character sheet stays scannable.
+     */
+    private void renderClassFeatures(
+            java.util.List<com.questkeeper.character.features.ClassFeature> all) {
+        java.util.List<com.questkeeper.character.features.ClassFeature> active = new java.util.ArrayList<>();
+        java.util.List<com.questkeeper.character.features.ClassFeature> passive = new java.util.ArrayList<>();
+        for (var f : all) {
+            if (f instanceof com.questkeeper.character.features.ActivatedFeature) {
+                active.add(f);
+            } else {
+                passive.add(f);
+            }
+        }
+
+        if (!active.isEmpty()) {
+            Display.println(Display.colorize("Active Features (use in combat):", YELLOW));
+            for (var f : active) {
+                if (f instanceof com.questkeeper.character.features.ActivatedFeature af) {
+                    Display.println(String.format("  - %s  (%d/%d uses)",
+                        f.getName(), af.getCurrentUses(), af.getMaxUses()));
+                } else {
+                    Display.println("  - " + f.getName());
+                }
+            }
+            Display.println();
+        }
+        if (!passive.isEmpty()) {
+            Display.println(Display.colorize("Passive Features:", WHITE));
+            for (var f : passive) {
+                Display.println("  - " + f.getName());
+            }
+            Display.println();
+        }
     }
 
     private CommandResult handleEquipment(GameContext context) {
