@@ -145,14 +145,19 @@ public class Spellbook {
     }
 
     /**
-     * Adds a spell to known spells.
+     * Adds a spell to known spells, and auto-prepares it.
+     *
+     * <p>Prepared casters (Wizard/Cleric/Druid/Paladin) otherwise need
+     * a separate preparation step. There's no preparation UI in v1, so
+     * the previous behavior of leaving prepared casters' default
+     * spells un-prepared meant they couldn't cast anything (canCast
+     * returns false for non-prepared, non-cantrip spells). The player
+     * can still call {@link #unprepareSpell} when a preparation
+     * management UI lands.
      */
     public void addKnownSpell(String spellId) {
         knownSpellIds.add(spellId);
-        // For non-prepared casters, known spells are always available
-        if (!usesPreparedSpells) {
-            preparedSpellIds.add(spellId);
-        }
+        preparedSpellIds.add(spellId);
     }
 
     /**
