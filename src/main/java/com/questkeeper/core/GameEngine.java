@@ -356,7 +356,7 @@ public class GameEngine implements AutoCloseable {
 
             // Show action prompt with suggestions
             Display.showActionPrompt(generateSuggestions());
-            Display.showPrompt();
+            Display.showPrompt(buildModePrompt());
             if (!scanner.hasNextLine()) {
                 // EOF (Ctrl-D / piped input exhausted). Exit cleanly instead
                 // of throwing NoSuchElementException up the stack.
@@ -1383,6 +1383,24 @@ public class GameEngine implements AutoCloseable {
     /**
      * Generates contextual command suggestions based on current game state.
      */
+    /**
+     * Builds a context-aware prompt string. Players see at a glance
+     * whether they're in dialogue, mid-trial, or just exploring.
+     */
+    private String buildModePrompt() {
+        if (gameContext != null && gameContext.isInDialogue()) {
+            var npc = gameContext.getDialogueSystem().getCurrentNpc();
+            if (npc != null) {
+                return Display.colorize("[Talking with " + npc.getName() + "] > ", CYAN);
+            }
+            return Display.colorize("[Dialogue] > ", CYAN);
+        }
+        if (gameContext != null && gameContext.getActiveTrial() != null) {
+            return Display.colorize("[Trial] > ", MAGENTA);
+        }
+        return "> ";
+    }
+
     private String[] generateSuggestions() {
         List<String> suggestions = new ArrayList<>();
         Location location = gameState.getCurrentLocation();
