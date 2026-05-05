@@ -536,4 +536,63 @@ class CharacterCreatorTest {
             assertEquals(12, CharacterClass.values().length);
         }
     }
+
+    @Nested
+    @DisplayName("promptForEnum input handling")
+    class PromptForEnumTests {
+
+        private void feed(String input) {
+            CharacterCreator.setScanner(new Scanner(
+                new ByteArrayInputStream(input.getBytes())));
+        }
+
+        @Test
+        @DisplayName("numeric input picks the corresponding enum value")
+        void numericInputPicksValue() {
+            feed("2\n");
+            assertEquals(Ability.DEXTERITY,
+                CharacterCreator.promptForEnum(Ability.values(), "test> "));
+        }
+
+        @Test
+        @DisplayName("exact name accepted (case-insensitive)")
+        void exactName() {
+            feed("dexterity\n");
+            assertEquals(Ability.DEXTERITY,
+                CharacterCreator.promptForEnum(Ability.values(), "test> "));
+        }
+
+        @Test
+        @DisplayName("3-letter abbreviation accepted via prefix match")
+        void shortPrefix() {
+            feed("dex\n");
+            assertEquals(Ability.DEXTERITY,
+                CharacterCreator.promptForEnum(Ability.values(), "test> "));
+        }
+
+        @Test
+        @DisplayName("ambiguous prefix re-prompts; longer prefix resolves")
+        void ambiguousPrefixThenResolved() {
+            // 'c' matches CONSTITUTION + CHARISMA -> reprompt; 'cha' resolves.
+            feed("c\ncha\n");
+            assertEquals(Ability.CHARISMA,
+                CharacterCreator.promptForEnum(Ability.values(), "test> "));
+        }
+
+        @Test
+        @DisplayName("empty input silently re-prompts (no error noise)")
+        void emptyInputReprompts() {
+            feed("\n\n3\n");
+            assertEquals(Ability.CONSTITUTION,
+                CharacterCreator.promptForEnum(Ability.values(), "test> "));
+        }
+
+        @Test
+        @DisplayName("invalid input re-prompts; subsequent valid input wins")
+        void invalidThenValid() {
+            feed("potato\n5\n");
+            assertEquals(Ability.WISDOM,
+                CharacterCreator.promptForEnum(Ability.values(), "test> "));
+        }
+    }
 }

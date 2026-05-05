@@ -1039,17 +1039,44 @@ public class CharacterCreator {
         return input.isEmpty() ? defaultValue : input;
     }
 
-    private static <T extends Enum<T>> T promptForEnum(T[] values, String prompt) {
+    static <T extends Enum<T>> T promptForEnum(T[] values, String prompt) {
         while (true) {
             print(colorize(prompt, CYAN));
             String input = scanner.nextLine().trim();
+            // Empty input — silently re-prompt; don't bury the screen in errors
+            // when the user just hit Enter to scroll.
+            if (input.isEmpty()) continue;
+
+            // Numeric path
             try {
                 int n = Integer.parseInt(input);
                 if (n >= 1 && n <= values.length) {
                     return values[n - 1];
                 }
             } catch (NumberFormatException ignored) {}
-            println(colorize("Invalid input. Enter a number from 1 to " + values.length + ".", RED));
+
+            // Name path — case-insensitive prefix match on enum names
+            // (so "dex", "Dex", "DEXTERITY" all hit DEXTERITY).
+            String needle = input.toLowerCase().replace(' ', '_');
+            T uniqueMatch = null;
+            int matchCount = 0;
+            for (T v : values) {
+                String name = v.name().toLowerCase();
+                if (name.startsWith(needle)) {
+                    uniqueMatch = v;
+                    matchCount++;
+                }
+            }
+            if (matchCount == 1) return uniqueMatch;
+            if (matchCount > 1) {
+                println(colorize("'" + input + "' could match more than one option — "
+                    + "type more letters or the number.", YELLOW));
+                continue;
+            }
+
+            println(colorize("'" + input + "' isn't a valid choice. "
+                + "Enter a number from 1 to " + values.length
+                + ", or type the option name (e.g. 'dex', 'wis').", RED));
         }
     }
 
