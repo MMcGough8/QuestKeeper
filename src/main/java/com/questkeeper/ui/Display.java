@@ -616,6 +616,14 @@ public class Display {
     // ENHANCED UI METHODS
     // ========================================================================
 
+    private static final String[] TITLE_QUOTES = {
+        "  \"Roll for initiative.\"",
+        "  \"The dice fall where they may.\"",
+        "  \"Adventure begins where the map ends.\"",
+        "  \"Every legend starts with a single quest.\"",
+        "  \"What the gods write in stars, mortals read in rolls.\"",
+    };
+
     /**
      * Displays the ASCII art title screen.
      */
@@ -637,9 +645,22 @@ public class Display {
         println(colorize("    ║    ██║  ██╗███████╗███████╗██║     ███████╗██║  ██║   ║", YELLOW));
         println(colorize("    ║    ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝     ╚══════╝╚═╝  ╚═╝   ║", YELLOW));
         println(colorize("    ║                                                       ║", YELLOW));
-        println(colorize("    ║           ⚔  A Terminal Fantasy Adventure  ⚔          ║", YELLOW));
+        // Tagline + author/version layered in contrasting colors so the
+        // chrome reads like a book cover, not an engine debug banner.
+        print(colorize("    ║         ", YELLOW));
+        print(colorize("⚔  A D&D 5e Terminal Adventure  ⚔", CYAN));
+        println(colorize("            ║", YELLOW));
+        print(colorize("    ║              ", YELLOW));
+        print(colorize("by Marc McGough  ·  v1.0", DEFAULT));
+        println(colorize("                ║", YELLOW));
         println(colorize("    ║                                                       ║", YELLOW));
         println(colorize("    ╚═══════════════════════════════════════════════════════╝", YELLOW));
+        println();
+        // Random flavor quote to vary the demo. Fixed seed via System.nanoTime
+        // so multiple title-screen views in one session don't repeat awkwardly.
+        String quote = TITLE_QUOTES[(int)(System.nanoTime() & 0x7fffffff) % TITLE_QUOTES.length];
+        println(colorize("                          ⚔ ★ ⚔", RED));
+        println(colorize(quote, CYAN));
         println();
     }
 
