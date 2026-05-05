@@ -1,5 +1,5 @@
 save_version: '1.0'
-timestamp: '2026-05-05T00:14:16.398013Z'
+timestamp: '2026-05-05T01:30:46.412576Z'
 campaign_id: eberron
 save_name: Mira (Wizard L5 Evocation) - Sculpt Spells, ready to cast
 character:
@@ -43,8 +43,10 @@ counters: {
   }
 strings: {
   }
-inventory: [
-  ]
+inventory:
+- competitor_badge
+- games_program
+- lucky_charm
 equipped:
 - quarterstaff
 equipped_slots:

@@ -11,6 +11,7 @@ import com.questkeeper.character.features.BardFeatures;
 import com.questkeeper.character.features.FightingStyle;
 import com.questkeeper.character.features.WizardFeatures;
 import com.questkeeper.inventory.Inventory;
+import com.questkeeper.inventory.Item;
 import com.questkeeper.inventory.StandardEquipment;
 import com.questkeeper.save.SaveState;
 import com.questkeeper.state.GameState;
@@ -75,6 +76,12 @@ public final class BuildDemoSaves {
         inv.equipToSlot(eq.getWeapon("longsword"), Inventory.EquipmentSlot.MAIN_HAND);
         inv.equipToSlot(eq.getArmor("chain_mail"), Inventory.EquipmentSlot.ARMOR);
         inv.equipToSlot(eq.getArmor("shield"), Inventory.EquipmentSlot.OFF_HAND);
+        // Backpack: post-Trial-01 loadout — healing draughts, the recovered
+        // clockwork key, and a theater ticket the mayor handed over.
+        addCampaignItem(inv, campaign, "healing_tincture");
+        addCampaignItem(inv, campaign, "healing_tincture");
+        addCampaignItem(inv, campaign, "clockwork_key");
+        addCampaignItem(inv, campaign, "theater_ticket");
         inv.addGold(85);
 
         GameState state = new GameState(paladin, campaign);
@@ -118,6 +125,10 @@ public final class BuildDemoSaves {
         Inventory inv = wizard.getInventory();
         inv.addItem(eq.getWeapon("quarterstaff"));
         inv.equipToSlot(eq.getWeapon("quarterstaff"), Inventory.EquipmentSlot.MAIN_HAND);
+        // Backpack: tournament essentials.
+        addCampaignItem(inv, campaign, "competitor_badge");
+        addCampaignItem(inv, campaign, "games_program");
+        addCampaignItem(inv, campaign, "lucky_charm");
         inv.addGold(40);
 
         GameState state = new GameState(wizard, campaign);
@@ -150,6 +161,13 @@ public final class BuildDemoSaves {
         inv.addItem(eq.getArmor("leather_armor"));
         inv.equipToSlot(eq.getWeapon("rapier"), Inventory.EquipmentSlot.MAIN_HAND);
         inv.equipToSlot(eq.getArmor("leather_armor"), Inventory.EquipmentSlot.ARMOR);
+        // Backpack: trickster's kit — smoke for cover, flash for distraction,
+        // grease for stuck mechanisms, plus a healing draught.
+        addCampaignItem(inv, campaign, "smoke_pellet");
+        addCampaignItem(inv, campaign, "smoke_pellet");
+        addCampaignItem(inv, campaign, "flash_powder");
+        addCampaignItem(inv, campaign, "gear_grease");
+        addCampaignItem(inv, campaign, "healing_tincture");
         inv.addGold(35);
 
         GameState state = new GameState(bard, campaign);
@@ -197,6 +215,11 @@ public final class BuildDemoSaves {
         inv.addItem(eq.getWeapon("javelin"));
         inv.addItem(eq.getWeapon("javelin"));
         inv.equipToSlot(eq.getWeapon("greataxe"), Inventory.EquipmentSlot.MAIN_HAND);
+        // Backpack: deep-dive raider kit.
+        addCampaignItem(inv, campaign, "salvage_lantern");
+        addCampaignItem(inv, campaign, "grappling_hook");
+        addCampaignItem(inv, campaign, "pressure_pills");
+        addCampaignItem(inv, campaign, "pressure_pills");
         inv.addGold(220);
 
         GameState state = new GameState(barb, campaign);
@@ -216,6 +239,21 @@ public final class BuildDemoSaves {
      */
     private static void healToFull(Character c) {
         c.setCurrentHitPoints(c.getMaxHitPoints());
+    }
+
+    /**
+     * Adds a campaign-defined item by id to the inventory. Throws if the
+     * id is not in the campaign so demo build fails fast on a typo
+     * rather than silently producing an empty backpack.
+     */
+    private static void addCampaignItem(Inventory inv, Campaign campaign, String itemId) {
+        Item item = campaign.getItem(itemId);
+        if (item == null) {
+            throw new IllegalStateException(
+                "Demo backpack item '" + itemId + "' not found in campaign '"
+                    + campaign.getId() + "'");
+        }
+        inv.addItem(item);
     }
 
     private static Campaign loadCampaign(String campaignId) throws Exception {

@@ -1,5 +1,5 @@
 save_version: '1.0'
-timestamp: '2026-05-05T00:14:16.371299Z'
+timestamp: '2026-05-05T01:30:46.383887Z'
 campaign_id: muddlebrook
 save_name: Aelar (Paladin L5) - Trial 1 done, gearing up for the clocktower
 character:
@@ -49,8 +49,11 @@ counters: {
   }
 strings: {
   }
-inventory: [
-  ]
+inventory:
+- healing_tincture
+- healing_tincture
+- clockwork_key
+- theater_ticket
 equipped:
 - shield
 - chain_mail

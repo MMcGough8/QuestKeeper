@@ -1,5 +1,5 @@
 save_version: '1.0'
-timestamp: '2026-05-05T00:14:16.412785Z'
+timestamp: '2026-05-05T01:30:46.426898Z'
 campaign_id: muddlebrook
 save_name: Lirael (Bard L3 Lore) - Mayor's Office, 3 of 6 clues solved
 character:
@@ -52,8 +52,12 @@ counters:
   clues_found: 3
 strings: {
   }
-inventory: [
-  ]
+inventory:
+- smoke_pellet
+- smoke_pellet
+- flash_powder
+- gear_grease
+- healing_tincture
 equipped:
 - leather_armor
 - rapier

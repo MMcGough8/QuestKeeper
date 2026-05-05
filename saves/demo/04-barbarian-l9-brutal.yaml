@@ -1,5 +1,5 @@
 save_version: '1.0'
-timestamp: '2026-05-05T00:14:16.434313Z'
+timestamp: '2026-05-05T01:30:46.446996Z'
 campaign_id: drownedgod
 save_name: Thrain (Barbarian L9 Berserker) - Brutal Critical online
 character:
@@ -45,6 +45,10 @@ inventory:
 - javelin
 - javelin
 - javelin
+- salvage_lantern
+- grappling_hook
+- pressure_pills
+- pressure_pills
 equipped:
 - greataxe
 equipped_slots:
