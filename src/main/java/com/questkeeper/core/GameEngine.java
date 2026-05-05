@@ -1296,9 +1296,12 @@ public class GameEngine implements AutoCloseable {
             return;
         }
 
-        // Full re-renders (move, look, load, combat end, init) re-arm
-        // the next-turn hint. Compact revisit panels stay quiet.
-        if (fullDescription) {
+        // Full panels re-arm the next-turn hint. Compact revisit panels
+        // (this location already shown once this session and the caller
+        // didn't ask for full) stay quiet.
+        boolean isCompactRevisit = !fullDescription
+            && shownLocationsThisSession.contains(location.getId());
+        if (!isCompactRevisit) {
             showHintNextTurn = true;
         }
 
