@@ -308,6 +308,11 @@ class CampaignLoader {
         npc.setGreeting(getString(data, "greeting", ""));
         npc.setReturnGreeting(getString(data, "return_greeting", ""));
 
+        String shortDescriptor = getString(data, "short_descriptor", "");
+        if (!shortDescriptor.isEmpty()) {
+            npc.setShortDescriptor(shortDescriptor);
+        }
+
         // Parse shop items if present
         Map<String, Object> shopItemsData = getMap(data, "shop_items");
         if (shopItemsData != null) {
@@ -318,9 +323,49 @@ class CampaignLoader {
             }
         }
 
+        // Schema 1 (Muddlebrook): flat 'dialogues:' map of topic -> response.
         Map<String, String> dialogueMap = getStringMap(data, "dialogues");
         for (Map.Entry<String, String> entry : dialogueMap.entrySet()) {
             npc.addDialogue(entry.getKey(), entry.getValue());
+        }
+
+        // Schema 2 (Eberron, DrownedGod): nested 'topics:' map where each
+        // entry has 'keywords:', 'response:', 'flags_required:'. Each
+        // keyword becomes its own dialogue topic key pointing at the
+        // shared response so 'ask about competition' and 'ask about
+        // tournament' both hit the same line. The first flag in
+        // flags_required (if any) becomes the gating flag.
+        Map<String, Object> topicsData = getMap(data, "topics");
+        if (topicsData != null) {
+            for (Map.Entry<String, Object> entry : topicsData.entrySet()) {
+                String topicId = entry.getKey().toLowerCase();
+                if (!(entry.getValue() instanceof Map)) continue;
+                @SuppressWarnings("unchecked")
+                Map<String, Object> topicData = (Map<String, Object>) entry.getValue();
+                String response = getString(topicData, "response", "");
+                if (response.isEmpty()) continue;
+
+                List<String> flagsRequired = getStringList(topicData, "flags_required");
+                String gateFlag = flagsRequired.isEmpty() ? null : flagsRequired.get(0);
+
+                // Always register the topic id itself.
+                if (gateFlag != null) {
+                    npc.addDialogue(topicId, response, gateFlag);
+                } else {
+                    npc.addDialogue(topicId, response);
+                }
+
+                // And every keyword as an alias pointing at the same response.
+                for (String keyword : getStringList(topicData, "keywords")) {
+                    String key = keyword.toLowerCase().trim();
+                    if (key.isEmpty() || key.equals(topicId)) continue;
+                    if (gateFlag != null) {
+                        npc.addDialogue(key, response, gateFlag);
+                    } else {
+                        npc.addDialogue(key, response);
+                    }
+                }
+            }
         }
 
         List<String> lines = getStringList(data, "sample_lines");

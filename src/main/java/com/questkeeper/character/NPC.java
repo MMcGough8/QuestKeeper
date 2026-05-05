@@ -41,6 +41,13 @@ public class NPC {
     private boolean shopkeeper;                   // Can sell items
     private final Map<String, Integer> shopItems; // Item name -> price in copper
 
+    /**
+     * Optional author-provided override for the short descriptor used in
+     * "You see: ..." location listings. When null, the descriptor is
+     * computed from {@link #role} via {@link #getShortDescriptor()}.
+     */
+    private String shortDescriptorOverride;
+
     public NPC(String id, String name) {
         this(id, name, "", "", "");
     }
@@ -371,6 +378,9 @@ public class NPC {
      * Format: "the bartender" or "a traveling bard"
      */
     public String getShortDescriptor() {
+        if (shortDescriptorOverride != null && !shortDescriptorOverride.isEmpty()) {
+            return shortDescriptorOverride;
+        }
         if (role.isEmpty()) {
             return "";
         }
@@ -378,6 +388,14 @@ public class NPC {
         // Use "the" for unique roles, "a/an" for general ones
         String article = isUniqueRole(role) ? "the " : getArticle(role);
         return article + role.toLowerCase();
+    }
+
+    /**
+     * Sets an author-provided short-descriptor override (e.g.,
+     * "the booming announcer"). Pass null/empty to clear.
+     */
+    public void setShortDescriptor(String descriptor) {
+        this.shortDescriptorOverride = descriptor;
     }
 
     private boolean isUniqueRole(String role) {

@@ -1188,4 +1188,65 @@ class CampaignLoaderTest {
             assertTrue(dungeon.hasFlag("dangerous"));
         }
     }
+
+    @Nested
+    @DisplayName("NPC dialogue schemas (real campaigns)")
+    class DialogueSchemaTests {
+
+        @Test
+        @DisplayName("Muddlebrook Norrin loads dialogues via the flat schema")
+        void muddlebrookFlatSchema() {
+            com.questkeeper.campaign.Campaign c =
+                com.questkeeper.campaign.Campaign.loadFromYaml(
+                    java.nio.file.Path.of("src/main/resources/campaigns/muddlebrook"));
+            com.questkeeper.character.NPC norrin = c.getNPC("norrin_bard");
+            assertNotNull(norrin);
+            assertTrue(norrin.hasDialogue("mayor"),
+                "Norrin should have 'mayor' topic from dialogues: schema");
+            assertTrue(norrin.hasDialogue("clocktower"));
+            assertTrue(norrin.hasDialogue("rumors"));
+        }
+
+        @Test
+        @DisplayName("Eberron Herald Vox loads topics via keywords/response schema")
+        void eberronTopicsSchema() {
+            com.questkeeper.campaign.Campaign c =
+                com.questkeeper.campaign.Campaign.loadFromYaml(
+                    java.nio.file.Path.of("src/main/resources/campaigns/eberron"));
+            com.questkeeper.character.NPC vox = c.getNPC("herald_vox");
+            assertNotNull(vox);
+            assertTrue(vox.hasDialogue("games"),
+                "Vox should have 'games' topic from topics: schema");
+            assertTrue(vox.hasDialogue("competition"),
+                "'competition' keyword should alias to games response");
+            assertTrue(vox.hasDialogue("tournament"));
+            assertTrue(vox.hasDialogue("trials"));
+            assertTrue(vox.hasDialogue("registration"));
+            assertTrue(vox.hasDialogue("shards"));
+        }
+
+        @Test
+        @DisplayName("Eberron Vox short_descriptor override is loaded")
+        void eberronShortDescriptorOverride() {
+            com.questkeeper.campaign.Campaign c =
+                com.questkeeper.campaign.Campaign.loadFromYaml(
+                    java.nio.file.Path.of("src/main/resources/campaigns/eberron"));
+            com.questkeeper.character.NPC vox = c.getNPC("herald_vox");
+            assertEquals("the booming announcer", vox.getShortDescriptor());
+        }
+
+        @Test
+        @DisplayName("DrownedGod Prophet Mira loads topics via keywords/response schema")
+        void drownedgodTopicsSchema() {
+            com.questkeeper.campaign.Campaign c =
+                com.questkeeper.campaign.Campaign.loadFromYaml(
+                    java.nio.file.Path.of("src/main/resources/campaigns/drownedgod"));
+            com.questkeeper.character.NPC mira = c.getNPC("prophet_mira");
+            assertNotNull(mira);
+            assertTrue(mira.hasDialogue("the_sea"));
+            assertTrue(mira.hasDialogue("sea"),
+                "'sea' keyword should alias to the_sea response");
+            assertTrue(mira.hasDialogue("the_drowned_god"));
+        }
+    }
 }
