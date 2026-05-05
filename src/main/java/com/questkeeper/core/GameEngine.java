@@ -399,6 +399,14 @@ public class GameEngine implements AutoCloseable {
             }
         }
 
+        // Manual clear: wipe screen and re-render current location.
+        String trimmed = input.trim().toLowerCase();
+        if (trimmed.equals("clear") || trimmed.equals("cls")) {
+            Display.clearScreen();
+            displayCurrentLocation(true);
+            return;
+        }
+
         if (!command.isValid()) {
             Display.showError("I don't understand '" + input + "'. Type 'help' for commands.");
             return;
@@ -416,6 +424,11 @@ public class GameEngine implements AutoCloseable {
                     running = false;
                 }
                 if (result.shouldDisplayLocation()) {
+                    // On movement, wipe the screen so each new room is a
+                    // fresh slate. `look` keeps the scrolling buffer.
+                    if (result.hasPlayerMoved()) {
+                        Display.clearScreen();
+                    }
                     // Movement renders compact if the location was already
                     // shown this session (cleaner exploration). `look`
                     // always renders full.

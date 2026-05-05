@@ -314,6 +314,7 @@ public class Display {
         println(colorize("System", YELLOW));
         showHelpCommand("save", "Save your game (YAML; auto-saves on level-up + trial completion)");
         showHelpCommand("load", "Load a saved game");
+        showHelpCommand("clear / cls", "Wipe the screen and re-show the current location");
         showHelpCommand("help", "Show this menu");
         showHelpCommand("quit / exit", "Exit the game");
         println();
