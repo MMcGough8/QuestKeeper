@@ -108,10 +108,19 @@ public class ExplorationCommandHandler implements CommandHandler {
         direction = expandDirection(direction);
 
         Location currentLocation = context.getCurrentLocation();
+        // Fall back to destination-name matching: if the player typed
+        // 'go whisperwood edge' or 'explore whisperwood edge', match
+        // against the names/ids of rooms each exit leads to and pick
+        // the matching exit key.
         if (!currentLocation.hasExit(direction)) {
-            Display.showError("You can't go " + direction + " from here.");
-            Display.println(buildExitsDisplay(currentLocation));
-            return CommandResult.failure("No exit in that direction");
+            String resolvedDir = matchExitByDestination(context, currentLocation, direction);
+            if (resolvedDir != null) {
+                direction = resolvedDir;
+            } else {
+                Display.showError("You can't go " + direction + " from here.");
+                Display.println(buildExitsDisplay(currentLocation));
+                return CommandResult.failure("No exit in that direction");
+            }
         }
 
         boolean moved = context.getGameState().move(direction);
@@ -175,6 +184,31 @@ public class ExplorationCommandHandler implements CommandHandler {
 
         // Use handleGo to do the actual movement
         return handleGo(context, chosenExit);
+    }
+
+    /**
+     * Returns the exit key whose destination room (id or display name)
+     * contains the given query, or null if no match. Lets players type
+     * "go whisperwood edge" instead of remembering the exit alias
+     * "forest". Case-insensitive substring match; first hit wins.
+     */
+    private String matchExitByDestination(GameContext context, Location current, String query) {
+        if (query == null || query.isEmpty()) return null;
+        String needle = query.toLowerCase().trim();
+        for (String exitKey : current.getExits()) {
+            String targetId = current.getExit(exitKey);
+            if (targetId == null) continue;
+            if (targetId.toLowerCase().replace('_', ' ').contains(needle)
+                    || targetId.toLowerCase().contains(needle.replace(' ', '_'))) {
+                return exitKey;
+            }
+            Location target = context.getCampaign().getLocation(targetId);
+            if (target != null && target.getName() != null
+                    && target.getName().toLowerCase().contains(needle)) {
+                return exitKey;
+            }
+        }
+        return null;
     }
 
     private String buildExitsDisplay(Location location) {

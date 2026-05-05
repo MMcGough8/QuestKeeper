@@ -1114,6 +1114,30 @@ class CommandParserTest {
             assertEquals("take", cmd.getVerb());
             assertEquals("mask", cmd.getNoun());
         }
+
+        @Test
+        @DisplayName("'put X in Y' parses as equip X to Y")
+        void putInRewritesToEquipTo() {
+            CommandParser.Command cmd = CommandParser.parse("put shortsword in offhand");
+            assertEquals("equip", cmd.getVerb());
+            assertEquals("shortsword to offhand", cmd.getNoun());
+        }
+
+        @Test
+        @DisplayName("'put on <item>' parses as equip <item>")
+        void putOnRewritesToEquip() {
+            CommandParser.Command cmd = CommandParser.parse("put on the helmet");
+            assertEquals("equip", cmd.getVerb());
+            assertEquals("helmet", cmd.getNoun());
+        }
+
+        @Test
+        @DisplayName("'put down <item>' still parses as drop (not rewritten)")
+        void putDownStillDrops() {
+            CommandParser.Command cmd = CommandParser.parse("put down the lantern");
+            assertEquals("drop", cmd.getVerb());
+            assertEquals("lantern", cmd.getNoun());
+        }
     }
 
     @Nested

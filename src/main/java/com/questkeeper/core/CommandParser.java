@@ -89,6 +89,8 @@ public class CommandParser {
         SYNONYM_MAP.put("crawl", VERB_GO);
         SYNONYM_MAP.put("sneak", VERB_GO);
         SYNONYM_MAP.put("submerge", VERB_GO);
+        SYNONYM_MAP.put("explore", VERB_GO);
+        SYNONYM_MAP.put("visit", VERB_GO);
 
         // Look synonyms → "look"
         SYNONYM_MAP.put("look", VERB_LOOK);
@@ -452,7 +454,8 @@ public class CommandParser {
      */
     private static String collapsePhrasalVerbs(String input) {
         String lower = input.toLowerCase();
-        // Order matters: longest match wins so "pick up" beats "pick".
+        // Order matters: longest/more-specific match wins so "pick up"
+        // beats "pick" and "put down" beats the catch-all "put X in Y".
         String[][] phrases = {
             {"pick up ",  "take "},
             {"pickup ",   "take "},
@@ -460,11 +463,19 @@ public class CommandParser {
             {"put down ", "drop "},
             {"lay down ", "drop "},
             {"throw away ", "drop "},
+            {"put on ",   "equip "},
         };
         for (String[] pair : phrases) {
             if (lower.startsWith(pair[0])) {
                 return pair[1] + input.substring(pair[0].length());
             }
+        }
+        // Natural-language equip: "put <item> in <slot>" -> "equip <item> to <slot>".
+        // Reaches here only after the prefix loop above, so "put down ..."
+        // and "put on ..." are already handled.
+        if (lower.startsWith("put ") && lower.contains(" in ")) {
+            String rest = input.substring(4);
+            return "equip " + rest.replaceFirst("(?i)\\s+in\\s+", " to ");
         }
         return input;
     }
