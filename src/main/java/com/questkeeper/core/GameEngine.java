@@ -1073,6 +1073,16 @@ public class GameEngine implements AutoCloseable {
                         YELLOW));
                     continue;
                 }
+                // Read-only player info commands — route through the
+                // command router so the player can check their inventory,
+                // equipment, or stats mid-fight without losing their turn.
+                if (action.equals("inventory") || action.equals("i")
+                        || action.equals("stats") || action.equals("character")
+                        || action.equals("equipment") || action.equals("equipped")
+                        || action.equals("gear")) {
+                    commandRouter.route(gameContext, action, target, input);
+                    continue;
+                }
 
                 CombatResult actionResult = combatSystem.playerTurn(action, target);
                 displayCombatResult(actionResult);

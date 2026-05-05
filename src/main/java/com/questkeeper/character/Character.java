@@ -1371,11 +1371,17 @@ public class Character implements Combatant {
         if (ability == null) {
             throw new IllegalArgumentException("Ability must not be null.");
         }
-        int current = baseAbilityScores.getOrDefault(ability, 10);
-        if (current >= MAX_ABILITY_SCORE) {
+        // Cap check on TOTAL score (base + racial), not base alone.
+        // A Half-Orc with base 19 STR + racial +1 has total 20; spending
+        // a +2 ASI would only contribute +1 net (20 -> 21 -> capped to
+        // 20) and leave the player wondering where the point went.
+        int total = getAbilityScore(ability);
+        if (total >= MAX_ABILITY_SCORE) {
             throw new IllegalStateException(
-                ability + " is already at the cap of " + MAX_ABILITY_SCORE + ".");
+                ability + " is already at the cap of " + MAX_ABILITY_SCORE
+                    + " (including racial bonuses). Pick a different ability.");
         }
+        int current = baseAbilityScores.getOrDefault(ability, 10);
         int newScore = Math.min(MAX_ABILITY_SCORE, current + 2);
         baseAbilityScores.put(ability, newScore);
         pendingAbilityScoreImprovements--;
