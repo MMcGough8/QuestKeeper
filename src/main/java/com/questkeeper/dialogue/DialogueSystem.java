@@ -186,26 +186,74 @@ public class DialogueSystem {
     // ==========================================
 
     /**
-     * Finds an NPC at the current location by name or ID.
+     * Finds an NPC at the current location by name, ID, role descriptor,
+     * or near-miss typo. Match order:
+     *   1. Exact ID / exact name / name substring
+     *   2. Role descriptor (e.g., "the announcer" -> Herald Vox, "an announcer")
+     *   3. Levenshtein distance <= 1 against any name token (catches typos
+     *      like "vax" for "Vox" without false-positives on short inputs)
      */
     private Optional<NPC> findNpcAtLocation(GameState state, String identifier) {
-        String searchTerm = identifier.trim().toLowerCase();
+        String raw = identifier.trim().toLowerCase();
+        String searchTerm = stripLeadingArticles(raw);
         Location location = state.getCurrentLocation();
         List<String> npcIds = location.getNpcs();
 
+        // Pass 1: exact / contains / descriptor.
         for (String npcId : npcIds) {
             NPC npc = state.getCampaign().getNPC(npcId);
-            if (npc != null) {
-                // Match by ID or name (case-insensitive)
-                if (npc.getId().toLowerCase().equals(searchTerm) ||
-                    npc.getName().toLowerCase().equals(searchTerm) ||
-                    npc.getName().toLowerCase().contains(searchTerm)) {
-                    return Optional.of(npc);
+            if (npc == null) continue;
+            String name = npc.getName().toLowerCase();
+            if (npc.getId().toLowerCase().equals(searchTerm)
+                    || name.equals(searchTerm)
+                    || name.contains(searchTerm)) {
+                return Optional.of(npc);
+            }
+            String descriptor = stripLeadingArticles(npc.getShortDescriptor().toLowerCase());
+            if (!descriptor.isEmpty()
+                    && (descriptor.equals(searchTerm) || descriptor.contains(searchTerm))) {
+                return Optional.of(npc);
+            }
+        }
+
+        // Pass 2: typo fallback. Only fires for >=4-char single-word searches
+        // so "vax" -> "vox" (Levenshtein 1) but "to" or "an" stay no-ops.
+        if (searchTerm.length() >= 4 && !searchTerm.contains(" ")) {
+            for (String npcId : npcIds) {
+                NPC npc = state.getCampaign().getNPC(npcId);
+                if (npc == null) continue;
+                for (String token : npc.getName().toLowerCase().split("\\s+")) {
+                    if (token.length() >= 3 && levenshtein(token, searchTerm) <= 1) {
+                        return Optional.of(npc);
+                    }
                 }
             }
         }
 
         return Optional.empty();
+    }
+
+    private static String stripLeadingArticles(String s) {
+        String r = s.trim();
+        for (String a : new String[]{"the ", "a ", "an ", "to "}) {
+            if (r.startsWith(a)) r = r.substring(a.length());
+        }
+        return r.trim();
+    }
+
+    /** Levenshtein edit distance (insert/delete/substitute). */
+    private static int levenshtein(String a, String b) {
+        int[][] d = new int[a.length() + 1][b.length() + 1];
+        for (int i = 0; i <= a.length(); i++) d[i][0] = i;
+        for (int j = 0; j <= b.length(); j++) d[0][j] = j;
+        for (int i = 1; i <= a.length(); i++) {
+            for (int j = 1; j <= b.length(); j++) {
+                int cost = a.charAt(i - 1) == b.charAt(j - 1) ? 0 : 1;
+                d[i][j] = Math.min(Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1),
+                                   d[i - 1][j - 1] + cost);
+            }
+        }
+        return d[a.length()][b.length()];
     }
 
     /**
