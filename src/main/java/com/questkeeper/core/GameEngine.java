@@ -67,6 +67,12 @@ public class GameEngine implements AutoCloseable {
     // this session. Subsequent visits render compact. Cleared on load.
     private final Set<String> shownLocationsThisSession = new HashSet<>();
 
+    // Drives the "Try: ..." nudge in the game loop. True for the first
+    // turn after a context shift (game start, move to new room, look,
+    // load, combat end, parse failure); flips false after one render so
+    // routine commands don't repeat the hint.
+    private boolean showHintNextTurn = true;
+
     public GameEngine() {
         this.scanner = new Scanner(System.in);
         this.random = new Random();
@@ -354,8 +360,12 @@ public class GameEngine implements AutoCloseable {
             }
             lastSeenLevel = currentLevel;
 
-            // Show action prompt with suggestions
-            Display.showActionPrompt(generateSuggestions());
+            // Show action prompt with suggestions only on context shifts
+            // (first turn, new room, look, load, combat end, parse error).
+            if (showHintNextTurn) {
+                Display.showActionPrompt(generateSuggestions());
+                showHintNextTurn = false;
+            }
             Display.showPrompt(buildModePrompt());
             if (!scanner.hasNextLine()) {
                 // EOF (Ctrl-D / piped input exhausted). Exit cleanly instead
@@ -426,6 +436,7 @@ public class GameEngine implements AutoCloseable {
 
         if (!command.isValid()) {
             Display.showError("I don't understand '" + input + "'. Type 'help' for commands.");
+            showHintNextTurn = true;
             return;
         }
 
@@ -1283,6 +1294,12 @@ public class GameEngine implements AutoCloseable {
         if (location == null) {
             Display.showError("You are nowhere... this shouldn't happen!");
             return;
+        }
+
+        // Full re-renders (move, look, load, combat end, init) re-arm
+        // the next-turn hint. Compact revisit panels stay quiet.
+        if (fullDescription) {
+            showHintNextTurn = true;
         }
 
         // Show status panel at the top
