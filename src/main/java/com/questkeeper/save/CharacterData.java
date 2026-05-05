@@ -69,6 +69,13 @@ public class CharacterData {
     // Unspent Ability Score Improvements waiting for a UI prompt.
     private int pendingAbilityScoreImprovements;
 
+    // Spellcasting state (Wizard/Cleric/Druid/Paladin/Sorcerer/Bard/Warlock/Ranger).
+    // Empty/null on non-casters and on saves predating Phase 1.3.
+    private Set<String> knownCantripIds;
+    private Set<String> knownSpellIds;
+    /** current spell slots remaining; index 0 = 1st-level slot. Sized 9 for L20 casters. */
+    private int[] spellSlotsCurrent;
+
     //creates empty CharacterData
     public CharacterData() {
         this.baseAbilityScores = new HashMap<>();
@@ -162,6 +169,18 @@ public class CharacterData {
         }
 
         data.pendingAbilityScoreImprovements = character.getPendingAbilityScoreImprovements();
+
+        // Spellbook state (skipped for non-casters where canCastSpells()
+        // returns false; their data fields stay null/empty).
+        com.questkeeper.magic.Spellbook sb = character.getSpellbook();
+        if (sb != null && sb.canCastSpells()) {
+            data.knownCantripIds = sb.getKnownCantripIds();
+            data.knownSpellIds = sb.getKnownSpellIds();
+            com.questkeeper.magic.SpellSlots ss = sb.getSpellSlots();
+            if (ss != null) {
+                data.spellSlotsCurrent = ss.getCurrentSlots();
+            }
+        }
 
         return data;
     }
@@ -313,6 +332,24 @@ public class CharacterData {
     // the saved (possibly-spent) count last.
     character.setPendingAbilityScoreImprovements(pendingAbilityScoreImprovements);
 
+    // Spellbook restoration must happen AFTER setLevel — onLevelUp inside
+    // setLevel restoreAlls slots and re-adds default spells, so saved
+    // state would be clobbered if we ran first.
+    com.questkeeper.magic.Spellbook sb = character.getSpellbook();
+    if (sb != null) {
+        if (knownCantripIds != null) {
+            for (String id : knownCantripIds) sb.addCantrip(id);
+        }
+        if (knownSpellIds != null) {
+            // addKnownSpell auto-prepares (per Spellbook fix), so prepared
+            // mirrors known until a preparation UI lands.
+            for (String id : knownSpellIds) sb.addKnownSpell(id);
+        }
+        if (spellSlotsCurrent != null && sb.getSpellSlots() != null) {
+            sb.getSpellSlots().setCurrentSlots(spellSlotsCurrent);
+        }
+    }
+
     return character;
 }
     /**
@@ -361,6 +398,18 @@ public class CharacterData {
         if (druidCircle != null)      map.put("druid_circle", druidCircle);
         if (warlockPatron != null)    map.put("warlock_patron", warlockPatron);
         if (warlockPactBoon != null)  map.put("warlock_pact_boon", warlockPactBoon);
+
+        if (knownCantripIds != null && !knownCantripIds.isEmpty()) {
+            map.put("known_cantrips", new ArrayList<>(knownCantripIds));
+        }
+        if (knownSpellIds != null && !knownSpellIds.isEmpty()) {
+            map.put("known_spells", new ArrayList<>(knownSpellIds));
+        }
+        if (spellSlotsCurrent != null && spellSlotsCurrent.length > 0) {
+            List<Integer> slots = new ArrayList<>();
+            for (int s : spellSlotsCurrent) slots.add(s);
+            map.put("spell_slots_current", slots);
+        }
 
         return map;
 
@@ -440,6 +489,24 @@ public class CharacterData {
         cd.druidCircle     = (String) data.get("druid_circle");
         cd.warlockPatron   = (String) data.get("warlock_patron");
         cd.warlockPactBoon = (String) data.get("warlock_pact_boon");
+
+        // Spellbook state (Phase 1.3+; absent on older saves)
+        List<String> cantrips = (List<String>) data.get("known_cantrips");
+        if (cantrips != null) {
+            cd.knownCantripIds = new LinkedHashSet<>(cantrips);
+        }
+        List<String> spells = (List<String>) data.get("known_spells");
+        if (spells != null) {
+            cd.knownSpellIds = new LinkedHashSet<>(spells);
+        }
+        Object slotsObj = data.get("spell_slots_current");
+        if (slotsObj instanceof List<?> slotsList) {
+            cd.spellSlotsCurrent = new int[slotsList.size()];
+            for (int i = 0; i < slotsList.size(); i++) {
+                Object v = slotsList.get(i);
+                cd.spellSlotsCurrent[i] = v instanceof Number n ? n.intValue() : 0;
+            }
+        }
 
         return cd;
     }

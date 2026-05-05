@@ -145,6 +145,22 @@ public class Spellbook {
     }
 
     /**
+     * Returns the set of cantrip ids the caster has learned. Used for
+     * save/load round-trip. Returned set is a defensive copy.
+     */
+    public java.util.Set<String> getKnownCantripIds() {
+        return new java.util.LinkedHashSet<>(knownCantripIds);
+    }
+
+    /**
+     * Returns the set of leveled-spell ids the caster has learned.
+     * Used for save/load round-trip. Returned set is a defensive copy.
+     */
+    public java.util.Set<String> getKnownSpellIds() {
+        return new java.util.LinkedHashSet<>(knownSpellIds);
+    }
+
+    /**
      * Adds a spell to known spells, and auto-prepares it.
      *
      * <p>Prepared casters (Wizard/Cleric/Druid/Paladin) otherwise need

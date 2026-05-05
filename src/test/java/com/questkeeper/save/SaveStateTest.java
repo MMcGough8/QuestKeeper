@@ -545,6 +545,57 @@ class SaveStateTest {
     }
 
     @Nested
+    @DisplayName("Spellcasting round-trip")
+    class SpellcastingRoundTripTests {
+
+        @Test
+        @DisplayName("Wizard known spells, cantrips, and spent slots survive save/load")
+        void wizardSpellbookRoundTrip() {
+            com.questkeeper.character.Character wiz = new com.questkeeper.character.Character(
+                "Mira", com.questkeeper.character.Character.Race.HALF_ELF,
+                com.questkeeper.character.Character.CharacterClass.WIZARD);
+            wiz.setLevel(5);
+            // Add a non-default spell.
+            wiz.getSpellbook().addKnownSpell("fireball");
+            wiz.getSpellbook().addCantrip("light");
+            // Spend two L1 slots and one L3 slot.
+            assertTrue(wiz.getSpellbook().getSpellSlots().expendSlot(1));
+            assertTrue(wiz.getSpellbook().getSpellSlots().expendSlot(1));
+            assertTrue(wiz.getSpellbook().getSpellSlots().expendSlot(3));
+
+            int[] before = wiz.getSpellbook().getSpellSlots().getCurrentSlots();
+
+            CharacterData data = CharacterData.fromCharacter(wiz);
+            // Round-trip through map for a more realistic test.
+            CharacterData restoredData = CharacterData.fromMap(data.toMap());
+            com.questkeeper.character.Character restored = restoredData.toCharacter();
+
+            int[] after = restored.getSpellbook().getSpellSlots().getCurrentSlots();
+            assertArrayEquals(before, after,
+                "spell slots must round-trip exactly: before=" + java.util.Arrays.toString(before)
+                    + " after=" + java.util.Arrays.toString(after));
+            assertTrue(restored.getSpellbook().getKnownSpellIds().contains("fireball"),
+                "non-default known spell must persist");
+            assertTrue(restored.getSpellbook().getKnownCantripIds().contains("light"),
+                "added cantrip must persist");
+        }
+
+        @Test
+        @DisplayName("non-caster Fighter has no spellbook fields written")
+        void nonCasterHasNoSpellFields() {
+            com.questkeeper.character.Character fighter = new com.questkeeper.character.Character(
+                "Aldric", com.questkeeper.character.Character.Race.HUMAN,
+                com.questkeeper.character.Character.CharacterClass.FIGHTER);
+            fighter.setLevel(5);
+            CharacterData data = CharacterData.fromCharacter(fighter);
+            java.util.Map<String, Object> map = data.toMap();
+            assertFalse(map.containsKey("known_spells"),
+                "non-casters should not write known_spells: " + map.keySet());
+            assertFalse(map.containsKey("spell_slots_current"));
+        }
+    }
+
+    @Nested
     @DisplayName("listSaves discovery")
     class ListSavesTests {
 

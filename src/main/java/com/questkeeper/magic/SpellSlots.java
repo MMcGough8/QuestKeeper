@@ -216,6 +216,21 @@ public class SpellSlots {
     }
 
     /**
+     * Replaces the current-slot array. Used by save/load to restore
+     * spent-slot state. Each entry is clamped to the corresponding max
+     * so a corrupted save can't grant more slots than the level allows.
+     * Indexes outside the maxSlots array are ignored.
+     */
+    public void setCurrentSlots(int[] slots) {
+        if (slots == null) return;
+        int n = Math.min(slots.length, currentSlots.length);
+        for (int i = 0; i < n; i++) {
+            int max = i < maxSlots.length ? maxSlots[i] : 0;
+            currentSlots[i] = Math.max(0, Math.min(slots[i], max));
+        }
+    }
+
+    /**
      * Gets all max slots as an array.
      */
     public int[] getMaxSlotsArray() {
