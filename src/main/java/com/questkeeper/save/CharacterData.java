@@ -53,6 +53,15 @@ public class CharacterData {
     private Set<String> expertiseSkills;           // Skill enum names
     private Set<String> halfElfBonusAbilities;     // Ability enum names; size 0 or 2
 
+    // Subclass choices — enum names from each class's choice enum, null if unset.
+    private String divineDomain;        // Cleric
+    private String arcaneTradition;     // Wizard
+    private String sorcerousOrigin;     // Sorcerer
+    private String bardCollege;         // Bard
+    private String druidCircle;         // Druid
+    private String warlockPatron;       // Warlock
+    private String warlockPactBoon;     // Warlock
+
     // Activated feature use counts (Lay on Hands pool, Ki, Action Surge,
     // Rage, etc.). Keyed by feature ID; values are current uses / pool.
     private Map<String, Integer> featureUses;
@@ -119,6 +128,29 @@ public class CharacterData {
         }
         for (Ability ability : character.getHalfElfBonusAbilities()) {
             data.halfElfBonusAbilities.add(ability.name());
+        }
+
+        // Subclass choices (Phase 3.6 classes)
+        if (character.getDivineDomain() != null) {
+            data.divineDomain = character.getDivineDomain().name();
+        }
+        if (character.getArcaneTradition() != null) {
+            data.arcaneTradition = character.getArcaneTradition().name();
+        }
+        if (character.getSorcerousOrigin() != null) {
+            data.sorcerousOrigin = character.getSorcerousOrigin().name();
+        }
+        if (character.getBardCollege() != null) {
+            data.bardCollege = character.getBardCollege().name();
+        }
+        if (character.getDruidCircle() != null) {
+            data.druidCircle = character.getDruidCircle().name();
+        }
+        if (character.getWarlockPatron() != null) {
+            data.warlockPatron = character.getWarlockPatron().name();
+        }
+        if (character.getWarlockPactBoon() != null) {
+            data.warlockPactBoon = character.getWarlockPactBoon().name();
         }
 
         // Activated feature use counts (Lay on Hands pool, Ki, Action Surge,
@@ -204,6 +236,51 @@ public class CharacterData {
         }
     }
 
+    // Subclass choices must be restored BEFORE setLevel so that
+    // ClassFeatureWiring sees them when adding level-gated features.
+    if (divineDomain != null) {
+        try {
+            character.setDivineDomain(
+                com.questkeeper.character.features.ClericFeatures.DivineDomain.valueOf(divineDomain));
+        } catch (RuntimeException e) { /* unknown; skip */ }
+    }
+    if (arcaneTradition != null) {
+        try {
+            character.setArcaneTradition(
+                com.questkeeper.character.features.WizardFeatures.ArcaneTradition.valueOf(arcaneTradition));
+        } catch (RuntimeException e) { /* skip */ }
+    }
+    if (sorcerousOrigin != null) {
+        try {
+            character.setSorcerousOrigin(
+                com.questkeeper.character.features.SorcererFeatures.SorcerousOrigin.valueOf(sorcerousOrigin));
+        } catch (RuntimeException e) { /* skip */ }
+    }
+    if (bardCollege != null) {
+        try {
+            character.setBardCollege(
+                com.questkeeper.character.features.BardFeatures.BardCollege.valueOf(bardCollege));
+        } catch (RuntimeException e) { /* skip */ }
+    }
+    if (druidCircle != null) {
+        try {
+            character.setDruidCircle(
+                com.questkeeper.character.features.DruidFeatures.DruidCircle.valueOf(druidCircle));
+        } catch (RuntimeException e) { /* skip */ }
+    }
+    if (warlockPatron != null) {
+        try {
+            character.setWarlockPatron(
+                com.questkeeper.character.features.WarlockFeatures.OtherworldlyPatron.valueOf(warlockPatron));
+        } catch (RuntimeException e) { /* skip */ }
+    }
+    if (warlockPactBoon != null) {
+        try {
+            character.setWarlockPactBoon(
+                com.questkeeper.character.features.WarlockFeatures.PactBoon.valueOf(warlockPactBoon));
+        } catch (RuntimeException e) { /* skip */ }
+    }
+
     // Set level (will recalculate max HP)
     character.setLevel(level);
     character.setExperiencePoints(experiencePoints);
@@ -277,6 +354,14 @@ public class CharacterData {
             map.put("pending_ability_score_improvements", pendingAbilityScoreImprovements);
         }
 
+        if (divineDomain != null)     map.put("divine_domain", divineDomain);
+        if (arcaneTradition != null)  map.put("arcane_tradition", arcaneTradition);
+        if (sorcerousOrigin != null)  map.put("sorcerous_origin", sorcerousOrigin);
+        if (bardCollege != null)      map.put("bard_college", bardCollege);
+        if (druidCircle != null)      map.put("druid_circle", druidCircle);
+        if (warlockPatron != null)    map.put("warlock_patron", warlockPatron);
+        if (warlockPactBoon != null)  map.put("warlock_pact_boon", warlockPactBoon);
+
         return map;
 
     }
@@ -347,6 +432,14 @@ public class CharacterData {
         }
 
         cd.pendingAbilityScoreImprovements = getInt(data, "pending_ability_score_improvements", 0);
+
+        cd.divineDomain    = (String) data.get("divine_domain");
+        cd.arcaneTradition = (String) data.get("arcane_tradition");
+        cd.sorcerousOrigin = (String) data.get("sorcerous_origin");
+        cd.bardCollege     = (String) data.get("bard_college");
+        cd.druidCircle     = (String) data.get("druid_circle");
+        cd.warlockPatron   = (String) data.get("warlock_patron");
+        cd.warlockPactBoon = (String) data.get("warlock_pact_boon");
 
         return cd;
     }

@@ -1,0 +1,54 @@
+save_version: '1.0'
+timestamp: '2026-05-05T00:14:16.434313Z'
+campaign_id: drownedgod
+save_name: Thrain (Barbarian L9 Berserker) - Brutal Critical online
+character:
+  name: Thrain Stormjaw
+  race: HALF_ORC
+  class: BARBARIAN
+  level: 9
+  experience_points: 0
+  ability_scores:
+    INTELLIGENCE: 8
+    WISDOM: 12
+    CHARISMA: 10
+    DEXTERITY: 14
+    STRENGTH: 18
+    CONSTITUTION: 16
+  skill_proficiencies:
+  - SURVIVAL
+  - PERCEPTION
+  - ATHLETICS
+  - INTIMIDATION
+  saving_throw_proficiencies:
+  - STRENGTH
+  - CONSTITUTION
+  current_hp: 95
+  max_hp: 95
+  temp_hp: 0
+  armor_bonus: 0
+  shield_bonus: 0
+  available_hit_dice: 9
+  feature_uses:
+    rage: 4
+    reckless_attack: 1
+current_location: harbor_district
+visited_locations:
+- harbor_district
+flags:
+  survived_first_storm: true
+counters: {
+  }
+strings: {
+  }
+inventory:
+- javelin
+- javelin
+- javelin
+equipped:
+- greataxe
+equipped_slots:
+  MAIN_HAND: greataxe
+gold: 220
+play_time_seconds: 0
+save_count: 1

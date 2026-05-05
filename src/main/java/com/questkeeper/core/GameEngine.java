@@ -335,15 +335,19 @@ public class GameEngine implements AutoCloseable {
             }
 
             // Auto-save on level-up. Best-effort; failures don't block.
-            if (player.getLevel() > lastSeenLevel) {
+            // Only fire on +1 level changes (genuine level-ups via XP) — a
+            // larger jump means the player loaded a higher-level save and
+            // we should not stomp their existing save with a fresh auto.
+            int currentLevel = player.getLevel();
+            if (currentLevel == lastSeenLevel + 1) {
                 var autoPath = com.questkeeper.save.SaveState.autoSave(
-                    gameState, "level-" + player.getLevel());
+                    gameState, "level-" + currentLevel);
                 if (autoPath != null) {
                     Display.println(Display.colorize(
                         "[Auto-saved: " + autoPath + "]", YELLOW));
                 }
-                lastSeenLevel = player.getLevel();
             }
+            lastSeenLevel = currentLevel;
 
             // Show action prompt with suggestions
             Display.showActionPrompt(generateSuggestions());
@@ -674,8 +678,13 @@ public class GameEngine implements AutoCloseable {
                     saveState.getCampaignId() + "). Some data may not load correctly.");
             }
 
-            // Restore game state
+            // Restore game state and refresh the command-handler context so
+            // routed commands (stats, inventory, etc.) see the new character.
             gameState = GameState.fromSaveState(saveState, campaign);
+            gameContext = new GameContext(
+                campaign, gameState, dialogueSystem, combatSystem,
+                restSystem, scanner, random
+            );
 
             Display.println(Display.colorize("Game loaded successfully!", GREEN));
             Display.println();

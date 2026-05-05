@@ -1,0 +1,64 @@
+save_version: '1.0'
+timestamp: '2026-05-05T00:14:16.371299Z'
+campaign_id: muddlebrook
+save_name: Aelar (Paladin L5) - Trial 1 done, gearing up for the clocktower
+character:
+  name: Aelar Brightwood
+  race: HUMAN
+  class: PALADIN
+  level: 5
+  experience_points: 0
+  ability_scores:
+    INTELLIGENCE: 10
+    WISDOM: 12
+    CHARISMA: 16
+    DEXTERITY: 10
+    STRENGTH: 18
+    CONSTITUTION: 14
+  skill_proficiencies:
+  - ATHLETICS
+  - RELIGION
+  - PERSUASION
+  saving_throw_proficiencies:
+  - WISDOM
+  - CHARISMA
+  current_hp: 44
+  max_hp: 44
+  temp_hp: 0
+  armor_bonus: 0
+  shield_bonus: 0
+  available_hit_dice: 5
+  fighting_style: DEFENSE
+  feature_uses:
+    lay_on_hands: 25
+    channel_divinity: 1
+    divine_sense: 4
+current_location: clocktower_base
+visited_locations:
+- mayors_office
+- drunken_dragon_inn
+- clocktower_hill
+- town_square
+- clocktower_base
+flags:
+  started_trial_01: true
+  clocktower_hill_unlocked: true
+  completed_trial_01: true
+  met_norrin: true
+counters: {
+  }
+strings: {
+  }
+inventory: [
+  ]
+equipped:
+- shield
+- chain_mail
+- longsword
+equipped_slots:
+  ARMOR: chain_mail
+  MAIN_HAND: longsword
+  OFF_HAND: shield
+gold: 85
+play_time_seconds: 0
+save_count: 1

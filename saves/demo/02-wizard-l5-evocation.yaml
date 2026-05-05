@@ -1,0 +1,54 @@
+save_version: '1.0'
+timestamp: '2026-05-05T00:14:16.398013Z'
+campaign_id: eberron
+save_name: Mira (Wizard L5 Evocation) - Sculpt Spells, ready to cast
+character:
+  name: Mira Steelglint
+  race: HALF_ELF
+  class: WIZARD
+  level: 5
+  experience_points: 0
+  ability_scores:
+    INTELLIGENCE: 18
+    WISDOM: 12
+    CHARISMA: 10
+    DEXTERITY: 14
+    STRENGTH: 8
+    CONSTITUTION: 14
+  skill_proficiencies:
+  - INVESTIGATION
+  - ARCANA
+  - HISTORY
+  saving_throw_proficiencies:
+  - INTELLIGENCE
+  - WISDOM
+  current_hp: 32
+  max_hp: 32
+  temp_hp: 0
+  armor_bonus: 0
+  shield_bonus: 0
+  available_hit_dice: 5
+  half_elf_bonus_abilities:
+  - INTELLIGENCE
+  - DEXTERITY
+  feature_uses:
+    arcane_recovery: 1
+  arcane_tradition: EVOCATION
+current_location: convergence_plaza
+visited_locations:
+- convergence_plaza
+flags: {
+  }
+counters: {
+  }
+strings: {
+  }
+inventory: [
+  ]
+equipped:
+- quarterstaff
+equipped_slots:
+  MAIN_HAND: quarterstaff
+gold: 40
+play_time_seconds: 0
+save_count: 1

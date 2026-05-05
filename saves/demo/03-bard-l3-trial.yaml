@@ -1,0 +1,65 @@
+save_version: '1.0'
+timestamp: '2026-05-05T00:14:16.412785Z'
+campaign_id: muddlebrook
+save_name: Lirael (Bard L3 Lore) - Mayor's Office, 3 of 6 clues solved
+character:
+  name: Lirael Songweaver
+  race: HALF_ELF
+  class: BARD
+  level: 3
+  experience_points: 0
+  ability_scores:
+    INTELLIGENCE: 12
+    WISDOM: 10
+    CHARISMA: 16
+    DEXTERITY: 14
+    STRENGTH: 8
+    CONSTITUTION: 12
+  skill_proficiencies:
+  - PERFORMANCE
+  - PERSUASION
+  - SLEIGHT_OF_HAND
+  - INVESTIGATION
+  saving_throw_proficiencies:
+  - CHARISMA
+  - DEXTERITY
+  current_hp: 21
+  max_hp: 21
+  temp_hp: 0
+  armor_bonus: 0
+  shield_bonus: 0
+  available_hit_dice: 3
+  half_elf_bonus_abilities:
+  - INTELLIGENCE
+  - DEXTERITY
+  feature_uses:
+    bardic_inspiration: 1
+  bard_college: LORE
+current_location: mayors_office
+visited_locations:
+- mayors_office
+- drunken_dragon_inn
+- town_square
+- town_hall
+flags:
+  started_trial_01: true
+  met_darius: true
+  completed_minigame_mechanical_frog: true
+  met_norrin: true
+  completed_minigame_backwards_clock: true
+  completed_minigame_three_locks: true
+counters:
+  clues_found: 3
+strings: {
+  }
+inventory: [
+  ]
+equipped:
+- leather_armor
+- rapier
+equipped_slots:
+  ARMOR: leather_armor
+  MAIN_HAND: rapier
+gold: 35
+play_time_seconds: 0
+save_count: 1
