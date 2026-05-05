@@ -1254,7 +1254,8 @@ public class GameEngine implements AutoCloseable {
 
         Display.clearScreen();
         Display.showHeader();
-        Display.printBox("~ " + campaign.getName() + " ~", 60, MAGENTA);
+        Display.printBox("~ " + campaign.getName() + " ~", 60,
+            Display.themeFor(campaign.getId()).accent());
         Display.println();
 
         // Display the intro text with blockquote style
@@ -1329,7 +1330,8 @@ public class GameEngine implements AutoCloseable {
         shownLocationsThisSession.add(location.getId());
 
         Display.println();
-        Display.printBox(location.getName(), 60, CYAN);
+        Display.printBox(location.getName(), 60,
+            Display.themeFor(campaign.getId()).primary());
         Display.println();
 
         // Show description (read-aloud for first visit, regular description otherwise)

@@ -3,6 +3,8 @@ package com.questkeeper.ui;
 import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.AnsiConsole;
 
+import java.util.Map;
+
 import static org.fusesource.jansi.Ansi.Color.*;
 import static org.fusesource.jansi.Ansi.ansi;
 
@@ -534,6 +536,27 @@ public class Display {
     public static String danger(String text)  { return colorize(text, RED); }
     /** Narrative voice / storyteller asides. */
     public static String narrative(String text) { return colorize(text, MAGENTA); }
+
+    /**
+     * Two-color palette assigned to a campaign. Used by location boxes,
+     * intro banners, and other chrome so campaigns look distinct on
+     * sight. Authors don't currently override; map below is hardcoded.
+     */
+    public record CampaignTheme(Ansi.Color primary, Ansi.Color accent) {
+        public static final CampaignTheme DEFAULT = new CampaignTheme(CYAN, MAGENTA);
+    }
+
+    private static final Map<String, CampaignTheme> CAMPAIGN_THEMES = Map.of(
+        "muddlebrook", new CampaignTheme(YELLOW, CYAN),    // brass clockwork + cool mystery
+        "eberron",     new CampaignTheme(CYAN, YELLOW),    // cosmic shards + tournament gold
+        "drownedgod",  new CampaignTheme(BLUE, MAGENTA)    // deep waters + cursed eldritch
+    );
+
+    /** Looks up the campaign's theme palette; falls back to a sensible default. */
+    public static CampaignTheme themeFor(String campaignId) {
+        if (campaignId == null) return CampaignTheme.DEFAULT;
+        return CAMPAIGN_THEMES.getOrDefault(campaignId.toLowerCase(), CampaignTheme.DEFAULT);
+    }
 
     /**
      * Returns the ANSI color for a D&D 5e item rarity tier:

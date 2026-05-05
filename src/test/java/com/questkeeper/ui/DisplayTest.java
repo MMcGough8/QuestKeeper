@@ -852,6 +852,54 @@ class DisplayTest {
     }
 
     @Nested
+    @DisplayName("Per-campaign theme palettes")
+    class CampaignThemeTests {
+
+        @Test
+        @DisplayName("muddlebrook uses brass yellow primary, cyan accent")
+        void muddlebrookTheme() {
+            Display.CampaignTheme t = Display.themeFor("muddlebrook");
+            assertEquals(org.fusesource.jansi.Ansi.Color.YELLOW, t.primary());
+            assertEquals(org.fusesource.jansi.Ansi.Color.CYAN, t.accent());
+        }
+
+        @Test
+        @DisplayName("eberron uses cosmic cyan primary, gold accent")
+        void eberronTheme() {
+            Display.CampaignTheme t = Display.themeFor("eberron");
+            assertEquals(org.fusesource.jansi.Ansi.Color.CYAN, t.primary());
+            assertEquals(org.fusesource.jansi.Ansi.Color.YELLOW, t.accent());
+        }
+
+        @Test
+        @DisplayName("drownedgod uses deep blue primary, magenta accent")
+        void drownedgodTheme() {
+            Display.CampaignTheme t = Display.themeFor("drownedgod");
+            assertEquals(org.fusesource.jansi.Ansi.Color.BLUE, t.primary());
+            assertEquals(org.fusesource.jansi.Ansi.Color.MAGENTA, t.accent());
+        }
+
+        @Test
+        @DisplayName("unknown campaign id falls back to default cyan/magenta")
+        void unknownCampaignTheme() {
+            Display.CampaignTheme t = Display.themeFor("xanathar");
+            assertEquals(Display.CampaignTheme.DEFAULT, t);
+        }
+
+        @Test
+        @DisplayName("null campaign id falls back to default")
+        void nullCampaignTheme() {
+            assertEquals(Display.CampaignTheme.DEFAULT, Display.themeFor(null));
+        }
+
+        @Test
+        @DisplayName("campaign id is matched case-insensitively")
+        void caseInsensitive() {
+            assertEquals(Display.themeFor("muddlebrook"), Display.themeFor("MUDDLEBROOK"));
+        }
+    }
+
+    @Nested
     @DisplayName("Combat HP bars")
     class HealthBarLineTests {
 
