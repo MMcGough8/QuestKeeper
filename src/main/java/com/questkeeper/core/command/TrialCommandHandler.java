@@ -47,8 +47,7 @@ public class TrialCommandHandler implements CommandHandler {
         Trial trial = context.getCampaign().getTrialAtLocation(locationId);
 
         if (trial == null) {
-            Display.showError("There's no trial at this location.");
-            listAvailableTrials(context);
+            Display.showError("There's no trial at this location. Explore the world to find them.");
             return CommandResult.failure("No trial at location");
         }
 
@@ -83,19 +82,6 @@ public class TrialCommandHandler implements CommandHandler {
             }
         }
         return true;
-    }
-
-    private void listAvailableTrials(GameContext context) {
-        var trials = context.getCampaign().getTrials();
-        if (!trials.isEmpty()) {
-            Display.println("Trials in this campaign:");
-            for (Trial t : trials.values()) {
-                String status = context.getGameState().hasCompletedTrial(t.getId()) ? "[COMPLETE]" :
-                               context.getGameState().hasStartedTrial(t.getId()) ? "[IN PROGRESS]" : "[NOT STARTED]";
-                Display.println("  - " + Display.colorize(t.getName(), MAGENTA) +
-                    " at " + t.getLocation() + " " + status);
-            }
-        }
     }
 
     private void startTrial(GameContext context, Trial trial) {

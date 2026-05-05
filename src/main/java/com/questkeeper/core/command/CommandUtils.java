@@ -28,10 +28,14 @@ public final class CommandUtils {
     public static boolean matchesTarget(String actual, String search) {
         if (actual == null || search == null) return false;
         String lowerActual = actual.toLowerCase();
-        String lowerSearch = search.toLowerCase();
-        // Exact match or contains match
-        if (lowerActual.equals(lowerSearch)
-                || lowerActual.contains(lowerSearch)
+        String lowerSearch = search.toLowerCase().trim();
+        if (lowerSearch.isEmpty()) return false;
+        // Exact match always wins, regardless of length.
+        if (lowerActual.equals(lowerSearch)) return true;
+        // Substring match needs at least 2 chars so 'take a' / 'take e'
+        // doesn't pluck the first item containing that single letter.
+        if (lowerSearch.length() < 2) return false;
+        if (lowerActual.contains(lowerSearch)
                 || lowerActual.replace("_", " ").contains(lowerSearch)) {
             return true;
         }

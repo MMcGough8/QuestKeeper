@@ -551,6 +551,18 @@ public class GameEngine implements AutoCloseable {
             Display.showError("Can't save mid-conversation. Type 'bye' first.");
             return;
         }
+        // Combat state isn't persisted, so saving mid-fight would let the
+        // player load out of the encounter (effectively cheat). Block it.
+        if (combatSystem != null && combatSystem.isInCombat()) {
+            Display.showError("Can't save mid-combat. Finish the fight or flee first.");
+            return;
+        }
+        // Trial state IS in flags, but the active-trial UI mode isn't —
+        // similar story: end the trial run before saving.
+        if (gameContext != null && gameContext.getActiveTrial() != null) {
+            Display.showError("Can't save inside a trial. Complete the current attempt first.");
+            return;
+        }
 
         Display.println();
         Display.printBox("SAVE GAME", 50, CYAN);
