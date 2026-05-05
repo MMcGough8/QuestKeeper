@@ -1437,13 +1437,19 @@ public class GameEngine implements AutoCloseable {
             }
         }
 
-        // Items on the floor → suggest taking the first one.
+        // Items on the floor → suggest taking the first one. Use the
+        // LAST token of the display name as the hint — it's almost always
+        // the most specific noun (e.g., "Mayor Alderwick's Journal" -> "journal").
         if (location != null && !location.getItems().isEmpty()) {
             String firstItemId = location.getItems().get(0);
             var item = campaign.getItem(firstItemId);
             if (item != null) {
-                String shortName = item.getName().split("\\s+")[0].toLowerCase();
-                suggestions.add("take " + shortName);
+                String[] tokens = item.getName().split("\\s+");
+                String shortName = tokens[tokens.length - 1].toLowerCase()
+                    .replaceAll("[^a-z0-9]", "");
+                if (!shortName.isEmpty()) {
+                    suggestions.add("take " + shortName);
+                }
             }
         }
 
