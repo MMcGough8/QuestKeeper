@@ -386,6 +386,9 @@ public class TrialCommandHandler implements CommandHandler {
         if (rollDescription == null || rollDescription.isEmpty()) {
             return "Skill";
         }
+        // Narrow catch: only suppress array-bounds parse-shape errors.
+        // Any other RuntimeException is surfaced so unexpected formats
+        // get noticed during development rather than masked as 'Skill'.
         try {
             String[] plusParts = rollDescription.split("\\+");
             if (plusParts.length > 1) {
@@ -394,8 +397,9 @@ public class TrialCommandHandler implements CommandHandler {
                     return parenParts[0].trim();
                 }
             }
-        } catch (Exception e) {
-            // Fall through to default
+        } catch (ArrayIndexOutOfBoundsException | StringIndexOutOfBoundsException e) {
+            System.err.println("WARN: unexpected roll-description format: '"
+                + rollDescription + "'");
         }
         return "Skill";
     }

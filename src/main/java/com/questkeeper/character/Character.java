@@ -613,14 +613,19 @@ public class Character implements Combatant {
     private int calculateMaxHitPoints() {
         int conMod = getAbilityModifier(Ability.CONSTITUTION);
         int hitDie = characterClass.getHitDie();
-        
-        int hp = hitDie + conMod;
-        
+
+        // RAW: each level contributes max(1, roll/avg + CON mod). Floor
+        // per-level rather than only on the total — a CON 1 Wizard
+        // should still gain 1 HP per level, ending at L20 with 20 HP
+        // rather than 1 HP forever (old single-floor behavior).
+        int hp = Math.max(1, hitDie + conMod);
+
+        int avgGain = (hitDie / 2) + 1;
         for (int i = 2; i <= level; i++) {
-            hp += (hitDie / 2) + 1 + conMod;
+            hp += Math.max(1, avgGain + conMod);
         }
-        
-        return Math.max(1, hp);
+
+        return hp;
     }
     
     public int getSpeed() {
