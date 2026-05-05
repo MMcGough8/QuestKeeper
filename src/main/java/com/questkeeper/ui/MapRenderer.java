@@ -1,6 +1,7 @@
 package com.questkeeper.ui;
 
 import com.questkeeper.campaign.Campaign;
+import com.questkeeper.campaign.Trial;
 import com.questkeeper.state.GameState;
 import com.questkeeper.ui.MapLayout.Coord;
 import com.questkeeper.world.Location;
@@ -39,13 +40,23 @@ public final class MapRenderer {
 
     private MapRenderer() {}
 
+    /** Status of a trial relative to player progress. */
+    public enum TrialStatus { COMPLETED, ACTIVE, AVAILABLE, LOCKED }
+
+    /**
+     * A trial annotation pinned to a room. Self-contained so tests can
+     * pass these without wiring a Campaign that defines trials.
+     */
+    public record TrialMarker(String trialId, String trialName, TrialStatus status) { }
+
     /** Convenience overload for game-loop callers. */
     public static String render(Campaign campaign, GameState state) {
         Set<String> visited = state.getVisitedLocations();
         MapLayout layout = MapLayout.compute(campaign, visited);
         String currentId = state.getCurrentLocationId();
         Predicate<String> isUnlocked = state::isLocationUnlocked;
-        return render(campaign, layout, currentId, isUnlocked);
+        Map<String, TrialMarker> trials = computeTrialMarkers(campaign, state);
+        return render(campaign, layout, currentId, isUnlocked, trials);
     }
 
     /**
@@ -55,6 +66,17 @@ public final class MapRenderer {
     public static String render(Campaign campaign, MapLayout layout,
                                 String currentRoomId,
                                 Predicate<String> isUnlocked) {
+        return render(campaign, layout, currentRoomId, isUnlocked, Map.of());
+    }
+
+    /**
+     * Test-friendly variant with trial annotations. Pass {@link Map#of()}
+     * for {@code trialsByRoom} to skip the trials section.
+     */
+    public static String render(Campaign campaign, MapLayout layout,
+                                String currentRoomId,
+                                Predicate<String> isUnlocked,
+                                Map<String, TrialMarker> trialsByRoom) {
         StringBuilder sb = new StringBuilder();
         appendHeader(sb);
 
@@ -67,10 +89,39 @@ public final class MapRenderer {
         appendVerticalStacks(sb, campaign, layout, isUnlocked);
         appendOrphans(sb, campaign, layout);
         appendConflicts(sb, campaign, layout);
-        appendCounts(sb, campaign, layout, currentRoomId);
-        appendVisitedListing(sb, campaign, layout, currentRoomId, isUnlocked);
+        appendTrials(sb, trialsByRoom, campaign);
+        appendCounts(sb, campaign, layout, currentRoomId, trialsByRoom);
+        appendVisitedListing(sb, campaign, layout, currentRoomId, isUnlocked, trialsByRoom);
         appendLegend(sb);
         return colorizeOutput(sb.toString());
+    }
+
+    private static Map<String, TrialMarker> computeTrialMarkers(Campaign campaign, GameState state) {
+        Map<String, TrialMarker> out = new java.util.LinkedHashMap<>();
+        for (Trial trial : campaign.getTrials().values()) {
+            String roomId = trial.getLocation();
+            if (roomId == null) continue;
+            TrialStatus status;
+            if (state.hasFlag("completed_" + trial.getId())) {
+                status = TrialStatus.COMPLETED;
+            } else if (state.hasFlag("started_" + trial.getId())) {
+                status = TrialStatus.ACTIVE;
+            } else if (allFlagsSet(trial.getPrerequisites(), state)) {
+                status = TrialStatus.AVAILABLE;
+            } else {
+                status = TrialStatus.LOCKED;
+            }
+            out.put(roomId, new TrialMarker(trial.getId(), trial.getName(), status));
+        }
+        return out;
+    }
+
+    private static boolean allFlagsSet(List<String> flags, GameState state) {
+        if (flags == null) return true;
+        for (String f : flags) {
+            if (!state.hasFlag(f)) return false;
+        }
+        return true;
     }
 
     // ==========================================
@@ -308,11 +359,21 @@ public final class MapRenderer {
     // ==========================================
 
     private static void appendCounts(StringBuilder sb, Campaign campaign,
-                                     MapLayout layout, String currentRoomId) {
+                                     MapLayout layout, String currentRoomId,
+                                     Map<String, TrialMarker> trialsByRoom) {
         int discovered = layout.getVisited().size();
         int total = campaign.getLocations().size();
         sb.append("\nLocations discovered: ")
           .append(discovered).append(" / ").append(total).append("\n");
+
+        if (!trialsByRoom.isEmpty()) {
+            long completed = trialsByRoom.values().stream()
+                .filter(m -> m.status() == TrialStatus.COMPLETED).count();
+            int trialTotal = trialsByRoom.size();
+            sb.append("Trials: ").append(completed)
+              .append(" / ").append(trialTotal).append("\n");
+        }
+
         if (currentRoomId != null) {
             Location cur = campaign.getLocation(currentRoomId);
             sb.append("Current: ")
@@ -322,13 +383,52 @@ public final class MapRenderer {
     }
 
     /**
+     * Lists each trial with its status glyph and location. Skipped when
+     * {@code trialsByRoom} is empty (e.g., test variant without trials).
+     */
+    private static void appendTrials(StringBuilder sb,
+                                     Map<String, TrialMarker> trialsByRoom,
+                                     Campaign campaign) {
+        if (trialsByRoom.isEmpty()) return;
+        sb.append("\n").append(Display.info("Trials:")).append("\n");
+        // Order: completed, active, available, locked — quest-tracker UX
+        // (what's done first, what's actionable next, what's still gated).
+        List<TrialStatus> order = List.of(
+            TrialStatus.COMPLETED, TrialStatus.ACTIVE,
+            TrialStatus.AVAILABLE, TrialStatus.LOCKED);
+        for (TrialStatus s : order) {
+            for (var entry : trialsByRoom.entrySet()) {
+                TrialMarker m = entry.getValue();
+                if (m.status() != s) continue;
+                String roomId = entry.getKey();
+                Location loc = campaign.getLocation(roomId);
+                String locName = loc != null ? loc.getName() : roomId;
+                sb.append("  ").append(glyphFor(s)).append(" ")
+                  .append(m.trialName())
+                  .append(" — ").append(locName)
+                  .append("\n");
+            }
+        }
+    }
+
+    private static String glyphFor(TrialStatus s) {
+        return switch (s) {
+            case COMPLETED -> "✓";
+            case ACTIVE    -> "▶";
+            case AVAILABLE -> "★";
+            case LOCKED    -> "·";
+        };
+    }
+
+    /**
      * Lists every visited room by display name. Cells truncate long
      * names to fit the box, but the listing always shows the full name
      * so tests and players can find every place they've been.
      */
     private static void appendVisitedListing(StringBuilder sb, Campaign campaign,
                                              MapLayout layout, String currentRoomId,
-                                             Predicate<String> isUnlocked) {
+                                             Predicate<String> isUnlocked,
+                                             Map<String, TrialMarker> trialsByRoom) {
         Set<String> visited = layout.getVisited();
         if (visited.isEmpty()) return;
 
@@ -344,7 +444,12 @@ public final class MapRenderer {
             String name = loc != null ? loc.getName() : id;
             String marker = id.equals(currentRoomId) ? "[*] " : "    ";
             String lockTag = isUnlocked.test(id) ? "" : " (locked)";
-            sb.append("  ").append(marker).append(name).append(lockTag).append("\n");
+            TrialMarker tm = trialsByRoom.get(id);
+            String trialGlyph = (tm != null && tm.status() != TrialStatus.LOCKED)
+                ? " " + glyphFor(tm.status())
+                : "";
+            sb.append("  ").append(marker).append(name)
+              .append(trialGlyph).append(lockTag).append("\n");
         }
     }
 
@@ -352,6 +457,7 @@ public final class MapRenderer {
         sb.append("\n").append(Display.info("Legend:")).append("\n");
         sb.append("  [*] You are here    ?  Unvisited (you can see it from here)\n");
         sb.append("  ⇕ Vertical path     (locked) Currently inaccessible\n");
+        sb.append("  ✓ Trial completed   ▶ Trial in progress    ★ Trial available\n");
     }
 
     /**

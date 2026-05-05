@@ -10,6 +10,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -400,6 +401,107 @@ class MapRendererTest {
             assertTrue(out.contains("Harbor District"));
             assertTrue(out.contains("Drowning Heart") || out.contains("The Drowning Heart"),
                 "deepest room should appear in the inset");
+        }
+    }
+
+    @Nested
+    @DisplayName("Trial markers (Phase 5a)")
+    class TrialMarkerTests {
+
+        @Test
+        @DisplayName("Trials section shows ✓/▶/★ glyphs for each trial status")
+        void trialsSectionShowsAllStatuses() throws IOException {
+            Campaign c = loadCampaign("a", """
+                locations:
+                  - id: a
+                    name: A
+                    description: a.
+                  - id: b
+                    name: B
+                    description: b.
+                """);
+            MapLayout layout = MapLayout.compute(c, Set.of("a"));
+            Map<String, MapRenderer.TrialMarker> trials = Map.of(
+                "a", new MapRenderer.TrialMarker("t1", "First Mystery",
+                    MapRenderer.TrialStatus.COMPLETED),
+                "b", new MapRenderer.TrialMarker("t2", "Second Quest",
+                    MapRenderer.TrialStatus.AVAILABLE)
+            );
+            String out = MapRenderer.render(c, layout, "a", ALL_UNLOCKED, trials);
+
+            assertTrue(out.toLowerCase().contains("trials:"),
+                "trials section header should appear; got:\n" + out);
+            assertTrue(out.contains("✓"), "completed glyph should appear");
+            assertTrue(out.contains("★"), "available glyph should appear");
+            assertTrue(out.contains("First Mystery"), "trial name should appear");
+            assertTrue(out.contains("Second Quest"), "second trial name should appear");
+        }
+
+        @Test
+        @DisplayName("counts line includes 'Trials: N / M'")
+        void countsIncludesTrialsCount() throws IOException {
+            Campaign c = loadCampaign("a", """
+                locations:
+                  - id: a
+                    name: A
+                    description: a.
+                """);
+            MapLayout layout = MapLayout.compute(c, Set.of("a"));
+            Map<String, MapRenderer.TrialMarker> trials = Map.of(
+                "a", new MapRenderer.TrialMarker("t1", "Done",
+                    MapRenderer.TrialStatus.COMPLETED),
+                "b", new MapRenderer.TrialMarker("t2", "Open",
+                    MapRenderer.TrialStatus.AVAILABLE),
+                "c", new MapRenderer.TrialMarker("t3", "Active",
+                    MapRenderer.TrialStatus.ACTIVE)
+            );
+            String out = MapRenderer.render(c, layout, "a", ALL_UNLOCKED, trials);
+
+            assertTrue(out.contains("Trials: 1 / 3"),
+                "counts line should show 1 completed of 3; got:\n" + out);
+        }
+
+        @Test
+        @DisplayName("no Trials section appears when trialsByRoom is empty")
+        void noTrialsSectionWhenEmpty() throws IOException {
+            Campaign c = loadCampaign("a", """
+                locations:
+                  - id: a
+                    name: A
+                    description: a.
+                """);
+            MapLayout layout = MapLayout.compute(c, Set.of("a"));
+            String out = MapRenderer.render(c, layout, "a", ALL_UNLOCKED, Map.of());
+
+            // Section is skipped entirely so no "Trials:" header appears
+            // (note: "Trials" word does NOT appear in the legend).
+            assertFalse(out.contains("Trials:"),
+                "Trials section should be omitted when no trials; got:\n" + out);
+        }
+
+        @Test
+        @DisplayName("Visited listing shows trial glyph next to room with active trial")
+        void visitedListingIncludesTrialGlyph() throws IOException {
+            Campaign c = loadCampaign("a", """
+                locations:
+                  - id: a
+                    name: Trial Room
+                    description: a.
+                """);
+            MapLayout layout = MapLayout.compute(c, Set.of("a"));
+            Map<String, MapRenderer.TrialMarker> trials = Map.of(
+                "a", new MapRenderer.TrialMarker("t1", "The Test",
+                    MapRenderer.TrialStatus.ACTIVE)
+            );
+            String out = MapRenderer.render(c, layout, "a", ALL_UNLOCKED, trials);
+
+            // The Visited listing line for "Trial Room" should carry the glyph.
+            int visitedIdx = out.toLowerCase().indexOf("visited:");
+            assertTrue(visitedIdx >= 0);
+            String visitedSection = out.substring(visitedIdx);
+            assertTrue(visitedSection.contains("Trial Room"));
+            assertTrue(visitedSection.contains("▶"),
+                "active trial glyph should appear in visited listing; got:\n" + visitedSection);
         }
     }
 
