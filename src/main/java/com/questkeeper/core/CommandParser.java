@@ -400,9 +400,23 @@ public class CommandParser {
         if (input == null || input.isEmpty()) {
             return null;
         }
-        
+
         String[] parts = input.split("\\s+", 2);
         return parts[0].toLowerCase();
+    }
+
+    /**
+     * Maps a single word through the synonym table, returning the
+     * canonical verb when known (e.g., {@code stab} -> {@code attack})
+     * or the original lowercased word otherwise. Lets context-specific
+     * input loops (combat, trials) accept the same player vocabulary
+     * the main loop does without parsing nouns or directions.
+     */
+    public static String mapSynonym(String word) {
+        if (word == null) return null;
+        String lower = word.toLowerCase();
+        String mapped = SYNONYM_MAP.get(lower);
+        return mapped != null ? mapped : lower;
     }
 
     public static String extractNoun(String input) {

@@ -1117,6 +1117,39 @@ class CommandParserTest {
     }
 
     @Nested
+    @DisplayName("mapSynonym (context-free word lookup)")
+    class MapSynonymTests {
+
+        @Test
+        @DisplayName("stab maps to attack")
+        void stabMapsToAttack() {
+            assertEquals("attack", CommandParser.mapSynonym("stab"));
+        }
+
+        @Test
+        @DisplayName("STAB also maps to attack (case-insensitive)")
+        void stabUppercase() {
+            assertEquals("attack", CommandParser.mapSynonym("STAB"));
+        }
+
+        @Test
+        @DisplayName("verbs not in the synonym map pass through lowercase")
+        void unknownVerbPassesThrough() {
+            // 'rage' is a Barbarian class action; not in the synonym map.
+            // 'wiggle' is plain unrecognized vocabulary. Both should pass
+            // through lowercased so callers can decide what to do.
+            assertEquals("rage", CommandParser.mapSynonym("RAGE"));
+            assertEquals("wiggle", CommandParser.mapSynonym("Wiggle"));
+        }
+
+        @Test
+        @DisplayName("null returns null")
+        void nullReturnsNull() {
+            assertNull(CommandParser.mapSynonym(null));
+        }
+    }
+
+    @Nested
     @DisplayName("World map verb")
     class WorldMapVerbTests {
 

@@ -50,6 +50,24 @@ public class GameEngine implements AutoCloseable {
 
     private static final double RANDOM_ENCOUNTER_CHANCE = 0.15; // 15% chance when moving
 
+    /**
+     * Class-action verbs the combat loop must pass to CombatSystem
+     * unchanged, even though the global synonym map remaps some of
+     * them outside combat (e.g., 'smite' -> attack, 'turn' -> use,
+     * 'dash' -> go). Inside a fight, these mean the class action.
+     */
+    private static final Set<String> COMBAT_CLASS_VERBS = Set.of(
+        "smite", "divinesmite",
+        "rage", "frenzy", "reckless",
+        "turn", "layonhands", "sacredweapon",
+        "flurry", "patient", "step", "stun",
+        "dash", "disengage", "hide",
+        "inspire", "bardic",
+        "surge", "secondwind",
+        "wildshape", "fontofmagic", "sorrypoint",
+        "help", "?"
+    );
+
     private final Scanner scanner;
     private final Random random;
     private Campaign campaign;
@@ -981,9 +999,16 @@ public class GameEngine implements AutoCloseable {
                     continue;
                 }
 
-                // Parse combat command
+                // Parse combat command. Route the verb through the main
+                // synonym map so 'stab', 'slash', 'pummel' etc. all resolve
+                // to 'attack' just like outside combat. Class actions get
+                // a pass-through allowlist so verbs that overlap the
+                // synonym map (smite -> attack outside combat, but Divine
+                // Smite during it) keep their class meaning here.
                 String[] parts = input.split("\\s+", 2);
-                String action = parts[0];
+                String action = COMBAT_CLASS_VERBS.contains(parts[0])
+                    ? parts[0]
+                    : CommandParser.mapSynonym(parts[0]);
                 String target = parts.length > 1 ? parts[1] : null;
 
                 // System commands that should work even mid-combat
@@ -1087,6 +1112,7 @@ public class GameEngine implements AutoCloseable {
     private void displayCombatStatus() {
         Display.println();
         Display.println(Display.colorize("COMBATANTS", RED));
+        Display.println();
         Character player = gameState.getCharacter();
 
         // Pick a label-column width that fits the longest name, with a
@@ -1099,9 +1125,11 @@ public class GameEngine implements AutoCloseable {
         Display.println(Display.healthBarLine("You", CYAN,
             player.getCurrentHitPoints(), player.getMaxHitPoints(), labelWidth));
         for (Combatant enemy : combatSystem.getLivingEnemies()) {
+            Display.println();
             Display.println(Display.healthBarLine(enemy.getName(), RED,
                 enemy.getCurrentHitPoints(), enemy.getMaxHitPoints(), labelWidth));
         }
+        Display.println();
     }
 
     private void displayCombatResult(CombatResult result) {
