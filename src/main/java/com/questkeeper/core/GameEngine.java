@@ -389,6 +389,16 @@ public class GameEngine implements AutoCloseable {
             return;
         }
 
+        // Bare exit name shortcut: "market" -> "go market" when an exit
+        // by that name exists at the current location. Players naturally
+        // type the suggestion shown in `Try: go market, look`.
+        if (!command.isValid() && gameState != null) {
+            var loc = gameState.getCurrentLocation();
+            if (loc != null && loc.hasExit(input.trim().toLowerCase())) {
+                command = CommandParser.parse("go " + input.trim());
+            }
+        }
+
         if (!command.isValid()) {
             Display.showError("I don't understand '" + input + "'. Type 'help' for commands.");
             return;
