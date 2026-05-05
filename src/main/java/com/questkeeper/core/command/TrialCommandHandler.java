@@ -420,9 +420,15 @@ public class TrialCommandHandler implements CommandHandler {
         var item = context.getCampaign().getItem(rewardId);
         if (item != null) {
             context.getCharacter().getInventory().addItem(item);
-            Display.showItemGained(item.getName(), item.getDescription());
+            Display.showItemGained(item);
         } else {
-            Display.println(Display.colorize("Reward: " + rewardId, YELLOW));
+            // Reward id doesn't resolve to an item in the campaign — author
+            // typo or missing items.yaml entry. Surface to player + log so
+            // it isn't a silent loss.
+            System.err.println("WARN: mini-game '" + game.getId()
+                + "' references unknown reward item '" + rewardId + "'");
+            Display.showWarning("Promised reward `" + rewardId
+                + "` couldn't be found in this campaign.");
         }
     }
 
@@ -489,9 +495,15 @@ public class TrialCommandHandler implements CommandHandler {
             var item = context.getCampaign().getItem(rewardId);
             if (item != null) {
                 context.getCharacter().getInventory().addItem(item);
-                Display.showItemGained(item.getName(), item.getDescription());
+                Display.showItemGained(item);
             } else {
-                Display.println(Display.colorize("You received: " + rewardId, YELLOW));
+                // Reward id doesn't resolve to a campaign item — surface
+                // visibly so a player isn't told they "received" something
+                // they didn't actually get.
+                System.err.println("WARN: trial '" + trial.getId()
+                    + "' references unknown reward item '" + rewardId + "'");
+                Display.showWarning("Promised reward `" + rewardId
+                    + "` couldn't be found in this campaign.");
             }
         }
 
