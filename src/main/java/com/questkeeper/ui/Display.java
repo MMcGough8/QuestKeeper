@@ -119,6 +119,38 @@ public class Display {
         println();
     }
 
+    /**
+     * Builds a single combatant HP bar line: padded name + colored bar
+     * + numeric HP. Bar color tracks HP percentage (green > 50%, yellow
+     * 25-50%, red below). Use this in combat status displays so the
+     * fight is visceral, not a number readout.
+     *
+     * @param name        plain (uncolored) display name
+     * @param nameColor   color to apply to the name (e.g. CYAN for player, RED for enemy)
+     * @param current     current HP
+     * @param max         max HP
+     * @param labelWidth  column width for the name (pad shorter names)
+     */
+    public static String healthBarLine(String name, Ansi.Color nameColor,
+                                       int current, int max, int labelWidth) {
+        int barWidth = 20;
+        double pct = max > 0 ? Math.min(1.0, (double) current / max) : 0;
+        int filled = Math.max(0, Math.min(barWidth, (int) Math.round(pct * barWidth)));
+        Ansi.Color barColor =
+            pct > 0.5  ? GREEN :
+            pct > 0.25 ? YELLOW :
+                         RED;
+        String paddedName = String.format("%-" + Math.max(1, labelWidth) + "s", name);
+        StringBuilder sb = new StringBuilder("  ");
+        sb.append(colorize(paddedName, nameColor));
+        sb.append(" [");
+        sb.append(colorize("█".repeat(filled), barColor));
+        sb.append(colorize("░".repeat(barWidth - filled), DEFAULT));
+        sb.append("] ");
+        sb.append(colorize(String.format("%3d/%-3d", current, max), barColor));
+        return sb.toString();
+    }
+
     public static void printHealthBar(int current, int max) {
         int barWidth = 20;
         int filled = (int) ((double) current / max * barWidth);

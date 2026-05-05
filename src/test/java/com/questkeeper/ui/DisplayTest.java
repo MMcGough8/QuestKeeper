@@ -852,6 +852,47 @@ class DisplayTest {
     }
 
     @Nested
+    @DisplayName("Combat HP bars")
+    class HealthBarLineTests {
+
+        @Test
+        @DisplayName("contains the combatant name and HP numbers")
+        void includesNameAndNumbers() {
+            String line = Display.healthBarLine("Goblin",
+                org.fusesource.jansi.Ansi.Color.RED, 5, 8, 8);
+            assertTrue(line.contains("Goblin"));
+            assertTrue(line.contains("5/8"));
+        }
+
+        @Test
+        @DisplayName("padded name keeps shorter names left-aligned")
+        void paddedName() {
+            String line = Display.healthBarLine("You",
+                org.fusesource.jansi.Ansi.Color.CYAN, 12, 12, 10);
+            // 'You' + 7 trailing spaces = 10-char column.
+            assertTrue(line.contains("You       "),
+                "expected 10-wide padded name; got:\n" + line);
+        }
+
+        @Test
+        @DisplayName("clamps current > max to a full bar without throwing")
+        void clampsOverflow() {
+            assertDoesNotThrow(() ->
+                Display.healthBarLine("Tank", org.fusesource.jansi.Ansi.Color.GREEN,
+                    100, 50, 8));
+        }
+
+        @Test
+        @DisplayName("zero max HP falls through cleanly with empty bar")
+        void zeroMaxHp() {
+            String line = Display.healthBarLine("Wraith",
+                org.fusesource.jansi.Ansi.Color.MAGENTA, 0, 0, 8);
+            assertTrue(line.contains("Wraith"));
+            assertTrue(line.contains("0/0"));
+        }
+    }
+
+    @Nested
     @DisplayName("Item rarity coloring")
     class RarityColorTests {
 

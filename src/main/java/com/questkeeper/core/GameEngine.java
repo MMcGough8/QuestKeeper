@@ -1086,24 +1086,22 @@ public class GameEngine implements AutoCloseable {
 
     private void displayCombatStatus() {
         Display.println();
+        Display.println(Display.colorize("COMBATANTS", RED));
         Character player = gameState.getCharacter();
 
-        // One-line combatant summary: [You 12/12 | Goblin 5/8 | Bandit 4/10]
-        StringBuilder line = new StringBuilder();
-        line.append(Display.colorize(
-            String.format("[You %d/%d", player.getCurrentHitPoints(), player.getMaxHitPoints()),
-            GREEN));
+        // Pick a label-column width that fits the longest name, with a
+        // sensible floor so short rows still align.
+        int labelWidth = 4; // "You" + space
         for (Combatant enemy : combatSystem.getLivingEnemies()) {
-            line.append(Display.colorize(" | ", WHITE));
-            line.append(Display.colorize(
-                String.format("%s %d/%d",
-                    enemy.getName(),
-                    enemy.getCurrentHitPoints(),
-                    enemy.getMaxHitPoints()),
-                RED));
+            labelWidth = Math.max(labelWidth, enemy.getName().length());
         }
-        line.append(Display.colorize("]", WHITE));
-        Display.println(line.toString());
+
+        Display.println(Display.healthBarLine("You", CYAN,
+            player.getCurrentHitPoints(), player.getMaxHitPoints(), labelWidth));
+        for (Combatant enemy : combatSystem.getLivingEnemies()) {
+            Display.println(Display.healthBarLine(enemy.getName(), RED,
+                enemy.getCurrentHitPoints(), enemy.getMaxHitPoints(), labelWidth));
+        }
     }
 
     private void displayCombatResult(CombatResult result) {
