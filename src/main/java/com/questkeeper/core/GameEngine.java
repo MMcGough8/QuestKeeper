@@ -770,6 +770,13 @@ public class GameEngine implements AutoCloseable {
             Display.println();
             Display.println("Welcome back, " + gameState.getCharacter().getName() + "!");
             Display.println("Play time: " + gameState.getFormattedPlayTime());
+
+            // Surface any partial-load warnings so the player knows what
+            // didn't restore (e.g., items not in this campaign, slot
+            // mismatches). Stays silent on a clean load.
+            for (String warn : gameState.getLoadWarnings()) {
+                Display.showWarning(warn);
+            }
             Display.println();
 
             // Show current location

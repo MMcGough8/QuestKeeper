@@ -52,6 +52,14 @@ public class GameState {
     private long previousPlayTimeSeconds;
 
     /**
+     * Warnings produced during the most recent {@link #fromSaveState} call —
+     * e.g., equipped items that couldn't be located in the current campaign,
+     * or slot-name mismatches. Empty for fresh games. {@link com.questkeeper.core.GameEngine#loadGame}
+     * surfaces these to the player so a partial load isn't silent.
+     */
+    private final List<String> loadWarnings = new ArrayList<>();
+
+    /**
      * Creates a new GameState for a fresh game.
      */
     public GameState(Character character, Campaign campaign) {
@@ -149,36 +157,55 @@ public class GameState {
         // Restore variables
         state.variables.putAll(saveState.getStateStrings());
 
-        // Restore inventory items from campaign or StandardEquipment
+        // Restore inventory items from campaign or StandardEquipment.
+        // Track lookup failures (often cross-campaign load) and weight-cap
+        // overflows so the load isn't silently lossy.
         StandardEquipment stdEquip = StandardEquipment.getInstance();
         for (String itemId : saveState.getInventoryItems()) {
             Item item = findItem(itemId, campaign, stdEquip);
-            if (item != null) {
-                if (!character.getInventory().addItem(item)) {
-                    System.err.println("Warning: could not load item '" + itemId +
-                        "' (likely over carrying capacity).");
-                }
+            if (item == null) {
+                String msg = "Backpack item '" + itemId
+                    + "' is not part of this campaign; dropped on load.";
+                System.err.println("WARN: " + msg);
+                state.loadWarnings.add(msg);
+                continue;
+            }
+            if (!character.getInventory().addItem(item)) {
+                String msg = "Could not pack '" + item.getName()
+                    + "' on load (likely over carrying capacity).";
+                System.err.println("WARN: " + msg);
+                state.loadWarnings.add(msg);
             }
         }
 
-        // Restore equipped items (use slot info if available, fallback to legacy)
+        // Restore equipped items (use slot info if available, fallback to legacy).
+        // Warnings collected here so we can show the player exactly what
+        // didn't restore — silent drops mask save corruption + cross-campaign
+        // loads.
+        java.util.List<String> equipWarnings = new java.util.ArrayList<>();
         if (saveState.hasEquippedSlots()) {
             // New format: restore to exact slots
             for (var entry : saveState.getEquippedSlots().entrySet()) {
                 String slotName = entry.getKey();
                 String itemId = entry.getValue();
                 Item item = findItem(itemId, campaign, stdEquip);
-                if (item != null) {
-                    character.getInventory().addItem(item);
-                    try {
-                        EquipmentSlot slot = EquipmentSlot.valueOf(slotName);
-                        character.getInventory().equipToSlot(item, slot);
-                    } catch (IllegalArgumentException e) {
-                        // Invalid slot name, use default
-                        EquipmentSlot slot = determineSlotForItem(item);
-                        if (slot != null) {
-                            character.getInventory().equipToSlot(item, slot);
-                        }
+                if (item == null) {
+                    equipWarnings.add("Could not find equipped item '" + itemId
+                        + "' (slot " + slotName + ") in this campaign.");
+                    continue;
+                }
+                character.getInventory().addItem(item);
+                try {
+                    EquipmentSlot slot = EquipmentSlot.valueOf(slotName);
+                    character.getInventory().equipToSlot(item, slot);
+                } catch (IllegalArgumentException e) {
+                    EquipmentSlot fallback = determineSlotForItem(item);
+                    if (fallback != null) {
+                        character.getInventory().equipToSlot(item, fallback);
+                    } else {
+                        equipWarnings.add("Could not restore '" + item.getName()
+                            + "' to slot '" + slotName
+                            + "'; left in backpack.");
                     }
                 }
             }
@@ -186,14 +213,26 @@ public class GameState {
             // Legacy format: use default slots
             for (String itemId : saveState.getEquippedItems()) {
                 Item item = findItem(itemId, campaign, stdEquip);
-                if (item != null) {
-                    character.getInventory().addItem(item);
-                    EquipmentSlot slot = determineSlotForItem(item);
-                    if (slot != null) {
-                        character.getInventory().equipToSlot(item, slot);
-                    }
+                if (item == null) {
+                    equipWarnings.add("Could not find equipped item '" + itemId
+                        + "' in this campaign.");
+                    continue;
+                }
+                character.getInventory().addItem(item);
+                EquipmentSlot slot = determineSlotForItem(item);
+                if (slot != null) {
+                    character.getInventory().equipToSlot(item, slot);
+                } else {
+                    equipWarnings.add("Could not infer slot for '"
+                        + item.getName() + "'; left in backpack.");
                 }
             }
+        }
+        if (!equipWarnings.isEmpty()) {
+            for (String w : equipWarnings) {
+                System.err.println("WARN: " + w);
+            }
+            state.loadWarnings.addAll(equipWarnings);
         }
 
         // Restore gold
@@ -406,6 +445,15 @@ public class GameState {
 
     public Set<String> getFlags() {
         return Collections.unmodifiableSet(flags);
+    }
+
+    /**
+     * Warnings accumulated during the most recent load. Empty for fresh games.
+     * Caller (GameEngine.loadGame) should surface these to the player so
+     * partial loads (cross-campaign, missing items, slot mismatches) aren't silent.
+     */
+    public List<String> getLoadWarnings() {
+        return Collections.unmodifiableList(loadWarnings);
     }
 
     // ==========================================
