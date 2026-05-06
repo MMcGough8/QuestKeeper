@@ -1162,6 +1162,12 @@ public class CombatSystem {
             sneakAttackUsed = false;
             disengageActive = false;
             flurryAttacksRemaining = 0;
+            // Symmetric with the other per-turn budgets. In normal play this
+            // is already 0 (attacks drained before turn ends), but a future
+            // code path that ends a turn early would otherwise leak a stale
+            // count between turns. executeTurn refills it on the next
+            // player turn-start.
+            mainActionAttacksRemaining = 0;
             smiteReady = false;  // Smite expires if not used
             stunningStrikeReady = false;  // Stunning Strike expires unused
             character.resetRecklessAttack();
