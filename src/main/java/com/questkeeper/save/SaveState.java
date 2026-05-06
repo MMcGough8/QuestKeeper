@@ -55,10 +55,17 @@ public class SaveState {
     /**
      * Item ids the character is attuned to. A subset of inventory + equipped.
      * Populated by GameState.toSaveState; consumed on load to call attune()
-     * after the item is restored. Per-effect charges aren't persisted yet
-     * (instance-state stacking makes round-trip nontrivial; deferred).
+     * after the item is restored.
      */
     private Set<String> attunedItemIds;
+    /**
+     * Per-magic-item, per-effect remaining charge counts.
+     * Outer key: item id. Inner key: effect id. Value: currentCharges.
+     * Stacked instances of the same item id share charges (acceptable for
+     * v1 since charged magic items don't stack in practice). Effects with
+     * unlimited charges (maxCharges <= 0) are skipped.
+     */
+    private Map<String, Map<String, Integer>> magicItemCharges;
     private int gold;
 
     private long totalPlayTimeSeconds;
@@ -83,6 +90,7 @@ public class SaveState {
         this.inventoryItems = new ArrayList<>();
         this.equippedItems = new ArrayList<>();
         this.attunedItemIds = new LinkedHashSet<>();
+        this.magicItemCharges = new LinkedHashMap<>();
         this.equippedSlots = new HashMap<>();
         this.gold = 0;
         
@@ -264,6 +272,15 @@ public class SaveState {
         if (attunedItemIds != null && !attunedItemIds.isEmpty()) {
             map.put("attuned_items", new ArrayList<>(attunedItemIds));
         }
+        if (magicItemCharges != null && !magicItemCharges.isEmpty()) {
+            // SnakeYAML handles nested LinkedHashMap<String, LinkedHashMap<String, Integer>>
+            // natively; deep-copy each inner map to detach from any aliased state.
+            Map<String, Object> chargesOut = new LinkedHashMap<>();
+            for (var entry : magicItemCharges.entrySet()) {
+                chargesOut.put(entry.getKey(), new LinkedHashMap<>(entry.getValue()));
+            }
+            map.put("magic_item_charges", chargesOut);
+        }
         map.put("gold", gold);
         
         map.put("play_time_seconds", totalPlayTimeSeconds);
@@ -313,6 +330,7 @@ public class SaveState {
         state.equippedItems = getStringList(data, "equipped");  // Legacy format
         state.equippedSlots = getStringMap(data, "equipped_slots");  // New format
         state.attunedItemIds = new LinkedHashSet<>(getStringList(data, "attuned_items"));
+        state.magicItemCharges = parseMagicItemCharges(data);
         state.gold = getInt(data, "gold", 0);
 
         // Stats
@@ -378,6 +396,35 @@ public class SaveState {
             return result;
         }
         return new HashMap<>();
+    }
+
+    /**
+     * Safely extracts the magic_item_charges nested map from YAML.
+     * Tolerates missing key, malformed shapes, and non-integer values
+     * (logs and skips bad entries instead of aborting the whole load).
+     */
+    private static Map<String, Map<String, Integer>> parseMagicItemCharges(
+            Map<String, Object> data) {
+        Map<String, Map<String, Integer>> result = new LinkedHashMap<>();
+        Object value = data.get("magic_item_charges");
+        if (!(value instanceof Map<?, ?> outer)) {
+            return result;
+        }
+        for (Map.Entry<?, ?> outerEntry : outer.entrySet()) {
+            if (!(outerEntry.getKey() instanceof String itemId)) continue;
+            if (!(outerEntry.getValue() instanceof Map<?, ?> inner)) continue;
+            Map<String, Integer> perEffect = new LinkedHashMap<>();
+            for (Map.Entry<?, ?> innerEntry : inner.entrySet()) {
+                if (innerEntry.getKey() instanceof String effectId
+                        && innerEntry.getValue() instanceof Number num) {
+                    perEffect.put(effectId, num.intValue());
+                }
+            }
+            if (!perEffect.isEmpty()) {
+                result.put(itemId, perEffect);
+            }
+        }
+        return result;
     }
 
     /**
@@ -473,6 +520,34 @@ public class SaveState {
 
     public Set<String> getAttunedItemIds() {
         return Collections.unmodifiableSet(attunedItemIds);
+    }
+
+    /**
+     * Records the remaining charge count for a single effect on a magic item.
+     * Skips items / effects with non-positive maxCharges (unlimited use).
+     */
+    public void setMagicItemCharges(String itemId, String effectId, int charges) {
+        if (itemId == null || effectId == null) return;
+        magicItemCharges
+            .computeIfAbsent(itemId, k -> new LinkedHashMap<>())
+            .put(effectId, charges);
+    }
+
+    /**
+     * Returns the per-effect charge map for an item, or null if no charges
+     * were recorded for that item.
+     */
+    public Map<String, Integer> getMagicItemCharges(String itemId) {
+        Map<String, Integer> per = magicItemCharges.get(itemId);
+        return per == null ? null : Collections.unmodifiableMap(per);
+    }
+
+    /**
+     * Returns the full magic-item charge map (item id -> effect id -> charges).
+     * Read-only view for diagnostics and tests.
+     */
+    public Map<String, Map<String, Integer>> getAllMagicItemCharges() {
+        return Collections.unmodifiableMap(magicItemCharges);
     }
 
     public void removeItem(String itemId) {

@@ -266,6 +266,13 @@ public class GameState {
             }
         }
 
+        // Restore per-effect charge counts on magic items. Walk inventory +
+        // equipped slots; for each MagicItem, look up its saved charge map
+        // and apply to matching effect IDs. Missing entries leave the item
+        // at its default (full) charges from campaign YAML — backward-compat
+        // for legacy saves and unrecognized effect IDs.
+        restoreMagicItemCharges(character, saveState);
+
         // Restore gold
         character.getInventory().addGold(saveState.getGold());
 
@@ -315,16 +322,17 @@ public class GameState {
 
         // Inventory items (backpack). Also captures attunement state on
         // any MagicItem so a Wand of X / Ring of Y stays attuned across
-        // save/load. (Per-effect charge state is deferred — round-trip
-        // for stacked charged items is nontrivial.)
+        // save/load, and snapshots per-effect charge counts.
         for (var stack : character.getInventory().getAllItems()) {
             String itemId = stack.getItem().getId();
             for (int i = 0; i < stack.getQuantity(); i++) {
                 save.addItem(itemId);
             }
-            if (stack.getItem() instanceof com.questkeeper.inventory.items.MagicItem mi
-                    && mi.isAttuned()) {
-                save.setItemAttuned(itemId, true);
+            if (stack.getItem() instanceof com.questkeeper.inventory.items.MagicItem mi) {
+                if (mi.isAttuned()) {
+                    save.setItemAttuned(itemId, true);
+                }
+                snapshotChargedEffects(save, mi);
             }
         }
 
@@ -334,9 +342,11 @@ public class GameState {
             var item = entry.getValue();
             String itemId = item.getId();
             save.equipItemToSlot(slot.name(), itemId);
-            if (item instanceof com.questkeeper.inventory.items.MagicItem mi
-                    && mi.isAttuned()) {
-                save.setItemAttuned(itemId, true);
+            if (item instanceof com.questkeeper.inventory.items.MagicItem mi) {
+                if (mi.isAttuned()) {
+                    save.setItemAttuned(itemId, true);
+                }
+                snapshotChargedEffects(save, mi);
             }
         }
 
@@ -347,6 +357,64 @@ public class GameState {
         save.addPlayTime(getTotalPlayTimeSeconds());
 
         return save;
+    }
+
+    /**
+     * Records per-effect charge counts for any MagicItem effect that
+     * tracks charges (maxCharges > 0). Skipped effects keep their default
+     * full charge on next load — desired behavior for unlimited / passive.
+     */
+    private static void snapshotChargedEffects(SaveState save,
+            com.questkeeper.inventory.items.MagicItem item) {
+        for (var effect : item.getEffects()) {
+            if (effect.getMaxCharges() > 0) {
+                save.setMagicItemCharges(item.getId(), effect.getId(),
+                    effect.getCurrentCharges());
+            }
+        }
+    }
+
+    /**
+     * Walks inventory and equipped slots, applying any saved charge counts
+     * to matching MagicItem effects. Effects whose ids don't appear in the
+     * saved map are left at their YAML default (treated as the canonical
+     * "full" state for legacy / cross-version saves).
+     */
+    private static void restoreMagicItemCharges(
+            Character character, SaveState saveState) {
+        java.util.Set<com.questkeeper.inventory.items.MagicItem> seen =
+            java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        for (var stack : character.getInventory().getAllItems()) {
+            if (stack.getItem() instanceof com.questkeeper.inventory.items.MagicItem mi) {
+                applySavedCharges(mi, saveState, seen);
+            }
+        }
+        for (var item : character.getInventory().getEquippedItems().values()) {
+            if (item instanceof com.questkeeper.inventory.items.MagicItem mi) {
+                applySavedCharges(mi, saveState, seen);
+            }
+        }
+    }
+
+    /**
+     * Applies saved charges to a single MagicItem instance, guarded against
+     * double application for items present in both inventory and equipment
+     * views (the same physical instance is referenced from both).
+     */
+    private static void applySavedCharges(
+            com.questkeeper.inventory.items.MagicItem mi, SaveState saveState,
+            java.util.Set<com.questkeeper.inventory.items.MagicItem> seen) {
+        if (!seen.add(mi)) return;
+        var saved = saveState.getMagicItemCharges(mi.getId());
+        if (saved == null) return;
+        for (var effect : mi.getEffects()) {
+            Integer charges = saved.get(effect.getId());
+            if (charges == null) continue;
+            if (effect instanceof com.questkeeper.inventory.items.effects.AbstractItemEffect aie
+                    && effect.getMaxCharges() > 0) {
+                aie.setCurrentCharges(charges);
+            }
+        }
     }
 
     // ==========================================

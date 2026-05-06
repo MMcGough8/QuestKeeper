@@ -501,6 +501,59 @@ class GameStateTest {
             assertEquals(character.getRace(), restored.getCharacter().getRace());
             assertEquals(character.getCharacterClass(), restored.getCharacter().getCharacterClass());
         }
+
+        @Test
+        @DisplayName("magic item charges persist through save/load")
+        void magicItemChargesPersist() throws IOException {
+            // Add a charged magic item to the test campaign and rebuild it.
+            Files.writeString(campaignDir.resolve("items.yaml"), """
+                items:
+                  - id: spark_of_blink
+                    name: Blinkstep Spark
+                    type: WONDROUS
+                    description: A crackling crystal.
+                    effect_description: "Teleport up to 10 feet."
+                    usage_type: CHARGES
+                    charges: 3
+                    weight: 0.1
+                    value: 100
+                    rarity: UNCOMMON
+                """);
+            Campaign chargedCampaign = Campaign.loadFromYaml(campaignDir);
+            Character ch = new Character("ChargeTester", Race.HUMAN, CharacterClass.FIGHTER);
+            GameState original = new GameState(ch, chargedCampaign);
+
+            // Pull the item from the campaign, place it in inventory, drain a charge.
+            var spark = (com.questkeeper.inventory.items.MagicItem)
+                chargedCampaign.getItem("spark_of_blink");
+            assertNotNull(spark, "test fixture: spark_of_blink should load");
+            ch.getInventory().addItem(spark);
+
+            // Find the charged effect and consume one charge.
+            var effects = spark.getEffects();
+            assertFalse(effects.isEmpty(), "fixture sanity: spark should have 1 effect");
+            var effect = (com.questkeeper.inventory.items.effects.AbstractItemEffect)
+                effects.get(0);
+            assertEquals(3, effect.getMaxCharges(), "fixture sanity: maxCharges = 3");
+            effect.setCurrentCharges(2);
+
+            // Round-trip through SaveState.
+            SaveState save = original.toSaveState();
+            // Load the campaign fresh to ensure we're not aliasing the spark
+            // instance — a real save/load builds a brand-new item from YAML.
+            Campaign reloadedCampaign = Campaign.loadFromYaml(campaignDir);
+            GameState restored = GameState.fromSaveState(save, reloadedCampaign);
+
+            // The restored character's spark should have 2 charges, not 3.
+            var restoredSpark = restored.getCharacter().getInventory().getAllItems().stream()
+                .map(s -> s.getItem())
+                .filter(i -> "spark_of_blink".equals(i.getId()))
+                .map(i -> (com.questkeeper.inventory.items.MagicItem) i)
+                .findFirst()
+                .orElseThrow();
+            assertEquals(2, restoredSpark.getEffects().get(0).getCurrentCharges(),
+                "Saved charge count must restore on load");
+        }
     }
 
     // ==========================================

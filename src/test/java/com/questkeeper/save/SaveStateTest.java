@@ -132,6 +132,38 @@ class SaveStateTest {
     }
 
     @Nested
+    @DisplayName("Magic item charge persistence")
+    class MagicItemChargePersistenceTests {
+
+        @Test
+        @DisplayName("magic_item_charges round-trips through save/load")
+        void magicItemChargesRoundTrip() throws IOException {
+            Path savePath = tempDir.resolve("charges_save.yaml");
+            SaveState save = new SaveState(createTestCharacter(), "test_campaign");
+            save.setMagicItemCharges("wand_fireballs", "wand_fireballs_effect", 4);
+            save.setMagicItemCharges("gem_of_seeing", "gem_seeing_truesight", 2);
+            save.save(savePath);
+
+            SaveState loaded = SaveState.load(savePath);
+
+            assertEquals(Integer.valueOf(4),
+                loaded.getMagicItemCharges("wand_fireballs").get("wand_fireballs_effect"),
+                "Wand of Fireballs charge count must round-trip");
+            assertEquals(Integer.valueOf(2),
+                loaded.getMagicItemCharges("gem_of_seeing").get("gem_seeing_truesight"),
+                "Gem of Seeing charge count must round-trip");
+        }
+
+        @Test
+        @DisplayName("missing magic_item_charges key returns null per item")
+        void missingChargeMapIsNullPerItem() {
+            SaveState save = new SaveState(createTestCharacter(), "test_campaign");
+            assertNull(save.getMagicItemCharges("nonexistent_item"),
+                "items with no recorded charges return null");
+        }
+    }
+
+    @Nested
     @DisplayName("Max HP persistence")
     class MaxHpPersistenceTests {
 
