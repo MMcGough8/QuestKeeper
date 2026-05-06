@@ -503,9 +503,21 @@ public class CombatSystem {
         if (!inCombat) {
             return CombatResult.error("Not in combat.");
         }
-
-        inCombat = false;
         int xp = calculateXpReward();
+        finalizeCombatEnd();
+        return CombatResult.victory(xp);
+    }
+
+    /**
+     * Centralized combat-state cleanup. Called by endCombat() and the
+     * win/loss/flee bypass sites in checkEndConditions, handlePlayerAttack,
+     * and handleFlee so per-turn flags and tracking maps don't leak into the
+     * next encounter. Caller is responsible for reading any participant /
+     * dropped-item state and computing XP before invoking, since this clears
+     * those collections.
+     */
+    private void finalizeCombatEnd() {
+        inCombat = false;
         participants.clear();
         initiative.clear();
         initiativeRolls.clear();
@@ -527,8 +539,6 @@ public class CombatSystem {
         sacredWeaponActive = false;
         smiteReady = false;
         stunningStrikeReady = false;
-
-        return CombatResult.victory(xp);
     }
 
     /**
@@ -1213,7 +1223,7 @@ public class CombatSystem {
         cleanupDeadCombatants();
 
         if (playerFled) {
-            inCombat = false;
+            finalizeCombatEnd();
             return CombatResult.fled();
         }
 
@@ -1221,27 +1231,26 @@ public class CombatSystem {
         boolean allEnemiesDead = getEnemies().stream().noneMatch(Combatant::isAlive);
         if (allEnemiesDead) {
             int xp = calculateXpReward();
-            inCombat = false;
 
-            // Award XP to player and return dropped items
+            // Award XP to player and return dropped items BEFORE finalizing,
+            // since finalize clears participants and droppedItems.
             Combatant player = getPlayer();
             if (player instanceof Character character) {
                 character.addExperience(xp);
-
-                // Return any dropped items to player's inventory
                 for (Item item : droppedItems) {
                     character.getInventory().addItem(item);
                 }
                 droppedItems.clear();
             }
 
+            finalizeCombatEnd();
             return CombatResult.victory(xp);
         }
 
         // Check if player is dead
         Combatant player = getPlayer();
         if (player == null || !player.isAlive()) {
-            inCombat = false;
+            finalizeCombatEnd();
             return CombatResult.playerDefeated(player);
         }
 
@@ -1325,9 +1334,8 @@ public class CombatSystem {
             // Check for victory - include killing blow details
             if (getLivingEnemies().isEmpty()) {
                 int xp = calculateXpReward();
-                inCombat = false;
 
-                // Award XP to player
+                // Award XP and return drops BEFORE finalizing.
                 Combatant player = getPlayer();
                 if (player instanceof Character character) {
                     character.addExperience(xp);
@@ -1338,6 +1346,7 @@ public class CombatSystem {
                 }
 
                 advanceTurn();
+                finalizeCombatEnd();
                 return CombatResult.victoryWithKillingBlow(xp, attackResult.getMessage());
             }
 
@@ -1415,7 +1424,7 @@ public class CombatSystem {
 
                     // Check if player died from opportunity attack
                     if (!player.isAlive()) {
-                        inCombat = false;
+                        finalizeCombatEnd();
                         return CombatResult.playerDefeated(player);
                     }
                 }
@@ -1428,7 +1437,7 @@ public class CombatSystem {
 
         if (success) {
             playerFled = true;
-            inCombat = false;
+            finalizeCombatEnd();
             fleeMessage.append("You fled from combat!");
             return CombatResult.fled(fleeMessage.toString().trim());
         } else {

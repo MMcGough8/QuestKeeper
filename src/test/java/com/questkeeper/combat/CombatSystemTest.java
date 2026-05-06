@@ -110,6 +110,45 @@ class CombatSystemTest {
     }
 
     // ==========================================
+    // Combat-End Cleanup Tests (Bug 2)
+    // ==========================================
+
+    @Nested
+    @DisplayName("Combat-end cleanup")
+    class CombatEndCleanupTests {
+
+        @Test
+        @DisplayName("victory via dead-on-arrival enemies clears participants like endCombat()")
+        void allEnemiesDeadPathRunsFullCleanup() {
+            Monster goblin = createGoblin();
+            combatSystem.startCombat(state, List.of(goblin));
+
+            // Pre-kill the goblin so the next handlePlayerAttack falls through
+            // to checkEndConditions (the all-enemies-dead bypass site).
+            goblin.takeDamage(999);
+
+            // Drive turns until it's the player's turn (initiative is random).
+            int safety = 8;
+            while (combatSystem.isInCombat()
+                   && !(combatSystem.getCurrentCombatant() instanceof Character)
+                   && safety-- > 0) {
+                combatSystem.executeTurn();
+            }
+
+            assertTrue(combatSystem.isInCombat(),
+                "precondition: combat should still be active before player attack");
+            combatSystem.playerTurn("attack", "Goblin");
+
+            assertFalse(combatSystem.isInCombat(),
+                "victory path must flip inCombat=false");
+            assertTrue(combatSystem.getParticipants().isEmpty(),
+                "victory cleanup must clear participants like endCombat() does");
+            assertNull(combatSystem.getCurrentCombatant(),
+                "victory cleanup must reset turn pointer");
+        }
+    }
+
+    // ==========================================
     // Start Combat Tests
     // ==========================================
 
