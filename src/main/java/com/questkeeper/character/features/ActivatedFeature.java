@@ -18,7 +18,7 @@ public abstract class ActivatedFeature implements ClassFeature {
     private final int levelRequired;
     private final boolean availableInCombat;
     private final boolean availableOutOfCombat;
-    private final ResetType resetType;
+    private ResetType resetType;
 
     private int maxUses;
     private int currentUses;
@@ -77,6 +77,15 @@ public abstract class ActivatedFeature implements ClassFeature {
      */
     public ResetType getResetType() {
         return resetType;
+    }
+
+    /**
+     * Updates the reset type. Used by features whose reset cadence changes
+     * with level (e.g., Bard's Font of Inspiration flips Bardic Inspiration
+     * from long-rest to short-rest reset at L5). Subclass-only.
+     */
+    protected void setResetType(ResetType resetType) {
+        this.resetType = resetType;
     }
 
     /**

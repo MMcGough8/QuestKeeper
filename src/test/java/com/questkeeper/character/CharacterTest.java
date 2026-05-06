@@ -1169,6 +1169,39 @@ class CharacterTest {
             assertTrue(b.getFeature(
                 com.questkeeper.character.features.BardFeatures.FONT_OF_INSPIRATION_ID
             ).isPresent(), "Lvl 5 Bard should gain Font of Inspiration");
+            assertEquals(
+                com.questkeeper.character.features.ResetType.SHORT_REST,
+                bi.getResetType(),
+                "Font of Inspiration converts Bardic Inspiration to short-rest reset");
+        }
+
+        @Test
+        @DisplayName("levelling a Bard from L4 to L5 flips Bardic Inspiration to short-rest reset")
+        void bardLevelUpL4ToL5FlipsResetType() {
+            Character b = new Character("Halo", Race.HUMAN, CharacterClass.BARD,
+                10, 14, 14, 10, 10, 16);
+            b.setLevel(4);
+
+            var biAtL4 = (com.questkeeper.character.features.BardFeatures.BardicInspiration)
+                b.getFeature(
+                    com.questkeeper.character.features.BardFeatures.BARDIC_INSPIRATION_ID
+                ).orElseThrow();
+            assertEquals(
+                com.questkeeper.character.features.ResetType.LONG_REST,
+                biAtL4.getResetType(),
+                "L4 Bard still uses long-rest reset");
+
+            b.setLevel(5);
+
+            var biAtL5 = (com.questkeeper.character.features.BardFeatures.BardicInspiration)
+                b.getFeature(
+                    com.questkeeper.character.features.BardFeatures.BARDIC_INSPIRATION_ID
+                ).orElseThrow();
+            assertEquals(
+                com.questkeeper.character.features.ResetType.SHORT_REST,
+                biAtL5.getResetType(),
+                "Crossing the Font of Inspiration threshold must update reset type"
+                    + " on the existing instance");
         }
 
         @Test
