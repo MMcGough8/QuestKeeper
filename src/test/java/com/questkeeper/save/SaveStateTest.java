@@ -132,6 +132,60 @@ class SaveStateTest {
     }
 
     @Nested
+    @DisplayName("Max HP persistence")
+    class MaxHpPersistenceTests {
+
+        @Test
+        @DisplayName("preserves saved max HP when it differs from class+level calc")
+        void preservesAugmentedMaxHp() {
+            // Simulate a save where something (house rule, magic item, manual
+            // adjustment) raised max HP above the class+level baseline.
+            Character character = createTestCharacter();
+            int baselineMax = character.getMaxHitPoints();
+            int augmentedMax = baselineMax + 7;
+            character.setMaxHitPoints(augmentedMax);
+
+            CharacterData data = CharacterData.fromCharacter(character);
+            Character restored = data.toCharacter();
+
+            assertEquals(augmentedMax, restored.getMaxHitPoints(),
+                "max HP must round-trip; setLevel-driven recalc loses it otherwise");
+        }
+
+        @Test
+        @DisplayName("clamps current HP to restored max when saved max is lower")
+        void currentHpClampedAgainstRestoredMax() {
+            Character character = createTestCharacter();
+            int restoredMax = 5;
+            character.setMaxHitPoints(restoredMax);
+
+            CharacterData data = CharacterData.fromCharacter(character);
+            Character restored = data.toCharacter();
+
+            assertEquals(restoredMax, restored.getMaxHitPoints());
+            assertTrue(restored.getCurrentHitPoints() <= restoredMax);
+        }
+
+        @Test
+        @DisplayName("falls back to calculated max when saved max is invalid")
+        void fallsBackOnInvalidSavedMax() {
+            // Legacy saves missing max_hp default to a low placeholder; the
+            // loader must not let that override a valid calculated value.
+            Character character = createTestCharacter();
+            int baselineMax = character.getMaxHitPoints();
+
+            CharacterData data = CharacterData.fromCharacter(character);
+            var map = data.toMap();
+            map.put("max_hp", 0);
+            CharacterData reloaded = CharacterData.fromMap(map);
+            Character restored = reloaded.toCharacter();
+
+            assertEquals(baselineMax, restored.getMaxHitPoints(),
+                "invalid saved max must fall back to class+level calc");
+        }
+    }
+
+    @Nested
     @DisplayName("SaveState Core")
     class SaveStateCoreTests {
 

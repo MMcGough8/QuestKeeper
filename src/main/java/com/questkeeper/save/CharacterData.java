@@ -314,6 +314,15 @@ public class CharacterData {
     character.setShieldBonus(shieldBonus);
     character.setTemporaryHitPoints(temporaryHitPoints);
 
+    // Honor the saved max HP, which may diverge from the class+level baseline
+    // (house rules, magic items, manual adjustment). setLevel() above
+    // recalculated max from the formula and would otherwise clobber it.
+    // Skip if the saved value is invalid (legacy saves missing the key default
+    // to a low placeholder we should not trust).
+    if (maxHitPoints > 0 && maxHitPoints != character.getMaxHitPoints()) {
+        character.setMaxHitPoints(maxHitPoints);
+    }
+
     // Restore HP by healing to full, then damaging to reach saved HP
     character.setCurrentHitPoints(currentHitPoints);
 
@@ -455,7 +464,10 @@ public class CharacterData {
         
         // Combat
         cd.currentHitPoints = getInt(data, "current_hp", 10);
-        cd.maxHitPoints = getInt(data, "max_hp", 10);
+        // Sentinel 0 means "not present in save"; toCharacter() will fall back
+        // to the class+level calculation rather than overwriting with the
+        // legacy literal 10 default.
+        cd.maxHitPoints = getInt(data, "max_hp", 0);
         cd.temporaryHitPoints = getInt(data, "temp_hp", 0);
         cd.armorBonus = getInt(data, "armor_bonus", 0);
         cd.shieldBonus = getInt(data, "shield_bonus", 0);

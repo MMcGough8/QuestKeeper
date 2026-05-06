@@ -316,7 +316,21 @@ public class Character implements Combatant {
     public int getMaxHitPoints() {
         return maxHitPoints;
     }
-    
+
+    /**
+     * Override the calculated max HP. Used by save/load to honor a persisted
+     * value that diverges from the class+level baseline (house rules, magic
+     * items, manual adjustment). Current HP is clamped to the new max.
+     * Values below 1 are ignored.
+     */
+    public void setMaxHitPoints(int newMax) {
+        if (newMax < 1) return;
+        this.maxHitPoints = newMax;
+        if (this.currentHitPoints > newMax) {
+            this.currentHitPoints = newMax;
+        }
+    }
+
     @Override
     public int getArmorClass() {
         int dexMod = getAbilityModifier(Ability.DEXTERITY);
