@@ -1239,6 +1239,28 @@ class CharacterTest {
         }
 
         @Test
+        @DisplayName("getNaturalAttackDice returns null when not in wild shape")
+        void naturalAttackDiceNullWhenHumanoid() {
+            Character d = new Character("Sylven", Race.HALF_ELF, CharacterClass.DRUID,
+                10, 10, 14, 10, 16, 10);
+            d.setLevel(2);
+            assertNull(d.getNaturalAttackDice(),
+                "humanoid druid has no natural attack dice");
+        }
+
+        @Test
+        @DisplayName("getNaturalAttackDice returns the beast's damage dice in wild shape")
+        void naturalAttackDiceFromBeastForm() {
+            Character d = new Character("Sylven", Race.HALF_ELF, CharacterClass.DRUID,
+                8, 10, 10, 10, 16, 10);
+            d.setLevel(2);
+            d.wildShapeInto(
+                com.questkeeper.character.features.DruidFeatures.BeastForm.WOLF);
+            assertEquals("2d4", d.getNaturalAttackDice(),
+                "wolf-shifted druid attacks with 2d4 (Bite)");
+        }
+
+        @Test
         @DisplayName("damage exceeding beast HP reverts druid and applies leftover to humanoid")
         void damageExceedingBeastHpReverts() {
             Character d = new Character("Sylven", Race.HALF_ELF, CharacterClass.DRUID,

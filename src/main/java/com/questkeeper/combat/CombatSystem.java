@@ -755,8 +755,15 @@ public class CombatSystem {
                 return CombatResult.attackMiss(attacker, target, attackRoll, targetAC);
             }
         } else if (attacker instanceof Character character) {
-            // Get equipped weapon and determine ability modifier to use
-            Weapon weapon = character.getInventory().getEquippedWeapon();
+            // Wild Shape: druid attacks with the beast's natural attack
+            // (Bite, Claws, etc.), not their equipped weapon. Setting
+            // weapon=null also bypasses weapon-feature gates (Sneak Attack,
+            // Horde Breaker, Divine Smite, fighting styles, etc.) which is
+            // RAW correct for natural attacks.
+            boolean inWildShape = character.isInWildShape();
+            Weapon weapon = inWildShape
+                ? null
+                : character.getInventory().getEquippedWeapon();
             String damageDice = DEFAULT_PLAYER_WEAPON;
 
             int strMod = character.getAbilityModifier(Ability.STRENGTH);
@@ -783,6 +790,11 @@ public class CombatSystem {
                     // Melee weapons use STR
                     abilityMod = strMod;
                 }
+            } else if (inWildShape) {
+                // Wild Shape natural attack: STR-based, beast's damage dice.
+                // Beast STR is already swapped via getAbilityScore.
+                abilityMod = strMod;
+                damageDice = character.getNaturalAttackDice();
             } else {
                 // Unarmed: use STR, damage is 1 + STR mod
                 abilityMod = strMod;
@@ -874,6 +886,14 @@ public class CombatSystem {
                                 }
                             }
                         }
+                    }
+                } else if (inWildShape) {
+                    // Wild Shape natural attack: roll the beast's dice.
+                    // Crit doubles the dice. Brutal Critical does not apply
+                    // (it's a weapon-attack feature in 5e).
+                    damage = Dice.parse(damageDice);
+                    if (isCrit) {
+                        damage += Dice.parse(damageDice);
                     }
                 } else {
                     // Unarmed: 1 damage (doubled to 2 on crit)

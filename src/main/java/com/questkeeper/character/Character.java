@@ -1376,6 +1376,16 @@ public class Character implements Combatant {
         revertWildShape(0);
     }
 
+    /**
+     * The beast's natural attack damage dice when in wild shape (e.g.,
+     * "2d4" for Wolf bite), or null when humanoid. Combat uses this to
+     * route wild-shaped attacks through the beast's stat block instead
+     * of the druid's equipped weapon.
+     */
+    public String getNaturalAttackDice() {
+        return currentBeastForm == null ? null : currentBeastForm.attackDamage();
+    }
+
     public boolean isConcentrating() {
         return concentratingOnSpell != null;
     }
