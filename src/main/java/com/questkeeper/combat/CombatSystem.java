@@ -323,6 +323,11 @@ public class CombatSystem {
             case "wild shape":
                 return handleWildShape();
 
+            case "revert":
+            case "revertshape":
+            case "revert shape":
+                return handleRevertWildShape();
+
             // Sorcerer
             case "fontofmagic":
             case "font of magic":
@@ -1897,13 +1902,18 @@ public class CombatSystem {
     }
 
     /**
-     * Wild Shape (Druid L2+) — action to transform. We consume one use and
-     * report the form's CR cap; the actual stat-block transformation is
-     * post-pitch (would need a beast-form table).
+     * Wild Shape (Druid L2+) — action: spend one use to assume the highest-
+     * CR beast form within the druid's CR cap. STR/DEX/CON, HP, and AC swap
+     * to the form; INT/WIS/CHA and class features stay with the druid.
+     * Cancel with the {@code revert} command.
      */
     private CombatResult handleWildShape() {
         Character player = (Character) getPlayer();
         if (player == null) return CombatResult.error("No player character found.");
+        if (player.isInWildShape()) {
+            return CombatResult.error(
+                "Already in beast form. Use 'revert' to return to humanoid first.");
+        }
         var feat = player.getFeature(
             com.questkeeper.character.features.DruidFeatures.WILD_SHAPE_ID);
         if (feat.isEmpty()) {
@@ -1917,12 +1927,29 @@ public class CombatSystem {
             return CombatResult.error("No Wild Shape uses remaining (rest to recover).");
         }
         ws.use(player);
-        String crStr = ws.getMaxChallengeRating() == 1.0 ? "1"
-            : ws.getMaxChallengeRating() == 0.5 ? "1/2" : "1/4";
+        var form = com.questkeeper.character.features.DruidFeatures.BeastForm
+            .bestFormForCR(ws.getMaxChallengeRating());
+        player.wildShapeInto(form);
         return CombatResult.info(String.format(
-            "%s assumes a beast form (CR %s max). Uses: %d/%d. "
-            + "[Form-specific stats coming in a future release.]",
-            player.getName(), crStr, ws.getCurrentUses(), ws.getMaxUses()));
+            "%s assumes the form of a %s. HP %d/%d, AC %d. Uses: %d/%d.",
+            player.getName(), form.name(),
+            player.getCurrentHitPoints(), player.getMaxHitPoints(),
+            player.getArmorClass(),
+            ws.getCurrentUses(), ws.getMaxUses()));
+    }
+
+    private CombatResult handleRevertWildShape() {
+        Character player = (Character) getPlayer();
+        if (player == null) return CombatResult.error("No player character found.");
+        if (!player.isInWildShape()) {
+            return CombatResult.error("You are not currently in a beast form.");
+        }
+        String formName = player.getCurrentBeastForm().name();
+        player.revertWildShape();
+        return CombatResult.info(String.format(
+            "%s reverts from %s form. HP %d/%d.",
+            player.getName(), formName,
+            player.getCurrentHitPoints(), player.getMaxHitPoints()));
     }
 
     /**

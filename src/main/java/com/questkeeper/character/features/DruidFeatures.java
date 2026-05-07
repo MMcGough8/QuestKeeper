@@ -102,6 +102,41 @@ public final class DruidFeatures {
      * For v1 we expose use tracking + a CR cap getter; the shape mechanics
      * themselves are post-pitch.
      */
+    /**
+     * A beast form a druid can assume via Wild Shape. Exposes the swap-in
+     * physical stats; mental stats (INT/WIS/CHA) and class features stay
+     * with the druid per 5e RAW.
+     */
+    public static record BeastForm(
+        String name,
+        double challengeRating,
+        int strength,
+        int dexterity,
+        int constitution,
+        int hitPoints,
+        int armorClass,
+        int speed,
+        String attackName,
+        String attackDamage
+    ) {
+        // CR 1/4 — minimum L2 druid form.
+        public static final BeastForm WOLF = new BeastForm(
+            "Wolf", 0.25, 12, 15, 12, 11, 13, 40, "Bite", "2d4");
+        // CR 1/2 — unlocks at L4 (no flying/swimming yet).
+        public static final BeastForm BLACK_BEAR = new BeastForm(
+            "Black Bear", 0.5, 15, 10, 14, 19, 11, 40, "Claws", "2d4");
+        // CR 1 — full Wild Shape access at L8.
+        public static final BeastForm BROWN_BEAR = new BeastForm(
+            "Brown Bear", 1.0, 19, 10, 16, 34, 11, 40, "Claws", "2d6");
+
+        /** Returns the highest-CR beast form within the given CR cap. */
+        public static BeastForm bestFormForCR(double maxCR) {
+            if (maxCR >= 1.0) return BROWN_BEAR;
+            if (maxCR >= 0.5) return BLACK_BEAR;
+            return WOLF;
+        }
+    }
+
     public static class WildShape extends ActivatedFeature {
         private int druidLevel;
 

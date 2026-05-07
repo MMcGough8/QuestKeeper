@@ -1137,6 +1137,124 @@ class CharacterTest {
                 () -> fighter.setDruidCircle(
                     com.questkeeper.character.features.DruidFeatures.DruidCircle.LAND));
         }
+
+        @Test
+        @DisplayName("druid is not in wild shape by default")
+        void druidNotInWildShapeByDefault() {
+            Character d = new Character("Sylven", Race.HALF_ELF, CharacterClass.DRUID,
+                10, 10, 14, 10, 16, 10);
+            d.setLevel(2);
+            assertFalse(d.isInWildShape(),
+                "fresh druid is not in wild shape");
+            assertNull(d.getCurrentBeastForm(),
+                "no beast form active");
+        }
+
+        @Test
+        @DisplayName("BeastForm.bestFormForCR honors the CR cap ladder")
+        void bestFormForCRLadder() {
+            assertEquals(
+                com.questkeeper.character.features.DruidFeatures.BeastForm.WOLF,
+                com.questkeeper.character.features.DruidFeatures.BeastForm.bestFormForCR(0.25));
+            assertEquals(
+                com.questkeeper.character.features.DruidFeatures.BeastForm.BLACK_BEAR,
+                com.questkeeper.character.features.DruidFeatures.BeastForm.bestFormForCR(0.5));
+            assertEquals(
+                com.questkeeper.character.features.DruidFeatures.BeastForm.BROWN_BEAR,
+                com.questkeeper.character.features.DruidFeatures.BeastForm.bestFormForCR(1.0));
+        }
+
+        @Test
+        @DisplayName("wildShapeInto swaps physical stats and HP pool, retains mental stats")
+        void wildShapeIntoSwapsStats() {
+            Character d = new Character("Sylven", Race.HALF_ELF, CharacterClass.DRUID,
+                8, 12, 10, 10, 16, 10);
+            d.setLevel(2);
+            int humanoidHp = d.getCurrentHitPoints();
+            int humanoidWisScore = d.getAbilityScore(Ability.WISDOM);
+
+            d.wildShapeInto(
+                com.questkeeper.character.features.DruidFeatures.BeastForm.WOLF);
+
+            assertTrue(d.isInWildShape(), "isInWildShape true after transform");
+            assertEquals(12, d.getAbilityScore(Ability.STRENGTH),
+                "STR comes from Wolf form");
+            assertEquals(15, d.getAbilityScore(Ability.DEXTERITY),
+                "DEX comes from Wolf form");
+            assertEquals(12, d.getAbilityScore(Ability.CONSTITUTION),
+                "CON comes from Wolf form");
+            assertEquals(humanoidWisScore, d.getAbilityScore(Ability.WISDOM),
+                "WIS preserved (mental stats stay with druid)");
+            assertEquals(11, d.getCurrentHitPoints(),
+                "HP swaps to Wolf's pool");
+            assertEquals(11, d.getMaxHitPoints(),
+                "max HP is Wolf's pool while transformed");
+            assertNotEquals(humanoidHp, d.getCurrentHitPoints(),
+                "humanoid HP is not the active pool");
+        }
+
+        @Test
+        @DisplayName("revertWildShape restores humanoid stats and HP pool")
+        void revertWildShapeRestoresHumanoid() {
+            Character d = new Character("Sylven", Race.HALF_ELF, CharacterClass.DRUID,
+                8, 12, 10, 10, 16, 10);
+            d.setLevel(2);
+            int humanoidHp = d.getCurrentHitPoints();
+            int humanoidMaxHp = d.getMaxHitPoints();
+            int humanoidStr = d.getAbilityScore(Ability.STRENGTH);
+
+            d.wildShapeInto(
+                com.questkeeper.character.features.DruidFeatures.BeastForm.WOLF);
+            d.revertWildShape();
+
+            assertFalse(d.isInWildShape(), "no longer in wild shape");
+            assertNull(d.getCurrentBeastForm());
+            assertEquals(humanoidStr, d.getAbilityScore(Ability.STRENGTH),
+                "humanoid STR restored");
+            assertEquals(humanoidHp, d.getCurrentHitPoints(),
+                "humanoid current HP restored");
+            assertEquals(humanoidMaxHp, d.getMaxHitPoints(),
+                "humanoid max HP restored");
+        }
+
+        @Test
+        @DisplayName("damage in beast form drains beast HP, not humanoid HP")
+        void damageInBeastFormDrainsBeastHp() {
+            Character d = new Character("Sylven", Race.HALF_ELF, CharacterClass.DRUID,
+                8, 12, 10, 10, 16, 10);
+            d.setLevel(2);
+            int humanoidHp = d.getCurrentHitPoints();
+
+            d.wildShapeInto(
+                com.questkeeper.character.features.DruidFeatures.BeastForm.WOLF);
+            d.takeDamage(5);
+
+            assertTrue(d.isInWildShape(),
+                "still in beast form after non-fatal damage");
+            assertEquals(11 - 5, d.getCurrentHitPoints(),
+                "beast HP reduced by damage");
+            d.revertWildShape();
+            assertEquals(humanoidHp, d.getCurrentHitPoints(),
+                "humanoid HP untouched by damage absorbed in beast form");
+        }
+
+        @Test
+        @DisplayName("damage exceeding beast HP reverts druid and applies leftover to humanoid")
+        void damageExceedingBeastHpReverts() {
+            Character d = new Character("Sylven", Race.HALF_ELF, CharacterClass.DRUID,
+                8, 12, 10, 10, 16, 10);
+            d.setLevel(2);
+            int humanoidHp = d.getCurrentHitPoints();
+
+            d.wildShapeInto(
+                com.questkeeper.character.features.DruidFeatures.BeastForm.WOLF);
+            d.takeDamage(11 + 3);
+
+            assertFalse(d.isInWildShape(),
+                "auto-revert when beast HP hits 0");
+            assertEquals(humanoidHp - 3, d.getCurrentHitPoints(),
+                "leftover damage applied to humanoid pool");
+        }
     }
 
     @Nested

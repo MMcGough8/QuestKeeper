@@ -233,6 +233,14 @@ public class Character implements Combatant {
     // 5e RAW: granted die expires after 10 minutes or one use.
     private int pendingBardicInspirationDie;
 
+    // Wild Shape state. When non-null, physical ability scores (STR/DEX/CON),
+    // HP pool, and AC come from the beast form; mental stats and class
+    // features stay with the druid. Humanoid HP is stashed and restored on
+    // revert. Transient — 5e RAW: revert on rest, fall to 0 HP, or by choice.
+    private com.questkeeper.character.features.DruidFeatures.BeastForm currentBeastForm;
+    private int humanoidHpStash;
+    private int humanoidMaxHpStash;
+
     // Half-Elf bonus abilities (+1 to two abilities of player's choice, excluding CHA)
     private Set<Ability> halfElfBonusAbilities = EnumSet.noneOf(Ability.class);
 
@@ -337,6 +345,11 @@ public class Character implements Combatant {
 
     @Override
     public int getArmorClass() {
+        // Wild Shape: AC is fixed by the beast form (armor and class
+        // features that depend on humanoid armor don't apply).
+        if (currentBeastForm != null) {
+            return currentBeastForm.armorClass();
+        }
         int dexMod = getAbilityModifier(Ability.DEXTERITY);
         int ac;
 
@@ -410,9 +423,9 @@ public class Character implements Combatant {
     @Override
     public int takeDamage(int amount) {
         if (amount <= 0) return 0;
-        
+
         int remainingDamage = amount;
-        
+
         if (temporaryHitPoints > 0) {
             if (temporaryHitPoints >= remainingDamage) {
                 temporaryHitPoints -= remainingDamage;
@@ -422,7 +435,19 @@ public class Character implements Combatant {
                 temporaryHitPoints = 0;
             }
         }
-    
+
+        // Wild Shape: damage drains the beast HP pool. If beast HP hits 0,
+        // auto-revert to humanoid form and bleed leftover damage through.
+        if (currentBeastForm != null) {
+            int beastAbsorbed = Math.min(remainingDamage, currentHitPoints);
+            int leftover = remainingDamage - beastAbsorbed;
+            currentHitPoints -= beastAbsorbed;
+            if (currentHitPoints <= 0) {
+                revertWildShape(leftover);
+            }
+            return beastAbsorbed + leftover;
+        }
+
         int actualDamage = Math.min(remainingDamage, currentHitPoints);
         currentHitPoints -= actualDamage;
         return actualDamage;
@@ -542,6 +567,17 @@ public class Character implements Combatant {
     }
 
     public int getAbilityScore(Ability ability) {
+        // Wild Shape: physical scores (STR/DEX/CON) come from the beast.
+        // Mental scores (INT/WIS/CHA) stay with the druid per 5e RAW.
+        if (currentBeastForm != null) {
+            switch (ability) {
+                case STRENGTH:     return currentBeastForm.strength();
+                case DEXTERITY:    return currentBeastForm.dexterity();
+                case CONSTITUTION: return currentBeastForm.constitution();
+                default: break;
+            }
+        }
+
         int base = baseAbilityScores.get(ability);
         int racialBonus = race.getAbilityBonus(ability);
 
@@ -1270,6 +1306,50 @@ public class Character implements Combatant {
         int bonus = Dice.roll(pendingBardicInspirationDie);
         pendingBardicInspirationDie = 0;
         return bonus;
+    }
+
+    public boolean isInWildShape() {
+        return currentBeastForm != null;
+    }
+
+    public com.questkeeper.character.features.DruidFeatures.BeastForm getCurrentBeastForm() {
+        return currentBeastForm;
+    }
+
+    /**
+     * Assumes the given beast form. Stashes the druid's current humanoid
+     * HP pool and switches to the beast's HP. Physical ability scores are
+     * read live from the form via {@link #getAbilityScore}. No-op if
+     * already in a beast form (caller should revert first).
+     */
+    public void wildShapeInto(
+            com.questkeeper.character.features.DruidFeatures.BeastForm form) {
+        if (currentBeastForm != null) return;
+        humanoidHpStash = currentHitPoints;
+        humanoidMaxHpStash = maxHitPoints;
+        currentBeastForm = form;
+        currentHitPoints = form.hitPoints();
+        maxHitPoints = form.hitPoints();
+    }
+
+    /**
+     * Reverts to humanoid form and restores the stashed HP pool. Optional
+     * residualDamage is dealt to the humanoid pool after restoration —
+     * used when a killing blow in beast form leaves leftover damage that
+     * should bleed through to the druid (5e RAW).
+     */
+    public void revertWildShape(int residualDamage) {
+        if (currentBeastForm == null) return;
+        currentBeastForm = null;
+        currentHitPoints = humanoidHpStash;
+        maxHitPoints = humanoidMaxHpStash;
+        if (residualDamage > 0) {
+            currentHitPoints = Math.max(0, currentHitPoints - residualDamage);
+        }
+    }
+
+    public void revertWildShape() {
+        revertWildShape(0);
     }
 
     /**
