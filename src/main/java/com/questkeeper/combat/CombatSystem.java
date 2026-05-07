@@ -471,8 +471,10 @@ public class CombatSystem {
             return attacker;
         }
 
-        // Tactical behavior: target lowest HP enemy
+        // Tactical behavior: prefer spellcasters when present, then lowest HP.
         if (monster.getBehavior() == Monster.Behavior.TACTICAL) {
+            Combatant caster = findFirstSpellcasterTarget();
+            if (caster != null) return caster;
             Combatant lowestHpTarget = findLowestHpTarget();
             if (lowestHpTarget != null) {
                 return lowestHpTarget;
@@ -481,6 +483,50 @@ public class CombatSystem {
 
         // Default: attack the player
         return getPlayer();
+    }
+
+    /**
+     * Returns true if a TACTICAL monster should attack with advantage
+     * because the target is bloodied. Used by processAttack to honor the
+     * tactical "smell blood" heuristic. Public + static for test access.
+     */
+    public static boolean tacticalPressesBloodied(Monster attacker, Combatant target) {
+        return attacker != null
+            && attacker.getBehavior() == Monster.Behavior.TACTICAL
+            && target != null
+            && target.isBloodied();
+    }
+
+    /**
+     * Conservative spellcaster heuristic — checks class only. Used by the
+     * tactical targeting priority. Returns false for Monster combatants.
+     */
+    public static boolean isLikelySpellcaster(Combatant c) {
+        if (!(c instanceof Character ch)) return false;
+        switch (ch.getCharacterClass()) {
+            case WIZARD:
+            case SORCERER:
+            case CLERIC:
+            case DRUID:
+            case BARD:
+            case WARLOCK:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Finds the first living non-monster combatant who is a likely
+     * spellcaster, or null if none.
+     */
+    private Combatant findFirstSpellcasterTarget() {
+        for (Combatant c : participants) {
+            if (!(c instanceof Monster) && c.isAlive() && isLikelySpellcaster(c)) {
+                return c;
+            }
+        }
+        return null;
     }
 
     /**
@@ -588,6 +634,14 @@ public class CombatSystem {
 
         // Reckless Attack: enemies have advantage on attacks against a reckless barbarian
         if (target instanceof Character targetChar && targetChar.isRecklessAttackActive()) {
+            hasAdvantage = true;
+        }
+
+        // Tactical AI: when a TACTICAL monster attacks a bloodied target, it
+        // smells blood and presses the attack with advantage. Distinguishes
+        // TACTICAL from AGGRESSIVE in solo combat where targeting is moot.
+        if (attacker instanceof Monster tacticalMonster
+            && tacticalPressesBloodied(tacticalMonster, target)) {
             hasAdvantage = true;
         }
 

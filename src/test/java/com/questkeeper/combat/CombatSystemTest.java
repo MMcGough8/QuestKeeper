@@ -1024,6 +1024,61 @@ class CombatSystemTest {
             // In a multi-player scenario, the lowest HP would be targeted
             assertTrue(combatSystem.isInCombat());
         }
+
+        @Test
+        @DisplayName("tacticalPressesBloodied is true for TACTICAL + bloodied target")
+        void tacticalPressesBloodiedTarget() {
+            Monster m = new Monster("t", "Tactician", 12, 30);
+            m.setBehavior(Monster.Behavior.TACTICAL);
+            character.takeDamage(character.getMaxHitPoints() / 2 + 1);
+            assertTrue(character.isBloodied(),
+                "test setup: character must be bloodied");
+            assertTrue(CombatSystem.tacticalPressesBloodied(m, character),
+                "TACTICAL monster smells blood when target is bloodied");
+        }
+
+        @Test
+        @DisplayName("tacticalPressesBloodied is false when target is healthy")
+        void tacticalDoesNotPressHealthyTarget() {
+            Monster m = new Monster("t", "Tactician", 12, 30);
+            m.setBehavior(Monster.Behavior.TACTICAL);
+            assertFalse(character.isBloodied(),
+                "test setup: character starts healthy");
+            assertFalse(CombatSystem.tacticalPressesBloodied(m, character),
+                "TACTICAL monster has no advantage against healthy target");
+        }
+
+        @Test
+        @DisplayName("tacticalPressesBloodied is false for AGGRESSIVE behavior")
+        void aggressiveDoesNotPressBloodied() {
+            Monster m = new Monster("a", "Brute", 12, 30);
+            m.setBehavior(Monster.Behavior.AGGRESSIVE);
+            character.takeDamage(character.getMaxHitPoints() / 2 + 1);
+            assertTrue(character.isBloodied());
+            assertFalse(CombatSystem.tacticalPressesBloodied(m, character),
+                "AGGRESSIVE behavior does not get the bloodied-advantage perk");
+        }
+
+        @Test
+        @DisplayName("tacticalPressesBloodied is false for null target")
+        void nullTargetIsNotPressed() {
+            Monster m = new Monster("t", "Tactician", 12, 30);
+            m.setBehavior(Monster.Behavior.TACTICAL);
+            assertFalse(CombatSystem.tacticalPressesBloodied(m, null));
+        }
+
+        @Test
+        @DisplayName("isLikelySpellcaster identifies caster classes")
+        void isLikelySpellcasterIdentifiesCasters() {
+            Character wizard = new Character("Mim", Race.ELF, CharacterClass.WIZARD,
+                10, 14, 12, 16, 12, 10);
+            Character fighter = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            assertTrue(CombatSystem.isLikelySpellcaster(wizard),
+                "Wizard counts as a spellcaster");
+            assertFalse(CombatSystem.isLikelySpellcaster(fighter),
+                "Fighter is not a spellcaster");
+        }
     }
 
     // ==========================================
