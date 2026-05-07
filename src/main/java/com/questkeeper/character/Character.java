@@ -241,6 +241,12 @@ public class Character implements Combatant {
     private int humanoidHpStash;
     private int humanoidMaxHpStash;
 
+    // Concentration: 5e RAW lets a caster maintain at most one concentration
+    // spell at a time. Damage forces a CON save vs DC max(10, damage/2);
+    // failure drops the spell. Stored as a label only — the active spell's
+    // ongoing effect lives on whatever was applied at cast time.
+    private String concentratingOnSpell;
+
     // Half-Elf bonus abilities (+1 to two abilities of player's choice, excluding CHA)
     private Set<Ability> halfElfBonusAbilities = EnumSet.noneOf(Ability.class);
 
@@ -429,6 +435,7 @@ public class Character implements Combatant {
         if (temporaryHitPoints > 0) {
             if (temporaryHitPoints >= remainingDamage) {
                 temporaryHitPoints -= remainingDamage;
+                checkConcentrationOnDamage(amount);
                 return 0;
             } else {
                 remainingDamage -= temporaryHitPoints;
@@ -445,12 +452,29 @@ public class Character implements Combatant {
             if (currentHitPoints <= 0) {
                 revertWildShape(leftover);
             }
+            checkConcentrationOnDamage(amount);
             return beastAbsorbed + leftover;
         }
 
         int actualDamage = Math.min(remainingDamage, currentHitPoints);
         currentHitPoints -= actualDamage;
+        checkConcentrationOnDamage(amount);
         return actualDamage;
+    }
+
+    /**
+     * If concentrating, force a CON save vs DC max(10, damage/2). On fail,
+     * drop concentration. No-op when not concentrating or damage <= 0.
+     * Note: the save uses {@link #makeSavingThrowAgainstDC} which routes
+     * through the Bardic Inspiration die hook — so a granted die can save a
+     * caster's concentration once.
+     */
+    private void checkConcentrationOnDamage(int damage) {
+        if (!isConcentrating() || damage <= 0) return;
+        int dc = concentrationDC(damage);
+        if (!makeSavingThrowAgainstDC(Ability.CONSTITUTION, dc)) {
+            endConcentration();
+        }
     }
     
     @Override
@@ -1350,6 +1374,33 @@ public class Character implements Combatant {
 
     public void revertWildShape() {
         revertWildShape(0);
+    }
+
+    public boolean isConcentrating() {
+        return concentratingOnSpell != null;
+    }
+
+    public String getConcentratedSpell() {
+        return concentratingOnSpell;
+    }
+
+    /**
+     * Marks this character as concentrating on the named spell. Replaces
+     * any prior concentration (5e RAW: only one at a time).
+     */
+    public void startConcentrating(String spellName) {
+        this.concentratingOnSpell = spellName;
+    }
+
+    public void endConcentration() {
+        this.concentratingOnSpell = null;
+    }
+
+    /**
+     * 5e concentration save DC: max(10, damage/2).
+     */
+    public static int concentrationDC(int damage) {
+        return Math.max(10, damage / 2);
     }
 
     /**

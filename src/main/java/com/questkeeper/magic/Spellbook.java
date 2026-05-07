@@ -268,7 +268,9 @@ public class Spellbook {
             if (!knownCantripIds.contains(spellId)) {
                 return SpellResult.error("You don't know that cantrip.");
             }
-            return spell.cast(caster, target, getSpellAttackBonus(caster), getSpellSaveDC(caster));
+            SpellResult result = spell.cast(caster, target, getSpellAttackBonus(caster), getSpellSaveDC(caster));
+            applyConcentration(spell, caster);
+            return result;
         }
 
         // Check if prepared
@@ -289,7 +291,19 @@ public class Spellbook {
         spellSlots.expendSlot(slotLevel);
 
         // Cast the spell
-        return spell.castAtLevel(caster, target, getSpellAttackBonus(caster), getSpellSaveDC(caster), slotLevel);
+        SpellResult result = spell.castAtLevel(caster, target, getSpellAttackBonus(caster), getSpellSaveDC(caster), slotLevel);
+        applyConcentration(spell, caster);
+        return result;
+    }
+
+    /**
+     * If the spell requires concentration, mark the caster as concentrating
+     * on it. 5e RAW: this replaces any prior concentration spell.
+     */
+    private void applyConcentration(Spell spell, Character caster) {
+        if (spell != null && spell.requiresConcentration()) {
+            caster.startConcentrating(spell.getName());
+        }
     }
 
     /**

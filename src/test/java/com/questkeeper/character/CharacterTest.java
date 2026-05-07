@@ -1918,4 +1918,102 @@ class CharacterTest {
                 "Fighter does not have Danger Sense");
         }
     }
+
+    @Nested
+    @DisplayName("Concentration")
+    class ConcentrationTests {
+
+        @Test
+        @DisplayName("character is not concentrating by default")
+        void notConcentratingByDefault() {
+            Character c = new Character("Mim", Race.ELF, CharacterClass.WIZARD,
+                10, 14, 12, 16, 12, 10);
+            assertFalse(c.isConcentrating(),
+                "fresh character has no active concentration");
+            assertNull(c.getConcentratedSpell());
+        }
+
+        @Test
+        @DisplayName("startConcentrating sets the active concentration slot")
+        void startConcentratingSetsSlot() {
+            Character c = new Character("Mim", Race.ELF, CharacterClass.WIZARD,
+                10, 14, 12, 16, 12, 10);
+            c.startConcentrating("Hex");
+            assertTrue(c.isConcentrating());
+            assertEquals("Hex", c.getConcentratedSpell());
+        }
+
+        @Test
+        @DisplayName("starting a new concentration replaces the prior spell")
+        void newConcentrationReplacesPrior() {
+            Character c = new Character("Mim", Race.ELF, CharacterClass.WIZARD,
+                10, 14, 12, 16, 12, 10);
+            c.startConcentrating("Hex");
+            c.startConcentrating("Bless");
+            assertEquals("Bless", c.getConcentratedSpell(),
+                "5e RAW: only one concentration spell at a time");
+        }
+
+        @Test
+        @DisplayName("endConcentration clears the slot")
+        void endConcentrationClearsSlot() {
+            Character c = new Character("Mim", Race.ELF, CharacterClass.WIZARD,
+                10, 14, 12, 16, 12, 10);
+            c.startConcentrating("Hex");
+            c.endConcentration();
+            assertFalse(c.isConcentrating());
+            assertNull(c.getConcentratedSpell());
+        }
+
+        @Test
+        @DisplayName("concentrationDC is max(10, damage/2)")
+        void concentrationDCFormula() {
+            assertEquals(10, Character.concentrationDC(0),
+                "DC floor is 10");
+            assertEquals(10, Character.concentrationDC(1),
+                "low damage stays at floor");
+            assertEquals(10, Character.concentrationDC(20),
+                "20/2 = 10, still at the floor");
+            assertEquals(11, Character.concentrationDC(22),
+                "22/2 = 11");
+            assertEquals(50, Character.concentrationDC(100),
+                "high damage scales");
+        }
+
+        @Test
+        @DisplayName("non-damaging takeDamage does not trigger a concentration save")
+        void zeroDamageDoesNotTriggerSave() {
+            Character c = new Character("Mim", Race.ELF, CharacterClass.WIZARD,
+                10, 14, 12, 16, 12, 10);
+            c.startConcentrating("Hex");
+            c.takeDamage(0);
+            assertTrue(c.isConcentrating(),
+                "0 damage must not trigger a concentration check");
+        }
+
+        @Test
+        @DisplayName("guaranteed-fail save drops concentration on damage")
+        void guaranteedFailSaveDropsConcentration() {
+            // Wizard with CON 1 (-5 mod). DC = max(10, 100/2) = 50 from
+            // a 100-damage hit. Best possible roll = d20 + (-5) = 15. Always fails.
+            Character c = new Character("Mim", Race.ELF, CharacterClass.WIZARD,
+                10, 14, 1, 16, 12, 10);
+            c.heal(1000);  // raise HP so the test damage doesn't kill
+            c.startConcentrating("Hex");
+            c.takeDamage(100);
+            assertFalse(c.isConcentrating(),
+                "DC 50 against CON -5 always fails — concentration must drop");
+        }
+
+        @Test
+        @DisplayName("not concentrating: damage path is unaffected")
+        void notConcentratingDamageStillWorks() {
+            Character c = new Character("Mim", Race.ELF, CharacterClass.WIZARD,
+                10, 14, 12, 16, 12, 10);
+            int hp = c.getCurrentHitPoints();
+            c.takeDamage(3);
+            assertEquals(hp - 3, c.getCurrentHitPoints(),
+                "damage flows normally when no concentration is active");
+        }
+    }
 }
