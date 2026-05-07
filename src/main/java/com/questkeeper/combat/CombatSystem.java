@@ -840,6 +840,22 @@ public class CombatSystem {
             // crit-range expansions like Improved Critical.
             boolean isNaturalMiss = Dice.wasNatural1();
 
+            // Horde Breaker (Ranger Hunter): 5e RAW fires on any weapon
+            // attack — hit or miss. Once per turn, when 2+ enemies present.
+            // Lives outside the hit branch so a natural-1 miss still grants
+            // the bonus attack.
+            var hordeBreakerOpt = character.getFeature(
+                RangerFeatures.HORDE_BREAKER_ID);
+            if (hordeBreakerOpt.isPresent()
+                && hordeBreakerOpt.get() instanceof
+                    RangerFeatures.HordeBreaker horde
+                && horde.canUse()
+                && weapon != null
+                && getLivingEnemies().size() >= 2) {
+                flurryAttacksRemaining += 1;
+                horde.use();
+            }
+
             if (!isNaturalMiss && (attackRoll >= targetAC || isNaturalCrit || isImprovedCrit)) {
                 // Damage: weapon dice + ability modifier (roll dice twice on crit)
                 // Unarmed attacks deal 1 flat damage (no dice), weapons use dice notation
@@ -923,21 +939,6 @@ public class CombatSystem {
                     }
                     damage += colossusSlayerDamage;
                     colossus.use();
-                }
-
-                // Horde Breaker (Ranger Hunter): grant one extra weapon attack
-                // once per turn, drawing from the bonus-attack budget. Requires
-                // a "different target" — only fires when 2+ enemies are alive.
-                var hordeBreakerOpt = character.getFeature(
-                    RangerFeatures.HORDE_BREAKER_ID);
-                if (hordeBreakerOpt.isPresent()
-                    && hordeBreakerOpt.get() instanceof
-                        RangerFeatures.HordeBreaker horde
-                    && horde.canUse()
-                    && weapon != null
-                    && getLivingEnemies().size() >= 2) {
-                    flurryAttacksRemaining += 1;
-                    horde.use();
                 }
 
                 // Divine Smite (Paladin): expend a spell slot for radiant damage on a melee hit

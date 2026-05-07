@@ -2162,6 +2162,43 @@ class CombatSystemTest {
         }
 
         @Test
+        @DisplayName("Horde Breaker fires on a missed weapon attack (RAW: any weapon attack)")
+        void hordeBreakerFiresEvenOnMiss() {
+            Character ranger = new Character("Vex", Race.HUMAN, CharacterClass.RANGER,
+                14, 16, 14, 10, 14, 10);
+            ranger.setLevel(3);
+            ranger.setHuntersPrey(
+                com.questkeeper.character.features.RangerFeatures.HuntersPrey.HORDE_BREAKER);
+            Weapon sword = Weapon.createLongsword();
+            ranger.getInventory().addItem(sword);
+            ranger.getInventory().equip(sword);
+
+            state = new GameState(ranger, campaign);
+            combatSystem = new CombatSystem();
+
+            // AC absurdly high — every attack misses. Horde Breaker must
+            // still fire because RAW it triggers on the attack, not a hit.
+            Monster a = new Monster("brute1", "Brute1", 99, 200);
+            a.setAttackBonus(0); a.setDamageDice("1d4"); a.setDexterityMod(0);
+            Monster b = new Monster("brute2", "Brute2", 99, 200);
+            b.setAttackBonus(0); b.setDamageDice("1d4"); b.setDexterityMod(0);
+
+            combatSystem.startCombat(state, List.of(a, b));
+            int safety = 0;
+            while (combatSystem.isInCombat() && safety++ < 20) {
+                CombatResult tr = combatSystem.executeTurn();
+                if (tr.getType() == CombatResult.Type.TURN_START
+                    && combatSystem.getCurrentCombatant() == ranger) break;
+            }
+
+            assertEquals(1, combatSystem.getMainActionAttacksRemaining());
+            combatSystem.playerTurn("attack", "brute1");
+            assertEquals(ranger, combatSystem.getCurrentCombatant(),
+                "Horde Breaker fires on the attack regardless of hit/miss; "
+                + "the ranger keeps the turn for the bonus weapon attack");
+        }
+
+        @Test
         @DisplayName("Turn the Unholy spends Channel Divinity and frightens undead/fiends")
         void turnTheUnholyAffectsUndeadAndFiends() {
             Character paladin = new Character("Lyra", Race.HUMAN, CharacterClass.PALADIN,
