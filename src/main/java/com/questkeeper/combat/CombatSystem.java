@@ -768,6 +768,11 @@ public class CombatSystem {
                 isNaturalCrit = naturalRoll == 20;
             }
 
+            // Bardic Inspiration: pending die (if any) is rolled and added to
+            // the attack total. Crit detection uses the natural d20, so the
+            // bonus only affects whether the attack hits AC, not whether it crits.
+            attackRoll += character.consumeBardicInspirationDie();
+
             // Check for Improved Critical (Champion Fighter) - crit on 19-20
             int critThreshold = character.getCriticalThreshold();
             boolean isImprovedCrit = naturalRoll >= critThreshold && naturalRoll < 20;
@@ -1858,9 +1863,11 @@ public class CombatSystem {
     }
 
     /**
-     * Bardic Inspiration (Bard L1+) — bonus action: spend a use to grant
-     * the caller a usable die. We track expenditure here; selecting a
-     * recipient and applying the die to a roll is post-pitch.
+     * Bardic Inspiration (Bard L1+) — bonus action: spend a use and grant
+     * the player a pending Bardic Inspiration die. The die is rolled and
+     * added to the player's next d20 (attack, check, or save), then cleared.
+     * Solo-game adaptation: 5e RAW grants this to an ally; here the bard is
+     * the only PC, so they self-inspire.
      */
     private CombatResult handleBardicInspiration() {
         Character player = (Character) getPlayer();
@@ -1881,9 +1888,10 @@ public class CombatSystem {
         if (bonusCheck != null) return bonusCheck;
 
         bi.use(player);
+        player.grantBardicInspiration(bi.getInspirationDie());
         consumeBonusAction();
         return CombatResult.info(String.format(
-            "%s inspires their allies! d%d Bardic Inspiration die granted. Uses: %d/%d.",
+            "%s steels themselves! d%d Bardic Inspiration die added to next roll. Uses: %d/%d.",
             player.getName(), bi.getInspirationDie(),
             bi.getCurrentUses(), bi.getMaxUses()));
     }

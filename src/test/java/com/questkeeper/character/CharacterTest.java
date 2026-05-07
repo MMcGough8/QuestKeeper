@@ -1243,6 +1243,91 @@ class CharacterTest {
                 () -> fighter.setBardCollege(
                     com.questkeeper.character.features.BardFeatures.BardCollege.LORE));
         }
+
+        @Test
+        @DisplayName("no Bardic Inspiration die is pending by default")
+        void noBardicDieByDefault() {
+            Character c = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            assertFalse(c.hasBardicInspirationDie(),
+                "fresh character has no pending Bardic Inspiration die");
+            assertEquals(0, c.consumeBardicInspirationDie(),
+                "consuming a non-existent die yields 0 bonus");
+        }
+
+        @Test
+        @DisplayName("granted Bardic Inspiration die is pending until consumed")
+        void grantedBardicDieIsPending() {
+            Character c = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            c.grantBardicInspiration(8);
+            assertTrue(c.hasBardicInspirationDie(),
+                "grant flips the pending flag");
+            assertEquals(8, c.getBardicInspirationDie(),
+                "pending die size matches granted size");
+        }
+
+        @Test
+        @DisplayName("consuming a granted Bardic die rolls in [1, dieSize] and clears state")
+        void consumeBardicDieRollsInRangeAndClears() {
+            Character c = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            c.grantBardicInspiration(6);
+            int bonus = c.consumeBardicInspirationDie();
+            assertTrue(bonus >= 1 && bonus <= 6,
+                "consumed bonus must be a legal d6 result, got " + bonus);
+            assertFalse(c.hasBardicInspirationDie(),
+                "die is single-use; consumption clears it");
+            assertEquals(0, c.consumeBardicInspirationDie(),
+                "second consume returns 0");
+        }
+
+        @Test
+        @DisplayName("makeAbilityCheck consumes a pending Bardic Inspiration die")
+        void abilityCheckConsumesBardicDie() {
+            Character c = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            c.grantBardicInspiration(6);
+            c.makeAbilityCheck(Ability.STRENGTH);
+            assertFalse(c.hasBardicInspirationDie(),
+                "ability check must consume the die");
+        }
+
+        @Test
+        @DisplayName("makeSkillCheck consumes a pending Bardic Inspiration die")
+        void skillCheckConsumesBardicDie() {
+            Character c = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            c.grantBardicInspiration(6);
+            c.makeSkillCheck(Skill.ATHLETICS);
+            assertFalse(c.hasBardicInspirationDie(),
+                "skill check must consume the die");
+        }
+
+        @Test
+        @DisplayName("makeSavingThrow consumes a pending Bardic Inspiration die")
+        void savingThrowConsumesBardicDie() {
+            Character c = new Character("Aelar", Race.HUMAN, CharacterClass.FIGHTER,
+                14, 14, 14, 10, 10, 10);
+            c.grantBardicInspiration(6);
+            c.makeSavingThrow(Ability.WISDOM);
+            assertFalse(c.hasBardicInspirationDie(),
+                "saving throw must consume the die");
+        }
+
+        @Test
+        @DisplayName("makeSavingThrowAgainstDC (advantage path) consumes a pending Bardic die")
+        void savingThrowAgainstDCConsumesBardicDie() {
+            Character c = new Character("Krug", Race.HALF_ORC, CharacterClass.BARBARIAN,
+                14, 14, 14, 10, 10, 10);
+            c.setLevel(2);
+            assertTrue(c.hasAdvantageOnSavingThrow(Ability.DEXTERITY),
+                "Barbarian L2 should have advantage on DEX saves");
+            c.grantBardicInspiration(8);
+            c.makeSavingThrowAgainstDC(Ability.DEXTERITY, 30);
+            assertFalse(c.hasBardicInspirationDie(),
+                "DC save (advantage path) must also consume the die");
+        }
     }
 
     @Nested

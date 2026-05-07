@@ -229,6 +229,10 @@ public class Character implements Combatant {
     private int armorBonus;
     private int shieldBonus;
 
+    // Pending Bardic Inspiration die size (0 = none). Transient; not persisted —
+    // 5e RAW: granted die expires after 10 minutes or one use.
+    private int pendingBardicInspirationDie;
+
     // Half-Elf bonus abilities (+1 to two abilities of player's choice, excluding CHA)
     private Set<Ability> halfElfBonusAbilities = EnumSet.noneOf(Ability.class);
 
@@ -1194,13 +1198,14 @@ public class Character implements Combatant {
     }
     
     public int makeAbilityCheck(Ability ability) {
-        return Dice.rollWithModifier(20, getAbilityModifier(ability));
+        return Dice.rollWithModifier(20, getAbilityModifier(ability))
+            + consumeBardicInspirationDie();
     }
 
     public int makeSkillCheck(Skill skill) {
         int raw = Dice.roll(20);
         int floored = applyReliableTalentFloor(skill, raw);
-        return floored + getSkillModifier(skill);
+        return floored + getSkillModifier(skill) + consumeBardicInspirationDie();
     }
 
     /**
@@ -1217,23 +1222,54 @@ public class Character implements Combatant {
     }
 
     public int makeSavingThrow(Ability ability) {
-        return Dice.rollWithModifier(20, getSavingThrowModifier(ability));
+        return Dice.rollWithModifier(20, getSavingThrowModifier(ability))
+            + consumeBardicInspirationDie();
     }
 
     public boolean makeAbilityCheckAgainstDC(Ability ability, int dc) {
-        return Dice.checkAgainstDC(getAbilityModifier(ability), dc);
+        return makeAbilityCheck(ability) >= dc;
     }
 
     public boolean makeSkillCheckAgainstDC(Skill skill, int dc) {
         return makeSkillCheck(skill) >= dc;
     }
- 
+
     public boolean makeSavingThrowAgainstDC(Ability ability, int dc) {
         if (hasAdvantageOnSavingThrow(ability)) {
             int roll = Math.max(Dice.roll(20), Dice.roll(20));
-            return roll + getSavingThrowModifier(ability) >= dc;
+            return roll + getSavingThrowModifier(ability)
+                + consumeBardicInspirationDie() >= dc;
         }
-        return Dice.checkAgainstDC(getSavingThrowModifier(ability), dc);
+        return makeSavingThrow(ability) >= dc;
+    }
+
+    /**
+     * Grants this character a pending Bardic Inspiration die. The die size is
+     * consumed and rolled on the next ability check, skill check, saving
+     * throw, or attack roll, then cleared. A second grant before consumption
+     * overwrites the prior die (5e RAW: only one inspiration at a time).
+     */
+    public void grantBardicInspiration(int dieSize) {
+        this.pendingBardicInspirationDie = dieSize;
+    }
+
+    public int getBardicInspirationDie() {
+        return pendingBardicInspirationDie;
+    }
+
+    public boolean hasBardicInspirationDie() {
+        return pendingBardicInspirationDie > 0;
+    }
+
+    /**
+     * If a Bardic Inspiration die is pending, rolls it, clears the pending
+     * state, and returns the bonus. If none, returns 0.
+     */
+    public int consumeBardicInspirationDie() {
+        if (pendingBardicInspirationDie <= 0) return 0;
+        int bonus = Dice.roll(pendingBardicInspirationDie);
+        pendingBardicInspirationDie = 0;
+        return bonus;
     }
 
     /**
