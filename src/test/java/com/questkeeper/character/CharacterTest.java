@@ -2037,5 +2037,62 @@ class CharacterTest {
             assertEquals(hp - 3, c.getCurrentHitPoints(),
                 "damage flows normally when no concentration is active");
         }
+
+        @Test
+        @DisplayName("falling to 0 HP drops concentration regardless of save outcome")
+        void zeroHpDropsConcentration() {
+            // Even on a passed CON save, hitting 0 HP = unconscious =
+            // incapacitated, which ends concentration per 5e RAW.
+            Character c = new Character("Mim", Race.ELF, CharacterClass.WIZARD,
+                10, 14, 12, 16, 12, 10);
+            c.startConcentrating("Hex");
+            c.takeDamage(c.getCurrentHitPoints() + 100);
+            assertEquals(0, c.getCurrentHitPoints(),
+                "test setup: lethal damage drops HP to 0");
+            assertFalse(c.isConcentrating(),
+                "0 HP must end concentration even if the CON save passed");
+        }
+
+        @Test
+        @DisplayName("paralyzed condition (incapacitating) drops concentration")
+        void paralyzedDropsConcentration() {
+            Character c = new Character("Mim", Race.ELF, CharacterClass.WIZARD,
+                10, 14, 12, 16, 12, 10);
+            c.startConcentrating("Hex");
+            com.questkeeper.combat.status.StatusEffectManager mgr =
+                new com.questkeeper.combat.status.StatusEffectManager();
+            mgr.applyEffect(c,
+                com.questkeeper.combat.status.ConditionEffect.paralyzed(3));
+            assertFalse(c.isConcentrating(),
+                "paralysis is incapacitating, must drop concentration");
+        }
+
+        @Test
+        @DisplayName("stunned condition (incapacitating) drops concentration")
+        void stunnedDropsConcentration() {
+            Character c = new Character("Mim", Race.ELF, CharacterClass.WIZARD,
+                10, 14, 12, 16, 12, 10);
+            c.startConcentrating("Hex");
+            com.questkeeper.combat.status.StatusEffectManager mgr =
+                new com.questkeeper.combat.status.StatusEffectManager();
+            mgr.applyEffect(c,
+                com.questkeeper.combat.status.ConditionEffect.stunned(3));
+            assertFalse(c.isConcentrating(),
+                "stunned is incapacitating, must drop concentration");
+        }
+
+        @Test
+        @DisplayName("poisoned condition (non-incapacitating) does not drop concentration")
+        void poisonedKeepsConcentration() {
+            Character c = new Character("Mim", Race.ELF, CharacterClass.WIZARD,
+                10, 14, 12, 16, 12, 10);
+            c.startConcentrating("Hex");
+            com.questkeeper.combat.status.StatusEffectManager mgr =
+                new com.questkeeper.combat.status.StatusEffectManager();
+            mgr.applyEffect(c,
+                com.questkeeper.combat.status.ConditionEffect.poisoned(3));
+            assertTrue(c.isConcentrating(),
+                "poisoned does not incapacitate; concentration is unaffected");
+        }
     }
 }

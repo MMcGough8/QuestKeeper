@@ -1,5 +1,6 @@
 package com.questkeeper.combat.status;
 
+import com.questkeeper.character.Character;
 import com.questkeeper.combat.Combatant;
 
 import java.util.*;
@@ -29,13 +30,19 @@ public class StatusEffectManager {
     // ==========================================
 
     /**
-     * Applies a status effect to a target combatant.
+     * Applies a status effect to a target combatant. If the effect prevents
+     * actions (incapacitating conditions: paralyzed, stunned, unconscious,
+     * petrified, incapacitated) and the target is a Character, also drops
+     * any active concentration spell per 5e RAW.
      *
      * @param target the combatant to apply the effect to
      * @param effect the effect to apply
      */
     public void applyEffect(Combatant target, StatusEffect effect) {
         effectsByTarget.computeIfAbsent(target, k -> new ArrayList<>()).add(effect);
+        if (effect.preventsActions() && target instanceof Character character) {
+            character.endConcentration();
+        }
     }
 
     /**

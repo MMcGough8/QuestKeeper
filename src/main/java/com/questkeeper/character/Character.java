@@ -464,7 +464,9 @@ public class Character implements Combatant {
 
     /**
      * If concentrating, force a CON save vs DC max(10, damage/2). On fail,
-     * drop concentration. No-op when not concentrating or damage <= 0.
+     * drop concentration. Also drops concentration unconditionally if the
+     * damage knocked the character to 0 HP (unconscious = incapacitated).
+     * No-op when not concentrating or damage <= 0.
      * Note: the save uses {@link #makeSavingThrowAgainstDC} which routes
      * through the Bardic Inspiration die hook — so a granted die can save a
      * caster's concentration once.
@@ -473,6 +475,10 @@ public class Character implements Combatant {
         if (!isConcentrating() || damage <= 0) return;
         int dc = concentrationDC(damage);
         if (!makeSavingThrowAgainstDC(Ability.CONSTITUTION, dc)) {
+            endConcentration();
+            return;
+        }
+        if (currentHitPoints <= 0) {
             endConcentration();
         }
     }
